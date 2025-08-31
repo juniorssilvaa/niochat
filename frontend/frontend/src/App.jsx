@@ -33,6 +33,7 @@ import AppearancePage from './components/AppearancePage';
 import TeamsPage from './components/TeamsPage';
 import ConversationRecovery from './components/ConversationRecovery';
 import CSATDashboard from './components/CSATDashboard';
+import Changelog from './components/Changelog';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 import { AlertTriangle } from 'lucide-react';
@@ -294,8 +295,10 @@ function App() {
     }
   };
 
+  const [showChangelog, setShowChangelog] = useState(false);
+
   const handleChangelog = () => {
-    alert('Changelog em breve!');
+    setShowChangelog(true);
   };
 
   const handleNotifications = () => {
@@ -391,6 +394,11 @@ function App() {
             <Route path="*" element={<SafeRedirect user={user} />} />
           </Routes>
         </Router>
+        {/* Changelog Modal */}
+        <Changelog 
+          isOpen={showChangelog} 
+          onClose={() => setShowChangelog(false)} 
+        />
       </>
     );
   } catch (error) {

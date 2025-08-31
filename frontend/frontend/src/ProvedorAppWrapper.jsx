@@ -21,6 +21,7 @@ import AppearancePage from './components/AppearancePage';
 import ProviderDataForm from './components/ProviderDataForm';
 import ProviderScheduleForm from './components/ProviderScheduleForm';
 import ChatGPTTest from './components/ChatGPTTest';
+import Changelog from './components/Changelog';
 
 export default function ProvedorAppWrapper(props) {
   const { provedorId } = useParams();
@@ -28,6 +29,11 @@ export default function ProvedorAppWrapper(props) {
   const lastStatusRef = useRef(null);
   const { setWhatsappDisconnected, userRole, user, handleLogout, handleChangelog, handleNotifications, selectedConversation, setSelectedConversation, providerMenu, setProviderMenu } = props;
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showChangelog, setShowChangelog] = useState(false);
+
+  const localHandleChangelog = () => {
+    setShowChangelog(true);
+  };
 
   // Resetar conversa selecionada ao trocar de rota
   useEffect(() => {
@@ -86,7 +92,7 @@ export default function ProvedorAppWrapper(props) {
     <div className="h-screen bg-background text-foreground flex overflow-hidden">
       <Sidebar userRole={userRole} provedorId={provedorId} mobileOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col overflow-y-auto">
-        <Topbar onLogout={handleLogout} onChangelog={handleChangelog} onNotifications={handleNotifications} onMenuClick={() => setSidebarOpen(true)} />
+        <Topbar onLogout={handleLogout} onChangelog={localHandleChangelog} onNotifications={handleNotifications} onMenuClick={() => setSidebarOpen(true)} />
         <Routes>
                       <Route path="dashboard" element={<DashboardPrincipal provedorId={provedorId} />} />
           <Route path="conversas" element={<ConversasDashboard provedorId={provedorId} />} />
@@ -116,6 +122,12 @@ export default function ProvedorAppWrapper(props) {
           <Route path="*" element={<Navigate to={`dashboard`} replace />} />
         </Routes>
       </div>
+      
+      {/* Changelog Modal */}
+      <Changelog 
+        isOpen={showChangelog} 
+        onClose={() => setShowChangelog(false)} 
+      />
     </div>
   );
 } 

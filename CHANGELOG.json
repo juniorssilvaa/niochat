@@ -1,0 +1,121 @@
+{
+  "versions": [
+    {
+      "version": "2.1.5",
+      "date": "2025-01-23",
+      "type": "minor",
+      "title": "Sistema CSAT e Auditoria Avançada",
+      "changes": [
+        {
+          "type": "feature",
+          "title": "Sistema CSAT Completo",
+          "description": "Coleta automática de feedback com dashboard interativo e métricas em tempo real"
+        },
+        {
+          "type": "feature", 
+          "title": "Análise de Sentimento IA",
+          "description": "Interpretação automática de feedback textual convertendo em avaliações CSAT"
+        },
+        {
+          "type": "feature",
+          "title": "Auditoria Avançada",
+          "description": "Histórico completo de conversas com avaliações CSAT integradas"
+        },
+        {
+          "type": "improvement",
+          "title": "Isolamento de Dados",
+          "description": "Segurança total entre provedores com dados completamente isolados"
+        },
+        {
+          "type": "improvement",
+          "title": "Interface Otimizada",
+          "description": "Componentes redesenhados sem emojis para aparência mais profissional"
+        },
+        {
+          "type": "improvement",
+          "title": "Sistema de Changelog",
+          "description": "Changelog dinâmico integrado com sistema de versionamento automático"
+        },
+        {
+          "type": "fix",
+          "title": "Limpeza de Dados",
+          "description": "Remoção completa de dados mockados e otimização do sistema"
+        }
+      ]
+    },
+    {
+      "version": "2.1.4",
+      "date": "2025-01-22",
+      "type": "patch",
+      "title": "Melhorias de Interface e Estabilidade",
+      "changes": [
+        {
+          "type": "improvement",
+          "title": "Interface Refinada",
+          "description": "Melhorias na responsividade e acessibilidade da interface"
+        },
+        {
+          "type": "fix",
+          "title": "Correções de Bugs",
+          "description": "Correções menores de estabilidade e performance"
+        }
+      ]
+    },
+    {
+      "version": "2.0.0",
+      "date": "2024-12-15",
+      "type": "major",
+      "title": "IA Inteligente + SGP",
+      "changes": [
+        {
+          "type": "feature",
+          "title": "Integração ChatGPT",
+          "description": "IA conversacional avançada com personalidade customizável"
+        },
+        {
+          "type": "feature",
+          "title": "SGP Automático",
+          "description": "Consulta dados reais do cliente via Function Calls"
+        },
+        {
+          "type": "feature",
+          "title": "Fluxo Inteligente",
+          "description": "Detecção automática de demandas sem perguntas desnecessárias"
+        },
+        {
+          "type": "feature",
+          "title": "Geração Automática",
+          "description": "Faturas com PIX e QR Code automático"
+        }
+      ]
+    },
+    {
+      "version": "1.0.0",
+      "date": "2024-08-15",
+      "type": "major",
+      "title": "Lançamento Inicial",
+      "changes": [
+        {
+          "type": "feature",
+          "title": "Sistema Base Completo",
+          "description": "Integração com Uazapi/Evolution, interface React moderna"
+        },
+        {
+          "type": "feature",
+          "title": "WebSocket em Tempo Real",
+          "description": "Sistema de reações e exclusão de mensagens"
+        },
+        {
+          "type": "feature",
+          "title": "Sistema Multi-tenant",
+          "description": "Gestão de equipes e permissões granulares"
+        },
+        {
+          "type": "feature",
+          "title": "Integrações Múltiplas",
+          "description": "WhatsApp, Telegram, Email, Webchat"
+        }
+      ]
+    }
+  ]
+}

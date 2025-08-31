@@ -7,7 +7,9 @@ Atualiza automaticamente a versão em todos os arquivos relevantes
 import re
 import os
 import sys
+import json
 from pathlib import Path
+from datetime import datetime
 
 class VersionManager:
     def __init__(self):
@@ -128,6 +130,75 @@ class VersionManager:
         else:
             print("⚠️  Arquivo de configuração do frontend não encontrado")
     
+    def update_changelog(self, new_version, bump_type):
+        """Atualiza o arquivo CHANGELOG.json com a nova versão"""
+        changelog_path = Path("CHANGELOG.json")
+        
+        if not changelog_path.exists():
+            # Criar changelog inicial se não existir
+            changelog_data = {"versions": []}
+        else:
+            try:
+                with open(changelog_path, 'r', encoding='utf-8') as f:
+                    changelog_data = json.load(f)
+            except:
+                changelog_data = {"versions": []}
+        
+        # Determinar o título e mudanças baseado no tipo de versão
+        if bump_type == "major":
+            title = "Atualização Principal"
+            default_changes = [
+                {
+                    "type": "feature",
+                    "title": "Novas Funcionalidades Principais",
+                    "description": "Implementação de novas funcionalidades que podem alterar a compatibilidade"
+                }
+            ]
+        elif bump_type == "minor":
+            title = "Novas Funcionalidades"
+            default_changes = [
+                {
+                    "type": "feature",
+                    "title": "Novas Funcionalidades",
+                    "description": "Adição de novas funcionalidades mantendo compatibilidade"
+                }
+            ]
+        else:  # patch
+            title = "Correções e Melhorias"
+            default_changes = [
+                {
+                    "type": "fix",
+                    "title": "Correções de Bugs",
+                    "description": "Correções de problemas e melhorias de estabilidade"
+                }
+            ]
+        
+        # Criar nova entrada
+        new_entry = {
+            "version": new_version,
+            "date": datetime.now().strftime("%Y-%m-%d"),
+            "type": bump_type,
+            "title": title,
+            "changes": default_changes
+        }
+        
+        # Adicionar no início da lista (versão mais recente primeiro)
+        changelog_data["versions"].insert(0, new_entry)
+        
+        # Salvar arquivo
+        with open(changelog_path, 'w', encoding='utf-8') as f:
+            json.dump(changelog_data, f, indent=2, ensure_ascii=False)
+        
+        # Copiar para o diretório público do frontend
+        frontend_public_path = Path("frontend/frontend/public/CHANGELOG.json")
+        if frontend_public_path.parent.exists():
+            import shutil
+            shutil.copy2(changelog_path, frontend_public_path)
+            print(f"✅ CHANGELOG.json copiado para frontend/public/")
+        
+        print(f"✅ CHANGELOG.json atualizado com versão {new_version}")
+        print(f"📝 Edite CHANGELOG.json para adicionar detalhes específicos das mudanças")
+
     def create_version_info(self, new_version):
         """Cria um arquivo de informações de versão"""
         version_info = f'''# NioChat - Informações de Versão
@@ -150,6 +221,7 @@ class VersionManager:
 - frontend/frontend/pnpm-lock.yaml: {new_version}
 - backend/niochat/settings.py: {new_version}
 - backend/core/telegram_service.py: {new_version}
+- CHANGELOG.json: {new_version}
 
 ### Como Usar:
 Para atualizar a versão automaticamente, execute:
@@ -172,7 +244,7 @@ python version_manager.py [major|minor|patch]
         from datetime import datetime
         return datetime.now().strftime("%d/%m/%Y")
     
-    def update_all_files(self, new_version):
+    def update_all_files(self, new_version, bump_type="patch"):
         """Atualiza a versão em todos os arquivos relevantes"""
         print(f"🔄 Atualizando versão de {self.current_version} para {new_version}")
         
@@ -183,11 +255,13 @@ python version_manager.py [major|minor|patch]
         self.update_django_settings(new_version)
         self.update_telegram_service(new_version)
         self.update_frontend_version_config(new_version)
+        self.update_changelog(new_version, bump_type)
         self.create_version_info(new_version)
         
         print(f"\n🎉 Versão atualizada com sucesso para {new_version}!")
         print(f"📝 Execute 'git add .' e 'git commit -m \"v{new_version}\"' para salvar as mudanças")
         print(f"🔨 Execute 'npm run build' no diretório frontend/frontend para recompilar")
+        print(f"📋 Edite CHANGELOG.json para personalizar as mudanças desta versão")
     
     def show_current_version(self):
         """Mostra a versão atual"""
@@ -209,7 +283,7 @@ python version_manager.py [major|minor|patch]
             self.show_current_version()
         elif command in ["major", "minor", "patch"]:
             new_version = self.bump_version(command)
-            self.update_all_files(new_version)
+            self.update_all_files(new_version, command)
         else:
             print(f"❌ Comando inválido: {command}")
             print("Comandos válidos: major, minor, patch, show")
