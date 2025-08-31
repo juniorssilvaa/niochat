@@ -176,6 +176,21 @@ const Changelog = ({ isOpen, onClose }) => {
     }
   };
 
+  const getChangeIcon = (type) => {
+    switch (type) {
+      case 'feature':
+        return <Sparkles className="w-4 h-4" />;
+      case 'improvement':
+        return <Zap className="w-4 h-4" />;
+      case 'fix':
+        return <Bug className="w-4 h-4" />;
+      case 'security':
+        return <Shield className="w-4 h-4" />;
+      default:
+        return <Plus className="w-4 h-4" />;
+    }
+  };
+
   const getTypeLabel = (type) => {
     switch (type) {
       case 'feature':
@@ -184,6 +199,8 @@ const Changelog = ({ isOpen, onClose }) => {
         return 'Melhoria';
       case 'fix':
         return 'Correção';
+      case 'security':
+        return 'Segurança';
       default:
         return '';
     }
@@ -243,7 +260,7 @@ const Changelog = ({ isOpen, onClose }) => {
                       className="flex items-start gap-3 p-3 rounded-lg bg-sidebar-accent/50"
                     >
                       <div className={`p-1.5 rounded-lg ${getTypeColor(change.type)}`}>
-                        {change.icon}
+                        {getChangeIcon(change.type)}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
@@ -268,7 +285,8 @@ const Changelog = ({ isOpen, onClose }) => {
                 )}
               </div>
             ))}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
