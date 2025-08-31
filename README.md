@@ -697,7 +697,7 @@ IA: "Encontrei seu cadastro!
 
 ## Changelog
 
-### v2.1.0 (Janeiro 2025) - Sistema CSAT e Auditoria Avançada
+### v2.1.5 (Janeiro 2025) - Sistema CSAT e Auditoria Avançada
 - **Sistema CSAT Completo**: Coleta automática de feedback com dashboard
 - **Análise de Sentimento IA**: Interpretação automática de feedback textual
 - **Auditoria Avançada**: Histórico completo de conversas e avaliações

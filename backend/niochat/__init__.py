@@ -2,6 +2,8 @@
 Inicialização do projeto Nio Chat
 """
 
+__version__ = '2.1.5'
+
 # Importar Celery para garantir que seja carregado quando Django iniciar
 from .celery import app as celery_app
 
