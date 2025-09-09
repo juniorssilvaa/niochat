@@ -1,4 +1,4 @@
-name: 🚀 Auto Version & Changelog Update
+name: Auto Version & Changelog Update
 
 on:
   push:
@@ -13,23 +13,25 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     
     steps:
-    - name: 📥 Checkout Repository
+    - name: Checkout Repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
         token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: 🐍 Setup Python
+    - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.12'
 
-    - name: 📋 Get Commit Info
+    - name: Get Commit Info
       id: commit_info
       run: |
         # Obter mensagem do último commit
         COMMIT_MSG=$(git log -1 --pretty=%B)
-        echo "commit_message=$COMMIT_MSG" >> $GITHUB_OUTPUT
+        # Escapar caracteres especiais para evitar problemas
+        COMMIT_MSG_ESCAPED=$(echo "$COMMIT_MSG" | sed 's/"/\\"/g' | sed 's/`/\\`/g')
+        echo "commit_message=$COMMIT_MSG_ESCAPED" >> $GITHUB_OUTPUT
         
         # Determinar tipo de versão
         COMMIT_LOWER=$(echo "$COMMIT_MSG" | tr '[:upper:]' '[:lower:]')
@@ -47,19 +49,19 @@ jobs:
         echo "Commit: $COMMIT_MSG"
         echo "Type detected: $(echo "$COMMIT_LOWER" | grep -q "feat\|feature" && echo "minor" || echo "patch")"
 
-    - name: 📊 Show Current Version
+    - name: Show Current Version
       run: |
-        echo "📋 Versão atual:"
+        echo "Versão atual:"
         python version_manager.py show
         
-        echo "📁 Arquivos de versão:"
+        echo "Arquivos de versão:"
         echo "VERSION: $(cat VERSION 2>/dev/null || echo 'não encontrado')"
         echo "package.json: $(grep '"version"' frontend/frontend/package.json 2>/dev/null || echo 'não encontrado')"
 
-    - name: 🔄 Update Version & Changelog
+    - name: Update Version & Changelog
       id: update_version
       run: |
-        echo "🚀 Atualizando versão (${{ steps.commit_info.outputs.version_type }})..."
+        echo "Atualizando versão (${{ steps.commit_info.outputs.version_type }})..."
         
         # Executar version_manager.py
         python version_manager.py ${{ steps.commit_info.outputs.version_type }}
@@ -68,11 +70,11 @@ jobs:
         NEW_VERSION=$(cat VERSION)
         echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
         
-        echo "✅ Nova versão: $NEW_VERSION"
+        echo "Nova versão: $NEW_VERSION"
 
-    - name: 📝 Customize Changelog Entry
+    - name: Customize Changelog Entry
       run: |
-        echo "📝 Personalizando entrada do changelog..."
+        echo "Personalizando entrada do changelog..."
         
         # Script Python para personalizar changelog baseado na mensagem do commit
         python3 << 'EOF'
@@ -166,14 +168,14 @@ jobs:
             if frontend_path.parent.exists():
                 shutil.copy2(changelog_path, frontend_path)
             
-            print(f"✅ Changelog personalizado para versão {new_version}")
-            print(f"📝 Título: {latest_version.get('title', 'N/A')}")
-            print(f"🔧 Mudanças: {len(changes)} entrada(s)")
+            print(f"Changelog personalizado para versão {new_version}")
+            print(f"Título: {latest_version.get('title', 'N/A')}")
+            print(f"Mudanças: {len(changes)} entrada(s)")
         EOF
 
-    - name: 🏗️ Build Frontend
+    - name: Build Frontend
       run: |
-        echo "🏗️ Compilando frontend com nova versão..."
+        echo "Compilando frontend com nova versão..."
         cd frontend/frontend
         
         # Instalar dependências se necessário
@@ -184,11 +186,11 @@ jobs:
         # Build do frontend
         npm run build
         
-        echo "✅ Frontend compilado com versão ${{ steps.update_version.outputs.new_version }}"
+        echo "Frontend compilado com versão ${{ steps.update_version.outputs.new_version }}"
 
-    - name: 📤 Commit & Push Changes
+    - name: Commit & Push Changes
       run: |
-        echo "📤 Fazendo commit das mudanças..."
+        echo "Fazendo commit das mudanças..."
         
         # Configurar Git
         git config --local user.email "action@github.com"
@@ -208,21 +210,21 @@ jobs:
         
         # Verificar se há mudanças
         if git diff --staged --quiet; then
-          echo "⏭️ Nenhuma mudança de versão detectada"
+          echo "Nenhuma mudança de versão detectada"
         else
           # Fazer commit
-          git commit -m "🤖 Auto-update version to ${{ steps.update_version.outputs.new_version }} [skip ci]"
+          git commit -m "Auto-update version to ${{ steps.update_version.outputs.new_version }} [skip ci]"
           
           # Push das mudanças
           git push origin ${{ github.ref_name }}
           
-          echo "✅ Versão ${{ steps.update_version.outputs.new_version }} commitada e enviada!"
+          echo "Versão ${{ steps.update_version.outputs.new_version }} commitada e enviada!"
         fi
 
-    - name: 🏷️ Create Release Tag
+    - name: Create Release Tag
       if: steps.update_version.outputs.new_version != ''
       run: |
-        echo "🏷️ Criando tag de release..."
+        echo "Criando tag de release..."
         
         NEW_VERSION="${{ steps.update_version.outputs.new_version }}"
         
@@ -232,24 +234,24 @@ jobs:
         # Push da tag
         git push origin "v$NEW_VERSION"
         
-        echo "✅ Tag v$NEW_VERSION criada!"
+        echo "Tag v$NEW_VERSION criada!"
 
-    - name: 📊 Summary
+    - name: Summary
       run: |
-        echo "## 🎉 Versionamento Automático Concluído!" >> $GITHUB_STEP_SUMMARY
+        echo "## Versionamento Automático Concluído!" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "- **Versão anterior:** $(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo 'N/A')" >> $GITHUB_STEP_SUMMARY
         echo "- **Nova versão:** ${{ steps.update_version.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Tipo:** ${{ steps.commit_info.outputs.version_type }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Commit:** ${{ steps.commit_info.outputs.commit_message }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### 📋 Arquivos Atualizados:" >> $GITHUB_STEP_SUMMARY
+        echo "### Arquivos Atualizados:" >> $GITHUB_STEP_SUMMARY
         echo "- VERSION" >> $GITHUB_STEP_SUMMARY
         echo "- frontend/frontend/package.json" >> $GITHUB_STEP_SUMMARY
         echo "- CHANGELOG.json" >> $GITHUB_STEP_SUMMARY
         echo "- Frontend build atualizado" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "🚀 **Sistema em produção atualizado automaticamente!**" >> $GITHUB_STEP_SUMMARY
+        echo "**Sistema em produção atualizado automaticamente!**" >> $GITHUB_STEP_SUMMARY
 
   notify-success:
     needs: auto-version
@@ -257,10 +259,10 @@ jobs:
     if: success()
     
     steps:
-    - name: 🎉 Success Notification
+    - name: Success Notification
       run: |
-        echo "✅ Versionamento automático executado com sucesso!"
-        echo "🔗 Verifique o changelog em: https://github.com/${{ github.repository }}/blob/main/CHANGELOG.json"
+        echo "Versionamento automático executado com sucesso!"
+        echo "Verifique o changelog em: https://github.com/${{ github.repository }}/blob/main/CHANGELOG.json"
 
 
 
