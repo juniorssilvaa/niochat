@@ -219,11 +219,8 @@ networks:
 
 volumes:
   niochat-media:
-    external: true
-    name: niochat-media
+    driver: local
   niochat-static:
-    external: true
-    name: niochat-static
+    driver: local
   niochat-postgres:
-    external: true
-    name: niochat-postgres
+    driver: local
