@@ -19,11 +19,11 @@ RUN pnpm run build
 # Production stage com Nginx corrigido
 FROM nginx:alpine
 
-# ✅ CRIAR o usuário www-data no Alpine
-RUN addgroup -g 1001 -S www-data && \
-    adduser -u 1001 -S www-data -G www-data
+# ✅ REMOVER estas linhas - o usuário já existe
+# RUN addgroup -g 1001 -S www-data && \
+#     adduser -u 1001 -S www-data -G www-data
 
-# ✅ Configuração customizada do Nginx SEM usuário www-data
+# ✅ Configuração customizada do Nginx
 RUN echo 'user nginx; \
 worker_processes auto; \
 \
@@ -56,7 +56,7 @@ http { \
 # Copiar arquivos buildados
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# ✅ Ajustar permissões
+# ✅ Ajustar permissões para o usuário nginx
 RUN chown -R nginx:nginx /usr/share/nginx/html && \
     chmod -R 755 /usr/share/nginx/html
 
@@ -67,7 +67,7 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
 
-# ✅ Usar usuário nginx (que já existe)
+# ✅ Usar usuário nginx (que já existe na imagem)
 USER nginx
 
 CMD ["nginx", "-g", "daemon off;"]
