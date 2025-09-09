@@ -16,31 +16,51 @@ COPY frontend/frontend/eslint.config.js ./
 
 RUN pnpm run build
 
-# Production stage com Nginx corrigido
+# Production stage com Nginx
 FROM nginx:alpine
-
-# ✅ REMOVER a configuração customizada que causa problemas
-# ✅ Usar a configuração padrão do Nginx
 
 # Copiar arquivos buildados
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# ✅ Criar diretórios necessários com permissões corretas
-RUN mkdir -p /var/cache/nginx/client_temp && \
-    chown -R nginx:nginx /var/cache/nginx && \
-    chown -R nginx:nginx /var/log/nginx && \
-    chown -R nginx:nginx /etc/nginx && \
-    chmod -R 755 /var/cache/nginx
+# ✅ Configuração SIMPLES do Nginx (sem loops)
+RUN echo 'events {\
+    worker_connections 1024;\
+}\
+\
+http {\
+    include /etc/nginx/mime.types;\
+    default_type application/octet-stream;\
+    \
+    server {\
+        listen 80;\
+        server_name localhost;\
+        root /usr/share/nginx/html;\
+        index index.html;\
+        \
+        location / {\
+            try_files \$uri \$uri/ /index.html;\
+        }\
+        \
+        error_page 500 502 503 504 /50x.html;\
+        location = /50x.html {\
+            root /usr/share/nginx/html;\
+        }\
+    }\
+}' > /etc/nginx/nginx.conf
 
-# ✅ Ajustar permissões dos arquivos estáticos
-RUN chown -R nginx:nginx /usr/share/nginx/html && \
+# ✅ Criar diretórios com permissões
+RUN mkdir -p /var/cache/nginx/client_temp && \
+    chmod -R 755 /var/cache/nginx && \
+    chmod -R 755 /var/log/nginx && \
+    chmod -R 755 /etc/nginx && \
+    chown -R nginx:nginx /usr/share/nginx/html && \
     chmod -R 755 /usr/share/nginx/html
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
 
-# ✅ Usar usuário nginx (que já existe na imagem)
-USER nginx
+# ✅ Manter como root para evitar problemas
+# USER nginx
 
 CMD ["nginx", "-g", "daemon off;"]
