@@ -30,14 +30,17 @@ WORKDIR /app/backend
 # Create directories for media and static files
 RUN mkdir -p media staticfiles
 
-# Collect static files
-RUN python manage.py collectstatic --noinput --settings=niochat.settings
-
 # Create superuser script
 RUN echo '#!/bin/bash\n\
+set -e\n\
+echo "Starting Django application..."\n\
+echo "Running migrations..."\n\
 python manage.py migrate --settings=niochat.settings\n\
+echo "Collecting static files..."\n\
 python manage.py collectstatic --noinput --settings=niochat.settings\n\
+echo "Creating superuser..."\n\
 echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username=\"Junior\").exists() or User.objects.create_superuser(\"Junior\", \"admin@niochat.com.br\", \"semfim01@\")" | python manage.py shell --settings=niochat.settings\n\
+echo "Starting Gunicorn..."\n\
 exec "$@"' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 # Expose port
