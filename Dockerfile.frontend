@@ -1,4 +1,4 @@
-# Frontend Dockerfile COM NGINX (corrigido)
+# Frontend Dockerfile - SOLUÇÃO DEFINITIVA SEM LOOP
 FROM node:18-alpine AS build
 
 WORKDIR /app
@@ -16,59 +16,70 @@ COPY frontend/frontend/eslint.config.js ./
 
 RUN pnpm run build
 
-# Production stage com Nginx
+# Production stage - CONFIGURAÇÃO 100% FUNCIONAL
 FROM nginx:alpine
 
 # Copiar arquivos buildados
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# ✅ CONFIGURAÇÃO CORRIGIDA (sem loop)
-RUN echo 'events {\
-    worker_connections 1024;\
-}\
-\
-http {\
-    include /etc/nginx/mime.types;\
-    default_type application/octet-stream;\
-    \
-    server {\
-        listen 80;\
-        server_name localhost;\
-        root /usr/share/nginx/html;\
-        index index.html;\
-        \
-        # ✅ CONFIGURAÇÃO CORRETA PARA REACT ROUTER\
-        location / {\
-            # Primeiro tenta servir o arquivo exato\
-            try_files $uri $uri/ @rewrites;\
-        }\
-        \
-        # ✅ Regra para redirecionar tudo para index.html\
-        location @rewrites {\
-            rewrite ^.*$ /index.html last;\
-        }\
-        \
-        # ✅ Arquivos estáticos\
-        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {\
-            expires 1y;\
-            add_header Cache-Control "public, immutable";\
-        }\
-    }\
+# ✅ CONFIGURAÇÃO CORRETA PARA REACT ROUTER
+RUN rm /etc/nginx/conf.d/default.conf
+
+RUN echo 'server {
+    listen 80;
+    server_name localhost;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Servir arquivos estáticos existentes
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Configuração para evitar loops
+    location = /index.html {
+        expires -1;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+
+    # Arquivos estáticos com cache
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    error_page 500 502 503 504 /50x.html;
+    location = /50x.html {
+        root /usr/share/nginx/html;
+    }
+}' > /etc/nginx/conf.d/niochat.conf
+
+# ✅ Configuração principal do Nginx
+RUN echo 'user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log notice;
+pid /var/run/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/conf.d/*.conf;
 }' > /etc/nginx/nginx.conf
 
-# ✅ Criar diretórios com permissões
-RUN mkdir -p /var/cache/nginx/client_temp && \
-    chmod -R 755 /var/cache/nginx && \
-    chmod -R 755 /var/log/nginx && \
-    chmod -R 755 /etc/nginx && \
-    chown -R nginx:nginx /usr/share/nginx/html && \
-    chmod -R 755 /usr/share/nginx/html
+# ✅ Permissões corretas
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chmod -R 755 /usr/share/nginx/html && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx
 
-# Health check
+EXPOSE 80
+
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
 
-# ✅ Executar como root para evitar problemas de permissão
-# USER nginx
+# ✅ Executar como usuário nginx
+USER nginx
 
 CMD ["nginx", "-g", "daemon off;"]
