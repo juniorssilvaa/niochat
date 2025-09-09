@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 
 # Version
-VERSION = "2.3.0"
+VERSION = "2.4.0"
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

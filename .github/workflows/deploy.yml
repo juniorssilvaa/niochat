@@ -146,23 +146,88 @@ jobs:
     if: github.ref == 'refs/heads/main'
     
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
     - name: Deploy to Portainer
+      env:
+        PORTAINER_URL: https://portainer.niochat.com.br
+        PORTAINER_API_KEY: ${{ secrets.PORTAINER_API_KEY }}
+        BACKEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
+        FRONTEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
       run: |
-        echo "Deploying to Portainer..."
-        # Here you would add Portainer API calls to update the stack
-        # For now, we'll just log the deployment
-        echo "Backend image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}"
-        echo "Frontend image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}"
+        echo "🚀 Deploying to Portainer..."
+        echo "Backend image: $BACKEND_IMAGE"
+        echo "Frontend image: $FRONTEND_IMAGE"
         
-        # Example Portainer API call (you'll need to configure the API endpoint and token)
-        # curl -X POST "https://portainer.niochat.com.br/api/stacks/1/redeploy" \
-        #   -H "X-API-Key: ${{ secrets.PORTAINER_API_KEY }}" \
-        #   -H "Content-Type: application/json" \
-        #   -d '{"env": [{"name": "BACKEND_IMAGE", "value": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}"}]}'
+        # Get stack information
+        echo "📋 Getting stack information..."
+        STACK_INFO=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" "$PORTAINER_URL/api/stacks")
+        STACK_ID=$(echo "$STACK_INFO" | jq -r '.[] | select(.Name == "niochat") | .Id')
+        
+        if [ -z "$STACK_ID" ] || [ "$STACK_ID" = "null" ]; then
+          echo "❌ Stack 'niochat' not found. Please create it first in Portainer."
+          exit 1
+        fi
+        
+        echo "✅ Found stack: niochat (ID: $STACK_ID)"
+        
+        # Get current stack configuration
+        echo "📥 Getting current stack configuration..."
+        CURRENT_STACK=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" "$PORTAINER_URL/api/stacks/$STACK_ID")
+        
+        # Update the stack with new images
+        echo "🔄 Updating stack with new images..."
+        UPDATED_STACK=$(echo "$CURRENT_STACK" | jq --arg backend "$BACKEND_IMAGE" --arg frontend "$FRONTEND_IMAGE" '
+          .StackFileContent = (.StackFileContent | 
+            gsub("ghcr\\.io/juniorsilvacmd/niotchat-backend:[^\\s]+"; $backend) |
+            gsub("ghcr\\.io/juniorsilvacmd/niotchat-frontend:[^\\s]+"; $frontend)
+          )
+        ')
+        
+        # Deploy the updated stack
+        echo "🚀 Deploying updated stack..."
+        DEPLOY_RESULT=$(curl -s -X PUT \
+          -H "X-API-Key: $PORTAINER_API_KEY" \
+          -H "Content-Type: application/json" \
+          -d "$UPDATED_STACK" \
+          "$PORTAINER_URL/api/stacks/$STACK_ID")
+        
+        if [ $? -eq 0 ]; then
+          echo "✅ Stack updated successfully!"
+        else
+          echo "❌ Failed to update stack"
+          echo "$DEPLOY_RESULT"
+          exit 1
+        fi
+
+    - name: Wait for deployment
+      run: |
+        echo "⏳ Waiting for deployment to complete..."
+        sleep 30
+
+    - name: Health check
+      run: |
+        echo "🔍 Checking application health..."
+        
+        # Check backend health
+        if curl -f -s "https://api.niochat.com.br/api/health/" > /dev/null; then
+          echo "✅ Backend is healthy"
+        else
+          echo "⚠️ Backend health check failed"
+        fi
+        
+        # Check frontend
+        if curl -f -s "https://app.niochat.com.br/" > /dev/null; then
+          echo "✅ Frontend is healthy"
+        else
+          echo "⚠️ Frontend health check failed"
+        fi
 
     - name: Notify deployment
       run: |
-        echo "✅ NioChat deployed successfully!"
+        echo "🎉 NioChat deployed successfully!"
         echo "🌐 Frontend: https://app.niochat.com.br"
         echo "🔧 API: https://api.niochat.com.br"
         echo "⚙️ Admin: https://admin.niochat.com.br"
+        echo "👤 Superadmin: Junior / semfim01@"
