@@ -169,9 +169,7 @@ class Command(BaseCommand):
         if not remaining:
             self.stdout.write(self.style.SUCCESS('# Debug logging removed for security Todos os dados foram removidos do Redis'))
         else:
-            self.stdout.write(self.style.WARNING(f'⚠️ Ainda restam dados de {len(remaining)} provedores')) 
-Comando para limpar dados Redis de provedores específicos
-"""
+            self.stdout.write(self.style.WARNING(f'Ainda restam dados de {len(remaining)} provedores'))
 
 from django.core.management.base import BaseCommand
 from core.models import Provedor

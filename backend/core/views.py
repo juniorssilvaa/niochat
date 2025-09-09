@@ -13,12 +13,14 @@ from django.utils.decorators import method_decorator
 import logging
 from . import models
 from .sgp_client import SGPClient
-# # from .openai_service import openai_service
+from .openai_service import openai_service
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import mixins
 import requests
 import json
-# from .telegram_service import telegram_service
+from .telegram_service import telegram_service
+
+logger = logging.getLogger(__name__)
 import asyncio
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer

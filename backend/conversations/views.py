@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from django.db.models import Q
 from core.models import Provedor, User, AuditLog
 from .models import Contact, Inbox, Conversation, Message, Team, TeamMember
+from .models import CSATFeedback
 from .serializers import (
     ContactSerializer, InboxSerializer, ConversationSerializer,
     ConversationListSerializer, ConversationUpdateSerializer, MessageSerializer, TeamSerializer, TeamMemberSerializer
@@ -15,6 +16,9 @@ from asgiref.sync import async_to_sync
 import requests
 import json
 import base64
+import logging
+
+logger = logging.getLogger(__name__)
 from django.http import FileResponse, Http404, JsonResponse
 from django.conf import settings
 from django.utils import timezone
@@ -1011,8 +1015,8 @@ def send_presence_via_uazapi(conversation, presence_type):
         
         print(f"DEBUG: URL da Uazapi para presença: {uazapi_url}")
         print(f"DEBUG: Token da Uazapi: {uazapi_token[:10] if uazapi_token else 'None'}...")
-        print(f"DEBUG: sender_lid: {sender_lid}")
-        print(f"DEBUG: chatid: {chatid}")
+        print(f"DEBUG: sender_lid: {sender_lid if 'sender_lid' in locals() else 'undefined'}")
+        print(f"DEBUG: chatid: {chatid if 'chatid' in locals() else 'undefined'}")
         print(f"DEBUG: URL base original: {whatsapp_integration.webhook_url if whatsapp_integration else 'None'}")
         print(f"DEBUG: Provedor: {provedor.nome if provedor else 'None'}")
         print(f"DEBUG: Integrações externas: {provedor.integracoes_externas if provedor else 'None'}")

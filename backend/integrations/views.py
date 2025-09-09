@@ -28,6 +28,10 @@ import time
 import random
 import subprocess
 import os
+import logging
+import django
+
+logger = logging.getLogger(__name__)
 from django.conf import settings
 from datetime import datetime, timedelta
 
