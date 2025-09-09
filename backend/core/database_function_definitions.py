@@ -1,15 +1,10 @@
-"""
-Definições de Functions para OpenAI Function Calling - Database Tools
-Ferramentas seguras para acesso ao banco de dados via IA
-"""
-
-# Definições dos tools seguindo a documentação OpenAI Function Calling
+# Ferramentas de banco de dados para OpenAI Function Calling
 DATABASE_FUNCTION_TOOLS = [
     {
         "type": "function",
         "function": {
             "name": "buscar_equipes_disponiveis",
-            "description": "# Debug logging removed for security Busca todas as equipes disponíveis do provedor atual. Use para verificar quais equipes existem antes de transferir ou quando o cliente perguntar sobre setores disponíveis.",
+            "description": "Busca todas as equipes disponíveis no sistema. Use quando precisar listar equipes para transferência de conversas.",
             "parameters": {
                 "type": "object",
                 "properties": {},
@@ -20,17 +15,16 @@ DATABASE_FUNCTION_TOOLS = [
         }
     },
     {
-        "type": "function", 
+        "type": "function",
         "function": {
             "name": "buscar_membro_disponivel_equipe",
-            "description": "Busca membro disponível em uma equipe específica. Use antes de executar transferência para verificar se há alguém disponível na equipe de destino.",
+            "description": "Busca membros disponíveis de uma equipe específica. Use quando precisar transferir conversa para um membro específico da equipe.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "nome_equipe": {
                         "type": "string",
-                        "enum": ["SUPORTE", "FINANCEIRO", "ATENDIMENTO"],
-                        "description": "Nome da equipe para buscar membro disponível"
+                        "description": "Nome da equipe para buscar membros disponíveis"
                     }
                 },
                 "required": ["nome_equipe"],
@@ -43,18 +37,17 @@ DATABASE_FUNCTION_TOOLS = [
         "type": "function",
         "function": {
             "name": "executar_transferencia_conversa",
-            "description": "FERRAMENTA PRINCIPAL PARA TRANSFERÊNCIAS! Executa transferência segura de conversa para equipe. Move automaticamente de 'Com IA' para 'Em Espera'. Use SEMPRE que cliente solicitar transferência para suporte/financeiro/atendimento.",
+            "description": "Executa transferência de conversa para uma equipe específica. Use quando cliente solicitar atendimento de equipe específica.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "conversation_id": {
                         "type": "integer",
-                        "description": "ID da conversa atual que será transferida"
+                        "description": "ID da conversa a ser transferida"
                     },
                     "equipe_nome": {
-                        "type": "string", 
-                        "enum": ["SUPORTE", "FINANCEIRO", "ATENDIMENTO"],
-                        "description": "Nome da equipe de destino. SUPORTE para problemas técnicos, FINANCEIRO para questões de pagamento/fatura, ATENDIMENTO para questões gerais."
+                        "type": "string",
+                        "description": "Nome da equipe de destino"
                     },
                     "motivo": {
                         "type": "string",
@@ -70,7 +63,7 @@ DATABASE_FUNCTION_TOOLS = [
     {
         "type": "function",
         "function": {
-            "name": "buscar_conversas_ativas", 
+            "name": "buscar_conversas_ativas",
             "description": "Busca conversas ativas do provedor. Use para verificar status das conversas, relatórios ou quando precisar de informações sobre atendimentos em andamento.",
             "parameters": {
                 "type": "object",
@@ -85,13 +78,13 @@ DATABASE_FUNCTION_TOOLS = [
         "type": "function",
         "function": {
             "name": "transferir_conversa_inteligente",
-            "description": "🤖 TRANSFERÊNCIA INTELIGENTE! Analisa automaticamente a conversa e transfere para a equipe mais adequada baseada no conteúdo das mensagens. Use quando a IA não conseguir resolver o problema do cliente e precisar transferir para equipe humana.",
+            "description": "TRANSFERENCIA INTELIGENTE! Analisa automaticamente a conversa e transfere para a equipe mais adequada baseada no conteudo das mensagens. Use quando a IA nao conseguir resolver o problema do cliente e precisar transferir para equipe humana.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "conversation_id": {
                         "type": "integer",
-                        "description": "ID da conversa que será analisada e transferida"
+                        "description": "ID da conversa a ser transferida"
                     }
                 },
                 "required": ["conversation_id"],
@@ -99,21 +92,8 @@ DATABASE_FUNCTION_TOOLS = [
             },
             "strict": True
         }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "buscar_estatisticas_atendimento",
-            "description": "Busca estatísticas gerais de atendimento do provedor. Use quando cliente ou agente pedir relatórios, números de atendimento ou visão geral do desempenho.",
-            "parameters": {
-                "type": "object", 
-                "properties": {},
-                "required": [],
-                "additionalProperties": False
-            },
-            "strict": True
-        }
     }
+]
 
 # Mapeamento de nomes de função para implementação
 DATABASE_FUNCTION_MAPPING = {
@@ -121,8 +101,7 @@ DATABASE_FUNCTION_MAPPING = {
     "buscar_membro_disponivel_equipe": "buscar_membro_disponível_equipe",
     "executar_transferencia_conversa": "executar_transferencia_conversa",
     "transferir_conversa_inteligente": "transferir_conversa_inteligente",
-    "buscar_conversas_ativas": "buscar_conversas_ativas",
-    "buscar_estatisticas_atendimento": "buscar_estatisticas_atendimento"
+    "buscar_conversas_ativas": "buscar_conversas_ativas"
 }
 
 # Instruções específicas para o sistema prompt
@@ -132,51 +111,17 @@ FERRAMENTAS DE BANCO DE DADOS DISPONÍVEIS:
 **Para Transferências (PRIORITÁRIO):**
 1. buscar_equipes_disponiveis() - Verificar equipes existentes
 2. buscar_membro_disponivel_equipe(nome_equipe) - Verificar disponibilidade  
-3. executar_transferencia_conversa(conversation_id, equipe_nome, motivo) - Executar transferência manual
-4. transferir_conversa_inteligente(conversation_id) - Transferência automática baseada na análise da conversa
+3. executar_transferencia_conversa(conversation_id, equipe_nome, motivo) - Transferir conversa
+4. transferir_conversa_inteligente(conversation_id) - Transferência automática baseada no conteúdo
 
-**Para Consultas e Relatórios:**
-4. buscar_conversas_ativas(status, assignee_id) - Listar conversas ativas
-5. buscar_estatisticas_atendimento() - Estatísticas gerais
+**Para Consultas:**
+5. buscar_conversas_ativas() - Ver conversas em andamento
 
-🚨 REGRAS CRÍTICAS PARA TRANSFERÊNCIAS:
-
-1. **FLUXO OBRIGATÓRIO quando cliente pedir transferência:**
-   - Cliente: "Quero falar com suporte técnico"
-   - IA: Execute executar_transferencia_conversa(equipe_nome="SUPORTE", motivo="Cliente solicitou suporte técnico")
-   - Sistema: Move de "Com IA" → "Em Espera" automaticamente
-
-2. **TRANSFERÊNCIA INTELIGENTE quando IA não conseguir resolver:**
-   - Se IA não conseguir resolver o problema do cliente
-   - Use transferir_conversa_inteligente(conversation_id) 
-   - Sistema analisa automaticamente a conversa e escolhe a equipe mais adequada
-   - Baseado em palavras-chave: técnico → SUPORTE, financeiro → FINANCEIRO, geral → ATENDIMENTO
-
-3. **MAPEAMENTO DE SOLICITAÇÕES:**
-   - **GERAL**: "alguém", "ajuda", "atendente", "pessoa", "humano" → ATENDIMENTO
-   - **TÉCNICO**: "suporte", "técnico", "internet", "problema", "conexão" → SUPORTE
-   - **FINANCEIRO**: "financeiro", "fatura", "pagamento", "cobrança", "boleto" → FINANCEIRO  
-   - **COMERCIAL**: "atendimento", "comercial", "dúvida geral", "informação" → ATENDIMENTO
-
-4. **NUNCA USE transferir_para_equipe (REMOVIDA):**
-   - Use APENAS executar_transferencia_conversa ou transferir_conversa_inteligente
-   - Estas são as ÚNICAS funções válidas para transferências
-   - Parâmetros: equipe_nome, motivo (conversation_id é automático)
-
-5. **NÃO FAÇA BUSCAR_FATURAS após transferência ser solicitada:**
-   - Se cliente quer transferência = Use executar_transferencia_conversa
-   - Se cliente quer fatura = Use buscar_faturas_vencidas
-   - NUNCA misture as duas ações
-
-6. **SEGURANÇA AUTOMÁTICA:**
-   - Todas as funções respeitam isolamento do provedor
-   - Conversation_id é validado automaticamente
-   - Transações são atômicas e seguras
-
-7. **MENSAGENS AO CLIENTE:**
-   - Sempre confirme transferência: "Transferindo para [EQUIPE]..."
-   - Use mensagem retornada pela função: mensagem_cliente
-   - Seja educado e explique o motivo
+**REGRAS IMPORTANTES:**
+- SEMPRE use buscar_equipes_disponiveis() ANTES de tentar transferir
+- Use executar_transferencia_conversa() quando cliente solicitar equipe específica
+- Use transferir_conversa_inteligente() quando IA não conseguir resolver e precisar transferir
+- Motivo deve ser em português e explicar por que está transferindo
 
 **EXEMPLOS CORRETOS:**
 Cliente: "Preciso falar com o financeiro"
@@ -194,4 +139,4 @@ Resultado: Conversa move de "Com IA" para "Em Espera" + Notificação WebSocket
 Cliente: "Preciso do financeiro" 
 IA: "Vou buscar suas faturas..." + executa buscar_faturas_vencidas
 ERRADO! Cliente quer transferência, não fatura!
-"""]
+"""

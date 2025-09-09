@@ -1,11 +1,13 @@
 name: Auto Version & Changelog Update
 
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-    types: [ closed ]
+  # Desabilitado temporariamente para evitar conflito com deploy.yml
+  # push:
+  #   branches: [ main, master ]
+  # pull_request:
+  #   branches: [ main, master ]
+  #   types: [ closed ]
+  workflow_dispatch: # Apenas execução manual
 
 jobs:
   auto-version:

@@ -1189,7 +1189,7 @@ DATA E HORA ATUAL: {data_atual}"""
                 
                 return {
                     "success": True,
-                    "fatura_id": fatura_id,
+                    "fatura_id": resultado.get('fatura_id') if resultado else None,
                     "pix_gerado": True,
                     "codigo_pix": resultado.get('codigo_pix') if resultado else None,
                     "qr_code": resultado.get('qr_code') if resultado else None,
@@ -2195,6 +2195,7 @@ IMPORTANTE - ENVIO AUTOMÁTICO DE FATURA:
 """
             
             # Adicionar instrução específica para perguntar se é cliente apenas quando necessário
+            already_asked_if_client = conversation.additional_attributes.get('asked_if_client', False) if conversation else False
             if not already_asked_if_client and needs_client_check:
                 logger.info("Detectada necessidade de verificar se é cliente - adicionando instrução")
                 system_prompt += """
@@ -2709,6 +2710,7 @@ IMPORTANTE - EQUIPE NÃO DISPONÍVEL:
                     logger.info("Nenhuma transferência necessária para esta mensagem")
             
             # Verificar se precisa marcar que perguntou sobre ser cliente
+            already_asked_if_client = conversation.additional_attributes.get('asked_if_client', False) if conversation else False
             if not already_asked_if_client and conversation and needs_client_check:
                 logger.info("Verificando se a resposta contém pergunta sobre ser cliente")
                 # Verificar se a resposta já contém uma pergunta sobre ser cliente

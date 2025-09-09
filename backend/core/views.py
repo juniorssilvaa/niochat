@@ -1971,6 +1971,7 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
                 }
                 
                 # Buscar logs de auditoria relacionados
+                from conversations.models import AuditLog
                 audit_logs = AuditLog.objects.filter(
                     conversation_id=conversation_id,
                     provedor_id=provedor_id

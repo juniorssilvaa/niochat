@@ -1015,8 +1015,8 @@ def send_presence_via_uazapi(conversation, presence_type):
         
         print(f"DEBUG: URL da Uazapi para presença: {uazapi_url}")
         print(f"DEBUG: Token da Uazapi: {uazapi_token[:10] if uazapi_token else 'None'}...")
-        print(f"DEBUG: sender_lid: {sender_lid if 'sender_lid' in locals() else 'undefined'}")
-        print(f"DEBUG: chatid: {chatid if 'chatid' in locals() else 'undefined'}")
+        print(f"DEBUG: sender_lid: undefined")
+        print(f"DEBUG: chatid: undefined")
         print(f"DEBUG: URL base original: {whatsapp_integration.webhook_url if whatsapp_integration else 'None'}")
         print(f"DEBUG: Provedor: {provedor.nome if provedor else 'None'}")
         print(f"DEBUG: Integrações externas: {provedor.integracoes_externas if provedor else 'None'}")
