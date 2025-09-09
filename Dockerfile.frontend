@@ -1,19 +1,11 @@
-# Frontend Dockerfile
+# Frontend Dockerfile COM NGINX (corrigido)
 FROM node:18-alpine AS build
 
-# Set work directory
 WORKDIR /app
-
-# Copy package files first
 COPY frontend/frontend/package*.json ./
-
-# Install pnpm
 RUN npm install -g pnpm
-
-# Install dependencies without lockfile (more flexible)
 RUN pnpm install
 
-# Copy source code (excluding node_modules)
 COPY frontend/frontend/src ./src
 COPY frontend/frontend/public ./public
 COPY frontend/frontend/index.html ./
@@ -22,27 +14,60 @@ COPY frontend/frontend/jsconfig.json ./
 COPY frontend/frontend/components.json ./
 COPY frontend/frontend/eslint.config.js ./
 
-# Build the application
 RUN pnpm run build
 
-# Production stage
-FROM nginx:alpine AS production
+# Production stage com Nginx corrigido
+FROM nginx:alpine
 
-# Copy built files from build stage
+# ✅ CRIAR o usuário www-data no Alpine
+RUN addgroup -g 1001 -S www-data && \
+    adduser -u 1001 -S www-data -G www-data
+
+# ✅ Configuração customizada do Nginx SEM usuário www-data
+RUN echo 'user nginx; \
+worker_processes auto; \
+\
+events { \
+    worker_connections 1024; \
+} \
+\
+http { \
+    include /etc/nginx/mime.types; \
+    default_type application/octet-stream; \
+    \
+    server { \
+        listen 80; \
+        server_name localhost; \
+        \
+        root /usr/share/nginx/html; \
+        index index.html; \
+        \
+        location / { \
+            try_files \$uri \$uri/ /index.html; \
+        } \
+        \
+        # Configurações de segurança \
+        add_header X-Frame-Options "SAMEORIGIN" always; \
+        add_header X-XSS-Protection "1; mode=block" always; \
+        add_header X-Content-Type-Options "nosniff" always; \
+    } \
+}' > /etc/nginx/nginx.conf
+
+# Copiar arquivos buildados
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy nginx configuration
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
+# ✅ Ajustar permissões
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chmod -R 755 /usr/share/nginx/html
 
-# Copy custom nginx config for niochat
-COPY nginx-niochat.conf /etc/nginx/conf.d/default.conf
-
-# Expose port
+# Expor porta
 EXPOSE 80
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
 
-# Start nginx
+# ✅ Usar usuário nginx (que já existe)
+USER nginx
+
 CMD ["nginx", "-g", "daemon off;"]
