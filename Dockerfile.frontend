@@ -6,13 +6,12 @@ WORKDIR /app
 
 # Copy package files first
 COPY frontend/frontend/package*.json ./
-COPY frontend/frontend/pnpm-lock.yaml ./
 
 # Install pnpm
 RUN npm install -g pnpm
 
-# Clean install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies without lockfile (more flexible)
+RUN pnpm install
 
 # Copy source code (excluding node_modules)
 COPY frontend/frontend/src ./src
