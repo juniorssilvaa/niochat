@@ -19,49 +19,22 @@ RUN pnpm run build
 # Production stage com Nginx corrigido
 FROM nginx:alpine
 
-# ✅ REMOVER estas linhas - o usuário já existe
-# RUN addgroup -g 1001 -S www-data && \
-#     adduser -u 1001 -S www-data -G www-data
-
-# ✅ Configuração customizada do Nginx
-RUN echo 'user nginx; \
-worker_processes auto; \
-\
-events { \
-    worker_connections 1024; \
-} \
-\
-http { \
-    include /etc/nginx/mime.types; \
-    default_type application/octet-stream; \
-    \
-    server { \
-        listen 80; \
-        server_name localhost; \
-        \
-        root /usr/share/nginx/html; \
-        index index.html; \
-        \
-        location / { \
-            try_files \$uri \$uri/ /index.html; \
-        } \
-        \
-        # Configurações de segurança \
-        add_header X-Frame-Options "SAMEORIGIN" always; \
-        add_header X-XSS-Protection "1; mode=block" always; \
-        add_header X-Content-Type-Options "nosniff" always; \
-    } \
-}' > /etc/nginx/nginx.conf
+# ✅ REMOVER a configuração customizada que causa problemas
+# ✅ Usar a configuração padrão do Nginx
 
 # Copiar arquivos buildados
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# ✅ Ajustar permissões para o usuário nginx
+# ✅ Criar diretórios necessários com permissões corretas
+RUN mkdir -p /var/cache/nginx/client_temp && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    chown -R nginx:nginx /etc/nginx && \
+    chmod -R 755 /var/cache/nginx
+
+# ✅ Ajustar permissões dos arquivos estáticos
 RUN chown -R nginx:nginx /usr/share/nginx/html && \
     chmod -R 755 /usr/share/nginx/html
-
-# Expor porta
-EXPOSE 80
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
