@@ -1,0 +1,58 @@
+{
+  "version_rules": {
+    "major_keywords": [
+      "breaking", "major", "incompatible", "refactor", "breaking change",
+      "major update", "major version", "breaking changes", "BREAKING"
+    ],
+    "minor_keywords": [
+      "feat", "feature", "minor", "add", "new", "implement", "enhancement",
+      "nova funcionalidade", "funcionalidade", "implementado", "adicionado"
+    ],
+    "patch_keywords": [
+      "fix", "patch", "bug", "correction", "hotfix", "bugfix",
+      "corrigido", "correção", "ajuste", "melhoria", "otimização"
+    ],
+    "security_keywords": [
+      "security", "segurança", "vulnerability", "cve", "exploit"
+    ]
+  },
+  "changelog_templates": {
+    "major": {
+      "title": "Atualização Principal",
+      "default_change": {
+        "type": "feature",
+        "title": "Mudanças Importantes",
+        "description": "Atualizações que podem afetar compatibilidade"
+      }
+    },
+    "minor": {
+      "title": "Novas Funcionalidades",
+      "default_change": {
+        "type": "feature", 
+        "title": "Nova Funcionalidade",
+        "description": "Funcionalidades adicionadas mantendo compatibilidade"
+      }
+    },
+    "patch": {
+      "title": "Correções e Melhorias",
+      "default_change": {
+        "type": "fix",
+        "title": "Melhorias Gerais",
+        "description": "Correções de problemas e melhorias de estabilidade"
+      }
+    }
+  },
+  "auto_deploy": {
+    "enabled": true,
+    "build_frontend": true,
+    "create_release_tag": true,
+    "update_production": true
+  },
+  "notifications": {
+    "success_message": "🎉 Sistema NioChat atualizado automaticamente!",
+    "error_message": "❌ Erro na atualização automática do NioChat"
+  }
+}
+
+
+

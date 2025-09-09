@@ -217,7 +217,7 @@ const ConversationRecovery = ({ provedorId }) => {
         </div>
         <button
           onClick={saveSettings}
-          className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+          className="mt-4 bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500 text-white px-4 py-2 rounded shadow-lg hover:shadow-xl transition-all duration-200"
         >
           Salvar Configurações
         </button>

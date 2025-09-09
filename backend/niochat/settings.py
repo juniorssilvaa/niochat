@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 
 # Version
-VERSION = "2.1.4"
+VERSION = "2.2.0"
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -170,7 +170,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20,
+    'PAGE_SIZE': 4000,
 }
 
 # CORS settings
@@ -199,7 +199,6 @@ CHANNEL_LAYERS = {
             'hosts': [{
                 'host': '154.38.176.17',
                 'port': 6379,
-                'username': 'niochat',
                 'password': 'E0sJT3wAYFuahovmHkxgy',
                 'db': 0,
             }],

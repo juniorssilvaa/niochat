@@ -41,16 +41,43 @@ class SGPClient:
     def liberar_por_confianca(self, contrato):
         return requests.post(f'{self.base_url}/api/ura/liberacaopromessa/', json={'contrato': contrato}, headers=self._headers()).json()
 
-    def criar_chamado(self, cliente_id, motivo):
-        return requests.post(f'{self.base_url}/api/ura/chamado/', json={'cliente_id': cliente_id, 'motivo': motivo}, headers=self._headers()).json()
+    def criar_chamado(self, contrato, ocorrenciatipo, conteudo):
+        """
+        Criar chamado técnico no SGP
+        Args:
+            contrato: ID do contrato
+            ocorrenciatipo: Código do tipo de ocorrência (padrão: 1 para técnico)
+            conteudo: Conteúdo principal do chamado (vai no campo "conteudo")
+        """
+        data = {
+            'token': self.token,
+            'app': self.app_name,
+            'contrato': contrato,
+            'ocorrenciatipo': ocorrenciatipo,
+            'conteudo': conteudo
+        }
+            
+        # Não enviar Content-Type para form-data!
+        return requests.post(f'{self.base_url}/api/ura/chamado/', data=data, headers=self._headers(include_content_type=False)).json()
 
-    def segunda_via_fatura(self, contrato):
+    def segunda_via_fatura(self, identificador):
+        """
+        Buscar segunda via da fatura usando CPF/CNPJ ou ID do contrato
+        Args:
+            identificador: CPF/CNPJ do cliente ou ID do contrato
+        """
         # Enviar token apenas nos parâmetros (sem Content-Type para form-data)
         data = {
             'token': self.token,
             'app': self.app_name,
-            'contrato': contrato
         }
+        
+        # Se é um número (contrato), usar campo 'contrato', senão usar 'cpfcnpj'
+        if str(identificador).isdigit():
+            data['contrato'] = identificador
+        else:
+            data['cpfcnpj'] = identificador
+            
         # Não enviar Content-Type para form-data!
         return requests.post(f'{self.base_url}/api/ura/fatura2via/', data=data, headers=self._headers(include_content_type=False)).json()
 

@@ -2,8 +2,9 @@ from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
-from django.db.models import Q, Prefetch
+from django.db.models import Q, Prefetch, Count
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from django.core.files.storage import default_storage
@@ -39,6 +40,9 @@ class InternalChatRoomViewSet(viewsets.ModelViewSet):
         
         if not provedor:
             return InternalChatRoom.objects.none()
+        
+        # Garantir que existe uma sala geral do provedor
+        self._ensure_provider_room_exists(user, provedor)
             
         # Retornar apenas salas do provedor onde o usuário participa
         return InternalChatRoom.objects.filter(
@@ -49,6 +53,35 @@ class InternalChatRoomViewSet(viewsets.ModelViewSet):
             'participants__user',
             Prefetch('messages', queryset=InternalChatMessage.objects.select_related('sender').order_by('-created_at')[:50])
         ).distinct()
+    
+    def _ensure_provider_room_exists(self, user, provedor):
+        """
+        Garantir que existe uma sala geral do provedor
+        """
+        room, created = InternalChatRoom.objects.get_or_create(
+            provedor=provedor,
+            room_type='general',
+            defaults={
+                'name': f'Chat Geral - {provedor.name}',
+                'description': 'Chat geral do provedor',
+                'created_by': user
+            }
+        )
+        
+        # Se a sala foi criada, adicionar todos os usuários do provedor
+        if created:
+            users = provedor.user_set.all()
+            for u in users:
+                InternalChatParticipant.objects.create(
+                    room=room,
+                    user=u
+                )
+        
+        # Garantir que o usuário atual seja participante
+        InternalChatParticipant.objects.get_or_create(
+            room=room,
+            user=user
+        )
     
     def perform_create(self, serializer):
         user = self.request.user
@@ -168,10 +201,13 @@ class InternalChatMessageViewSet(viewsets.ModelViewSet):
         user = self.request.user
         room_id = self.request.data.get('room_id')
         
-        # Verificar se o usuário pode enviar mensagem nesta sala
-        room = get_object_or_404(InternalChatRoom, id=room_id)
-        if not room.participants.filter(user=user, is_active=True).exists():
-            raise permissions.PermissionDenied("Você não tem permissão para enviar mensagens nesta sala")
+        # Se não há room_id, obter ou criar sala geral do provedor
+        if not room_id:
+            room = self._get_or_create_provider_room(user)
+        else:
+            room = get_object_or_404(InternalChatRoom, id=room_id)
+            if not room.participants.filter(user=user, is_active=True).exists():
+                raise permissions.PermissionDenied("Você não tem permissão para enviar mensagens nesta sala")
         
         # Processar upload de arquivo se houver
         file_data = self._handle_file_upload(self.request)
@@ -192,6 +228,40 @@ class InternalChatMessageViewSet(viewsets.ModelViewSet):
         self._notify_new_message(message)
         
         return message
+    
+    def _get_or_create_provider_room(self, user):
+        """
+        Obter ou criar sala geral do provedor
+        """
+        from core.models import Provedor
+        
+        # Buscar ou criar sala geral do provedor
+        room, created = InternalChatRoom.objects.get_or_create(
+            provedor=user.provedor,
+            room_type='general',
+            defaults={
+                'name': f'Chat Geral - {user.provedor.name}',
+                'description': 'Chat geral do provedor',
+                'created_by': user
+            }
+        )
+        
+        # Se a sala foi criada, adicionar todos os usuários do provedor
+        if created:
+            users = user.provedor.user_set.all()
+            for u in users:
+                InternalChatParticipant.objects.create(
+                    room=room,
+                    user=u
+                )
+        
+        # Garantir que o usuário atual seja participante
+        InternalChatParticipant.objects.get_or_create(
+            room=room,
+            user=user
+        )
+        
+        return room
     
     def _handle_file_upload(self, request):
         """
@@ -238,6 +308,7 @@ class InternalChatMessageViewSet(viewsets.ModelViewSet):
         from .serializers_internal_chat import InternalChatMessageSerializer
         message_data = InternalChatMessageSerializer(message).data
         
+        # Notificar sala específica
         async_to_sync(channel_layer.group_send)(
             f"internal_chat_{message.room.id}",
             {
@@ -245,6 +316,57 @@ class InternalChatMessageViewSet(viewsets.ModelViewSet):
                 'message': message_data
             }
         )
+        
+        # Notificar todos os participantes da sala sobre contador atualizado
+        participants = message.room.participants.filter(is_active=True)
+        for participant in participants:
+            if participant.user != message.sender:  # Não notificar o remetente
+                # Calcular contador total de mensagens não lidas para este usuário em todas as salas
+                provedor = getattr(participant.user, 'provedor', None) or participant.user.provedores_admin.first()
+                if provedor:
+                    user_rooms = InternalChatRoom.objects.filter(
+                        provedor=provedor,
+                        participants__user=participant.user,
+                        participants__is_active=True,
+                        is_active=True
+                    )
+                    
+                    total_unread = 0
+                    unread_by_sender = {}
+                    
+                    for room in user_rooms:
+                        unread_count = room.messages.exclude(
+                            read_receipts__user=participant.user
+                        ).exclude(
+                            sender=participant.user
+                        ).count()
+                        total_unread += unread_count
+                        
+                        # Contar mensagens não lidas por remetente
+                        unread_messages = room.messages.exclude(
+                            read_receipts__user=participant.user
+                        ).exclude(
+                            sender=participant.user
+                        ).values('sender').annotate(
+                            count=Count('id')
+                        )
+                        
+                        for item in unread_messages:
+                            sender_id = item['sender']
+                            count = item['count']
+                            if sender_id in unread_by_sender:
+                                unread_by_sender[sender_id] += count
+                            else:
+                                unread_by_sender[sender_id] = count
+                    
+                    async_to_sync(channel_layer.group_send)(
+                        f"internal_chat_notifications_{participant.user.id}",
+                        {
+                            'type': 'unread_count_update',
+                            'total_unread': total_unread,
+                            'unread_by_user': unread_by_sender
+                        }
+                    )
     
     @action(detail=True, methods=['post'])
     def mark_read(self, request, pk=None):
@@ -272,6 +394,131 @@ class InternalChatMessageViewSet(viewsets.ModelViewSet):
             )
         
         return Response({'message': 'Mensagem marcada como lida'})
+    
+    @action(detail=False, methods=['post'])
+    def mark_all_read(self, request):
+        """
+        Marcar todas as mensagens de uma sala como lidas
+        """
+        user = request.user
+        
+        # Tentar obter room_id de diferentes formas
+        room_id = None
+        if hasattr(request, 'data'):
+            room_id = request.data.get('room_id')
+        elif request.POST:
+            room_id = request.POST.get('room_id')
+        elif request.body:
+            import json
+            try:
+                data = json.loads(request.body)
+                room_id = data.get('room_id')
+            except:
+                pass
+        
+        if not room_id:
+            return Response({'error': 'room_id é obrigatório'}, status=400)
+        
+        try:
+            # Verificar se o usuário participa da sala
+            room = InternalChatRoom.objects.get(
+                id=room_id,
+                participants__user=user,
+                participants__is_active=True,
+                is_active=True
+            )
+            
+            # Buscar todas as mensagens não lidas da sala
+            unread_messages = room.messages.exclude(
+                read_receipts__user=user
+            ).exclude(
+                sender=user
+            )
+            
+            # Marcar todas como lidas
+            read_receipts = []
+            for message in unread_messages:
+                read_receipt, created = InternalChatMessageRead.objects.get_or_create(
+                    message=message,
+                    user=user
+                )
+                if created:
+                    read_receipts.append(read_receipt)
+            
+            # Notificar atualização do contador
+            self._notify_unread_count_update(user)
+            
+            return Response({
+                'message': f'{len(read_receipts)} mensagens marcadas como lidas',
+                'marked_count': len(read_receipts)
+            })
+            
+        except InternalChatRoom.DoesNotExist:
+            return Response({'error': 'Sala não encontrada ou usuário não participa'}, status=404)
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+    
+    def _notify_unread_count_update(self, user):
+        """
+        Notificar atualização do contador de mensagens não lidas
+        """
+        try:
+            # Buscar provedor do usuário
+            provedor = getattr(user, 'provedor', None) or user.provedores_admin.first()
+            
+            if not provedor:
+                return
+            
+            # Buscar salas onde o usuário participa
+            user_rooms = InternalChatRoom.objects.filter(
+                provedor=provedor,
+                participants__user=user,
+                participants__is_active=True,
+                is_active=True
+            )
+            
+            # Contar mensagens não lidas
+            total_unread = 0
+            unread_by_sender = {}
+            
+            for room in user_rooms:
+                unread_count = room.messages.exclude(
+                    read_receipts__user=user
+                ).exclude(
+                    sender=user
+                ).count()
+                total_unread += unread_count
+                
+                # Contar mensagens não lidas por remetente
+                unread_messages = room.messages.exclude(
+                    read_receipts__user=user
+                ).exclude(
+                    sender=user
+                ).values('sender').annotate(
+                    count=Count('id')
+                )
+                
+                for item in unread_messages:
+                    sender_id = item['sender']
+                    count = item['count']
+                    if sender_id in unread_by_sender:
+                        unread_by_sender[sender_id] += count
+                    else:
+                        unread_by_sender[sender_id] = count
+            
+            # Notificar via WebSocket
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f"internal_chat_notifications_{user.id}",
+                {
+                    'type': 'unread_count_update',
+                    'total_unread': total_unread,
+                    'unread_by_user': unread_by_sender
+                }
+            )
+            
+        except Exception as e:
+            print(f"Erro ao notificar atualização do contador: {e}")
     
     @action(detail=True, methods=['post'])
     def react(self, request, pk=None):
@@ -328,3 +575,95 @@ class InternalChatParticipantViewSet(viewsets.ReadOnlyModelViewSet):
             room_id=room_id,
             is_active=True
         ).select_related('user')
+
+
+class InternalChatUnreadCountView(APIView):
+    """
+    API para buscar contador total de mensagens não lidas do chat interno
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        
+        try:
+            # Buscar provedor do usuário
+            provedor = getattr(user, 'provedor', None) or user.provedores_admin.first()
+            
+            if not provedor:
+                return Response({'total_unread': 0})
+            
+            # Buscar salas onde o usuário participa
+            user_rooms = InternalChatRoom.objects.filter(
+                provedor=provedor,
+                participants__user=user,
+                participants__is_active=True,
+                is_active=True
+            )
+            
+            # Contar mensagens não lidas em todas as salas
+            total_unread = 0
+            for room in user_rooms:
+                unread_count = room.messages.exclude(
+                    read_receipts__user=user
+                ).exclude(
+                    sender=user
+                ).count()
+                total_unread += unread_count
+            
+            return Response({'total_unread': total_unread})
+            
+        except Exception as e:
+            print(f"Erro na InternalChatUnreadCountView: {e}")
+            return Response({'total_unread': 0})
+
+
+class InternalChatUnreadByUserView(APIView):
+    """
+    API para buscar contadores de mensagens não lidas do chat interno por usuário
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        
+        try:
+            # Buscar provedor do usuário
+            provedor = getattr(user, 'provedor', None) or user.provedores_admin.first()
+            
+            if not provedor:
+                return Response({})
+            
+            # Buscar salas onde o usuário participa
+            user_rooms = InternalChatRoom.objects.filter(
+                provedor=provedor,
+                participants__user=user,
+                participants__is_active=True,
+                is_active=True
+            )
+            
+            # Contar mensagens não lidas por remetente
+            unread_by_sender = {}
+            for room in user_rooms:
+                # Buscar mensagens não lidas agrupadas por remetente
+                unread_messages = room.messages.exclude(
+                    read_receipts__user=user
+                ).exclude(
+                    sender=user
+                ).values('sender').annotate(
+                    count=Count('id')
+                )
+                
+                for item in unread_messages:
+                    sender_id = item['sender']
+                    count = item['count']
+                    if sender_id in unread_by_sender:
+                        unread_by_sender[sender_id] += count
+                    else:
+                        unread_by_sender[sender_id] = count
+            
+            return Response(unread_by_sender)
+            
+        except Exception as e:
+            print(f"Erro na InternalChatUnreadByUserView: {e}")
+            return Response({})

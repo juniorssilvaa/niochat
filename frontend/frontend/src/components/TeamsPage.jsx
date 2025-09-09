@@ -155,7 +155,7 @@ const TeamsPage = () => {
     <div className="p-6 bg-background text-foreground min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-foreground">Configurações de Equipes</h1>
-        <Button onClick={handleAddTeam} className="bg-green-600 hover:bg-green-700">
+        <Button onClick={handleAddTeam} className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg hover:shadow-xl transition-all duration-200">
           <Plus className="w-4 h-4 mr-2" />
           Adicionar
         </Button>

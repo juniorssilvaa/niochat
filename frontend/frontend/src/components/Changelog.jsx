@@ -10,16 +10,14 @@ const Changelog = ({ isOpen, onClose }) => {
     const loadChangelog = async () => {
       try {
         setLoading(true);
-        // Tentar carregar do arquivo local primeiro
-        const response = await fetch('/CHANGELOG.json');
+        // Carregar dados do backend
+        const response = await fetch('/api/changelog/');
         if (response.ok) {
           const data = await response.json();
           setVersions(data.versions || []);
-          if (data.versions && data.versions.length > 0) {
-            setCurrentVersion(data.versions[0].version);
-          }
+          setCurrentVersion(data.current_version || '2.1.5');
         } else {
-          // Fallback para dados estáticos se o arquivo não existir
+          // Fallback para dados estáticos se a API falhar
           setVersions(fallbackVersions);
         }
       } catch (error) {

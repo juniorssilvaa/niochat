@@ -18,6 +18,8 @@ Sistema completo de atendimento via WhatsApp com interface moderna, integração
 - Uazapi/Evolution API integrado
 - Webhooks para mensagens recebidas
 - Envio de mídia com conversão automática
+- **Transcrição automática de áudio**: Conversão de mensagens de voz para texto
+- **Transcrição dupla**: Duas transcrições para garantir precisão máxima
 - Status de mensagens em tempo real
 - Múltiplos provedores suportados
 - Extração automática de external_id para exclusão
@@ -27,6 +29,9 @@ Sistema completo de atendimento via WhatsApp com interface moderna, integração
 - Múltiplos usuários e permissões
 - Atribuição de conversas a agentes
 - Transferência de conversas entre agentes
+- **Transferência para equipes**: Conversas ficam visíveis para toda a equipe
+- **Classificação inteligente**: Abas Com IA, Em Espera e Em Atendimento
+- **Visibilidade por equipe**: Membros veem conversas da sua equipe
 - Dashboard com métricas
 - Logs de auditoria completos
 - Status online/offline dos agentes
@@ -386,6 +391,8 @@ https://seu_dominio.com/api/webhooks/evolution-uazapi/
 ### Sistema de Mensagens
 - Envio: Mensagens de texto, mídia e áudio
 - Recepção: Webhooks do WhatsApp via Uazapi
+- **Transcrição de áudio**: Conversão automática de mensagens de voz para texto
+- **IA com transcrição**: Resposta automática baseada na transcrição do áudio
 - Reações: Emojis em mensagens
 - Exclusão: Deletar mensagens para todos
 - Status: Confirmação de entrega
@@ -423,6 +430,9 @@ https://seu_dominio.com/api/webhooks/evolution-uazapi/
 - POST /api/conversations/ - Criar conversa
 - GET /api/conversations/{id}/ - Detalhes da conversa
 - PUT /api/conversations/{id}/ - Atualizar conversa
+- POST /api/conversations/{id}/assign/ - Atribuir conversa para o usuário atual
+- POST /api/conversations/{id}/transfer/ - Transferir para agente específico
+- POST /api/conversations/{id}/transfer_to_team/ - Transferir para equipe
 
 ### Mensagens
 - GET /api/messages/ - Listar mensagens
@@ -557,6 +567,9 @@ Para suporte técnico ou dúvidas, abra uma issue no GitHub ou entre em contato 
 
 ### Inteligência Artificial Avançada
 - **IA ChatGPT Integrada**: Atendimento automatizado inteligente
+- **Transcrição de Áudio**: Conversão automática de mensagens de voz para texto
+- **Transcrição Dupla**: Duas transcrições para garantir precisão máxima
+- **IA com Transcrição**: Resposta automática baseada na transcrição do áudio
 - **Consulta SGP Automática**: IA consulta dados reais do cliente automaticamente
 - **Function Calls**: IA executa funções do SGP em tempo real
 - **Detecção Inteligente**: Reconhece demandas específicas (fatura, suporte, etc.)
@@ -597,6 +610,16 @@ Para suporte técnico ou dúvidas, abra uma issue no GitHub ou entre em contato 
 - **Isolamento por Provedor**: Cada provedor vê apenas seus dados
 - **Histórico Detalhado**: Últimos feedbacks com fotos de perfil dos clientes
 
+### Transcrição de Áudio
+- **Transcrição Automática**: Conversão de mensagens de voz para texto via Uazapi
+- **Transcrição Dupla**: Duas transcrições para garantir precisão máxima
+- **Configurações Dinâmicas**: Personalizadas por provedor via `integracoes_externas`
+- **Integração com IA**: Transcrição é passada automaticamente para a IA responder
+- **Suporte a Múltiplos Idiomas**: Transcrição em português e outros idiomas
+- **Fallback Inteligente**: Se uma transcrição falhar, usa a outra disponível
+- **Logs Detalhados**: Registro completo do processo de transcrição
+- **Configuração OpenAI**: Usa chave OpenAI do sistema ou do provedor
+
 ### Sistema de Auditoria Avançado
 - **Logs Detalhados**: Registro completo de ações do sistema
 - **Histórico de Conversas**: Visualização completa de mensagens por conversa
@@ -612,11 +635,72 @@ Para suporte técnico ou dúvidas, abra uma issue no GitHub ou entre em contato 
 - Integração automática com SGP via Function Calls
 - Resposta com dados reais do sistema
 
+### Transcrição de Áudio
+- **Processamento Automático**: Via webhook Uazapi quando mensagem de áudio é recebida
+- **Endpoint Uazapi**: `/message/download` com parâmetro `transcribe=True`
+- **Dupla Transcrição**: Duas chamadas para garantir precisão
+- **Integração IA**: Transcrição é automaticamente passada para a IA responder
+- **Configuração OpenAI**: Prioriza chave do sistema, fallback para chave do provedor
+
+### Configurações Dinâmicas de Transcrição
+- **Idioma**: Configurável por provedor (`language`: 'pt-BR', 'en-US', etc.)
+- **Qualidade**: Configurável por provedor (`quality`: 'high', 'medium', 'low')
+- **Delay entre transcrições**: Configurável por provedor (`delay_between`: segundos)
+- **Transcrição dupla**: Habilitável/desabilitável por provedor (`enable_double_transcription`)
+- **Localização**: `provedor.integracoes_externas.transcription_config`
+
 ### SGP Function Calls (Executadas pela IA)
 - `consultar_cliente_sgp(cpf_cnpj)` - Busca dados do cliente
 - `verificar_acesso_sgp(contrato)` - Status da conexão
 - `gerar_fatura_completa(contrato)` - Boleto + PIX + QR Code
 - `gerar_pix_qrcode(fatura_id)` - PIX específico
+- `enviar_formato_adicional(cpf_cnpj, formato_solicitado)` - Envia formato adicional (PIX ou Boleto) quando cliente pede depois
+- `criar_chamado_tecnico(cpf_cnpj, motivo, sintomas)` - Cria chamado técnico e transfere para suporte
+
+### 🔍 Diagnóstico Inteligente de Problemas de Internet
+O sistema implementa diagnóstico automático de problemas de internet:
+
+**Fluxo de Diagnóstico:**
+1. **Cliente relata problema**: "sem internet", "sem acesso", "internet não funciona"
+2. **IA verifica status**: Usa `verificar_acesso_sgp()` automaticamente
+3. **Diagnóstico automático**:
+   - **Status "Online"** → Problema no equipamento local
+   - **Status "Offline"** → Problema técnico (fibra, equipamento)
+   - **Status "Suspenso"** → Problema financeiro (fatura em aberto)
+4. **Ação baseada no status**:
+   - **Offline**: Pergunta sobre LEDs do modem
+   - **LED vermelho piscando**: Cria chamado técnico automaticamente
+   - **Suspenso**: Orienta sobre pagamento de fatura
+   - **Online**: Orienta sobre equipamento local
+
+**Exemplos de Interação:**
+```
+Cliente: "Estou sem internet"
+IA: [Verifica status automaticamente]
+IA: "Vejo que sua conexão está offline. Você consegue ver algum LED vermelho piscando no seu modem?"
+
+Cliente: "Sim, tem um LED vermelho piscando"
+IA: [Cria chamado técnico automaticamente]
+IA: "✅ Chamado técnico criado! Transferindo você para nossa equipe de suporte técnico..."
+```
+
+### Lógica de Formatos Adicionais
+O sistema implementa uma lógica inteligente para formatos de pagamento:
+
+1. **Primeiro pedido**: Cliente pede PIX OU Boleto → IA envia apenas o solicitado
+2. **Segundo pedido**: Cliente pede o outro formato → IA envia apenas o que falta
+
+**Exemplos:**
+- Cliente pede PIX → Recebe QR Code + botão "Copiar Chave PIX"
+- Cliente pede "também PDF" → Recebe PDF do boleto + botão "Copiar Linha Digitável"
+- Cliente pede Boleto → Recebe PDF + botão "Copiar Linha Digitável"  
+- Cliente pede "também PIX" → Recebe QR Code + botão "Copiar Chave PIX"
+
+### Dependências do Sistema
+- **qrcode[pil]**: Para geração de QR Codes PIX
+- **Pillow**: Para processamento de imagens
+- **requests**: Para comunicação HTTP
+- **openai**: Para integração com IA
 
 ### CSAT (Customer Satisfaction)
 - GET /api/csat/feedbacks/stats/ - Estatísticas de satisfação
@@ -638,6 +722,27 @@ Para suporte técnico ou dúvidas, abra uma issue no GitHub ou entre em contato 
 # Configurações do Sistema -> Chave API OpenAI
 ```
 
+### 2. Configurar Transcrição Dinâmica por Provedor
+```json
+// Em integracoes_externas do provedor
+{
+    "whatsapp_url": "https://seu-provedor.uazapi.com",
+    "whatsapp_token": "seu-token-uazapi",
+    "transcription_config": {
+        "language": "pt-BR",
+        "quality": "high",
+        "delay_between": 1,
+        "enable_double_transcription": true
+    }
+}
+```
+
+**Configurações disponíveis:**
+- `language`: Idioma da transcrição ('pt-BR', 'en-US', 'es-ES', etc.)
+- `quality`: Qualidade da transcrição ('high', 'medium', 'low')
+- `delay_between`: Delay entre transcrições em segundos (1-5)
+- `enable_double_transcription`: Habilitar transcrição dupla (true/false)
+
 ### 2. Configurar SGP por Provedor
 ```bash
 # Para cada provedor, configure:
@@ -658,6 +763,82 @@ Para suporte técnico ou dúvidas, abra uma issue no GitHub ou entre em contato 
 #   * Princípios
 #   * Humor
 ```
+
+## Transferência de Conversas
+
+### Atribuir para o Usuário Atual
+```bash
+curl -X POST "http://localhost:8010/api/conversations/123/assign/" \
+  -H "Authorization: Token seu_token_aqui" \
+  -H "Content-Type: application/json"
+```
+
+**Resposta de sucesso:**
+```json
+{
+  "success": true,
+  "message": "Conversa atribuída para Avila",
+  "conversation": {
+    "id": 123,
+    "assignee": {
+      "id": 3,
+      "username": "avila",
+      "first_name": "Avila"
+    },
+    "status": "open"
+  }
+}
+```
+
+### Transferir para Agente Específico
+```bash
+curl -X POST "http://localhost:8010/api/conversations/123/transfer/" \
+  -H "Authorization: Token seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": 5
+  }'
+```
+
+### Transferir para Equipe
+```bash
+curl -X POST "http://localhost:8010/api/conversations/123/transfer_to_team/" \
+  -H "Authorization: Token seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "team_id": 4,
+    "team_name": "SUPORTE TÉCNICO"
+  }'
+```
+
+**Resposta de sucesso:**
+```json
+{
+  "success": true,
+  "message": "Conversa transferida para equipe SUPORTE TÉCNICO",
+  "conversation": {
+    "id": 123,
+    "status": "pending",
+    "assignee": null,
+    "team": "SUPORTE TÉCNICO"
+  }
+}
+```
+
+### Comportamento da Transferência para Equipe
+- **Assignee**: Define como `null` (sem atendente individual)
+- **Status**: Muda para `"pending"` (Em Espera)
+- **Additional Attributes**: Salva informações da equipe:
+  ```json
+  {
+    "assigned_team": {
+      "id": 4,
+      "name": "SUPORTE TÉCNICO"
+    }
+  }
+  ```
+- **Visibilidade**: Conversa fica visível para todos os membros da equipe
+- **Interface**: Aparece na aba "Em Espera" com grupo correto
 
 ## Exemplos de Uso da IA
 
@@ -705,6 +886,9 @@ IA: "Encontrei seu cadastro!
 - **Isolamento de Dados**: Segurança total entre provedores
 - **Automação Celery**: Tarefas programadas para CSAT
 - **Interface Otimizada**: Componentes sem emojis e mais profissional
+- **Transferência para Equipes**: Novo endpoint `/transfer_to_team/` para transferência correta
+- **Classificação de Conversas**: Lógica aprimorada para abas (Com IA, Em Espera, Em Atendimento)
+- **Sistema de Equipes**: Conversas transferidas ficam visíveis para toda a equipe
 
 ### v2.0.0 (Dezembro 2024) - IA Inteligente + SGP
 - **Integração ChatGPT**: IA conversacional avançada
@@ -730,5 +914,6 @@ IA: "Encontrei seu cadastro!
 - Sistema de permissões granulares
 - Configurações de provedores
 - Webhooks configuráveis
+
 
 

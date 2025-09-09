@@ -110,18 +110,18 @@ export default function ConversasDashboard() {
 
   // Funções auxiliares para filtrar conversas (sem sobreposição)
   const isComIA = (conv) => {
-    // Apenas conversas com status 'snoozed' (Com IA)
-    return conv.status === 'snoozed';
+    // Conversas NÃO atribuídas a um agente e SEM equipe (automatização/IA)
+    return !conv.assignee && conv.status === 'snoozed' && !conv.additional_attributes?.assigned_team;
   };
 
   const isEmEspera = (conv) => {
-    // Conversas com status 'pending' (Em Espera) - incluindo sem atendente
-    return conv.status === 'pending';
+    // Conversas com status 'pending' OU transferidas para equipe (sem atendente individual)
+    return conv.status === 'pending' || (!conv.assignee && conv.additional_attributes?.assigned_team);
   };
 
   const isEmAtendimento = (conv) => {
-    // Conversas com status 'open' (Em Atendimento)
-    return conv.status === 'open';
+    // Conversas com status 'open' E que têm atendente individual atribuído
+    return conv.status === 'open' && conv.assignee && !conv.additional_attributes?.assigned_team;
   };
 
   // Função para verificar autenticação (mesma lógica do ConversationList)
@@ -240,15 +240,53 @@ export default function ConversasDashboard() {
     }
   }, [modalMensagens, modalLoading]);
 
+  // Fechar menu quando clicar fora
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuOpenId && !event.target.closest('.menu-contextual') && !event.target.closest('button[data-menu-trigger]')) {
+        setMenuOpenId(null);
+      }
+    }
+    
+    if (menuOpenId) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [menuOpenId]);
+
   // Handlers do menu contextual
   function handleMenuOpen(conversaId, e) {
     e.stopPropagation();
     const btn = menuBtnRefs.current[conversaId];
     if (btn) {
       const rect = btn.getBoundingClientRect();
+      const menuWidth = 160;
+      const menuHeight = 140; // altura aproximada do menu com 4 itens
+      const windowHeight = window.innerHeight;
+      const windowWidth = window.innerWidth;
+      
+      // Posição vertical - preferir mostrar embaixo, mas se não couber, mostrar em cima
+      let top = rect.bottom + 4;
+      if (top + menuHeight > windowHeight - 20) {
+        top = rect.top - menuHeight - 4;
+        // Se ainda não couber em cima, centralizar próximo ao botão
+        if (top < 20) {
+          top = rect.top + (rect.height / 2) - (menuHeight / 2);
+        }
+      }
+      
+      // Posição horizontal - preferir à esquerda do botão (alinhado pela direita)
+      let left = rect.right - menuWidth;
+      if (left < 20) {
+        left = rect.left; // se não couber, alinhar pela esquerda do botão
+        if (left + menuWidth > windowWidth - 20) {
+          left = windowWidth - menuWidth - 20; // último recurso: colar na direita da tela
+        }
+      }
+      
       setMenuPosition({
-        top: rect.bottom + window.scrollY + 4,
-        left: rect.right + window.scrollX - 160
+        top: Math.max(20, Math.min(top, windowHeight - menuHeight - 20)),
+        left: Math.max(20, Math.min(left, windowWidth - menuWidth - 20))
       });
     }
     setMenuOpenId(conversaId);
@@ -351,12 +389,27 @@ export default function ConversasDashboard() {
         setConversas(conversasData);
         console.log('Conversas carregadas da API:', conversasData);
         
-        // Usar as funções de filtro para contagem consistente
-        const ia = conversasData.filter(isComIA).length;
-        const fila = conversasData.filter(isEmEspera).length;
-        const atendimento = conversasData.filter(isEmAtendimento).length;
+        // Aplicar permissões do usuário para filtrar conversas
+        const userPermissions = user?.permissions || [];
+        let filteredConversas = conversasData;
         
-        console.log('Contagem de conversas:', { ia, fila, atendimento });
+        // Se não tem permissão 'view_ai_conversations', filtrar conversas com IA
+        if (!userPermissions.includes('view_ai_conversations')) {
+          filteredConversas = filteredConversas.filter(conv => !isComIA(conv));
+        }
+        
+        // Se não tem permissão 'view_team_unassigned', filtrar conversas não atribuídas
+        if (!userPermissions.includes('view_team_unassigned')) {
+          filteredConversas = filteredConversas.filter(conv => !isEmEspera(conv));
+        }
+        
+        // Usar as funções de filtro para contagem consistente (após aplicar permissões)
+        const ia = filteredConversas.filter(isComIA).length;
+        const fila = filteredConversas.filter(isEmEspera).length;
+        const atendimento = filteredConversas.filter(isEmAtendimento).length;
+        
+        console.log('Contagem de conversas (com permissões):', { ia, fila, atendimento });
+        console.log('Permissões do usuário:', userPermissions);
         setCounts({ ia, fila, atendimento });
       } catch (e) {
         console.error('Erro ao carregar conversas:', e);
@@ -462,6 +515,32 @@ export default function ConversasDashboard() {
     };
   }, [authReady]);
 
+  // CORREÇÃO: Listener para atualização de permissões do usuário atual
+  useEffect(() => {
+    const handlePermissionsUpdate = (event) => {
+      console.log('🔄 ConversasDashboard: Permissões do usuário atualizadas:', event.detail.permissions);
+      
+      // Atualizar o usuário local com as novas permissões
+      setUser(prevUser => ({
+        ...prevUser,
+        permissions: event.detail.permissions
+      }));
+      
+      // Recarregar contagens para aplicar as novas permissões
+      setTimeout(() => {
+        if (authReady && hasInitialized) {
+          fetchCounts();
+        }
+      }, 500);
+    };
+
+    window.addEventListener('userPermissionsUpdated', handlePermissionsUpdate);
+    
+    return () => {
+      window.removeEventListener('userPermissionsUpdated', handlePermissionsUpdate);
+    };
+  }, [authReady, hasInitialized]);
+
   // Buscar usuários do provedor ao abrir modal de transferência
   useEffect(() => {
     if (modalTransferir) {
@@ -474,7 +553,7 @@ export default function ConversasDashboard() {
           
           // Conectar ao WebSocket para atualizações de status em tempo real
           const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-          const wsUrl = `${wsProtocol}://${window.location.hostname}:810/ws/user_status/`;
+          const wsUrl = `${wsProtocol}://${window.location.hostname}:8010/ws/user_status/?token=${token}`;
           const statusWs = new WebSocket(wsUrl);
           
           statusWs.onmessage = (event) => {
@@ -525,31 +604,23 @@ export default function ConversasDashboard() {
     
     const token = localStorage.getItem('token');
     try {
-      // Para transferir para equipe, vamos transferir para o primeiro membro da equipe
-      if (equipe.members && equipe.members.length > 0) {
-        const primeiroMembro = equipe.members[0];
-        if (!primeiroMembro.user) {
-          alert('Erro: Membro da equipe sem usuário válido.');
-          return;
-        }
-        const response = await axios.post(`/api/conversations/${modalTransferirEquipe.id}/transfer/`, {
-          user_id: primeiroMembro.user.id
-        }, {
-          headers: { Authorization: `Token ${token}` }
-        });
-        
-        console.log('Transferência para equipe realizada:', response.data);
-        setModalTransferirEquipe(null);
-        setEquipesTransferir([]);
-        
-        alert('Transferido para equipe com sucesso!');
-        // Recarregar conversas
-        window.location.reload();
-      } else {
-        alert('Esta equipe não possui membros para receber a conversa.');
-      }
+      // Usar novo endpoint específico para transferência de equipes
+      const response = await axios.post(`/api/conversations/${modalTransferirEquipe.id}/transfer_to_team/`, {
+        team_id: equipe.id,
+        team_name: equipe.name
+      }, {
+        headers: { Authorization: `Token ${token}` }
+      });
+      
+      console.log('✅ Transferência para equipe realizada:', response.data);
+      setModalTransferirEquipe(null);
+      setEquipesTransferir([]);
+      
+      alert(`Transferido para equipe "${equipe.name}" com sucesso! Agora está visível para todos os membros da equipe.`);
+      // Recarregar conversas
+      window.location.reload();
     } catch (error) {
-      console.error('Erro ao transferir para equipe:', error);
+      console.error('❌ Erro ao transferir para equipe:', error);
       alert('Erro ao transferir conversa para equipe. Tente novamente.');
     }
   }
@@ -564,9 +635,14 @@ export default function ConversasDashboard() {
 
   // Função para pegar nome do atendente
   function getAtendente(conversa) {
-    // Se tem atendente, mostrar nome
+    // Se tem atendente individual, mostrar nome
     if (conversa.assignee) {
-    return conversa.assignee.first_name || conversa.assignee.username || 'Atendente';
+      return conversa.assignee.first_name || conversa.assignee.username || 'Atendente';
+    }
+    
+    // Se transferido para equipe (sem atendente individual), NÃO mostrar no campo atendente
+    if (conversa.additional_attributes?.assigned_team) {
+      return ''; // Campo atendente vazio quando transferido para equipe
     }
     
     // Se não tem atendente mas está "Com IA", mostrar "IA"
@@ -574,40 +650,35 @@ export default function ConversasDashboard() {
       return 'IA';
     }
     
-    // Se não tem atendente e está em espera/atendimento: deixar vazio
+    // Se não tem atendente e está em espera: deixar vazio
     return '';
   }
 
   // Função para pegar equipe
   function getEquipe(conversa) {
-    // DEBUG: Log para verificar dados
-    console.log('# Debug logging removed for security getEquipe DEBUG:', {
+    // Debug: sempre mostrar os dados para investigar
+    console.log('🔍 DEBUG getEquipe:', {
       id: conversa.id,
+      status: conversa.status,
+      assignee: conversa.assignee?.first_name,
       additional_attributes: conversa.additional_attributes,
-      assigned_team: conversa.additional_attributes?.assigned_team,
-      assignee: conversa.assignee
+      assigned_team: conversa.additional_attributes?.assigned_team
     });
     
     // Primeiro, verificar se há informação da equipe específica da transferência
     if (conversa.additional_attributes?.assigned_team?.name) {
-      console.log('# Debug logging removed for security Usando assigned_team:', conversa.additional_attributes.assigned_team.name);
+      console.log('✅ Retornando equipe do assigned_team:', conversa.additional_attributes.assigned_team.name);
       return conversa.additional_attributes.assigned_team.name;
     }
     
     // Se tem assignee, tentar obter da equipe do usuário
     if (conversa.assignee?.team?.name) {
-      console.log('# Debug logging removed for security Usando assignee.team:', conversa.assignee.team.name);
+      console.log('✅ Retornando equipe do assignee:', conversa.assignee.team.name);
       return conversa.assignee.team.name;
     }
     
-    // Fallback padrão
-    if (conversa.assignee) {
-      console.log('# Debug logging removed for security Usando fallback ATENDIMENTO');
-      return 'ATENDIMENTO';
-    }
-    
-    console.log('# Debug logging removed for security Retornando vazio');
-    return '';
+    console.log('❌ Nenhuma equipe encontrada, retornando string vazia');
+    return ''; // Não usar mais fallback fixo
   }
 
   // Função para formatar número do contato
@@ -643,7 +714,19 @@ export default function ConversasDashboard() {
   }
 
   // Função para pegar status traduzido
-  function getStatusText(status) {
+  function getStatusText(status, conv = null) {
+    // Se temos a conversa, usar lógica baseada na atribuição
+    if (conv) {
+      if (conv.assignee) {
+        return 'Em Atendimento';
+      } else if (status === 'snoozed') {
+        return 'Com IA';
+      } else if (status === 'pending') {
+        return 'Em Espera';
+      }
+    }
+    
+    // Fallback para status padrão
     switch (status) {
       case 'snoozed': return 'Em Espera';
       case 'open': return 'Em Atendimento';
@@ -652,6 +735,8 @@ export default function ConversasDashboard() {
       default: return status;
     }
   }
+
+
 
   // Função para pegar cor do status
   function getStatusColor(status) {
@@ -828,8 +913,8 @@ export default function ConversasDashboard() {
                           <div className="space-y-1 text-xs text-muted-foreground mt-2">
                             <div><strong>Contato:</strong> {formatPhone(conv.contact?.phone)}</div>
                             <div><strong>Atendente:</strong> {getAtendente(conv)}</div>
-                            <div><strong>Grupo:</strong> {getEquipe(conv) || 'ATENDIMENTO'}</div>
-                            <div><strong>Status:</strong> {getStatusText(conv.status)}</div>
+                            <div><strong>Grupo:</strong> {getEquipe(conv) || '-'}</div>
+                            <div><strong>Status:</strong> {getStatusText(conv.status, conv)}</div>
                             <div><strong>Canal:</strong> {getChannelDisplayName(conv.inbox)}</div>
                           </div>
                         </div>
@@ -838,13 +923,14 @@ export default function ConversasDashboard() {
                         ref={el => (menuBtnRefs.current[conv.id] = el)}
                         className="absolute bottom-2 right-2 p-1 text-muted-foreground hover:text-card-foreground"
                         onClick={e => handleMenuOpen(conv.id, e)}
+                        data-menu-trigger
                       >
                         <MoreVertical className="w-3 h-3" />
                       </button>
                       {/* Menu contextual */}
                       {menuOpenId === conv.id && (
                         <div
-                          className="bg-card border border-border rounded shadow-lg z-[9999] min-w-[160px] flex flex-col w-max fixed"
+                          className="menu-contextual bg-card border border-border rounded shadow-lg z-[9999] min-w-[160px] flex flex-col w-max fixed"
                           style={{ top: menuPosition.top, left: menuPosition.left }}
                         >
                           <button className="flex items-center gap-2 w-full px-4 py-2 text-left hover:bg-muted" onClick={(e) => { e.stopPropagation(); handleMenuClose(); handleAbrir(conv); }}>
@@ -892,23 +978,24 @@ export default function ConversasDashboard() {
                           <div className="space-y-1 text-xs text-muted-foreground mt-2">
                             <div><strong>Contato:</strong> {formatPhone(conv.contact?.phone)}</div>
                             <div><strong>Atendente:</strong> {getAtendente(conv)}</div>
-                            <div><strong>Grupo:</strong> {getEquipe(conv) || 'ATENDIMENTO'}</div>
-                            <div><strong>Status:</strong> {getStatusText(conv.status)}</div>
+                            <div><strong>Grupo:</strong> {getEquipe(conv) || '-'}</div>
+                            <div><strong>Status:</strong> {getStatusText(conv.status, conv)}</div>
                             <div><strong>Canal:</strong> {getChannelDisplayName(conv.inbox)}</div>
                           </div>
                         </div>
                       </div>
-                      <button 
+                      <button
                         ref={el => (menuBtnRefs.current[conv.id] = el)}
                         className="absolute bottom-2 right-2 p-1 text-muted-foreground hover:text-card-foreground"
                         onClick={e => handleMenuOpen(conv.id, e)}
+                        data-menu-trigger
                       >
                         <MoreVertical className="w-3 h-3" />
                       </button>
                       {/* Menu contextual */}
                       {menuOpenId === conv.id && (
                         <div
-                          className="bg-card border border-border rounded shadow-lg z-[9999] min-w-[160px] flex flex-col w-max fixed"
+                          className="menu-contextual bg-card border border-border rounded shadow-lg z-[9999] min-w-[160px] flex flex-col w-max fixed"
                           style={{ top: menuPosition.top, left: menuPosition.left }}
                         >
                           <button className="flex items-center gap-2 w-full px-4 py-2 text-left hover:bg-muted" onClick={(e) => { e.stopPropagation(); handleMenuClose(); handleAbrir(conv); }}>
@@ -922,7 +1009,7 @@ export default function ConversasDashboard() {
                           </button>
                           <button className="flex items-center gap-2 w-full px-4 py-2 text-left hover:bg-muted text-red-600" onClick={(e) => { e.stopPropagation(); handleMenuClose(); handleEncerrar(conv); }}>
                             <X className="w-4 h-4" /> <span>Encerrar</span>
-                      </button>
+                          </button>
                         </div>
                       )}
                     </div>
@@ -956,8 +1043,8 @@ export default function ConversasDashboard() {
                           <div className="space-y-1 text-xs text-muted-foreground mt-2">
                             <div><strong>Contato:</strong> {formatPhone(conv.contact?.phone)}</div>
                             <div><strong>Atendente:</strong> {getAtendente(conv)}</div>
-                            <div><strong>Grupo:</strong> {getEquipe(conv) || 'ATENDIMENTO'}</div>
-                            <div><strong>Status:</strong> {getStatusText(conv.status)}</div>
+                            <div><strong>Grupo:</strong> {getEquipe(conv) || '-'}</div>
+                            <div><strong>Status:</strong> {getStatusText(conv.status, conv)}</div>
                             <div><strong>Canal:</strong> {getChannelDisplayName(conv.inbox)}</div>
                           </div>
                         </div>
@@ -966,13 +1053,14 @@ export default function ConversasDashboard() {
                         ref={el => (menuBtnRefs.current[conv.id] = el)}
                         className="absolute bottom-2 right-2 p-1 text-muted-foreground hover:text-card-foreground"
                         onClick={e => handleMenuOpen(conv.id, e)}
+                        data-menu-trigger
                       >
                         <MoreVertical className="w-3 h-3" />
                       </button>
                       {/* Menu contextual */}
                       {menuOpenId === conv.id && (
                         <div
-                          className="bg-card border border-border rounded shadow-lg z-[9999] min-w-[160px] flex flex-col w-max fixed"
+                          className="menu-contextual bg-card border border-border rounded shadow-lg z-[9999] min-w-[160px] flex flex-col w-max fixed"
                           style={{ top: menuPosition.top, left: menuPosition.left }}
                         >
                           <button className="flex items-center gap-2 w-full px-4 py-2 text-left hover:bg-muted" onClick={(e) => { e.stopPropagation(); handleMenuClose(); handleAbrir(conv); }}>
@@ -986,7 +1074,7 @@ export default function ConversasDashboard() {
                           </button>
                           <button className="flex items-center gap-2 w-full px-4 py-2 text-left hover:bg-muted text-red-600" onClick={(e) => { e.stopPropagation(); handleMenuClose(); handleEncerrar(conv); }}>
                             <X className="w-4 h-4" /> <span>Encerrar</span>
-                      </button>
+                          </button>
                         </div>
                       )}
                     </div>
@@ -1049,7 +1137,7 @@ export default function ConversasDashboard() {
                     <div className="flex-1">
                       <div className="text-lg font-semibold text-foreground">{modalConversa?.contact?.name || 'Contato'}</div>
                       <div className="text-sm text-muted-foreground">
-                        {formatPhone(modalConversa?.contact?.phone)} • {getChannelDisplayName(modalConversa?.inbox)} • {getStatusText(modalConversa?.status)}
+                        {formatPhone(modalConversa?.contact?.phone)} • {getChannelDisplayName(modalConversa?.inbox)} • {getStatusText(modalConversa?.status, modalConversa)}
                       </div>
                       {/* # Debug logging removed for security Tempo de atendimento em aberto */}
                       <div className="text-xs text-white bg-gray-600 px-2 py-1 rounded-full mt-1 inline-block">

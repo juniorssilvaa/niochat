@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Input } from './ui/input';
+import useOnlineUsers from '../hooks/useOnlineUsers';
+import { NotificationContext } from '../contexts/NotificationContext';
 import { 
   MessageCircle, 
+  MessageSquare,
   Search, 
   Users, 
   Settings,
@@ -16,9 +19,7 @@ import {
   MoreVertical
 } from 'lucide-react';
 import PrivateChatSidebar from './PrivateChatSidebar';
-import useOnlineUsers from '../hooks/useOnlineUsers';
 import axios from 'axios';
-import { useNotifications } from '../contexts/NotificationContext';
 
 const InternalChatButton = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,16 +27,16 @@ const InternalChatButton = () => {
   const [chatRooms, setChatRooms] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
+  
   const [selectedUser, setSelectedUser] = useState(null);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [unreadByUser, setUnreadByUser] = useState({}); // Mensagens não lidas por usuário
   const [currentUser, setCurrentUser] = useState(null);
   
   // Hook para usuários online
   const { isUserOnline, getOnlineCount } = useOnlineUsers();
   
-  // Hook para notificações
-  const { unreadMessagesByUser } = useNotifications();
+  // Hook para notificações - usar contexto diretamente
+  const notificationContext = useContext(NotificationContext);
+  const { unreadCount, unreadMessagesByUser, internalChatUnreadCount, internalChatUnreadByUser } = notificationContext;
   
   // Usar URL relativa (será resolvida pelo proxy do Vite)
   const API_BASE = '/api';
@@ -46,7 +47,6 @@ const InternalChatButton = () => {
     if (isOpen) {
       loadUsers();
       loadCurrentUser();
-      loadUnreadCounts();
     }
   }, [isOpen]);
   
@@ -70,16 +70,12 @@ const InternalChatButton = () => {
         return;
       }
       
-      console.log('[DEBUG InternalChat] Fazendo requisição para /users-list/');
-      
-      // Buscar usuários do mesmo provedor (usando endpoint específico para chat interno)
-      const response = await axios.get(`${API_BASE}/users-list/`, {
+      // Buscar usuários do mesmo provedor (usando endpoint correto)
+      const response = await axios.get(`${API_BASE}/users/my_provider_users/`, {
         headers: { Authorization: `Token ${token}` }
       });
-      
-      console.log('[DEBUG InternalChat] Usuários recebidos:', response.data);
-      // A API /users-list/ retorna array direto
-      const usersData = response.data || [];
+      // A API /users/my_provider_users/ retorna objeto com chave 'users'
+      const usersData = response.data.users || [];
       setUsers(usersData);
     } catch (error) {
       console.error('Erro ao carregar usuários:', error);
@@ -164,25 +160,10 @@ const InternalChatButton = () => {
   
   const filteredUsers = users; // Sem filtro de busca por enquanto
   
-  // Debug: verificar estado dos usuários
-  console.log('[DEBUG InternalChat] Estado atual:', {
-    users: users,
-    usersLength: users.length,
-    currentUser: currentUser,
-    filteredUsers: filteredUsers
-  });
-  
   // Separar usuários online e offline (excluindo usuário atual)
   const otherUsers = filteredUsers.filter(user => user.id !== currentUser?.id);
   const onlineUsersList = otherUsers.filter(user => isUserOnline(user.id));
   const offlineUsersList = otherUsers.filter(user => !isUserOnline(user.id));
-  
-  console.log('[DEBUG InternalChat] Usuários processados:', {
-    otherUsers: otherUsers,
-    otherUsersLength: otherUsers.length,
-    onlineUsersList: onlineUsersList,
-    offlineUsersList: offlineUsersList
-  });
   
   // Função para abrir chat privado
   const openPrivateChat = (user) => {
@@ -202,12 +183,12 @@ const InternalChatButton = () => {
             title="Chat Interno"
           >
             <MessageCircle className="w-5 h-5" />
-            {unreadCount > 0 && (
+            {internalChatUnreadCount > 0 && (
               <Badge 
                 variant="destructive" 
                 className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0 text-xs flex items-center justify-center"
               >
-                {unreadCount > 9 ? '9+' : unreadCount}
+                {internalChatUnreadCount > 9 ? '9+' : internalChatUnreadCount}
               </Badge>
             )}
           </button>
@@ -276,13 +257,23 @@ const InternalChatButton = () => {
                             <Crown className="h-3 w-3 text-yellow-500" />
                           )}
                           
-                          {/* Badge de mensagens não lidas */}
+                          {/* Badge de mensagens não lidas do chat privado */}
                           {unreadMessagesByUser[user.id] && unreadMessagesByUser[user.id] > 0 && (
                             <Badge 
                               variant="destructive" 
                               className="h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
                             >
                               {unreadMessagesByUser[user.id] > 9 ? '9+' : unreadMessagesByUser[user.id]}
+                            </Badge>
+                          )}
+                          
+                          {/* Badge de mensagens não lidas do chat interno */}
+                          {internalChatUnreadByUser[user.id] && internalChatUnreadByUser[user.id] > 0 && (
+                            <Badge 
+                              variant="secondary" 
+                              className="h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center bg-blue-600 text-white"
+                            >
+                              {internalChatUnreadByUser[user.id] > 9 ? '9+' : internalChatUnreadByUser[user.id]}
                             </Badge>
                           )}
                         </div>

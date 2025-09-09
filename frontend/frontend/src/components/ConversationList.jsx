@@ -20,8 +20,13 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
   const [hasInitialized, setHasInitialized] = useState(false);
   const [wsConnected, setWsConnected] = useState(false);
   const [newMessageNotification, setNewMessageNotification] = useState(false);
+  const faviconTimerRef = useRef(null);
+  const isFaviconBlinkingRef = useRef(false);
   const [lastUpdateTime, setLastUpdateTime] = useState(null);
   const [authReady, setAuthReady] = useState(false);
+  const audioRef = useRef(null);
+  const prevConversationsRef = useRef({}); // { [id]: lastMessageIdOrTime }
+  const hasSoundInitRef = useRef(false);
   
   // # Debug logging removed for security Estados para novo atendimento
   const [showMenuAtendimento, setShowMenuAtendimento] = useState(false);
@@ -69,6 +74,9 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
     }
   };
 
+  // Removido prompt de desbloqueio (UX simplificada)
+  useEffect(() => {}, [authReady, user?.sound_notifications_enabled]);
+
   // # Debug logging removed for security Função para criar atendimento com novo contato
   const handleNovoContato = async () => {
     if (!novoContato.nome || !novoContato.telefone || !novoContato.mensagem) {
@@ -91,12 +99,55 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
         headers: { Authorization: `Token ${token}` }
       });
       
-      const response = await axios.post('/api/messages/create_manual_conversation/', {
-        contact_name: novoContato.nome,
-        phone: telefoneFormatado,
-        message: novoContato.mensagem,
+      // 1. Criar ou buscar contato
+      let contactResponse;
+      try {
+        contactResponse = await axios.post('/api/contacts/', {
+          name: novoContato.nome,
+          phone: telefoneFormatado,
+          provedor: 2
+        }, {
+          headers: { Authorization: `Token ${token}` }
+        });
+      } catch (error) {
+        if (error.response?.status === 400 && error.response?.data?.non_field_errors?.[0]?.includes('único')) {
+          // Contato já existe, buscar o existente
+          const contactsResponse = await axios.get(`/api/contacts/?phone=${telefoneFormatado}`, {
+            headers: { Authorization: `Token ${token}` }
+          });
+          contactResponse = { data: contactsResponse.data.results[0] };
+        } else {
+          throw error;
+        }
+      }
+
+      // 2. Buscar inbox padrão para o canal
+      const inboxesResponse = await axios.get('/api/inboxes/', {
+        headers: { Authorization: `Token ${token}` }
+      });
+      
+      const inbox = inboxesResponse.data.results.find(
+        inbox => inbox.channel_type === novoContato.canal
+      ) || inboxesResponse.data.results[0];
+
+      if (!inbox) {
+        throw new Error('Nenhum inbox encontrado');
+      }
+
+      // 3. Criar conversa
+      const conversationResponse = await axios.post('/api/conversations/', {
+        contact_id: contactResponse.data.id,
+        inbox_id: inbox.id,
         assignee_id: userResponse.data.id,
-        channel_type: novoContato.canal
+        status: 'open'
+      }, {
+        headers: { Authorization: `Token ${token}` }
+      });
+
+      // 4. Enviar mensagem inicial
+      const messageResponse = await axios.post('/api/messages/send_text/', {
+        content: novoContato.mensagem,
+        conversation_id: conversationResponse.data.id
       }, {
         headers: { Authorization: `Token ${token}` }
       });
@@ -132,12 +183,33 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
         headers: { Authorization: `Token ${token}` }
       });
       
-      const response = await axios.post('/api/messages/create_manual_conversation/', {
-        contact_name: contatoExistente.contato.name,
-        phone: contatoExistente.contato.phone,
-        message: contatoExistente.mensagem,
+      // 1. Buscar inbox padrão
+      const inboxesResponse = await axios.get('/api/inboxes/', {
+        headers: { Authorization: `Token ${token}` }
+      });
+      
+      const inbox = inboxesResponse.data.results.find(
+        inbox => inbox.channel_type === 'whatsapp'
+      ) || inboxesResponse.data.results[0];
+
+      if (!inbox) {
+        throw new Error('Nenhum inbox encontrado');
+      }
+
+      // 2. Criar conversa
+      const conversationResponse = await axios.post('/api/conversations/', {
+        contact_id: contatoExistente.contato.id,
+        inbox_id: inbox.id,
         assignee_id: userResponse.data.id,
-        channel_type: 'whatsapp'
+        status: 'open'
+      }, {
+        headers: { Authorization: `Token ${token}` }
+      });
+
+      // 3. Enviar mensagem inicial
+      const messageResponse = await axios.post('/api/messages/send_text/', {
+        content: contatoExistente.mensagem,
+        conversation_id: conversationResponse.data.id
       }, {
         headers: { Authorization: `Token ${token}` }
       });
@@ -284,6 +356,98 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
     return false;
   };
 
+  // Preferências de som
+  const isSoundEnabled = () => {
+    if (typeof user?.sound_notifications_enabled === 'boolean') return user.sound_notifications_enabled;
+    return localStorage.getItem('sound_notifications_enabled') === 'true';
+  };
+  const getNewMessageSound = () => {
+    return user?.new_message_sound || localStorage.getItem('sound_new_message') || 'mixkit-bell-notification-933.wav';
+  };
+  const getNewConversationSound = () => {
+    return user?.new_conversation_sound || localStorage.getItem('sound_new_conversation') || 'mixkit-digital-quick-tone-2866.wav';
+  };
+  const playSound = (fileName) => {
+    if (!isSoundEnabled()) return;
+    try {
+      const src = `/sounds/${fileName}`;
+      if (!audioRef.current) {
+        audioRef.current = new Audio(src);
+      } else {
+        audioRef.current.pause();
+        audioRef.current.src = src;
+      }
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {
+        // Autoplay bloqueado: solicitar interação do usuário
+        setShowSoundPrompt(true);
+      });
+    } catch (e) {
+      // Silenciar erros de autoplay
+    }
+  };
+
+  const setFavicon = (hrefBase) => {
+    try {
+      const href = `${hrefBase}?v=${Date.now()}`; // cache-busting
+      const links = Array.from(document.querySelectorAll("link[rel~='icon']"));
+      if (links.length > 0) {
+        links.forEach(l => { l.href = href; });
+      } else {
+        // Criar tanto 'icon' quanto 'shortcut icon' para compatibilidade
+        const link1 = document.createElement('link');
+        link1.rel = 'icon';
+        link1.type = 'image/x-icon';
+        link1.href = href;
+        document.head.appendChild(link1);
+        const link2 = document.createElement('link');
+        link2.rel = 'shortcut icon';
+        link2.type = 'image/x-icon';
+        link2.href = href;
+        document.head.appendChild(link2);
+      }
+    } catch (_) {}
+  };
+
+  const startBlinkingFavicon = () => {
+    if (isFaviconBlinkingRef.current) return;
+    isFaviconBlinkingRef.current = true;
+    const defaultIcon = '/favicon.ico';
+    const notifyIcon = '/faviconnotifica.ico';
+    let toggle = false;
+    faviconTimerRef.current = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        // parar quando a aba estiver ativa
+        stopBlinkingFavicon();
+        return;
+      }
+      toggle = !toggle;
+      setFavicon(toggle ? notifyIcon : defaultIcon);
+    }, 800);
+  };
+
+  const stopBlinkingFavicon = () => {
+    if (faviconTimerRef.current) {
+      clearInterval(faviconTimerRef.current);
+      faviconTimerRef.current = null;
+    }
+    isFaviconBlinkingRef.current = false;
+    setFavicon('/favicon.ico');
+  };
+
+  const unlockAudio = () => {
+    try {
+      const src = `/sounds/${getNewMessageSound()}`;
+      if (!audioRef.current) {
+        audioRef.current = new Audio(src);
+      }
+      audioRef.current.currentTime = 0;
+      audioRef.current.play()
+        .then(() => setShowSoundPrompt(false))
+        .catch(() => setShowSoundPrompt(true));
+    } catch (_) {}
+  };
+
   // Função para buscar conversas
   const fetchConversations = async (forceRefresh = false) => {
     if (!isMounted.current || !authReady) {
@@ -306,13 +470,13 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
       }
 
       // Buscar conversas sem filtro de provedor primeiro
-      const res = await axios.get('/api/conversations/', {
+      const res = await axios.get('/api/conversations/?page_size=100&ordering=-created_at', {
         headers: { Authorization: `Token ${token}` }
       });
       
       if (!isMounted.current) return;
 
-      const conversationsData = res.data.results || res.data;
+      const conversationsData = res.data.results || res.data || [];
       
       // Filtrar conversas ativas (incluir mais status)
       const activeConversations = conversationsData.filter(conv => {
@@ -322,8 +486,38 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
         return !closedStatuses.includes(status);
       });
       
+      // Detectar novas conversas e novas mensagens (fallback quando WS não tocar)
+      try {
+        const prevMap = prevConversationsRef.current || {};
+        const nextMap = {};
+        const seenIds = new Set();
+
+        activeConversations.forEach(conv => {
+          const convId = conv.id;
+          const lastMsgKey = conv.last_message?.id || conv.last_message?.created_at || conv.updated_at || conv.created_at || 'none';
+          nextMap[convId] = lastMsgKey;
+          seenIds.add(convId);
+
+          if (hasSoundInitRef.current) {
+            if (!(convId in prevMap)) {
+              // Nova conversa
+              playSound(getNewConversationSound());
+            } else if (prevMap[convId] !== lastMsgKey) {
+              // Nova mensagem
+              playSound(getNewMessageSound());
+            }
+          }
+        });
+
+        // Atualizar referência para próxima comparação
+        prevConversationsRef.current = nextMap;
+        if (!hasSoundInitRef.current) {
+          hasSoundInitRef.current = true; // evitar tocar tudo na primeira carga
+        }
+      } catch (_) {}
+
       console.log('# Debug logging removed for security Conversas ativas encontradas:', activeConversations.length);
-      
+
       setConversations(activeConversations);
       setHasInitialized(true);
       setLastUpdateTime(new Date());
@@ -392,8 +586,9 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
     console.log('# Debug logging removed for security Conectando WebSocket para provedor:', provedorId);
     
     const connectWebSocket = () => {
+      const token = localStorage.getItem('token');
       const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      const ws = new WebSocket(`${wsProtocol}://${window.location.host}/ws/painel/${provedorId}/`);
+      const ws = new WebSocket(`${wsProtocol}://${window.location.host}/ws/painel/${provedorId}/?token=${token}`);
       wsRef.current = ws;
       
       const wsTimeout = setTimeout(() => {
@@ -415,18 +610,44 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
           // Processar todos os tipos de eventos relacionados a conversas
           if (data.type === 'conversation_created' || 
               data.type === 'conversation_updated' || 
+              data.type === 'conversation_event' ||
               data.type === 'new_message' ||
               data.type === 'message_created' ||
-              data.type === 'conversation_event' ||
+              data.type === 'message' ||
+              data.type === 'chat_message' ||
+              data.type === 'messages' ||
               data.event_type === 'new_message' ||
-              data.event_type === 'conversation_updated') {
+              data.event_type === 'conversation_updated' ||
+              data.event_type === 'message' ||
+              data.event_type === 'chat_message' ||
+              data.event_type === 'messages') {
+            // Tocar som e piscar favicon conforme o tipo de evento
+            try {
+              const evt = data.type || data.event_type;
+              if (evt === 'new_message' || evt === 'message_created' || evt === 'message' || evt === 'chat_message' || evt === 'messages') {
+                playSound(getNewMessageSound());
+                startBlinkingFavicon();
+              } else if (evt === 'conversation_created' || evt === 'conversation_updated' || evt === 'conversation_event') {
+                const conv = data.conversation || data.payload || data.data;
+                const status = conv?.status || conv?.additional_attributes?.status;
+                const assignedToMe = conv?.assignee && user && (
+                  (conv.assignee.id && conv.assignee.id === user.id) ||
+                  (conv.assignee.username && conv.assignee.username === user.username)
+                );
+                const isUnassignedPending = !conv?.assignee && status === 'pending';
+                if (!conv || assignedToMe || isUnassignedPending) {
+                  playSound(getNewConversationSound());
+                  startBlinkingFavicon();
+                }
+              }
+            } catch (_) {}
             
             console.log('# Debug logging removed for security Atualização recebida via WebSocket, recarregando lista');
             setNewMessageNotification(true);
             setTimeout(() => setNewMessageNotification(false), 3000);
             
             // Recarregar conversas imediatamente
-            setTimeout(() => fetchConversations(true), 100);
+            setTimeout(() => fetchConversations(true), 0);
           }
         } catch (error) {
           console.error('# Debug logging removed for security Erro ao processar mensagem WebSocket:', error);
@@ -461,7 +682,21 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
     };
   }, [provedorId, authReady]);
 
-  // Polling mínimo como backup
+  // Parar piscar quando a aba ficar visível
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        stopBlinkingFavicon();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      stopBlinkingFavicon();
+    };
+  }, []);
+
+  // Polling como backup (mais frequente para reduzir latência)
   useEffect(() => {
     if (!authReady) return;
     
@@ -469,10 +704,31 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
       if (isMounted.current) {
         fetchConversations(false); // false = não mostrar loading
       }
-    }, 15000); // 15 segundos como backup
+    }, 3000); // 3 segundos para maior instantaneidade
     
     return () => clearInterval(interval);
   }, [authReady]);
+
+  // CORREÇÃO: Listener para atualização de permissões do usuário atual
+  useEffect(() => {
+    const handlePermissionsUpdate = (event) => {
+      console.log('🔄 Permissões do usuário atualizadas:', event.detail.permissions);
+      setUserPermissions(event.detail.permissions);
+      
+      // Recarregar conversas para aplicar as novas permissões
+      setTimeout(() => {
+        if (isMounted.current) {
+          fetchConversations(true);
+        }
+      }, 500);
+    };
+
+    window.addEventListener('userPermissionsUpdated', handlePermissionsUpdate);
+    
+    return () => {
+      window.removeEventListener('userPermissionsUpdated', handlePermissionsUpdate);
+    };
+  }, []);
 
   // Definir abas baseado nas permissões
   const getAvailableTabs = () => {
@@ -482,18 +738,39 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
       return !closedStatuses.includes(status);
     });
 
-    return [
-      {
-        id: 'mine',
-        label: 'Minhas',
-        count: activeConversations.filter(c => c.assignee && c.assignee.id === user?.id).length
-      },
-      {
-        id: 'unassigned',
-        label: 'Não atribuídas',
-        count: activeConversations.filter(c => !c.assignee).length
-      }
-    ];
+    const tabs = [];
+
+    // Abas padrão - Minhas sempre primeiro
+    tabs.push({
+      id: 'mine',
+      label: 'Minhas',
+      count: activeConversations.filter(c => {
+        const a = c.assignee;
+        if (!a || !user) return false;
+        return (a.id && a.id === user.id) || (a.username && a.username === user.username);
+      }).length,
+    });
+
+    // Aba Não atribuídas - apenas conversas em espera (pending)
+    tabs.push({
+      id: 'unassigned',
+      label: 'Não atribuídas',
+      count: activeConversations.filter(c => !c.assignee && (c.status || c.additional_attributes?.status) === 'pending').length,
+    });
+
+    // Aba Com IA se o usuário tiver a permissão específica - depois de Não atribuídas
+    if (userPermissions.includes('view_ai_conversations')) {
+      tabs.push({
+        id: 'ai',
+        label: 'Com IA',
+        count: activeConversations.filter(c => {
+          const status = c.status || c.additional_attributes?.status;
+          return status === 'snoozed' && !c.assignee;
+        }).length,
+      });
+    }
+
+    return tabs;
   };
 
   const tabs = getAvailableTabs();
@@ -507,14 +784,29 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
     });
 
     // Filtrar por aba
-    if (activeTab === 'mine') {
-      filtered = filtered.filter(c => c.assignee && c.assignee.id === user?.id);
+    if (activeTab === 'ai') {
+      // Mostrar conversas com IA: status 'snoozed' e não atribuídas
+      filtered = filtered.filter(c => {
+        const status = c.status || c.additional_attributes?.status;
+        return status === 'snoozed' && !c.assignee;
+      });
+    } else if (activeTab === 'mine') {
+      // Sempre mostrar conversas atribuídas ao usuário atual
+      filtered = filtered.filter(c => {
+        const a = c.assignee;
+        if (!a || !user) return false;
+        return (a.id && a.id === user.id) || (a.username && a.username === user.username);
+      });
     } else if (activeTab === 'unassigned') {
-      filtered = filtered.filter(c => !c.assignee);
+      // Mostrar apenas conversas não atribuídas em espera (pending)
+      filtered = filtered.filter(c => {
+        const status = c.status || c.additional_attributes?.status;
+        return !c.assignee && status === 'pending';
+      });
     }
 
     // Filtrar por termo de busca
-    if (searchTerm.trim()) {
+    if (searchTerm && searchTerm.trim().length >= 2) {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(c => {
         const contactName = c.contact?.name || '';
@@ -528,7 +820,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
     }
 
     return filtered;
-  }, [conversations, activeTab, searchTerm, user?.id]);
+  }, [conversations, activeTab, searchTerm, user?.id, userPermissions]);
 
   return (
     <div className="w-80 border-r border-border bg-background">
@@ -552,6 +844,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
                 {wsConnected ? 'Online' : authReady ? 'Conectando...' : 'Offline'}
               </span>
             </div>
+            {/* Botão de ativar sons removido */}
             
             {/* Notificação de nova mensagem */}
             {newMessageNotification && (
@@ -625,6 +918,14 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
             onChange={(e) => setSearchTerm(e.target.value)}
             className="niochat-input pl-8 w-full text-sm"
           />
+          {searchTerm && (
+            <button
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => setSearchTerm('')}
+            >
+              Limpar
+            </button>
+          )}
         </div>
 
         {/* Tabs */}

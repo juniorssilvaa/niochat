@@ -27,8 +27,6 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         
         # Atualizar status online do usuário
         await self.update_user_online_status(True)
-        
-        print(f"[INFO] Usuário {self.user.username} conectado ao chat privado")
     
     async def disconnect(self, close_code):
         if hasattr(self, 'user_group_name'):
@@ -40,8 +38,6 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             
             # Atualizar status offline do usuário
             await self.update_user_online_status(False)
-            
-            print(f"[INFO] Usuário {self.user.username} desconectado do chat privado")
     
     async def receive(self, text_data):
         """
@@ -132,17 +128,12 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         """
         Nova mensagem privada recebida
         """
-        print(f"[DEBUG Consumer] new_private_message recebido para usuário {self.user.username}")
-        print(f"[DEBUG Consumer] Event data: {event}")
-        
         message_data = json.dumps({
             'type': 'new_private_message',
             'message': event['message']
         })
         
-        print(f"[DEBUG Consumer] Enviando mensagem: {message_data}")
         await self.send(text_data=message_data)
-        print(f"[DEBUG Consumer] Mensagem enviada com sucesso!")
     
     async def message_read(self, event):
         """
@@ -207,7 +198,6 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         # TODO: Implementar sistema de status online real
         # Por enquanto só logamos
         status = "online" if is_online else "offline"
-        print(f"[INFO] Status do usuário {self.user.username}: {status}")
     
     @database_sync_to_async
     def mark_message_read(self, message_id):
@@ -240,7 +230,6 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             for message in messages:
                 message.mark_as_read()
             
-            print(f"[INFO] Marcadas {messages.count()} mensagens como lidas")
             return True
         except Exception as e:
             print(f"[ERROR] Erro ao marcar mensagens como lidas: {e}")

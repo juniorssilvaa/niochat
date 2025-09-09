@@ -942,18 +942,8 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
     
     const token = localStorage.getItem('token');
     try {
-      // Primeiro, buscar o usuário atual
-      const userResponse = await axios.get('/api/auth/me/', {
-        headers: { Authorization: `Token ${token}` }
-      });
-      
-      const currentUser = userResponse.data;
-      console.log('Usuário atual:', currentUser);
-      
-      // Atualizar a conversa com o usuário atual como assignee
-      const response = await axios.patch(`/api/conversations/${conversation.id}/`, {
-        assignee: currentUser.id
-      }, {
+      // Usar o novo endpoint específico para atribuição
+      const response = await axios.post(`/api/conversations/${conversation.id}/assign/`, {}, {
         headers: { Authorization: `Token ${token}` }
       });
       
@@ -1019,12 +1009,12 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
     setLoadingAgents(true);
     
     try {
-      // Usar a mesma lógica do ConversasDashboard
-      const response = await axios.get('/api/users/?provedor=me', { 
+      // Usar o novo endpoint específico para usuários do provedor
+      const response = await axios.get('/api/users/my_provider_users/', { 
         headers: { Authorization: `Token ${token}` } 
       });
       
-      const agents = response.data.results || response.data;
+      const agents = response.data.users || [];
       console.log('Agentes encontrados:', agents);
       setAgents(agents);
       
@@ -1528,6 +1518,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
             const isCustomer = msg.is_from_customer;
           const isBot = !isCustomer && (msg.message_type === 'incoming' || msg.sender?.sender_type === 'bot');
           const isAgent = !isCustomer && !isBot;
+          const isSystemMessage = msg.additional_attributes?.system_message || msg.content?.includes('Conversa atribuída para');
           const isLarge = isLargeMessage(content);
           
           // Determinar se a mensagem tem mídia
@@ -1562,7 +1553,9 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                     ? 'bg-muted text-foreground' 
                     : isBot 
                       ? 'bg-blue-500 text-white'
-                      : 'bg-green-500 text-white'
+                      : isSystemMessage
+                        ? 'bg-cyan-500 text-white'
+                        : 'bg-green-500 text-white'
                   }
                   ${isLarge ? 'rounded-2xl' : 'rounded-2xl'}
                 `}>
@@ -1767,13 +1760,13 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                                 const btn = event.target;
                                 const originalText = btn.textContent;
                                 btn.textContent = '✅ Copiado!';
-                                btn.className = 'w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium';
+                                btn.className = 'w-full px-4 py-2 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-medium';
                                 setTimeout(() => {
                                   btn.textContent = originalText;
-                                  btn.className = 'w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium';
+                                  btn.className = 'w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-medium';
                                 }, 2000);
                               }}
-                              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                              className="w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-medium"
                             >
                               {nome}
                             </button>
@@ -1902,7 +1895,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
               <button
                 onClick={sendAudioMessage}
                 disabled={sendingMedia}
-                className="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 text-sm"
+                className="px-3 py-1 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 text-sm"
               >
                 {sendingMedia ? 'Enviando...' : 'Enviar'}
               </button>

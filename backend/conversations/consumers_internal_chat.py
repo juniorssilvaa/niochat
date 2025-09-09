@@ -282,3 +282,71 @@ class InternalChatConsumer(AsyncWebsocketConsumer):
             return created
         except InternalChatMessage.DoesNotExist:
             return False
+
+
+class InternalChatNotificationConsumer(AsyncWebsocketConsumer):
+    """
+    Consumer WebSocket para notificações globais do chat interno
+    """
+    
+    async def connect(self):
+        self.user = self.scope['user']
+        
+        print(f"[DEBUG InternalChatNotificationConsumer] Usuário: {self.user}")
+        print(f"[DEBUG InternalChatNotificationConsumer] Autenticado: {self.user.is_authenticated}")
+        print(f"[DEBUG InternalChatNotificationConsumer] Tipo: {type(self.user)}")
+        print(f"[DEBUG InternalChatNotificationConsumer] Scope: {self.scope}")
+        
+        if not self.user.is_authenticated:
+            print(f"[DEBUG InternalChatNotificationConsumer] Usuário não autenticado, fechando conexão")
+            await self.close()
+            return
+        
+        # Grupo específico para notificações do usuário
+        self.user_group_name = f'internal_chat_notifications_{self.user.id}'
+        
+        # Entrar no grupo de notificações do usuário
+        await self.channel_layer.group_add(
+            self.user_group_name,
+            self.channel_name
+        )
+        
+        await self.accept()
+    
+    async def disconnect(self, close_code):
+        if hasattr(self, 'user_group_name'):
+            # Sair do grupo de notificações
+            await self.channel_layer.group_discard(
+                self.user_group_name,
+                self.channel_name
+            )
+    
+    async def receive(self, text_data):
+        """
+        Receber mensagens do WebSocket
+        """
+        try:
+            data = json.loads(text_data)
+            message_type = data.get('type')
+            
+            if message_type == 'join_notifications':
+                # Usuário entrou no sistema de notificações
+                await self.send(text_data=json.dumps({
+                    'type': 'notifications_joined',
+                    'user_id': self.user.id
+                }))
+                
+        except json.JSONDecodeError:
+            await self.send(text_data=json.dumps({
+                'type': 'error',
+                'message': 'Formato JSON inválido'
+            }))
+    
+    async def unread_count_update(self, event):
+        """
+        Atualizar contador de mensagens não lidas
+        """
+        await self.send(text_data=json.dumps({
+            'type': 'unread_count_update',
+            'total_unread': event['total_unread']
+        }))

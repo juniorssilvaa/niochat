@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback } from './ui/avatar';
+import { NotificationContext } from '../contexts/NotificationContext';
 import { 
   MessageSquare, 
   Send, 
@@ -24,6 +25,7 @@ import {
 import axios from 'axios';
 
 const InternalChat = () => {
+  const { loadInternalChatUnreadCount } = useContext(NotificationContext);
   const [chatRooms, setChatRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -51,6 +53,11 @@ const InternalChat = () => {
   // ===== EFEITOS =====
   
   useEffect(() => {
+    // Limpar cache local antes de carregar
+    localStorage.removeItem('internal_chat_rooms');
+    localStorage.removeItem('internal_chat_messages');
+    sessionStorage.removeItem('internal_chat_data');
+    
     loadChatRooms();
   }, []);
   
@@ -92,7 +99,9 @@ const InternalChat = () => {
   };
   
   const loadMessages = async () => {
-    if (!selectedRoom) return;
+    if (!selectedRoom) {
+      return;
+    }
     
     try {
       setLoading(true);
@@ -102,10 +111,38 @@ const InternalChat = () => {
         params: { room_id: selectedRoom.id }
       });
       setMessages(response.data.reverse()); // Mais antigas primeiro
+      
+      // Marcar todas as mensagens como lidas quando carregar
+      await markAllMessagesAsRead();
+      
     } catch (error) {
       console.error('Erro ao carregar mensagens:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const markAllMessagesAsRead = async () => {
+    if (!selectedRoom) {
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('token');
+      
+      await axios.post(`${API_BASE}/conversations/internal-chat/messages/mark_all_read/`, {
+        room_id: selectedRoom.id
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Recarregar contador de mensagens não lidas
+      if (loadInternalChatUnreadCount) {
+        loadInternalChatUnreadCount();
+      }
+      
+    } catch (error) {
+      console.error('Erro ao marcar mensagens como lidas:', error);
     }
   };
   
@@ -114,11 +151,11 @@ const InternalChat = () => {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_BASE}/conversations/internal-chat/participants/`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { room_id: selectedRoom.id }
+      // Usar a URL correta para buscar usuários do provedor
+      const response = await axios.get(`${API_BASE}/users/my_provider_users/`, {
+        headers: { Authorization: `Token ${token}` }
       });
-      setParticipants(response.data);
+      setParticipants(response.data.users || []);
     } catch (error) {
       console.error('Erro ao carregar participantes:', error);
     }
@@ -354,9 +391,14 @@ const InternalChat = () => {
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-foreground">Chat Interno</h2>
-            <Button size="sm" variant="ghost">
-              <Settings className="w-4 h-4" />
-            </Button>
+            <div className="flex gap-2">
+              <Button size="sm" variant="ghost">
+                <Settings className="w-4 h-4" />
+              </Button>
+              <Button size="sm" variant="ghost" onClick={onClose}>
+                ✕
+              </Button>
+            </div>
           </div>
           
           <div className="relative">

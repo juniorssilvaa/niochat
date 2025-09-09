@@ -8,7 +8,9 @@ from .views import (
 from .views_internal_chat import (
     InternalChatRoomViewSet,
     InternalChatMessageViewSet,
-    InternalChatParticipantViewSet
+    InternalChatParticipantViewSet,
+    InternalChatUnreadCountView,
+    InternalChatUnreadByUserView
 )
 from .views_private_chat import (
     PrivateMessageViewSet,
@@ -49,9 +51,12 @@ urlpatterns = [
     path('recovery/settings/<int:provedor_id>/', ConversationViewSet.as_view({'post': 'recovery_settings'}), name='recovery-settings'),
     # URL para servir arquivos de mídia
     path('media/messages/<int:conversation_id>/<str:filename>/', serve_media_file, name='serve-media-file'),
+
     
     # APIs específicas
     path('private-unread-counts/', PrivateUnreadCountsView.as_view(), name='private-unread-counts'),
+    path('internal-chat-unread-count/', InternalChatUnreadCountView.as_view(), name='internal-chat-unread-count'),
+    path('internal-chat-unread-by-user/', InternalChatUnreadByUserView.as_view(), name='internal-chat-unread-by-user'),
     path('users-list/', UsersListView.as_view(), name='users-list'),
     path('dashboard-stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
     path('analysis/', ConversationAnalysisView.as_view(), name='conversation-analysis'),
@@ -59,5 +64,7 @@ urlpatterns = [
     
     # CSAT webhook
     path('csat/webhook/', process_csat_webhook, name='csat-webhook'),
+    
+
 ]
 

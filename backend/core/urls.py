@@ -18,7 +18,7 @@ urlpatterns = [
     path('auth/login/', views.CustomAuthToken.as_view(), name='auth_login'),
     path('auth/me/', views.UserMeView.as_view(), name='auth_me'),
     path('auth/logout/', views.LogoutView.as_view(), name='auth_logout'),
-    path('auth/reset-password/', views.ResetPasswordView.as_view(), name='auth_reset_password'),
+    path('auth/session-timeout/', views.SessionTimeoutView.as_view(), name='auth_session_timeout'),
     path('users/list/', views.UserListView.as_view(), name='users_list'),
     path('dashboard/stats/', views.DashboardStatsView.as_view(), name='dashboard_stats'),
     path('dashboard/response-time-hourly/', views.DashboardResponseTimeHourlyView.as_view(), name='dashboard_response_time_hourly'),
@@ -28,6 +28,7 @@ urlpatterns = [
     # path('media/<path:path>/', views.serve_media_file, name='serve_media_file'),
     path('uazapi/file/<str:file_id>/', views.serve_uazapi_file, name='serve_uazapi_file'),
     path('health/', views.health_check, name='health_check'),
+    # path('changelog/', views.ChangelogView.as_view(), name='changelog'),
     path('', views.frontend_view, name='frontend'),
 ]
 

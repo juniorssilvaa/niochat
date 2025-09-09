@@ -287,9 +287,13 @@ export default function Contacts() {
         <button className="bg-primary text-primary-foreground px-3 py-1 rounded text-sm font-medium">Ir</button>
         <span className="ml-2 text-xs text-muted-foreground">{selected.length} de {contatos.length} selecionado(s)</span>
         <div className="flex-1" />
-        <button onClick={() => setShowModal(true)} className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm font-medium"><Plus className="w-4 h-4" /> Novo Contato</button>
-        <button onClick={exportCSV} className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium"><Download className="w-4 h-4" /> Exportar CSV</button>
-        <label className="flex items-center gap-1 bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-sm font-medium cursor-pointer">
+        <button onClick={() => setShowModal(true)} className="flex items-center gap-1 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white px-3 py-1 rounded text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-200">
+          <Plus className="w-4 h-4" /> Novo Contato
+        </button>
+        <button onClick={exportCSV} className="flex items-center gap-1 bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500 text-white px-3 py-1 rounded text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-200">
+          <Download className="w-4 h-4" /> Exportar CSV
+        </button>
+        <label className="flex items-center gap-1 bg-gradient-to-r from-orange-400 to-yellow-400 hover:from-orange-500 hover:to-yellow-500 text-white px-3 py-1 rounded text-sm font-medium cursor-pointer shadow-lg hover:shadow-xl transition-all duration-200">
           <Download className="w-4 h-4 rotate-180" /> Importar CSV
           <input type="file" accept=".csv" className="hidden" onChange={() => alert('Funcionalidade em desenvolvimento')}/>
         </label>
@@ -319,7 +323,7 @@ export default function Contacts() {
                   <option value="webchat">Web Site</option>
                 </select>
               </label>
-              <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm font-medium mt-2">Salvar</button>
+              <button type="submit" className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white px-3 py-1 rounded text-sm font-medium mt-2 shadow-lg hover:shadow-xl transition-all duration-200">Salvar</button>
             </form>
           </div>
         </div>
@@ -344,7 +348,7 @@ export default function Contacts() {
               <label className="text-sm font-medium">Sender LID
                 <input className="mt-1 w-full border rounded px-2 py-1 bg-background" value={editingContact.sender_lid} onChange={e => setEditingContact({ ...editingContact, sender_lid: e.target.value })} placeholder="249666566365270@lid" />
               </label>
-              <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium mt-2">Salvar Edição</button>
+              <button type="submit" className="bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500 text-white px-3 py-1 rounded text-sm font-medium mt-2 shadow-lg hover:shadow-xl transition-all duration-200">Salvar Edição</button>
             </form>
           </div>
         </div>

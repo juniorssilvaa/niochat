@@ -58,8 +58,6 @@ class ProvedorSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         ext = instance.integracoes_externas or {}
-        print(f"[DEBUG ProvedorSerializer] Dados recebidos: {self.initial_data}")
-        print(f"[DEBUG ProvedorSerializer] Integrações atuais: {ext}")
         
         ext.update({
             'sgp_url': self.initial_data.get('sgp_url', ext.get('sgp_url', '')),
@@ -69,7 +67,6 @@ class ProvedorSerializer(serializers.ModelSerializer):
             'whatsapp_token': self.initial_data.get('whatsapp_token', ext.get('whatsapp_token', '')),
         })
         
-        print(f"[DEBUG ProvedorSerializer] Integrações atualizadas: {ext}")
         validated_data['integracoes_externas'] = ext
         return super().update(instance, validated_data)
 
@@ -88,31 +85,16 @@ class AuditLogSerializer(serializers.ModelSerializer):
         model = AuditLog
         fields = [
             'id', 'user', 'action', 'timestamp', 'ip_address', 'details',
-            'provedor', 'conversation_id', 'contact_name', 'channel_type',
-            'conversation_duration', 'message_count', 'resolution_type', 'csat_rating'
+            'provedor', 'conversation_id', 'contact_name', 'channel_type', 'csat_rating'
         ]
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
         
-        # Formatar duração da conversa para exibição
-        if instance.conversation_duration:
-            total_seconds = int(instance.conversation_duration.total_seconds())
-            hours = total_seconds // 3600
-            minutes = (total_seconds % 3600) // 60
-            seconds = total_seconds % 60
-            
-            if hours > 0:
-                data['conversation_duration_formatted'] = f"{hours}h {minutes}m {seconds}s"
-            elif minutes > 0:
-                data['conversation_duration_formatted'] = f"{minutes}m {seconds}s"
-            else:
-                data['conversation_duration_formatted'] = f"{seconds}s"
-        else:
-            data['conversation_duration_formatted'] = None
+        # Formatação removida - campo conversation_duration não existe mais
         
         # Formatar ação para exibição em português
-        action_display = dict(AuditLog.ACTIONS).get(instance.action, instance.action)
+        action_display = dict(AuditLog.ACTION_CHOICES).get(instance.action, instance.action)
         data['action_display'] = action_display
         
         return data
@@ -166,13 +148,13 @@ class ConversationAuditSerializer(serializers.ModelSerializer):
         return None
     
     def get_assigned_agent(self, obj):
-        if hasattr(obj, 'assigned_agent') and obj.assigned_agent:
+        if hasattr(obj, 'assignee') and obj.assignee:
             return {
-                'id': obj.assigned_agent.id,
-                'username': obj.assigned_agent.username,
-                'first_name': obj.assigned_agent.first_name,
-                'last_name': obj.assigned_agent.last_name,
-                'user_type': obj.assigned_agent.user_type
+                'id': obj.assignee.id,
+                'username': obj.assignee.username,
+                'first_name': obj.assignee.first_name,
+                'last_name': obj.assignee.last_name,
+                'user_type': obj.assignee.user_type
             }
         return None
     
@@ -208,7 +190,7 @@ class ConversationAuditSerializer(serializers.ModelSerializer):
         return [{
             'id': log.id,
             'action': log.action,
-            'action_display': dict(AuditLog.ACTIONS).get(log.action, log.action),
+            'action_display': dict(AuditLog.ACTION_CHOICES).get(log.action, log.action),
             'user': log.user.username if log.user else None,
             'timestamp': log.timestamp,
             'details': log.details,
@@ -245,7 +227,11 @@ class ConversationAuditSerializer(serializers.ModelSerializer):
 class SystemConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = SystemConfig
-        fields = '__all__'
+        fields = [
+            'id', 'key', 'value', 'description', 'is_active', 
+            'created_at', 'updated_at', 'sgp_app', 'sgp_token', 
+            'sgp_url', 'openai_api_key'
+        ]
 
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
@@ -265,8 +251,8 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name', 'user_type',
             'avatar', 'phone', 'is_online', 'last_seen', 'created_at', 'updated_at',
-            'is_active', 'last_login', 'permissions', 'password',
-            'provedor_id', 'provedores_admin',
+            'is_active', 'last_login', 'password', 'permissions',
+            'provedor_id', 'provedores_admin', 'session_timeout',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'last_login']
     
@@ -361,9 +347,7 @@ class CanalSerializer(serializers.ModelSerializer):
         model = Canal
         fields = [
             'id', 'tipo', 'nome', 'ativo', 'provedor',
-            'api_id', 'api_hash', 'app_title', 'short_name', 'verification_code', 'phone_number',  # Telegram
-            'email', 'smtp_host', 'smtp_port',  # Email
-            'url',  # Website
+            'api_hash', 'verification_code', 'phone_number',  # Telegram/WhatsApp
             'created_at', 'updated_at',
             'state',  # Status de conexão
             'profile_pic',  # Foto de perfil

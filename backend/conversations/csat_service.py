@@ -132,13 +132,17 @@ class CSATService:
             return None
     
     @classmethod
-    def get_csat_stats(cls, provedor: Provedor, days: int = 30):
+    def get_csat_stats(cls, provedor, days: int = 30):
         """
         Obter estatísticas CSAT para o dashboard
         """
         try:
             from django.db.models import Count, Avg
             from django.utils import timezone
+            
+            # Se provedor é um ID, buscar o objeto
+            if isinstance(provedor, int):
+                provedor = Provedor.objects.get(id=provedor)
             
             end_date = timezone.now()
             start_date = end_date - timedelta(days=days)

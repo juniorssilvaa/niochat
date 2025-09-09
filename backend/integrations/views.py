@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django.db import models
 from core.models import CompanyUser
 from .models import TelegramIntegration, EmailIntegration, WhatsAppIntegration, WebchatIntegration
 from .serializers import (
@@ -444,10 +445,7 @@ def evolution_webhook(request):
             if not provedor:
                 return JsonResponse({'error': 'Nenhum provedor encontrado'}, status=400)
             
-            # Verificar se o provedor está suspenso
-            if provedor.status == 'suspenso':
-                print(f"Provedor {provedor.nome} está suspenso - bloqueando webhook")
-                return JsonResponse({'error': 'Provedor suspenso'}, status=403)
+# Verificação de status removida - campo não existe mais
             
             # 2. Buscar ou criar contato
             contact, created = Contact.objects.get_or_create(
@@ -536,11 +534,17 @@ def evolution_webhook(request):
                 conv_created = True
                 print(f"Nova conversa criada: {conversation.id} para contato {contact.name}")
             
-            # Se a conversa já existia e não está com status correto, atualiza
-            if not conv_created and (conversation.status != 'snoozed' or conversation.assignee is not None):
-                conversation.status = 'snoozed'
-                conversation.assignee = None
-                conversation.save()
+            # Se a conversa já existia, preservar atribuição se houver agente
+            if not conv_created:
+                # Se não tem agente atribuído, colocar como snoozed
+                if conversation.assignee is None:
+                    conversation.status = 'snoozed'
+                    conversation.save()
+                # Se tem agente atribuído, manter como 'open' e preservar agente
+                elif conversation.status != 'open':
+                    conversation.status = 'open'
+                    conversation.save()
+                    print(f"Conversa mantida atribuída ao agente {conversation.assignee.username}")
             
             # 5. Salvar mensagem recebida - VERIFICAR DUPLICATA
             # Verificar se já existe uma mensagem com o mesmo conteúdo nos últimos 30 segundos
@@ -636,13 +640,34 @@ def evolution_webhook(request):
                 }
             )
             
-            # 6. Acionar IA para resposta automática
-            print(f"🤖 IA: Acionando IA para mensagem: {content[:50]}...")
-            ia_result = openai_service.generate_response_sync(
-                mensagem=content,
-                provedor=provedor,
-                contexto={'conversation': conversation}
+            # 6. Acionar IA para resposta automática (apenas se não estiver atribuída E não for CSAT)
+            should_call_ai = (
+                conversation.assignee is None and 
+                conversation.status != 'pending' and
+                conversation.status != 'closed'  # Não acionar IA se conversa estiver fechada
             )
+            
+            # Verificar se há CSAT pendente para esta conversa
+            from conversations.models import CSATRequest
+            csat_pending = CSATRequest.objects.filter(
+                conversation=conversation,
+                status__in=['pending', 'sent']
+            ).exists()
+            
+            if csat_pending:
+                should_call_ai = False
+                print(f"🤖 IA: Não acionada - CSAT pendente para conversa {conversation.id}")
+            
+            if should_call_ai:
+                print(f"🤖 IA: Acionando IA para mensagem: {content[:50]}...")
+                ia_result = openai_service.generate_response_sync(
+                    mensagem=content,
+                    provedor=provedor,
+                    contexto={'conversation': conversation}
+                )
+            else:
+                print(f"🤖 IA: Não acionada - Conversa atribuída ao agente {conversation.assignee.username if conversation.assignee else 'N/A'} ou em espera ou fechada")
+                ia_result = {'success': False, 'motivo': 'Conversa atribuída, em espera ou fechada'}
             
             print(f"🤖 IA: Resultado: {ia_result}")
             resposta_ia = ia_result.get('resposta') if ia_result.get('success') else None
@@ -804,6 +829,7 @@ def webhook_evolution_uazapi(request):
         for p in provedores:
             # Verificar se a instance corresponde ao número conectado do provedor
             provedor_instance = p.integracoes_externas.get('whatsapp_instance')
+            print(f"DEBUG: Comparando instance {clean_instance} com provedor {p.nome} (instance: {provedor_instance})")
             if provedor_instance and clean_instance == provedor_instance.replace('@s.whatsapp.net', '').replace('@c.us', ''):
                 provedor = p
                 print(f"DEBUG: Provedor CORRETO encontrado: {provedor.nome} (instance: {provedor_instance})")
@@ -827,10 +853,7 @@ def webhook_evolution_uazapi(request):
             print("DEBUG: Nenhum provedor com credenciais da Uazapi encontrado")
             return JsonResponse({'error': 'Nenhum provedor com credenciais da Uazapi encontrado'}, status=400)
         
-        # Verificar se o provedor está suspenso
-        if provedor.status == 'suspenso':
-            print(f"Provedor {provedor.nome} está suspenso - bloqueando webhook Uazapi")
-            return JsonResponse({'error': 'Provedor suspenso'}, status=403)
+        # Verificação de status removida - campo não existe mais
         
         print(f"DEBUG: Provedor final selecionado: {provedor.nome}")
         
@@ -1179,9 +1202,35 @@ def webhook_evolution_uazapi(request):
         # Buscar contato existente por phone (que agora é o chatid limpo)
         contact = None
         if phone_number:
-            # Buscar por phone_number primeiro
+            # Buscar por phone_number exato primeiro
             contact = Contact.objects.filter(phone=phone_number, provedor=provedor).first()
-            print(f"DEBUG: Busca por phone_number '{phone_number}': {'Encontrado' if contact else 'Não encontrado'}")
+            print(f"DEBUG: Busca exata por phone_number '{phone_number}': {'Encontrado' if contact else 'Não encontrado'}")
+            
+            # Se não encontrou, buscar por números similares (variações de dígitos)
+            if not contact:
+                # Criar variações do número para busca
+                phone_variations = [
+                    phone_number,                    # número original
+                    phone_number[1:],               # sem primeiro dígito  
+                    phone_number[2:],               # sem dois primeiros dígitos
+                    f"55{phone_number[2:]}",        # adicionar 55 
+                    f"559{phone_number[3:]}",       # adicionar 559
+                    f"5594{phone_number[4:]}",      # adicionar 5594
+                ]
+                
+                # Buscar contatos que tenham números similares
+                for variation in phone_variations:
+                    if len(variation) >= 8:  # apenas variações válidas
+                        contact = Contact.objects.filter(
+                            phone__endswith=variation[-8:],  # últimos 8 dígitos
+                            provedor=provedor
+                        ).first()
+                        if contact:
+                            print(f"DEBUG: Contato encontrado com variação '{variation[-8:]}': {contact.name} (ID: {contact.id}, Phone: {contact.phone})")
+                            break
+                
+                if not contact:
+                    print(f"DEBUG: Busca flexível por phone similar: Não encontrado")
             
             # Se não encontrou, buscar por chatid nos additional_attributes
             if not contact:
@@ -1398,11 +1447,23 @@ def webhook_evolution_uazapi(request):
             conv_created = True
             print(f"DEBUG: Nova conversa criada: {conversation.id} para contato {contact.name} (ID: {contact.id})")
         
-        # Se a conversa já existia e não está com status correto, atualiza
-        if not conv_created and (conversation.status != 'snoozed' or conversation.assignee is not None):
-            conversation.status = 'snoozed'
-            conversation.assignee = None
-            conversation.save()
+        # Se a conversa já existia, preservar atribuição se houver agente
+        if not conv_created:
+            # Se não tem agente atribuído, colocar como snoozed
+            if conversation.assignee is None:
+                conversation.status = 'snoozed'
+                conversation.save()
+            # Se tem agente atribuído E a conversa não está fechada, manter como 'open'
+            elif conversation.status != 'open' and conversation.status != 'closed':
+                conversation.status = 'open'
+                conversation.save()
+                print(f"DEBUG: Conversa mantida atribuída ao agente {conversation.assignee.username}")
+            # Se a conversa está fechada, colocar como 'snoozed' para IA responder
+            elif conversation.status == 'closed':
+                conversation.status = 'snoozed'
+                conversation.assignee = None  # Remover agente para IA responder
+                conversation.save()
+                print(f"DEBUG: Conversa {conversation.id} reaberta como 'snoozed' para IA responder")
         
         # 4. Extrair external_id da mensagem
         external_id = msg_data.get('id') or msg_data.get('key', {}).get('id')
@@ -1498,6 +1559,7 @@ def webhook_evolution_uazapi(request):
                         print(f"DEBUG: Forçando extensão .mp3 para compatibilidade")
                     
                     # Gerar nome do arquivo
+                    import time
                     timestamp = int(time.time() * 1000)
                     filename = f"{file_prefix}_{timestamp}{file_extension}"
                     file_path = os.path.join(media_dir, filename)
@@ -1766,16 +1828,136 @@ def webhook_evolution_uazapi(request):
                 # Se foi processado como CSAT, não enviar para IA
                 return JsonResponse({'success': True, 'csat_processed': True, 'rating': csat_feedback.emoji_rating})
         
-        # 2. Acionar IA para resposta automática (apenas se não foi CSAT)
+        # 2.a Se for áudio, tentar baixar/transcrever via Uazapi e anexar ao conteúdo para IA
+        try:
+            if db_message_type in ['audio', 'ptt'] and 'id' in msg_data:
+                audio_msg_id = (msg_data.get('id') or msg_data.get('messageId') or msg_data.get('key', {}).get('id'))
+                if audio_msg_id:
+                    from core.uazapi_client import UazapiClient
+                    client = UazapiClient(uazapi_url, uazapi_token)
+                    
+                    # CONFIGURAÇÕES DINÂMICAS DE TRANSCRIÇÃO POR PROVEDOR
+                    transcription_config = provedor.integracoes_externas.get('transcription_config', {})
+                    language = transcription_config.get('language', 'pt-BR')
+                    quality = transcription_config.get('quality', 'high')
+                    delay_between = transcription_config.get('delay_between', 1)
+                    enable_double = transcription_config.get('enable_double_transcription', True)
+                    
+                    print(f"🎵 CONFIGURAÇÕES DE TRANSCRIÇÃO - Provedor: {provedor.nome}")
+                    print(f"🎵 Idioma: {language}, Qualidade: {quality}, Delay: {delay_between}s, Dupla: {enable_double}")
+                    
+                    # Usar chave OpenAI do sistema/provedor se disponível
+                    # Priorizar chave do Superadmin (SystemConfig); fallback para provedor
+                    from core.models import SystemConfig
+                    cfg = SystemConfig.objects.first()
+                    openai_key = None
+                    if cfg and cfg.openai_api_key:
+                        openai_key = cfg.openai_api_key
+                    elif hasattr(provedor, 'openai_api_key') and provedor.openai_api_key:
+                        openai_key = provedor.openai_api_key
+                    
+                    # PRIMEIRA TRANSCRIÇÃO
+                    print(f"🎵 PRIMEIRA TRANSCRIÇÃO: Iniciando para áudio ID {audio_msg_id}")
+                    dl1 = client.download_message(
+                        message_id=audio_msg_id,
+                        generate_mp3=True,
+                        return_base64=False,
+                        return_link=True,
+                        transcribe=True,
+                        openai_apikey=openai_key
+                    )
+                    transcription1 = dl1.get('transcription') if isinstance(dl1, dict) else None
+                    
+                    # Delay dinâmico entre transcrições
+                    if enable_double:
+                        print(f"⏳ Aguardando {delay_between} segundo(s) entre transcrições...")
+                        import time
+                        time.sleep(delay_between)
+                        
+                        # SEGUNDA TRANSCRIÇÃO (para garantir precisão)
+                        print(f"🎵 SEGUNDA TRANSCRIÇÃO: Iniciando para áudio ID {audio_msg_id}")
+                        dl2 = client.download_message(
+                            message_id=audio_msg_id,
+                            generate_mp3=True,
+                            return_base64=False,
+                            return_link=True,
+                            transcribe=True,
+                            openai_apikey=openai_key
+                        )
+                        transcription2 = dl2.get('transcription') if isinstance(dl2, dict) else None
+                        
+                        # COMPARAR TRANSCRIÇÕES E ESCOLHER A MELHOR
+                        final_transcription = None
+                        if transcription1 and transcription2:
+                            print(f"🎵 TRANSCRIÇÃO 1: {transcription1}")
+                            print(f"🎵 TRANSCRIÇÃO 2: {transcription2}")
+                            
+                            # Se as transcrições são idênticas, usar qualquer uma
+                            if transcription1.strip().lower() == transcription2.strip().lower():
+                                final_transcription = transcription1
+                                print(f"🎵 TRANSCRIÇÕES IDÊNTICAS: Usando transcrição 1")
+                            else:
+                                # Se diferentes, usar a mais longa (geralmente mais precisa)
+                                if len(transcription1) > len(transcription2):
+                                    final_transcription = transcription1
+                                    print(f"🎵 TRANSCRIÇÕES DIFERENTES: Usando transcrição 1 (mais longa)")
+                                else:
+                                    final_transcription = transcription2
+                                    print(f"🎵 TRANSCRIÇÕES DIFERENTES: Usando transcrição 2 (mais longa)")
+                        elif transcription1:
+                            final_transcription = transcription1
+                            print(f"🎵 APENAS TRANSCRIÇÃO 1 DISPONÍVEL: {transcription1}")
+                        elif transcription2:
+                            final_transcription = transcription2
+                            print(f"🎵 APENAS TRANSCRIÇÃO 2 DISPONÍVEL: {transcription2}")
+                        else:
+                            print(f"🎵 NENHUMA TRANSCRIÇÃO OBTIDA para áudio ID {audio_msg_id}")
+                    else:
+                        # TRANSCRIÇÃO ÚNICA (quando dupla está desabilitada)
+                        final_transcription = transcription1
+                        print(f"🎵 TRANSCRIÇÃO ÚNICA: {transcription1}")
+                    
+                    if final_transcription:
+                        additional_attrs['transcription'] = final_transcription
+                        additional_attrs['transcription1'] = transcription1
+                        additional_attrs['transcription2'] = transcription2 if enable_double else None
+                        additional_attrs['transcription_config'] = {
+                            'language': language,
+                            'quality': quality,
+                            'delay_between': delay_between,
+                            'enable_double': enable_double,
+                            'provedor': provedor.nome
+                        }
+                        # Usar a transcrição final como conteúdo para IA
+                        content = final_transcription
+                        print(f"🎵 TRANSCRIÇÃO FINAL PARA IA: {final_transcription[:120]}...")
+                    else:
+                        print(f"🎵 NENHUMA TRANSCRIÇÃO OBTIDA para áudio ID {audio_msg_id}")
+        except Exception as e:
+            print(f"[WARN] Falha ao transcrever áudio via Uazapi: {e}")
+            import traceback
+            traceback.print_exc()
+
+        # 2. Acionar IA para resposta automática (apenas se não foi CSAT e não estiver atribuída)
         
         if content and str(content).strip():  # Verificar se há conteúdo válido antes de chamar a IA
-            print(f"🤖 IA: Acionando IA para mensagem: {content[:50]}...")
+            # Verificar se conversa está atribuída ou em espera
+            if conversation.assignee is None and conversation.status != 'pending':
+                print(f"🤖 IA: Acionando IA para mensagem: {content[:50]}...")
+                try:
+                    ia_result = openai_service.generate_response_sync(
+                        mensagem=str(content),  # Garantir que é string
+                        provedor=provedor,
+                        contexto={'conversation': conversation}
+                    )
+                except Exception as e:
+                    print(f"🤖 IA: Erro ao gerar resposta: {str(e)}")
+                    ia_result = {'success': False, 'erro': str(e)}
+            else:
+                print(f"🤖 IA: Não acionada - Conversa atribuída ao agente {conversation.assignee.username if conversation.assignee else 'N/A'} ou em espera (status: {conversation.status})")
+                ia_result = {'success': False, 'motivo': 'Conversa atribuída ou em espera'}
+                
             try:
-                ia_result = openai_service.generate_response_sync(
-                    mensagem=str(content),  # Garantir que é string
-                    provedor=provedor,
-                    contexto={'conversation': conversation}
-                )
                 print(f"🤖 IA: Resultado: {ia_result}")
             except Exception as e:
                 print(f"❌ ERRO na IA: {str(e)}")

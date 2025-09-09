@@ -10,9 +10,6 @@ class ConversationConsumer(AsyncWebsocketConsumer):
         self.conversation_id = self.scope['url_route']['kwargs']['conversation_id']
         self.room_group_name = f'conversation_{self.conversation_id}'
 
-        print(f"🔌 WebSocket: Tentando conectar para conversa {self.conversation_id}")
-        print(f"🔌 WebSocket: Room group name: {self.room_group_name}")
-
         # Join room group
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -20,7 +17,6 @@ class ConversationConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
-        print(f"✅ WebSocket: Conectado com sucesso para conversa {self.conversation_id}")
 
     async def disconnect(self, close_code):
         # Leave room group
@@ -73,9 +69,6 @@ class ConversationConsumer(AsyncWebsocketConsumer):
         sender = event['sender']
         timestamp = event['timestamp']
 
-        print(f"📨 WebSocket: Enviando mensagem para conversa {self.conversation_id}")
-        print(f"📨 WebSocket: Mensagem: {message}")
-
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             'type': 'message',
@@ -83,7 +76,6 @@ class ConversationConsumer(AsyncWebsocketConsumer):
             'sender': sender,
             'timestamp': timestamp
         }))
-        print(f"✅ WebSocket: Mensagem enviada com sucesso")
 
     # Handle typing indicator
     async def typing_indicator(self, event):
@@ -176,17 +168,41 @@ class PainelConsumer(AsyncWebsocketConsumer):
 
     async def dashboard_event(self, event):
         await self.send(text_data=json.dumps(event['data']))
+    
+    async def conversation_event(self, event):
+        """Handler para eventos de conversa"""
+        await self.send(text_data=json.dumps({
+            'type': 'conversation_event',
+            'event_type': event['event_type'],
+            'conversation_id': event['conversation_id'],
+            'data': event['data'],
+            'timestamp': event['timestamp']
+        }))
+    
+    async def conversation_status_changed(self, event):
+        """Handler para mudanças de status de conversa"""
+        await self.send(text_data=json.dumps({
+            'type': 'conversation_status_changed',
+            'conversation': event['conversation'],
+            'message': event['message'],
+            'timestamp': timezone.now().isoformat()
+        }))
 
 
 class UserStatusConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.user_id = self.scope['url_route']['kwargs']['user_id']
-        self.room_group_name = f'user_status_{self.user_id}'
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
-        await self.accept()
+        # Verificar se o usuário está autenticado
+        user = self.scope.get('user')
+        if user and user.is_authenticated:
+            self.user_id = user.id
+            self.room_group_name = 'user_status_global'
+            await self.channel_layer.group_add(
+                self.room_group_name,
+                self.channel_name
+            )
+            await self.accept()
+        else:
+            await self.close()
         # Marcar usuário como online
         await self.set_user_online(True)
 

@@ -25,6 +25,7 @@ const Settings = () => {
       emailNotifications: true,
       pushNotifications: true,
       soundNotifications: false,
+      soundNotificationFile: 'mixkit-bell-notification-933.wav', // Som padrão
       desktopNotifications: true
     },
     security: {
@@ -50,6 +51,15 @@ const Settings = () => {
   const handleSave = () => {
     // Aqui você salvaria as configurações no backend
     console.log('Saving settings:', settings);
+    
+    // Salvar preferências de notificação sonora no localStorage
+    localStorage.setItem('notificationSound', JSON.stringify({
+      enabled: settings.notifications.soundNotifications,
+      file: settings.notifications.soundNotificationFile
+    }));
+    
+    // Mostrar mensagem de sucesso
+    alert('Configurações salvas com sucesso!');
   };
 
   const renderProfileSettings = () => (
@@ -156,12 +166,14 @@ const Settings = () => {
                 {key === 'emailNotifications' && 'Notificações por E-mail'}
                 {key === 'pushNotifications' && 'Notificações Push'}
                 {key === 'soundNotifications' && 'Notificações Sonoras'}
+                {key === 'soundNotificationFile' && 'Som das Notificações'}
                 {key === 'desktopNotifications' && 'Notificações Desktop'}
               </h4>
               <p className="text-sm text-muted-foreground">
                 {key === 'emailNotifications' && 'Receber notificações por e-mail'}
                 {key === 'pushNotifications' && 'Receber notificações push no dispositivo'}
                 {key === 'soundNotifications' && 'Reproduzir som para notificações'}
+                {key === 'soundNotificationFile' && 'Escolher o som para notificações'}
                 {key === 'desktopNotifications' && 'Mostrar notificações na área de trabalho'}
               </p>
             </div>
@@ -179,6 +191,56 @@ const Settings = () => {
             </label>
           </div>
         ))}
+        
+        {/* Seleção de som para notificações */}
+        {settings.notifications.soundNotifications && (
+          <div className="p-4 border border-border rounded-lg bg-muted/20">
+            <h4 className="font-medium text-card-foreground mb-3">
+              Som das Notificações
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-card-foreground mb-2">
+                  Escolher Som
+                </label>
+                <select
+                  value={settings.notifications.soundNotificationFile}
+                  onChange={(e) => setSettings({
+                    ...settings,
+                    notifications: { 
+                      ...settings.notifications, 
+                      soundNotificationFile: e.target.value 
+                    }
+                  })}
+                  className="niochat-input w-full"
+                >
+                  <option value="mixkit-bell-notification-933.wav">Bell Notification</option>
+                  <option value="mixkit-access-allowed-tone-2869.wav">Access Allowed</option>
+                  <option value="mixkit-bubble-pop-up-alert-notification-2357.wav">Bubble Pop Up</option>
+                  <option value="mixkit-correct-answer-tone-2870.wav">Correct Answer</option>
+                  <option value="mixkit-digital-quick-tone-2866.wav">Digital Quick</option>
+                  <option value="mixkit-elevator-tone-2863.wav">Elevator</option>
+                  <option value="mixkit-interface-option-select-2573.wav">Interface Option</option>
+                  <option value="mixkit-sci-fi-click-900.wav">Sci-Fi Click</option>
+                </select>
+              </div>
+              <div className="flex items-end">
+                <button
+                  onClick={() => {
+                    const audio = new Audio(`/sounds/${settings.notifications.soundNotificationFile}`);
+                    audio.play().catch(e => console.log('Erro ao reproduzir som:', e));
+                  }}
+                  className="niochat-button niochat-button-primary px-4 py-2 flex items-center space-x-2"
+                >
+                  <span>Ouvir Som</span>
+                </button>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Pré-visualize o som selecionado clicando em "Ouvir Som"
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -10,7 +10,8 @@ import {
   Shield,
   User,
   Crown,
-  Building
+  Building,
+  Settings
 } from 'lucide-react';
 import axios from 'axios';
 import ReactDOM from 'react-dom';
@@ -95,7 +96,6 @@ const fetchUsers = async (token) => {
 };
 
 const UserManagement = ({ provedorId }) => {
-  console.log('UserManagement: Componente montado, provedorId:', provedorId);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
@@ -149,17 +149,14 @@ const UserManagement = ({ provedorId }) => {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          console.log('Token não encontrado');
           return;
         }
         
-        console.log('Carregando provedores...');
         const response = await axios.get('/api/provedores/', {
           headers: { Authorization: `Token ${token}` }
         });
         
         const provedoresData = response.data.results || response.data;
-        console.log('Provedores carregados:', provedoresData);
         setProvedores(provedoresData);
       } catch (error) {
         console.error('Erro ao carregar provedores:', error);
@@ -179,7 +176,6 @@ const UserManagement = ({ provedorId }) => {
         ...prev,
         provedor_id: provedorId
       }));
-      console.log('Provedor ID atualizado automaticamente:', provedorId);
     }
   }, [provedorId]);
 
@@ -251,6 +247,20 @@ const UserManagement = ({ provedorId }) => {
           : user
       );
       setUsersState(updatedUsers);
+      
+      // CORREÇÃO: Se o usuário editado é o usuário atual, atualizar suas permissões no localStorage
+      const currentUser = JSON.parse(localStorage.getItem('user'));
+      if (currentUser && currentUser.id === selectedUser.id) {
+        const updatedCurrentUser = { ...currentUser, permissions: editUserPermissions };
+        localStorage.setItem('user', JSON.stringify(updatedCurrentUser));
+        
+        // Disparar evento customizado para notificar outros componentes sobre a atualização
+        window.dispatchEvent(new CustomEvent('userPermissionsUpdated', {
+          detail: { permissions: editUserPermissions }
+        }));
+        
+        console.log('✅ Permissões do usuário atual atualizadas:', editUserPermissions);
+      }
       
       alert('Permissões salvas com sucesso!');
       handleCloseEditModal();
@@ -381,24 +391,20 @@ const UserManagement = ({ provedorId }) => {
     setShowAddModal(true);
     
     // SEMPRE forçar carregamento dos provedores quando abrir o modal
-    console.log('# Debug logging removed for security Modal aberto - forçando carregamento de provedores...');
     try {
       const token = localStorage.getItem('token');
-      console.log('# Debug logging removed for security Token encontrado:', token ? 'SIM' : 'NÃO');
       
       if (token) {
-        console.log('# Debug logging removed for security Fazendo chamada para API...');
         const response = await axios.get('/api/provedores/', {
           headers: { Authorization: `Token ${token}` }
         });
         const provedoresData = response.data.results || response.data;
-        console.log('# Debug logging removed for security Provedores carregados no modal:', provedoresData);
         setProvedores(provedoresData);
       } else {
-        console.error('# Debug logging removed for security Token não encontrado!');
+        console.error('Token não encontrado!');
       }
     } catch (error) {
-      console.error('# Debug logging removed for security Erro ao carregar provedores no modal:', error);
+      console.error('Erro ao carregar provedores no modal:', error);
       // Fallback: criar provedor padrão
       setProvedores([{ id: 1, nome: 'MEGA FIBRA (Fallback)' }]);
     }
@@ -624,13 +630,13 @@ const UserManagement = ({ provedorId }) => {
                               className="w-full text-left px-4 py-2 hover:bg-muted text-sm flex items-center gap-2"
                               onClick={() => handleResetPassword(user)}
                             >
-                              <span className="inline-block w-4 h-4"># Debug logging removed for security</span> Redefinir senha
+                              <span className="inline-block w-4 h-4">🔑</span> Redefinir senha
                             </button>
                             <button
                               className="w-full text-left px-4 py-2 hover:bg-muted text-sm flex items-center gap-2"
                               onClick={() => handleToggleUserStatus(user)}
                             >
-                              <span className="inline-block w-4 h-4">⚙️</span> {user.is_active ? 'Inativar acesso' : 'Reativar acesso'}
+                              <Settings className="inline w-4 h-4" /> {user.is_active ? 'Inativar acesso' : 'Reativar acesso'}
                             </button>
                           </div>
                         )}

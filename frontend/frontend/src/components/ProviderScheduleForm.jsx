@@ -146,7 +146,7 @@ export default function ProviderScheduleForm() {
                       Copiar horário acima
                     </button>
                   )}
-                  <button type="button" className="text-xs px-3 py-1 rounded bg-green-600 hover:bg-green-700 text-white" onClick={() => handleAddPeriodo(diaIdx)}>
+                  <button type="button" className="text-xs px-3 py-1 rounded bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg hover:shadow-xl transition-all duration-200" onClick={() => handleAddPeriodo(diaIdx)}>
                     + Novo período
                   </button>
                 </div>

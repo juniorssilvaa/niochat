@@ -200,7 +200,7 @@ class UazapiClient:
     
     def enviar_imagem(self, numero: str, imagem_bytes: bytes, legenda: str = "", instance_id: str = None) -> bool:
         """
-        Envia imagem via WhatsApp usando /send/media conforme documentação
+        Envia imagem via WhatsApp usando ev conforme documentação
         
         Args:
             numero: Número do WhatsApp
@@ -357,7 +357,8 @@ class UazapiClient:
                 "number": numero_limpo,
                 "type": tipo,
                 "text": texto,
-                "choices": choices
+                "choices": choices,
+                "readchat": True  # Adicionar para garantir que a mensagem seja lida
             }
             
             if footer_text:
@@ -369,6 +370,8 @@ class UazapiClient:
             print(f"[DEBUG UazapiClient] Enviando menu para: {numero_limpo}")
             print(f"[DEBUG UazapiClient] Tipo: {tipo}")
             print(f"[DEBUG UazapiClient] Choices: {len(choices)}")
+            print(f"[DEBUG UazapiClient] Primeiro choice: {choices[0] if choices else 'Nenhum'}")
+            print(f"[DEBUG UazapiClient] Tamanho do primeiro choice: {len(choices[0]) if choices else 0} caracteres")
             
             resp = requests.post(url, json=data, headers=headers, timeout=30)
             print(f"[DEBUG UazapiClient] Status: {resp.status_code}")
@@ -386,3 +389,96 @@ class UazapiClient:
         except Exception as e:
             print(f"[DEBUG UazapiClient] Erro ao enviar menu: {e}")
             return False 
+
+    def enviar_carousel(self, numero: str, texto: str, choices: list, instance_id: str = None) -> bool:
+        """
+        Envia carrossel interativo via WhatsApp
+        
+        Args:
+            numero: Número do WhatsApp
+            texto: Texto principal
+            choices: Lista de opções no formato do carrossel
+            instance_id: ID da instância (opcional)
+            
+        Returns:
+            True se enviado com sucesso, False caso contrário
+        """
+        try:
+            # Limpar número
+            numero_limpo = numero.replace('@s.whatsapp.net', '').replace('@c.us', '')
+            
+            url = f"{self.base_url}/send/carousel"
+            
+            headers = {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "token": self.token
+            }
+            
+            data = {
+                "number": numero_limpo,
+                "text": texto,
+                "choices": choices,
+                "readchat": True
+            }
+            
+            if instance_id:
+                data["instance"] = instance_id
+            
+            print(f"[DEBUG UazapiClient] Enviando carrossel para: {numero_limpo}")
+            print(f"[DEBUG UazapiClient] Choices: {len(choices)}")
+            print(f"[DEBUG UazapiClient] Primeiro choice: {choices[0] if choices else 'Nenhum'}")
+            
+            resp = requests.post(url, json=data, headers=headers, timeout=30)
+            print(f"[DEBUG UazapiClient] Status: {resp.status_code}")
+            print(f"[DEBUG UazapiClient] Response: {resp.text}")
+            
+            if resp.status_code == 200:
+                result = resp.json()
+                return bool(result.get('id'))
+            else:
+                print(f"[DEBUG UazapiClient] Erro HTTP: {resp.status_code}")
+                return False
+                
+        except Exception as e:
+            print(f"[DEBUG UazapiClient] Erro ao enviar carrossel: {e}")
+            return False
+
+    def download_message(self, message_id: str, instance_id: str = None,
+                          return_base64: bool = False,
+                          generate_mp3: bool = True,
+                          return_link: bool = True,
+                          transcribe: bool = False,
+                          openai_apikey: str = None) -> dict:
+        """Chama /message/download para obter mídia/transcrição.
+
+        Retorna dict com possíveis chaves: fileURL, mimetype, base64Data, transcription.
+        """
+        try:
+            url = f"{self.base_url}/message/download"
+            headers = {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "token": self.token
+            }
+            data = {
+                "id": message_id,
+                "return_base64": return_base64,
+                "generate_mp3": generate_mp3,
+                "return_link": return_link,
+                "transcribe": transcribe
+            }
+            if instance_id:
+                data["instance"] = instance_id
+            if openai_apikey:
+                data["openai_apikey"] = openai_apikey
+            print(f"[DEBUG UazapiClient] Fazendo POST para: {url}")
+            print(f"[DEBUG UazapiClient] Payload download: {{k: data.get(k) for k in ['id','generate_mp3','transcribe','return_base64','return_link']}}")
+            resp = requests.post(url, json=data, headers=headers, timeout=30)
+            print(f"[DEBUG UazapiClient] Status: {resp.status_code}")
+            print(f"[DEBUG UazapiClient] Response: {resp.text[:300]}...")
+            if resp.status_code == 200:
+                return resp.json()
+            return {"error": f"HTTP {resp.status_code}", "raw": resp.text}
+        except Exception as e:
+            return {"error": str(e)}

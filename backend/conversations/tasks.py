@@ -24,3 +24,4 @@ def send_csat_message(csat_request_id):
     except Exception as e:
         logger.error(f"Erro na task send_csat_message: {e}")
         return False
+

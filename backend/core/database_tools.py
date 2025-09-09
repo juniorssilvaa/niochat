@@ -1,13 +1,9 @@
-"""
-Database Tools para OpenAI Function Calling
-Ferramentas seguras e eficientes para acesso ao banco de dados via IA
-"""
-
 import logging
-from typing import Dict, Any, List, Optional
+import json
+from typing import Dict, Any, List
 from django.db import transaction
-from django.core.exceptions import ObjectDoesNotExist
-from conversations.models import Team, Conversation, Contact, Message
+from django.utils import timezone
+from conversations.models import Conversation, Message, Team, TeamMember
 from core.models import Provedor
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -16,43 +12,32 @@ logger = logging.getLogger(__name__)
 
 class DatabaseTools:
     """
-    Classe com ferramentas seguras para a IA acessar o banco de dados
-    usando OpenAI Function Calling
+    Ferramentas seguras para a IA interagir com o banco de dados
     """
     
     def __init__(self, provedor: Provedor):
         self.provedor = provedor
         self.channel_layer = get_channel_layer()
-    
+
     def buscar_equipes_disponíveis(self) -> Dict[str, Any]:
         """
         Tool: buscar_equipes_disponíveis
         Busca todas as equipes disponíveis no provedor atual
-        
-        Returns:
-            Dict com lista de equipes disponíveis
         """
         try:
-            query = Team.objects.filter(
+            equipes = Team.objects.filter(
                 provedor=self.provedor,
                 is_active=True
-            )
+            ).values('id', 'nome', 'description')
             
-            equipes = []
-            for team in query:
-                membros_ativos = team.members.filter(user__is_active=True).count()
-                equipes.append({
-                    'id': team.id,
-                    'nome': team.name,
-                    'descricao': team.description,
-                    'membros_ativos': membros_ativos,
-                    'pode_receber_transferencia': membros_ativos > 0
-                })
+            equipes_list = list(equipes)
+            
+            logger.info(f"Equipes encontradas para {self.provedor.nome}: {len(equipes_list)}")
             
             return {
                 'success': True,
-                'equipes_encontradas': len(equipes),
-                'equipes': equipes,
+                'equipes': equipes_list,
+                'total': len(equipes_list),
                 'provedor': self.provedor.nome
             }
             
@@ -60,86 +45,238 @@ class DatabaseTools:
             logger.error(f"Erro ao buscar equipes: {e}")
             return {
                 'success': False,
-                'erro': f"Erro ao consultar equipes: {str(e)}"
+                'erro': f"Erro ao buscar equipes: {str(e)}"
             }
-    
+
     def buscar_membro_disponível_equipe(self, nome_equipe: str) -> Dict[str, Any]:
         """
         Tool: buscar_membro_disponível_equipe
-        Busca membro disponível em uma equipe específica
+        Busca um membro disponível de uma equipe específica
         
         Args:
             nome_equipe: Nome da equipe (SUPORTE, FINANCEIRO, ATENDIMENTO)
-        
-        Returns:
-            Dict com dados do membro disponível
         """
         try:
             # Buscar equipe
             equipe = Team.objects.filter(
                 provedor=self.provedor,
-                name__iexact=nome_equipe,
+                nome__icontains=nome_equipe,
                 is_active=True
             ).first()
             
             if not equipe:
                 return {
                     'success': False,
-                    'erro': f'Equipe {nome_equipe} não encontrada ou inativa',
-                    'equipes_disponiveis': [
-                        team.name for team in Team.objects.filter(
-                            provedor=self.provedor, 
-                            is_active=True
-                        )
-                    ]
+                    'erro': f'Equipe {nome_equipe} não encontrada ou inativa'
                 }
             
-            # Buscar membro disponível
-            membro = equipe.members.filter(user__is_active=True).first()
+            # Buscar membros ativos da equipe
+            membros = TeamMember.objects.filter(
+                team=equipe,
+                is_active=True
+            ).select_related('user')
             
-            if not membro:
+            if not membros.exists():
                 return {
                     'success': False,
-                    'erro': f'Nenhum membro ativo na equipe {nome_equipe}',
-                    'equipe_id': equipe.id,
-                    'equipe_nome': equipe.name
+                    'erro': f'Nenhum membro ativo encontrado na equipe {nome_equipe}'
                 }
+            
+            # Escolher primeiro membro disponível
+            membro = membros.first()
             
             return {
                 'success': True,
-                'membro_encontrado': True,
-                'equipe': {
-                    'id': equipe.id,
-                    'nome': equipe.name,
-                    'descricao': equipe.description
-                },
                 'membro': {
                     'id': membro.user.id,
                     'nome': membro.user.get_full_name() or membro.user.username,
                     'username': membro.user.username,
                     'email': membro.user.email
+                },
+                'equipe': {
+                    'id': equipe.id,
+                    'nome': equipe.nome,
+                    'description': equipe.description
                 }
             }
             
         except Exception as e:
-            logger.error(f"Erro ao buscar membro da equipe {nome_equipe}: {e}")
+            logger.error(f"Erro ao buscar membro da equipe: {e}")
             return {
                 'success': False,
-                'erro': f"Erro ao consultar membro da equipe: {str(e)}"
+                'erro': f"Erro ao buscar membro da equipe: {str(e)}"
             }
-    
-    def executar_transferencia_conversa(self, conversation_id: int, equipe_nome: str, motivo: str) -> Dict[str, Any]:
+
+    def analisar_conversa_para_transferencia(self, conversation_id: int) -> Dict[str, Any]:
         """
-        Tool: executar_transferencia_conversa
-        Executa transferência segura de conversa para equipe
+        Analisa a conversa para determinar a equipe mais adequada para transferência
+        
+        Args:
+            conversation_id: ID da conversa a ser analisada
+        
+        Returns:
+            Dict com análise e recomendação de equipe
+        """
+        try:
+            # Buscar conversa
+            conversa = Conversation.objects.filter(
+                id=conversation_id,
+                inbox__provedor=self.provedor
+            ).first()
+            
+            if not conversa:
+                return {
+                    'success': False,
+                    'erro': f'Conversa {conversation_id} não encontrada'
+                }
+            
+            # Buscar últimas mensagens da conversa
+            mensagens = Message.objects.filter(
+                conversation=conversa
+            ).order_by('-created_at')[:20]  # Últimas 20 mensagens
+            
+            # Analisar conteúdo das mensagens
+            texto_completo = ""
+            for msg in reversed(mensagens):  # Ordem cronológica
+                if msg.content:
+                    texto_completo += f" {msg.content.lower()}"
+            
+            # Palavras-chave para cada tipo de equipe
+            palavras_suporte = [
+                'internet', 'conexão', 'modem', 'roteador', 'sinal', 'velocidade', 'lenta', 'caiu', 
+                'desconectou', 'problema', 'técnico', 'instalação', 'equipamento', 'cabo', 'fibra',
+                'drop', 'led', 'vermelho', 'piscando', 'sem acesso', 'não funciona', 'erro',
+                'chamado', 'suporte', 'técnico', 'reparo', 'manutenção'
+            ]
+            
+            palavras_financeiro = [
+                'fatura', 'boleto', 'pagamento', 'pagar', 'valor', 'preço', 'conta', 'débito',
+                'vencimento', 'multa', 'juros', 'desconto', 'segunda via', 'comprovante',
+                'recibo', 'parcelamento', 'cartão', 'pix', 'transferência', 'dinheiro',
+                'cobrança', 'em aberto', 'atraso', 'suspenso'
+            ]
+            
+            palavras_vendas = [
+                'plano', 'contratar', 'contratação', 'oferta', 'melhor', 'escolher', 'novo',
+                'mudar', 'alterar', 'preço', 'velocidade', 'instalação', 'endereço',
+                'documentos', 'proposta', 'orçamento', 'promoção', 'desconto', 'vantagem'
+            ]
+            
+            # Contar ocorrências
+            score_suporte = sum(1 for palavra in palavras_suporte if palavra in texto_completo)
+            score_financeiro = sum(1 for palavra in palavras_financeiro if palavra in texto_completo)
+            score_vendas = sum(1 for palavra in palavras_vendas if palavra in texto_completo)
+            
+            # Determinar equipe recomendada
+            scores = {
+                'SUPORTE TÉCNICO': score_suporte,
+                'FINANCEIRO': score_financeiro,
+                'ATENDIMENTO': score_vendas
+            }
+            
+            equipe_recomendada = max(scores, key=scores.get)
+            score_maximo = scores[equipe_recomendada]
+            
+            # Verificar se há equipe disponível
+            equipes_disponiveis = self.buscar_equipes_disponíveis()
+            
+            if not equipes_disponiveis['success']:
+                return {
+                    'success': False,
+                    'erro': 'Não foi possível verificar equipes disponíveis'
+                }
+            
+            # Verificar se a equipe recomendada existe
+            equipe_existe = any(
+                equipe['nome'].upper() == equipe_recomendada.upper() 
+                for equipe in equipes_disponiveis['equipes']
+            )
+            
+            if not equipe_existe:
+                # Se não existe, usar primeira equipe disponível
+                if equipes_disponiveis['equipes']:
+                    equipe_recomendada = equipes_disponiveis['equipes'][0]['nome']
+                else:
+                    return {
+                        'success': False,
+                        'erro': 'Nenhuma equipe disponível encontrada'
+                    }
+            
+            return {
+                'success': True,
+                'conversa_id': conversation_id,
+                'equipe_recomendada': equipe_recomendada,
+                'score_maximo': score_maximo,
+                'scores': scores,
+                'confianca': 'alta' if score_maximo >= 3 else 'media' if score_maximo >= 1 else 'baixa',
+                'motivo': self._gerar_motivo_transferencia(equipe_recomendada, scores),
+                'equipes_disponiveis': equipes_disponiveis['equipes']
+            }
+            
+        except Exception as e:
+            logger.error(f"Erro ao analisar conversa para transferência: {e}")
+            return {
+                'success': False,
+                'erro': f"Erro ao analisar conversa: {str(e)}"
+            }
+
+    def _gerar_motivo_transferencia(self, equipe: str, scores: Dict[str, int]) -> str:
+        """Gera motivo da transferência baseado na análise"""
+        if equipe == 'SUPORTE TÉCNICO':
+            return "Problema técnico identificado - transferindo para equipe de suporte"
+        elif equipe == 'FINANCEIRO':
+            return "Questão financeira identificada - transferindo para equipe financeira"
+        elif equipe == 'ATENDIMENTO':
+            return "Solicitação de atendimento geral - transferindo para equipe de atendimento"
+        else:
+            return f"Transferência para {equipe} - análise automática da conversa"
+
+    def transferir_conversa_inteligente(self, conversation_id: int) -> Dict[str, Any]:
+        """
+        Executa transferência inteligente baseada na análise da conversa
         
         Args:
             conversation_id: ID da conversa
-            equipe_nome: Nome da equipe destino
-            motivo: Motivo da transferência
         
         Returns:
             Dict com resultado da transferência
+        """
+        try:
+            # Analisar conversa
+            analise = self.analisar_conversa_para_transferencia(conversation_id)
+            
+            if not analise['success']:
+                return analise
+            
+            # Executar transferência
+            resultado = self.executar_transferencia_conversa(
+                conversation_id=conversation_id,
+                equipe_nome=analise['equipe_recomendada'],
+                motivo=analise['motivo']
+            )
+            
+            if resultado['success']:
+                resultado['analise'] = analise
+                resultado['transferencia_inteligente'] = True
+            
+            return resultado
+            
+        except Exception as e:
+            logger.error(f"Erro na transferência inteligente: {e}")
+            return {
+                'success': False,
+                'erro': f"Erro na transferência inteligente: {str(e)}"
+            }
+
+    def executar_transferencia_conversa(self, conversation_id: int, equipe_nome: str, motivo: str) -> Dict[str, Any]:
+        """
+        Tool: executar_transferencia_conversa
+        Transfere uma conversa para uma equipe específica
+        
+        Args:
+            conversation_id: ID da conversa
+            equipe_nome: Nome da equipe de destino
+            motivo: Motivo da transferência
         """
         try:
             with transaction.atomic():
@@ -173,7 +310,8 @@ class DatabaseTools:
                 status_anterior = conversa.status
                 assignee_anterior = conversa.assignee
                 
-                conversa.assignee = membro_usuario
+                # IMPORTANTE: Não atribuir diretamente ao membro, deixar em espera
+                conversa.assignee = None  # Sem atribuição direta
                 conversa.status = 'pending'  # Em Espera
                 
                 # Salvar informação da equipe nos additional_attributes
@@ -183,6 +321,8 @@ class DatabaseTools:
                     'id': equipe_data['id'],
                     'name': equipe_data['nome']
                 }
+                conversa.additional_attributes['transfer_motivo'] = motivo
+                conversa.additional_attributes['transfer_timestamp'] = str(timezone.now())
                 
                 conversa.save()
                 
@@ -195,11 +335,7 @@ class DatabaseTools:
                             'conversation': {
                                 'id': conversa.id,
                                 'status': conversa.status,
-                                'assignee': {
-                                    'id': membro_usuario.id,
-                                    'name': membro_data['nome'],
-                                    'team': equipe_nome
-                                },
+                                'assigned_team': equipe_data['nome'],
                                 'contact': {
                                     'name': conversa.contact.name,
                                     'phone': conversa.contact.phone
@@ -209,7 +345,7 @@ class DatabaseTools:
                         }
                     )
                 
-                logger.info(f"Transferência executada: Conversa {conversation_id} → {equipe_nome} (User: {membro_data['nome']})")
+                logger.info(f"Transferência executada: Conversa {conversation_id} → {equipe_nome} (Status: Em Espera)")
                 
                 return {
                     'success': True,
@@ -217,11 +353,9 @@ class DatabaseTools:
                     'conversa_id': conversa.id,
                     'status_anterior': status_anterior,
                     'status_atual': conversa.status,
-                    'assignee_anterior': assignee_anterior.username if assignee_anterior else None,
-                    'assignee_atual': membro_data['nome'],
-                    'equipe_destino': equipe_data['nome'],
+                    'equipe_destino': equipe_nome,
                     'motivo': motivo,
-                    'mensagem_cliente': f"Você foi transferido para o setor {equipe_nome}. Em breve você será atendido por um de nossos especialistas!"
+                    'em_espera': True
                 }
                 
         except Exception as e:
@@ -230,96 +364,82 @@ class DatabaseTools:
                 'success': False,
                 'erro': f"Erro ao executar transferência: {str(e)}"
             }
-    
+
     def buscar_conversas_ativas(self) -> Dict[str, Any]:
         """
         Tool: buscar_conversas_ativas
         Busca todas as conversas ativas do provedor
-        
-        Returns:
-            Dict com lista de conversas ativas
         """
         try:
-            query = Conversation.objects.filter(
+            conversas = Conversation.objects.filter(
                 inbox__provedor=self.provedor
-            ).exclude(
-                status__in=['closed', 'encerrada', 'resolved', 'finalizada']
-            )
+            ).select_related('contact', 'assignee', 'inbox').order_by('-last_message_at')
             
-            conversas = []
-            for conv in query.order_by('-created_at')[:50]:  # Limitar a 50 mais recentes
-                conversas.append({
-                    'id': conv.id,
-                    'status': conv.status,
-                    'contato_nome': conv.contact.name,
-                    'contato_telefone': conv.contact.phone,
-                    'assignee': conv.assignee.get_full_name() if conv.assignee else None,
-                    'criada_em': conv.created_at.isoformat(),
-                    'ultima_atividade': conv.updated_at.isoformat() if conv.updated_at else None
+            conversas_data = []
+            for conversa in conversas:
+                conversas_data.append({
+                    'id': conversa.id,
+                    'status': conversa.status,
+                    'contact_name': conversa.contact.name,
+                    'contact_phone': conversa.contact.phone,
+                    'assignee': conversa.assignee.get_full_name() if conversa.assignee else None,
+                    'last_message_at': conversa.last_message_at.isoformat() if conversa.last_message_at else None,
+                    'created_at': conversa.created_at.isoformat()
                 })
             
             return {
                 'success': True,
-                'total_conversas': len(conversas),
-                'conversas': conversas,
-                'filtros_aplicados': {
-                    'status': status,
-                    'assignee_id': assignee_id
-                }
+                'conversas': conversas_data,
+                'total': len(conversas_data),
+                'provedor': self.provedor.nome
             }
             
         except Exception as e:
-            logger.error(f"Erro ao buscar conversas: {e}")
+            logger.error(f"Erro ao buscar conversas ativas: {e}")
             return {
                 'success': False,
-                'erro': f"Erro ao consultar conversas: {str(e)}"
+                'erro': f"Erro ao buscar conversas ativas: {str(e)}"
             }
-    
+
     def buscar_estatisticas_atendimento(self) -> Dict[str, Any]:
         """
         Tool: buscar_estatisticas_atendimento
         Busca estatísticas gerais de atendimento do provedor
-        
-        Returns:
-            Dict com estatísticas
         """
         try:
-            from django.db.models import Count, Q
-            from django.utils import timezone
-            from datetime import timedelta
-            
             # Estatísticas básicas
             total_conversas = Conversation.objects.filter(inbox__provedor=self.provedor).count()
+            
             conversas_abertas = Conversation.objects.filter(
-                inbox__provedor=self.provedor, 
+                inbox__provedor=self.provedor,
                 status='open'
             ).count()
+            
             conversas_pendentes = Conversation.objects.filter(
-                inbox__provedor=self.provedor, 
+                inbox__provedor=self.provedor,
                 status='pending'
             ).count()
+            
             conversas_com_ia = Conversation.objects.filter(
-                inbox__provedor=self.provedor, 
+                inbox__provedor=self.provedor,
                 status='snoozed'
             ).count()
             
             # Estatísticas por equipe
-            equipes_stats = []
+            equipes_stats = {}
             for team in Team.objects.filter(provedor=self.provedor, is_active=True):
-                conv_equipe = Conversation.objects.filter(
+                conversas_equipe = Conversation.objects.filter(
                     inbox__provedor=self.provedor,
-                    assignee__in=[member.user for member in team.members.all()]
+                    additional_attributes__assigned_team__id=team.id
                 ).count()
                 
-                equipes_stats.append({
-                    'equipe': team.name,
-                    'membros': team.members.count(),
-                    'conversas_ativas': conv_equipe
-                })
+                equipes_stats[team.nome] = {
+                    'total_conversas': conversas_equipe,
+                    'membros_ativos': team.members.filter(is_active=True).count()
+                }
             
             return {
                 'success': True,
-                'provedor': self.provedor.nome,
                 'estatisticas_gerais': {
                     'total_conversas': total_conversas,
                     'conversas_abertas': conversas_abertas,
@@ -341,3 +461,7 @@ class DatabaseTools:
 def create_database_tools(provedor: Provedor) -> DatabaseTools:
     """Cria instância das ferramentas de banco para um provedor específico"""
     return DatabaseTools(provedor)
+
+
+
+

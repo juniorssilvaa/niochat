@@ -75,9 +75,8 @@ export default function AuditLog({ provedorId }) {
   async function fetchStats() {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('/api/audit-logs/conversation_stats/', {
-        headers: { Authorization: `Token ${token}` },
-        params: { provedor_id: provedorId }
+      const res = await axios.get(`/api/audit-logs/conversation_stats/?provedor_id=${provedorId}`, {
+        headers: { Authorization: `Token ${token}` }
       });
       setStats(res.data);
     } catch (e) {
@@ -136,7 +135,7 @@ export default function AuditLog({ provedorId }) {
     if (!action) return <Eye className="w-4 h-4 text-muted-foreground" />;
     const a = action.toLowerCase();
     if (a.includes('conversation_closed_agent')) return <User className="w-4 h-4 text-green-600" />;
-    if (a.includes('conversation_closed_ai')) return <Bot className="w-4 h-4 text-purple-600" />;
+    if (a.includes('conversation_closed_ai')) return <img src="/logoia.png" alt="IA" className="w-4 h-4" />;
     if (a.includes('conversation_transferred')) return <MessageSquare className="w-4 h-4 text-blue-600" />;
     if (a.includes('conversation_assigned')) return <User className="w-4 h-4 text-yellow-600" />;
     return <Eye className="w-4 h-4 text-muted-foreground" />;
@@ -225,7 +224,7 @@ export default function AuditLog({ provedorId }) {
             </button>
             <button
               onClick={exportAuditLog}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
             >
               <Download className="w-4 h-4" />
               Exportar
@@ -259,8 +258,8 @@ export default function AuditLog({ provedorId }) {
             </div>
             <div className="bg-card p-4 rounded-lg border">
               <div className="flex items-center gap-2">
-                <Bot className="w-5 h-5 text-purple-500" />
-                <span className="text-sm text-muted-foreground">Por IA</span>
+                                              <img src="/logoia.png?v=1" alt="IA" className="w-5 h-5" style={{width: '20px', height: '20px'}} />
+                <span className="text-sm text-muted-foreground">Pela IA</span>
               </div>
               <p className="text-2xl font-bold">{stats.closed_by_ai || 0}</p>
             </div>
@@ -373,9 +372,21 @@ export default function AuditLog({ provedorId }) {
                         </button>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="font-medium">
-                          {typeof log.user === 'string' ? log.user.split(' (')[0] : log.user || 'Sistema'}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          {log.action === 'conversation_closed_ai' ? (
+                            <>
+                              <img src="/logoia.png?v=1" alt="IA" className="w-5 h-5" />
+                              <span className="font-medium">Pela IA</span>
+                            </>
+                          ) : (
+                            <>
+                              <User className="w-4 h-4 text-purple-600" />
+                              <span className="font-medium">
+                                {typeof log.user === 'string' ? log.user.split(' (')[0] : log.user || 'Sistema'}
+                              </span>
+                            </>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">
                         {new Date(log.timestamp).toLocaleString('pt-BR')}
@@ -402,7 +413,7 @@ export default function AuditLog({ provedorId }) {
                       <td className="px-4 py-3">
                         <button
                           onClick={() => openConversationModal(log.conversation_id)}
-                          className="flex items-center gap-2 px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                          className="flex items-center gap-2 px-3 py-1 text-sm bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
                           title="Ver detalhes da conversa"
                         >
                           <Eye className="w-4 h-4" />

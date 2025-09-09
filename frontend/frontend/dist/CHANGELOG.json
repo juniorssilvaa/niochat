@@ -2,6 +2,19 @@
   "versions": [
     {
       "version": "2.1.5",
+      "date": "2025-08-31",
+      "type": "patch",
+      "title": "Correções e Melhorias",
+      "changes": [
+        {
+          "type": "fix",
+          "title": "Correções de Bugs",
+          "description": "Correções de problemas e melhorias de estabilidade"
+        }
+      ]
+    },
+    {
+      "version": "2.1.5",
       "date": "2025-01-23",
       "type": "minor",
       "title": "Sistema CSAT e Auditoria Avançada",
@@ -12,7 +25,7 @@
           "description": "Coleta automática de feedback com dashboard interativo e métricas em tempo real"
         },
         {
-          "type": "feature", 
+          "type": "feature",
           "title": "Análise de Sentimento IA",
           "description": "Interpretação automática de feedback textual convertendo em avaliações CSAT"
         },

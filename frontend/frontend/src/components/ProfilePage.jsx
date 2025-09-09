@@ -1,12 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { User, Shield, Bell, Volume2, Save, Key } from 'lucide-react';
 import axios from 'axios';
+import useSessionTimeout from '../hooks/useSessionTimeout';
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [userData, setUserData] = useState(null);
+  const audioRef = useRef(null);
+  const { updateTimeout } = useSessionTimeout();
+  const availableSounds = [
+    'mixkit-access-allowed-tone-2869.wav',
+    'mixkit-bell-notification-933.wav',
+    'mixkit-bubble-pop-up-alert-notification-2357.wav',
+    'mixkit-correct-answer-tone-2870.wav',
+    'mixkit-digital-quick-tone-2866.wav',
+    'mixkit-elevator-tone-2863.wav',
+    'mixkit-interface-option-select-2573.wav',
+    'mixkit-sci-fi-click-900.wav'
+  ];
   const [settings, setSettings] = useState({
     profile: {
       name: '',
@@ -15,10 +28,9 @@ export default function ProfilePage() {
       avatar: null
     },
     notifications: {
-      emailNotifications: true,
-      pushNotifications: true,
       soundNotifications: false,
-      desktopNotifications: true
+      newMessageSound: 'mixkit-bell-notification-933.wav',
+      newConversationSound: 'mixkit-digital-quick-tone-2866.wav'
     },
     security: {
       twoFactorAuth: false,
@@ -37,6 +49,9 @@ export default function ProfilePage() {
         
         const user = response.data;
         setUserData(user);
+        const storedSoundEnabled = localStorage.getItem('sound_notifications_enabled');
+        const storedMsgSound = localStorage.getItem('sound_new_message');
+        const storedConvSound = localStorage.getItem('sound_new_conversation');
         setSettings({
           ...settings,
           profile: {
@@ -44,6 +59,18 @@ export default function ProfilePage() {
             email: user.email || '',
             phone: user.phone || '',
             avatar: user.avatar
+          },
+          notifications: {
+            ...settings.notifications,
+            soundNotifications: typeof user.sound_notifications_enabled === 'boolean' 
+              ? user.sound_notifications_enabled 
+              : (storedSoundEnabled ? storedSoundEnabled === 'true' : settings.notifications.soundNotifications),
+            newMessageSound: user.new_message_sound || storedMsgSound || settings.notifications.newMessageSound,
+            newConversationSound: user.new_conversation_sound || storedConvSound || settings.notifications.newConversationSound
+          },
+          security: {
+            ...settings.security,
+            sessionTimeout: user.session_timeout || settings.security.sessionTimeout
           }
         });
       } catch (error) {
@@ -63,14 +90,29 @@ export default function ProfilePage() {
       const [firstName, ...lastNameParts] = settings.profile.name.split(' ');
       const lastName = lastNameParts.join(' ') || '';
       
-              await axios.patch('/api/auth/me/', {
+      await axios.patch('/api/auth/me/', {
         first_name: firstName,
         last_name: lastName,
         email: settings.profile.email,
-        phone: settings.profile.phone
+        phone: settings.profile.phone,
+        session_timeout: settings.security.sessionTimeout
       }, {
         headers: { Authorization: `Token ${token}` }
       });
+      
+      // Atualizar timeout da sessão
+      try {
+        await axios.patch('/api/auth/me/', {
+          session_timeout: settings.security.sessionTimeout
+        }, {
+          headers: { Authorization: `Token ${token}` }
+        });
+        
+        // Atualizar o timeout no frontend
+        await updateTimeout();
+      } catch (error) {
+        console.error('Erro ao atualizar timeout da sessão:', error);
+      }
       
       setMessage('Perfil atualizado com sucesso!');
       setTimeout(() => setMessage(''), 3000);
@@ -80,6 +122,81 @@ export default function ProfilePage() {
       setTimeout(() => setMessage(''), 3000);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const formatSoundLabel = (fileName) => {
+    const base = fileName.replace(/\.wav$/i, '').replace(/-/g, ' ');
+    return base.charAt(0).toUpperCase() + base.slice(1);
+  };
+
+  const handleToggleSoundNotifications = async (checked) => {
+    setSettings({
+      ...settings,
+      notifications: { ...settings.notifications, soundNotifications: checked }
+    });
+    localStorage.setItem('sound_notifications_enabled', String(checked));
+    try {
+      const token = localStorage.getItem('token');
+      await axios.patch('/api/auth/me/', {
+        sound_notifications_enabled: checked
+      }, {
+        headers: { Authorization: `Token ${token}` }
+      });
+      // Desbloquear autoplay imediatamente quando o usuário habilitar
+      if (checked) {
+        try {
+          const src = `/sounds/${settings.notifications.newMessageSound}`;
+          if (!audioRef.current) {
+            audioRef.current = new Audio(src);
+          } else {
+            audioRef.current.src = src;
+          }
+          audioRef.current.currentTime = 0;
+          await audioRef.current.play().catch(() => {});
+        } catch (_) {}
+      }
+    } catch (e) {
+      console.error('Erro ao salvar preferência de som no servidor:', e);
+    }
+  };
+
+  const handleSelectSound = async (type, value) => {
+    setSettings({
+      ...settings,
+      notifications: { ...settings.notifications, [type]: value }
+    });
+    if (type === 'newMessageSound') {
+      localStorage.setItem('sound_new_message', value);
+    }
+    if (type === 'newConversationSound') {
+      localStorage.setItem('sound_new_conversation', value);
+    }
+    try {
+      const token = localStorage.getItem('token');
+      await axios.patch('/api/auth/me/', {
+        [type === 'newMessageSound' ? 'new_message_sound' : 'new_conversation_sound']: value
+      }, {
+        headers: { Authorization: `Token ${token}` }
+      });
+    } catch (e) {
+      console.error('Erro ao salvar som no servidor:', e);
+    }
+  };
+
+  const handlePreviewSound = (fileName) => {
+    try {
+      const src = `/sounds/${fileName}`;
+      if (!audioRef.current) {
+        audioRef.current = new Audio(src);
+      } else {
+        audioRef.current.pause();
+        audioRef.current.src = src;
+      }
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+    } catch (e) {
+      console.error('Erro ao reproduzir som:', e);
     }
   };
 
@@ -193,32 +310,80 @@ export default function ProfilePage() {
         Preferências de Notificação
       </h3>
       <div className="space-y-4">
-        {Object.entries(settings.notifications).map(([key, value]) => (
-          <div key={key} className="flex items-center justify-between p-4 border border-border rounded-lg">
-            <div className="flex items-center gap-2">
-              {key === 'soundNotifications' && <Volume2 className="w-5 h-5 text-muted-foreground" />}
-              <h4 className="font-medium text-card-foreground">
-                {key === 'emailNotifications' && 'Notificações por E-mail'}
-                {key === 'pushNotifications' && 'Notificações Push'}
-                {key === 'soundNotifications' && 'Notificações Sonoras'}
-                {key === 'desktopNotifications' && 'Notificações Desktop'}
-              </h4>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={value}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  notifications: { ...settings.notifications, [key]: e.target.checked }
-                })}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-            </label>
+        <div className="flex items-center justify-between p-4 border border-border rounded-lg">
+          <div className="flex items-center gap-2">
+            <Volume2 className="w-5 h-5 text-muted-foreground" />
+            <h4 className="font-medium text-card-foreground">Notificações Sonoras</h4>
           </div>
-        ))}
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={settings.notifications.soundNotifications}
+              onChange={(e) => handleToggleSoundNotifications(e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+          </label>
+        </div>
       </div>
+      {settings.notifications.soundNotifications && (
+        <div className="space-y-4">
+          <div className="p-4 border border-border rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-card-foreground mb-2">
+                  Som para novas mensagens
+                </label>
+                <select
+                  value={settings.notifications.newMessageSound}
+                  onChange={(e) => handleSelectSound('newMessageSound', e.target.value)}
+                  className="niochat-input"
+                >
+                  {availableSounds.map((s) => (
+                    <option key={s} value={s}>{formatSoundLabel(s)}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <button
+                  type="button"
+                  onClick={() => handlePreviewSound(settings.notifications.newMessageSound)}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+                >
+                  Reproduzir
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="p-4 border border-border rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-card-foreground mb-2">
+                  Som para novas conversas
+                </label>
+                <select
+                  value={settings.notifications.newConversationSound}
+                  onChange={(e) => handleSelectSound('newConversationSound', e.target.value)}
+                  className="niochat-input"
+                >
+                  {availableSounds.map((s) => (
+                    <option key={s} value={s}>{formatSoundLabel(s)}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <button
+                  type="button"
+                  onClick={() => handlePreviewSound(settings.notifications.newConversationSound)}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+                >
+                  Reproduzir
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -274,19 +439,31 @@ export default function ProfilePage() {
           <label className="block text-sm font-medium text-card-foreground mb-2">
             Timeout da Sessão (minutos)
           </label>
-          <select
-            value={settings.security.sessionTimeout}
-            onChange={(e) => setSettings({
-              ...settings,
-              security: { ...settings.security, sessionTimeout: parseInt(e.target.value) }
-            })}
-            className="niochat-input"
-          >
-            <option value={15}>15 minutos</option>
-            <option value={30}>30 minutos</option>
-            <option value={60}>1 hora</option>
-            <option value={120}>2 horas</option>
-          </select>
+          <div className="flex gap-2">
+            <select
+              value={settings.security.sessionTimeout}
+              onChange={(e) => setSettings({
+                ...settings,
+                security: { ...settings.security, sessionTimeout: parseInt(e.target.value) }
+              })}
+              className="niochat-input flex-1"
+            >
+              <option value={1}>1 minuto</option>
+              <option value={2}>2 minutos</option>
+              <option value={15}>15 minutos</option>
+              <option value={30}>30 minutos</option>
+              <option value={60}>1 hora</option>
+              <option value={120}>2 horas</option>
+            </select>
+            <button
+              onClick={handleSaveProfile}
+              disabled={loading}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Save className="w-4 h-4" />
+              {loading ? 'Salvando...' : 'Salvar'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

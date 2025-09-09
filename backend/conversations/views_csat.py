@@ -31,24 +31,35 @@ class CSATFeedbackViewSet(viewsets.ModelViewSet):
         user = self.request.user
         provedor = None
         
-        # Tentar por provedor_id primeiro
-        if hasattr(user, 'provedor_id') and user.provedor_id:
-            provedor = Provedor.objects.filter(id=user.provedor_id).first()
-        
-        # Se não encontrou, tentar por relacionamento direto
-        if not provedor and hasattr(user, 'provedor') and user.provedor:
-            provedor = user.provedor
-        
-        # Se ainda não encontrou, tentar por admins
-        if not provedor:
-            provedor = Provedor.objects.filter(admins=user).first()
+        # Se for superuser, permitir acesso a todos os provedores
+        if user.is_superuser:
+            queryset = CSATFeedback.objects.all().select_related('contact', 'conversation').order_by('-feedback_sent_at')
+        else:
+            # Tentar por provedor_id primeiro
+            if hasattr(user, 'provedor_id') and user.provedor_id:
+                provedor = Provedor.objects.filter(id=user.provedor_id).first()
             
-        if not provedor:
-            return CSATFeedback.objects.none()
+            # Se não encontrou, tentar por relacionamento direto
+            if not provedor and hasattr(user, 'provedor') and user.provedor:
+                provedor = user.provedor
             
-        return CSATFeedback.objects.filter(
-            provedor=provedor
-        ).select_related('contact', 'conversation').order_by('-feedback_sent_at')
+            # Se ainda não encontrou, tentar por admins
+            if not provedor:
+                provedor = Provedor.objects.filter(admins=user).first()
+                
+            if not provedor:
+                return CSATFeedback.objects.none()
+            
+            queryset = CSATFeedback.objects.filter(
+                provedor=provedor
+            ).select_related('contact', 'conversation').order_by('-feedback_sent_at')
+        
+        # Filtrar por conversa se especificado
+        conversation_id = self.request.query_params.get('conversation')
+        if conversation_id:
+            queryset = queryset.filter(conversation_id=conversation_id)
+            
+        return queryset
     
     @action(detail=False, methods=['get'])
     def stats(self, request):

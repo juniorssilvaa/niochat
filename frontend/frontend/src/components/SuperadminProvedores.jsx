@@ -561,7 +561,7 @@ export default function SuperadminProvedores() {
                   <button
                     onClick={() => handleExecutarLimpeza('redis')}
                     disabled={loadingLimpeza}
-                    className="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-gradient-to-r from-orange-400 to-yellow-400 hover:from-orange-500 hover:to-yellow-500 text-white py-2 px-4 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all duration-200"
                   >
                     {loadingLimpeza ? 'Executando...' : 'Limpar Redis'}
                   </button>

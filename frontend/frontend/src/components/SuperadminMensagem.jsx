@@ -169,7 +169,7 @@ export default function SuperadminMensagem() {
                 <button
                   type="button"
                   onClick={selectAllProvedores}
-                  className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                  className="px-3 py-1 text-xs bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500 text-white rounded shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                   Selecionar Todos
                 </button>

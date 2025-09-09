@@ -262,8 +262,9 @@ export default function Integrations({ provedorId }) {
     let ws = null;
     
     try {
+      const token = localStorage.getItem('token');
       const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      ws = new window.WebSocket(`${wsProtocol}://${window.location.host}/ws/painel/${provedorId}/`);
+      ws = new window.WebSocket(`${wsProtocol}://${window.location.host}/ws/painel/${provedorId}/?token=${token}`);
       
       ws.onopen = () => {
         console.log('# Debug logging removed for security WebSocket Integrations: Conectado com sucesso');
@@ -936,7 +937,7 @@ export default function Integrations({ provedorId }) {
             <p className="text-white mb-6">O canal foi adicionado com sucesso!</p>
             <button
               onClick={() => setShowSuccess(false)}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow transition"
+              className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
             >
               Fechar
             </button>
@@ -997,7 +998,7 @@ export default function Integrations({ provedorId }) {
                 <button 
                   type="submit" 
                   disabled={saving}
-            className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
             {saving ? 'Salvando...' : 'Salvar Configurações do SGP'}
                 </button>
@@ -1042,7 +1043,7 @@ export default function Integrations({ provedorId }) {
               <button 
               type="submit"
               disabled={saving}
-              className="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? 'Salvando...' : 'Salvar Configurações do WhatsApp'}
               </button>

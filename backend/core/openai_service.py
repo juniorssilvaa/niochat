@@ -9,6 +9,7 @@ import json
 import re
 from typing import Dict, Any, Optional, List
 from django.conf import settings
+from django.utils import timezone
 from .models import Provedor, SystemConfig
 from asgiref.sync import sync_to_async
 from datetime import datetime
@@ -85,6 +86,111 @@ class OpenAIService:
         else:
             logger.error("Não foi possível atualizar a chave da API OpenAI - chave não configurada (async)")
 
+    def _detectar_satisfacao_cliente(self, mensagem: str) -> Dict[str, Any]:
+        """
+        Detecta automaticamente se o cliente está satisfeito e quer encerrar o atendimento
+        
+        Returns:
+            Dict com 'satisfeito': bool, 'motivo': str, 'confianca': float
+        """
+        mensagem_lower = mensagem.lower().strip()
+        
+        # Palavras-chave que indicam satisfação e desejo de encerrar
+        palavras_satisfacao = [
+            'ok', 'certo', 'beleza', 'blz', 'tá bom', 'ta bom', 'tudo bem', 'tudo certo',
+            'perfeito', 'ótimo', 'excelente', 'maravilha', 'show', 'show de bola',
+            'valeu', 'valeu mesmo', 'obrigado', 'obrigada', 'obrigadão', 'valeu demais',
+            'tá de boa', 'ta de boa', 'de boa', 'suave', 'tranquilo', 'tranquilo demais',
+            'resolvido', 'resolvido sim', 'conseguiu', 'deu certo', 'funcionou',
+            'não precisa mais', 'nao precisa mais', 'não precisa de mais nada', 'nao precisa de mais nada',
+            'já está bom', 'ja esta bom', 'já está de boa', 'ja esta de boa',
+            'tá tudo certo', 'ta tudo certo', 'tudo certo sim', 'tudo certo mesmo',
+            'não tem mais dúvida', 'nao tem mais duvida', 'sem dúvida', 'sem duvida',
+            'entendi tudo', 'entendi perfeitamente', 'entendi certinho',
+            'não tem mais pergunta', 'nao tem mais pergunta', 'sem pergunta',
+            'tá resolvido', 'ta resolvido', 'resolvido sim', 'resolvido mesmo',
+            'não precisa de ajuda', 'nao precisa de ajuda', 'sem ajuda',
+            'já consegui', 'ja consegui', 'consegui sim', 'consegui mesmo',
+            'tá funcionando', 'ta funcionando', 'funcionando sim', 'funcionando mesmo',
+            'não tem mais problema', 'nao tem mais problema', 'sem problema',
+            'tá de boa', 'ta de boa', 'de boa sim', 'de boa mesmo',
+            'não tem mais nada', 'nao tem mais nada', 'sem mais nada',
+            'já está resolvido', 'ja esta resolvido', 'resolvido sim', 'resolvido mesmo',
+            'não tem mais dúvida', 'nao tem mais duvida', 'sem dúvida', 'sem duvida',
+            'entendi tudo', 'entendi perfeitamente', 'entendi certinho',
+            'não tem mais pergunta', 'nao tem mais pergunta', 'sem pergunta',
+            'tá resolvido', 'ta resolvido', 'resolvido sim', 'resolvido mesmo',
+            'não precisa de ajuda', 'nao precisa de ajuda', 'sem ajuda',
+            'já consegui', 'ja consegui', 'consegui sim', 'consegui mesmo',
+            'tá funcionando', 'ta funcionando', 'funcionando sim', 'funcionando mesmo',
+            'não tem mais problema', 'nao tem mais problema', 'sem problema',
+            'tá de boa', 'ta de boa', 'de boa sim', 'de boa mesmo',
+            'não tem mais nada', 'nao tem mais nada', 'sem mais nada',
+            'já está resolvido', 'ja esta resolvido', 'resolvido sim', 'resolvido mesmo'
+        ]
+        
+        # Palavras-chave que indicam despedida
+        palavras_despedida = [
+            'tchau', 'até logo', 'ate logo', 'até mais', 'ate mais', 'até a próxima', 'ate a proxima',
+            'até depois', 'ate depois', 'até breve', 'ate breve', 'até mais tarde', 'ate mais tarde',
+            'até amanhã', 'ate amanha', 'até segunda', 'ate segunda', 'até terça', 'ate terca',
+            'até quarta', 'ate quarta', 'até quinta', 'ate quinta', 'até sexta', 'ate sexta',
+            'até sábado', 'ate sabado', 'até domingo', 'ate domingo',
+            'até a próxima vez', 'ate a proxima vez', 'até a próxima conversa', 'ate a proxima conversa',
+            'até a próxima ligação', 'ate a proxima ligacao', 'até a próxima mensagem', 'ate a proxima mensagem',
+            'até a próxima chamada', 'ate a proxima chamada', 'até a próxima vez que precisar', 'ate a proxima vez que precisar',
+            'até a próxima vez que tiver dúvida', 'ate a proxima vez que tiver duvida',
+            'até a próxima vez que precisar de ajuda', 'ate a proxima vez que precisar de ajuda',
+            'até a próxima vez que tiver problema', 'ate a proxima vez que tiver problema',
+            'até a próxima vez que precisar de suporte', 'ate a proxima vez que precisar de suporte',
+            'até a próxima vez que precisar de atendimento', 'ate a proxima vez que precisar de atendimento',
+            'até a próxima vez que precisar de assistência', 'ate a proxima vez que precisar de assistencia',
+            'até a próxima vez que precisar de auxílio', 'ate a proxima vez que precisar de auxilio',
+            'até a próxima vez que precisar de orientação', 'ate a proxima vez que precisar de orientacao',
+            'até a próxima vez que precisar de informação', 'ate a proxima vez que precisar de informacao',
+            'até a próxima vez que precisar de esclarecimento', 'ate a proxima vez que precisar de esclarecimento',
+            'até a próxima vez que precisar de ajuda', 'ate a proxima vez que precisar de ajuda',
+            'até a próxima vez que precisar de suporte', 'ate a proxima vez que precisar de suporte',
+            'até a próxima vez que precisar de atendimento', 'ate a proxima vez que precisar de atendimento',
+            'até a próxima vez que precisar de assistência', 'ate a proxima vez que precisar de assistencia',
+            'até a próxima vez que precisar de auxílio', 'ate a proxima vez que precisar de auxilio',
+            'até a próxima vez que precisar de orientação', 'ate a proxima vez que precisar de orientacao',
+            'até a próxima vez que precisar de informação', 'ate a proxima vez que precisar de informacao',
+            'até a próxima vez que precisar de esclarecimento', 'ate a proxima vez que precisar de esclarecimento'
+        ]
+        
+        # Verificar se a mensagem contém palavras de satisfação
+        satisfacao_detectada = any(palavra in mensagem_lower for palavra in palavras_satisfacao)
+        despedida_detectada = any(palavra in mensagem_lower for palavra in palavras_despedida)
+        
+        # Calcular confiança baseada no número de palavras encontradas
+        palavras_encontradas = []
+        if satisfacao_detectada:
+            palavras_encontradas.extend([palavra for palavra in palavras_satisfacao if palavra in mensagem_lower])
+        if despedida_detectada:
+            palavras_encontradas.extend([palavra for palavra in palavras_despedida if palavra in mensagem_lower])
+        
+        confianca = min(len(palavras_encontradas) * 0.3, 1.0)  # Máximo 100% de confiança
+        
+        # Determinar motivo baseado no tipo de palavras encontradas
+        if satisfacao_detectada and despedida_detectada:
+            motivo = 'cliente_satisfeito_com_despedida'
+        elif satisfacao_detectada:
+            motivo = 'cliente_satisfeito'
+        elif despedida_detectada:
+            motivo = 'cliente_despediu'
+        else:
+            motivo = 'nao_detectado'
+        
+        return {
+            'satisfeito': satisfacao_detectada or despedida_detectada,
+            'motivo': motivo,
+            'confianca': confianca,
+            'palavras_encontradas': palavras_encontradas,
+            'satisfacao_detectada': satisfacao_detectada,
+            'despedida_detectada': despedida_detectada
+        }
+    
     def _get_greeting_time(self) -> str:
         """Retorna saudação baseada no horário atual"""
         from datetime import datetime
@@ -145,6 +251,9 @@ class OpenAIService:
         
         # Planos de internet
         planos_internet = provedor.planos_internet or ''
+        planos_descricao = provedor.planos_descricao or ''
+        
+
 
         # Emojis
         uso_emojis = provedor.uso_emojis or ""
@@ -212,6 +321,38 @@ Nome: {nome_provedor}"""
             empresa_section += f"\nEndereço: {endereco}"
         if email_contato:
             empresa_section += f"\nE-mail: {email_contato}"
+            
+        # Adicionar horários de atendimento
+        if provedor.horarios_atendimento:
+            try:
+                import json
+                horarios = json.loads(provedor.horarios_atendimento) if isinstance(provedor.horarios_atendimento, str) else provedor.horarios_atendimento
+                horarios_texto = []
+                
+                for dia_info in horarios:
+                    dia = dia_info.get('dia', '')
+                    periodos = dia_info.get('periodos', [])
+                    
+                    if periodos:
+                        periodos_texto = []
+                        for periodo in periodos:
+                            inicio = periodo.get('inicio', '')
+                            fim = periodo.get('fim', '')
+                            if inicio and fim:
+                                periodos_texto.append(f"{inicio} às {fim}")
+                        
+                        if periodos_texto:
+                            horarios_texto.append(f"{dia}: {', '.join(periodos_texto)}")
+                    else:
+                        horarios_texto.append(f"{dia}: Fechado")
+                
+                if horarios_texto:
+                    empresa_section += f"\n\nHorários de Atendimento:\n" + "\n".join(horarios_texto)
+                    
+            except Exception as e:
+                # Se houver erro no JSON, usar texto simples
+                if provedor.horarios_atendimento:
+                    empresa_section += f"\nHorários de Atendimento: {provedor.horarios_atendimento}"
         
         prompt_sections.append(empresa_section)
         
@@ -267,7 +408,7 @@ DATA E HORA ATUAL: {data_atual}"""
         import re
         
         # Se a resposta contém o formato antigo, corrigir
-        if any(termo in resposta for termo in ['*Dados do Cliente:*', '*Nome:*', '*Status do Contrato:*', 'ℹ', '👤', '🔒']):
+        if any(termo in resposta for termo in ['*Dados do Cliente:*', '*Nome:*', '*Status do Contrato:*']):
             logger.warning("Detectado formato antigo na resposta, corrigindo...")
             
             # Formatação básica removida
@@ -400,20 +541,79 @@ DATA E HORA ATUAL: {data_atual}"""
                     
             elif function_name == "verificar_acesso_sgp":
                 contrato = function_args.get('contrato')
+                
+                # Se não tem contrato, tentar buscar pelo CPF/CNPJ da memória
+                if not contrato and contexto and contexto.get('conversation'):
+                    conversation = contexto['conversation']
+                    conversation_id = conversation.id
+                    
+                    # Recuperar memória Redis para obter CPF/CNPJ
+                    try:
+                        conversation_memory = redis_memory_service.get_conversation_memory_sync(
+                            provedor_id=provedor.id,
+                            conversation_id=conversation_id
+                        )
+                        
+                        if conversation_memory and conversation_memory.get('cpf_cnpj'):
+                            # Buscar contrato pelo CPF/CNPJ
+                            dados_cliente = sgp.consultar_cliente(conversation_memory['cpf_cnpj'])
+                            if dados_cliente.get('contratos'):
+                                contrato = dados_cliente['contratos'][0].get('contratoId')
+                                logger.info(f"Contrato encontrado via CPF: {contrato}")
+                    except Exception as e:
+                        logger.warning(f"Erro ao buscar contrato via CPF: {e}")
+                
+                if not contrato:
+                    return {
+                        "success": False,
+                        "erro": "Contrato não informado e não foi possível identificar automaticamente. Por favor, informe o CPF/CNPJ do cliente primeiro."
+                    }
+                
+                # Verificar acesso no SGP
                 resultado = sgp.verifica_acesso(contrato)
                 
-                status_conexao = (
-                    resultado.get('msg') or
-                    resultado.get('status') or 
-                    resultado.get('status_conexao') or
-                    resultado.get('mensagem') or
-                    "Status não disponível"
-                )
+                # Interpretar resultado
+                status_conexao = "Desconhecido"
+                problema_identificado = None
+                acao_recomendada = None
+                
+                if isinstance(resultado, list):
+                    if len(resultado) == 0:
+                        status_conexao = "Offline"
+                        problema_identificado = "Contrato suspenso ou sem acesso"
+                        acao_recomendada = "Verificar status financeiro ou técnico"
+                    else:
+                        status_conexao = "Online"
+                        problema_identificado = "Conexão ativa"
+                        acao_recomendada = "Verificar equipamento local"
+                else:
+                    # Resultado é dicionário
+                    status_code = resultado.get('status')
+                    mensagem = resultado.get('msg', '')
+                    
+                    if status_code == 1:
+                        status_conexao = "Online"
+                        problema_identificado = "Conexão ativa"
+                        acao_recomendada = "Verificar equipamento local"
+                    elif status_code == 2:
+                        status_conexao = "Offline"
+                        problema_identificado = "Serviço Offline"
+                        acao_recomendada = "Verificar equipamento e LEDs"
+                    elif status_code == 4:
+                        status_conexao = "Suspenso"
+                        problema_identificado = "Contrato suspenso por motivo financeiro"
+                        acao_recomendada = "Verificar faturas em aberto"
+                    else:
+                        status_conexao = f"Status {status_code}"
+                        problema_identificado = mensagem
+                        acao_recomendada = "Verificar com suporte técnico"
                 
                 return {
                     "success": True,
                     "contrato": contrato,
                     "status_conexao": status_conexao,
+                    "problema_identificado": problema_identificado,
+                    "acao_recomendada": acao_recomendada,
                     "dados_completos": resultado
                 }
                 
@@ -438,12 +638,68 @@ DATA E HORA ATUAL: {data_atual}"""
                         except Exception as e:
                             logger.warning(f"Erro ao limpar memória Redis: {e}")
                     
+                    # ENCERRAR CONVERSA E REGISTRAR AUDITORIA
+                    if contexto and contexto.get('conversation'):
+                        conversation = contexto['conversation']
+                        
+                        # Fechar a conversa
+                        conversation.status = 'closed'
+                        conversation.ended_at = timezone.now()
+                        conversation.save()
+                        
+                        # Registrar auditoria de encerramento
+                        try:
+                            from core.models import AuditLog
+                            from conversations.csat_automation import CSATAutomationService
+                            
+                            # Calcular duração da conversa
+                            duracao = None
+                            if conversation.created_at and conversation.ended_at:
+                                duracao = conversation.ended_at - conversation.created_at
+                            
+                            # Contar mensagens
+                            message_count = conversation.messages.count()
+                            
+                            # Registrar auditoria
+                            audit_log = AuditLog.objects.create(
+                                action='conversation_closed_ai',
+                                user=None,  # Encerrado pela IA
+                                provedor=provedor,
+                                conversation_id=str(conversation.id),
+                                details=json.dumps({
+                                    'motivo': motivo,
+                                    'encerrado_por': 'ai',
+                                    'duracao_minutos': round(duracao.total_seconds() / 60, 2) if duracao else None,
+                                    'quantidade_mensagens': message_count,
+                                    'satisfacao_cliente': 'confirmada' if motivo in ['cliente_satisfeito', 'atendimento_concluido'] else 'nao_avaliada'
+                                }),
+                                ip_address='127.0.0.1',  # IA
+                                timestamp=timezone.now()
+                            )
+                            
+                            logger.info(f"Auditoria de encerramento registrada: {audit_log.id}")
+                            
+                            # CRIAR SOLICITAÇÃO DE CSAT AUTOMÁTICA
+                            try:
+                                csat_request = CSATAutomationService.create_csat_request(conversation)
+                                if csat_request:
+                                    logger.info(f"CSAT request criada automaticamente: {csat_request.id}")
+                                else:
+                                    logger.warning("Não foi possível criar CSAT request automático")
+                            except Exception as csat_error:
+                                logger.error(f"Erro ao criar CSAT request automático: {csat_error}")
+                            
+                        except Exception as audit_error:
+                            logger.error(f"Erro ao registrar auditoria de encerramento: {audit_error}")
+                    
                     return {
                         "success": True,
                         "atendimento_encerrado": True,
                         "motivo": motivo,
                         "mensagem": "Obrigado pelo contato! Tenha um ótimo dia! 👋",
-                        "conversation_id": conversation_id
+                        "conversation_id": conversation_id,
+                        "auditoria_registrada": True,
+                        "csat_disparado": True
                     }
                     
                 except Exception as e:
@@ -481,22 +737,30 @@ DATA E HORA ATUAL: {data_atual}"""
                         
                         logger.info(f"Executando gerar_fatura_completa usando FaturaService para CPF/CNPJ: {cpf_cnpj}")
                         
-                        # O SGP aceita CPF/CNPJ diretamente - não precisa buscar contrato_id primeiro
-                        # Processar fatura completa usando FaturaService com CPF/CNPJ
-                        resultado = fatura_service.processar_fatura_completa(
+                        # Buscar dados da fatura no SGP
+                        dados_fatura = fatura_service.buscar_fatura_sgp(provedor, cpf_cnpj)
+                        
+                        if not dados_fatura:
+                            return {
+                                "success": False,
+                                "erro": "Não foi possível encontrar fatura para este CPF/CNPJ"
+                            }
+                        
+                        # Enviar fatura via Uazapi
+                        resultado = fatura_service.enviar_fatura_uazapi(
                             provedor=provedor,
-                            cpf_cnpj=cpf_cnpj,  # Usar CPF/CNPJ diretamente
                             numero_whatsapp=numero_whatsapp,
-                            preferencia_pagamento=tipo_pagamento,  # PIX ou boleto conforme solicitado
-                            conversation=contexto.get('conversation')
+                            dados_fatura=dados_fatura,
+                            conversation=contexto.get('conversation'),
+                            tipo_pagamento=tipo_pagamento
                         )
                         
                         if resultado.get('success'):
                             # Criar mensagem dinâmica baseada no tipo de pagamento
                             if tipo_pagamento == 'pix':
-                                mensagem_sucesso = "✅ Acabei de enviar sua fatura via WhatsApp com QR Code e botão de cópia PIX!\n\nPosso te ajudar com mais alguma coisa?"
+                                mensagem_sucesso = "Acabei de enviar sua fatura via WhatsApp com QR Code e botão de cópia PIX!\n\nPosso te ajudar com mais alguma coisa?"
                             else:  # boleto
-                                mensagem_sucesso = "✅ Acabei de enviar sua fatura via WhatsApp com boleto PDF!\n\nPosso te ajudar com mais alguma coisa?"
+                                mensagem_sucesso = "Acabei de enviar sua fatura via WhatsApp com boleto PDF!\n\nPosso te ajudar com mais alguma coisa?"
                             
                             return {
                                 "success": True,
@@ -523,8 +787,246 @@ DATA E HORA ATUAL: {data_atual}"""
                         "erro": "CPF/CNPJ não fornecido"
                     }
                 
+            elif function_name == "enviar_formato_adicional":
+                # Implementação para enviar formato adicional (PIX ou Boleto) quando cliente pede depois
+                cpf_cnpj = function_args.get('cpf_cnpj', '')
+                formato_solicitado = function_args.get('formato_solicitado', '')  # 'pix' ou 'boleto'
+                numero_whatsapp = function_args.get('numero_whatsapp', '')
+                
+                # Extrair número WhatsApp apenas do contexto atual da conversa
+                if not numero_whatsapp and contexto and contexto.get('conversation'):
+                    conversation = contexto['conversation']
+                    if hasattr(conversation, 'contact') and hasattr(conversation.contact, 'phone'):
+                        numero_whatsapp = conversation.contact.phone
+                        logger.info(f"Número WhatsApp obtido da conversa atual: {numero_whatsapp}")
+                
+                if cpf_cnpj and formato_solicitado:
+                    # Validar se o CPF/CNPJ é válido
+                    if not self._is_valid_cpf_cnpj(cpf_cnpj):
+                        return {
+                            "success": False,
+                            "erro": f"CPF/CNPJ inválido: '{cpf_cnpj}'. Por favor, informe um CPF (11 dígitos) ou CNPJ (14 dígitos) válido."
+                        }
+                    
+                    try:
+                        from .fatura_service import FaturaService
+                        fatura_service = FaturaService()
+                        
+                        logger.info(f"Executando enviar_formato_adicional para CPF/CNPJ: {cpf_cnpj}, formato: {formato_solicitado}")
+                        
+                        # Buscar dados da fatura primeiro
+                        dados_fatura = fatura_service.buscar_fatura_sgp(provedor, cpf_cnpj)
+                        
+                        if not dados_fatura:
+                            return {
+                                "success": False,
+                                "erro": "Fatura não encontrada no SGP"
+                            }
+                        
+                        # Enviar formato adicional
+                        resultado = fatura_service.enviar_formato_adicional(
+                            provedor=provedor,
+                            numero_whatsapp=numero_whatsapp,
+                            dados_fatura=dados_fatura,
+                            formato_solicitado=formato_solicitado,
+                            conversation=contexto.get('conversation')
+                        )
+                        
+                        if resultado:
+                            # Criar mensagem de confirmação
+                            if formato_solicitado.lower() == 'pix':
+                                mensagem_sucesso = "Acabei de enviar o QR Code PIX e botão para copiar a chave!\n\nPosso te ajudar com mais alguma coisa?"
+                            else:  # boleto
+                                mensagem_sucesso = "Acabei de enviar o PDF do boleto e botão para copiar a linha digitável!\n\nPosso te ajudar com mais alguma coisa?"
+                            
+                            return {
+                                "success": True,
+                                "formato_enviado": True,
+                                "tipo_formato": formato_solicitado,
+                                "enviada_whatsapp": True,
+                                "mensagem_formatada": mensagem_sucesso
+                            }
+                        else:
+                            return {
+                                "success": False,
+                                "erro": f"Falha ao enviar {formato_solicitado}"
+                            }
+                            
+                    except Exception as e:
+                        logger.error(f"Erro ao enviar formato adicional: {e}")
+                        return {
+                            "success": False,
+                            "erro": f"Erro ao enviar formato adicional: {str(e)}"
+                        }
+                else:
+                    return {
+                        "success": False,
+                        "erro": "CPF/CNPJ ou formato solicitado não fornecido"
+                    }
+                
+            elif function_name == "criar_chamado_tecnico":
+                # Implementação para criar chamado técnico no SGP
+                cpf_cnpj = function_args.get('cpf_cnpj', '')
+                motivo = function_args.get('motivo', '')
+                sintomas = function_args.get('sintomas', '')
+                
+                if not cpf_cnpj or not motivo:
+                    return {
+                        "success": False,
+                        "erro": "CPF/CNPJ e motivo são obrigatórios para criar chamado técnico"
+                    }
+                
+                # Validar se o CPF/CNPJ é válido
+                if not self._is_valid_cpf_cnpj(cpf_cnpj):
+                    return {
+                        "success": False,
+                        "erro": f"CPF/CNPJ inválido: '{cpf_cnpj}'. Por favor, informe um CPF (11 dígitos) ou CNPJ (14 dígitos) válido."
+                    }
+                
+                try:
+                    from .sgp_client import SGPClient
+                    integracao = provedor.integracoes_externas or {}
+                    sgp_url = integracao.get('sgp_url')
+                    sgp_token = integracao.get('sgp_token') 
+                    sgp_app = integracao.get('sgp_app')
+                    
+                    if not all([sgp_url, sgp_token, sgp_app]):
+                        return {
+                            "success": False,
+                            "erro": "Configurações do SGP não encontradas"
+                        }
+                    
+                    sgp = SGPClient(base_url=sgp_url, token=sgp_token, app_name=sgp_app)
+                    
+                    # Buscar cliente para obter contrato_id
+                    dados_cliente = sgp.consultar_cliente(cpf_cnpj)
+                    
+                    if not dados_cliente.get('contratos'):
+                        return {
+                            "success": False,
+                            "erro": "Cliente não encontrado ou sem contrato ativo"
+                        }
+                    
+                    contrato_id = dados_cliente['contratos'][0].get('contratoId')
+                    
+                    if not contrato_id:
+                        return {
+                            "success": False,
+                            "erro": "ID do contrato não encontrado"
+                        }
+                    
+                    # Detectar tipo de ocorrência automaticamente baseado no relato
+                    motivo_lower = motivo.lower()
+                    sintomas_lower = sintomas.lower()
+                    texto_completo = f"{motivo} {sintomas}".lower()
+                    
+                    # Detectar tipo de ocorrência
+                    ocorrenciatipo = 1  # Padrão: sem acesso à internet
+                    
+                    # Palavras-chave para internet lenta
+                    palavras_lenta = ['lenta', 'lento', 'devagar', 'baixa velocidade', 'velocidade baixa', 'ping alto', 'lag', 'travando', 'instável']
+                    
+                    # Palavras-chave para sem acesso
+                    palavras_sem_acesso = ['sem internet', 'sem acesso', 'não funciona', 'não conecta', 'offline', 'desconectado', 'quebrou', 'rompeu', 'caiu', 'drop', 'fio quebrado', 'cabo quebrado']
+                    
+                    # Verificar se é problema de velocidade
+                    if any(palavra in texto_completo for palavra in palavras_lenta):
+                        ocorrenciatipo = 2  # Internet lenta
+                        tipo_problema = "Internet lenta/instável"
+                    elif any(palavra in texto_completo for palavra in palavras_sem_acesso):
+                        ocorrenciatipo = 1  # Sem acesso à internet
+                        tipo_problema = "Sem acesso à internet"
+                    else:
+                        # Se não detectar claramente, usar padrão baseado no contexto
+                        if 'led' in texto_completo or 'vermelho' in texto_completo:
+                            ocorrenciatipo = 1  # Sem acesso (LED vermelho indica problema físico)
+                            tipo_problema = "Problema físico (LED vermelho)"
+                        else:
+                            ocorrenciatipo = 1  # Padrão: sem acesso
+                            tipo_problema = "Problema de acesso"
+                    
+                    # Criar mensagem simplificada e natural para o chamado
+                    # Substituir "fio" por "drop" e simplificar o relato
+                    sintomas_limpo = sintomas.replace('fio', 'drop').replace('Fio', 'Drop')
+                    motivo_limpo = motivo.replace('fio', 'drop').replace('Fio', 'Drop')
+                    
+                    msg_detalhada = f"Cliente relatou: {motivo_limpo} {sintomas_limpo}"
+                    
+                    # Criar chamado técnico
+                    resultado_chamado = sgp.criar_chamado(
+                        contrato=contrato_id,
+                        ocorrenciatipo=ocorrenciatipo,
+                        conteudo=msg_detalhada
+                    )
+                    
+                    if resultado_chamado:
+                        protocolo = resultado_chamado.get('protocolo', 'N/A')
+                        
+                        # Transferir conversa para equipe de suporte
+                        conversation_id = None
+                        if contexto and contexto.get('conversation'):
+                            conversation_id = contexto['conversation'].id
+                            
+                            try:
+                                # Transferir para equipe de suporte usando database_tools
+                                from .database_tools import DatabaseTools
+                                db_tools = DatabaseTools(provedor=provedor)
+                                resultado_transferencia = db_tools.executar_transferencia_conversa(
+                                    conversation_id=conversation_id,
+                                    equipe_nome="SUPORTE TÉCNICO",
+                                    motivo=f"Chamado técnico criado - {tipo_problema}"
+                                )
+                                
+                                if resultado_transferencia.get('success'):
+                                    return {
+                                        "success": True,
+                                        "chamado_criado": True,
+                                        "protocolo": protocolo,
+                                        "transferido_suporte": True,
+                                        "mensagem_formatada": f"Já abri seu chamado técnico! Seu número de protocolo é: {protocolo}\n\nTransferindo você para nossa equipe de suporte técnico que irá atender seu caso. Aguarde um momento, por favor!"
+                                    }
+                                else:
+                                    return {
+                                        "success": True,
+                                        "chamado_criado": True,
+                                        "protocolo": protocolo,
+                                        "transferido_suporte": False,
+                                        "erro_transferencia": resultado_transferencia.get('erro', 'Erro desconhecido'),
+                                        "mensagem_formatada": f"Já abri seu chamado técnico! Seu número de protocolo é: {protocolo}\n\nNossa equipe de suporte entrará em contato em breve.\n\nObrigado pelo contato!"
+                                    }
+                                    
+                            except Exception as e:
+                                logger.error(f"Erro ao transferir conversa: {e}")
+                                return {
+                                    "success": True,
+                                    "chamado_criado": True,
+                                    "protocolo": protocolo,
+                                    "transferido_suporte": False,
+                                    "erro_transferencia": str(e),
+                                    "mensagem_formatada": f"Já abri seu chamado técnico! Seu número de protocolo é: {protocolo}\n\nNossa equipe de suporte entrará em contato em breve.\n\nObrigado pelo contato!"
+                                }
+                        else:
+                            return {
+                                "success": True,
+                                "chamado_criado": True,
+                                "protocolo": protocolo,
+                                "transferido_suporte": False,
+                                "mensagem_formatada": f"Já abri seu chamado técnico! Seu número de protocolo é: {protocolo}\n\nNossa equipe de suporte entrará em contato em breve.\n\nObrigado pelo contato!"
+                            }
+                    else:
+                        return {
+                            "success": False,
+                            "erro": "Falha ao criar chamado técnico no SGP"
+                        }
+                        
+                except Exception as e:
+                    logger.error(f"Erro ao criar chamado técnico: {e}")
+                    return {
+                        "success": False,
+                        "erro": f"Erro ao criar chamado técnico: {str(e)}"
+                    }
+                
             elif function_name == "enviar_qr_code_pix":
-                # Implementação para enviar apenas QR Code PIX
                 cpf_cnpj = function_args.get('cpf_cnpj', '')
                 contrato = function_args.get('contrato', '')
                 numero_whatsapp = function_args.get('numero_whatsapp', '')
@@ -1121,11 +1623,12 @@ IMPORTANTE: Use este histórico para manter contexto da conversa. NÃO repita pe
                 except Exception as e:
                     logger.warning(f"Erro ao carregar histórico do Redis: {e}")
 
-            # NOVO PROMPT COMPLETO E PROFISSIONAL
+            # USAR O PROMPT COMPLETO COM TODOS OS DADOS DO PROVEDOR
+            system_prompt = self._build_system_prompt(provedor)
             system_prompt = f"""
 IMPORTANTE: Sempre retorne as mensagens em uma lista (um bloco para cada mensagem), para que o frontend exiba cada uma separadamente com efeito de 'digitando...'. Nunca junte mensagens diferentes em um único bloco.
 
-Você é {provedor.nome_agente_ia}, agente virtual do provedor {provedor.nome}. Seu papel é atender clientes e interessados, oferecendo suporte técnico, esclarecendo dúvidas e apresentando planos de internet. Seja acolhedor, objetivo e resolva o que for possível.{historico_conversa}
+{system_prompt}{historico_conversa}
 
 CONTEXTO:
 - Empresa: {provedor.nome}
@@ -1201,6 +1704,28 @@ REGRAS PARA ENCERRAMENTO DE ATENDIMENTO:
 PROBLEMAS DE INTERNET:
 - Se o cliente relatar problemas de internet, utilize verificar_acesso_sgp para verificar o status
 - Só prossiga para as orientações após consultar o status da conexão
+
+                DIAGNÓSTICO INTELIGENTE DE PROBLEMAS DE INTERNET:
+1. Quando cliente disser "sem internet", "sem acesso", "internet não funciona" → Use verificar_acesso_sgp
+2. A função identifica automaticamente:
+   - Status "Online" → Problema no equipamento local
+   - Status "Offline" → Problema técnico (fibra, equipamento)
+   - Status "Suspenso" → Problema financeiro (fatura em aberto)
+3. Se for "Offline":
+   - PERGUNTE IMEDIATAMENTE: "Você consegue ver algum LED vermelho piscando no seu modem?"
+   - Se cliente responder SIM (sim, tem, está, piscando, vermelho) → Use criar_chamado_tecnico IMEDIATAMENTE
+   - NÃO pergunte mais nada, apenas informe que é problema físico e vai abrir chamado
+   - Se cliente responder NÃO → Oriente sobre equipamento local
+4. Se for "Suspenso" → Oriente sobre pagamento de fatura
+5. Se for "Online" → Oriente sobre equipamento local
+
+REGRA IMPORTANTE: Se cliente já disse que está sem internet E você detectou que está offline, pergunte sobre LED vermelho. Se confirmar LED vermelho, abra chamado técnico IMEDIATAMENTE sem mais perguntas.
+
+TRANSFERÊNCIA INTELIGENTE:
+- Quando não conseguir resolver o problema do cliente, use transferir_conversa_inteligente
+- A função analisa automaticamente a conversa e escolhe a equipe mais adequada
+- Após transferência, a IA NÃO responde mais - apenas quando atendente encerrar
+- Conversa fica em "Em Espera" até atendente pegar o atendimento
 
 MEMÓRIA DE CONTEXTO (REDIS):
 - USE A MEMÓRIA REDIS PARA LEMBRAR DO QUE JÁ FOI CONVERSADO
@@ -1300,7 +1825,7 @@ FLUXO FATURA SIMPLIFICADO:
                     "type": "function", 
                     "function": {
                         "name": "gerar_fatura_completa",
-                        "description": "OBRIGATÓRIO: Esta é a ÚNICA forma de gerar faturas. Use sua inteligência para interpretar se o cliente prefere PIX (rápido/instantâneo) ou boleto (tradicional/físico). NUNCA mostre dados fixos. SEMPRE use esta função quando cliente pedir fatura ou pagamento.",
+                        "description": "OBRIGATÓRIO: Esta é a ÚNICA forma de gerar faturas. Use sua inteligência para interpretar se o cliente prefere PIX (rápido/instantâneo) ou boleto (tradicional/físico). NUNCA mostre dados fixos. SEMPRE use esta função quando cliente pedir fatura ou pagamento. A função faz TUDO automaticamente: busca a fatura no SGP, gera QR Code PIX, envia via WhatsApp com botões interativos. NÃO precisa formatar manualmente - a função já retorna a mensagem pronta.",
                         "parameters": {
                             "type": "object",
                             "properties": {
@@ -1330,13 +1855,41 @@ FLUXO FATURA SIMPLIFICADO:
                     "type": "function",
                     "function": {
                         "name": "verificar_acesso_sgp",
-                        "description": "Verificar status da conexão do cliente. Use quando cliente relatar problemas de internet.",
+                        "description": "DIAGNÓSTICO COMPLETO DE PROBLEMAS DE INTERNET: Verificar status da conexão do cliente e diagnosticar problemas. Use quando cliente relatar 'sem internet', 'sem acesso', 'internet não funciona'. A função identifica automaticamente se é problema técnico (offline), financeiro (suspenso) ou equipamento local. Se for offline, pergunte sobre LEDs do modem para identificar se é problema físico (fibra rompida) ou equipamento.",
                         "parameters": {
                             "type": "object",
                             "properties": {
-                                "contrato": {"type": "string", "description": "ID do contrato"}
+                                "contrato": {
+                                    "type": "string", 
+                                    "description": "ID do contrato (opcional - se não informado, busca automaticamente pelo CPF/CNPJ da memória)"
+                                }
                             },
-                            "required": ["contrato"]
+                            "required": []
+                        }
+                    }
+                },
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "criar_chamado_tecnico",
+                        "description": "CRIAR CHAMADO TÉCNICO INTELIGENTE: Abrir chamado técnico no SGP com detecção automática do tipo de problema. Use APENAS quando cliente confirmar LEDs vermelhos piscando ou problema físico identificado. A IA detecta automaticamente: Tipo 1 (Sem acesso) ou Tipo 2 (Internet lenta) baseado no relato do cliente.",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "cpf_cnpj": {
+                                    "type": "string",
+                                    "description": "CPF ou CNPJ do cliente"
+                                },
+                                "motivo": {
+                                    "type": "string",
+                                    "description": "Motivo do chamado técnico (ex: 'LED vermelho piscando', 'fibra rompida', 'internet lenta')"
+                                },
+                                "sintomas": {
+                                    "type": "string",
+                                    "description": "Sintomas relatados pelo cliente (ex: 'sem internet', 'LED vermelho piscando', 'velocidade baixa')"
+                                }
+                            },
+                            "required": ["cpf_cnpj", "motivo", "sintomas"]
                         }
                     }
                 },
@@ -1344,11 +1897,11 @@ FLUXO FATURA SIMPLIFICADO:
                     "type": "function",
                     "function": {
                         "name": "encerrar_atendimento",
-                        "description": "OBRIGATÓRIO: Use quando cliente disser 'não', 'não preciso', 'tá bom', 'obrigado' ou qualquer resposta indicando que não precisa de mais ajuda. Limpa a memória Redis e encerra o atendimento.",
+                        "description": "OBRIGATÓRIO: Use quando cliente disser 'não', 'não preciso', 'tá bom', 'obrigado' ou qualquer resposta indicando que não precisa de mais ajuda. Limpa a memória Redis e encerra o atendimento automaticamente, registra auditoria e dispara CSAT.",
                         "parameters": {
                             "type": "object",
                             "properties": {
-                                "motivo": {"type": "string", "description": "Motivo do encerramento (ex: 'cliente_satisfeito', 'nao_precisa_mais')"}
+                                "motivo": {"type": "string", "description": "Motivo do encerramento (ex: 'cliente_satisfeito', 'nao_precisa_mais', 'atendimento_concluido')"}
                             },
                             "required": ["motivo"]
                         }
@@ -1364,8 +1917,18 @@ FLUXO FATURA SIMPLIFICADO:
             if cliente_pediu_fatura:
                 system_prompt += """
 
-🚨 CLIENTE PEDIU FATURA/PAGAMENTO:
+CLIENTE PEDIU FATURA/PAGAMENTO:
 - IMPORTANTE: Antes de usar gerar_fatura_completa, você DEVE perguntar o CPF/CNPJ do cliente
+- Se já tem CPF/CNPJ na memória Redis, use gerar_fatura_completa IMEDIATAMENTE
+- A função gerar_fatura_completa faz TUDO automaticamente:
+  * Formata o CPF/CNPJ (adiciona pontos e traços)
+  * Busca a fatura no SGP usando o CPF/CNPJ formatado
+  * Gera QR Code PIX automaticamente
+  * Envia via WhatsApp com botões interativos
+  * Confirma o envio na conversa
+- NÃO precisa fazer nada manualmente - a função já faz tudo
+- Use 'pix' se cliente pedir pagamento rápido/instantâneo
+- Use 'boleto' se cliente pedir comprovante tradicional/físico
 - Só use gerar_fatura_completa quando tiver o CPF/CNPJ válido (11 ou 14 dígitos)
 - Se cliente não informou CPF/CNPJ, pergunte: "Qual é o seu CPF ou CNPJ?"
 - Use gerar_fatura_completa apenas com dados válidos:
@@ -1373,6 +1936,14 @@ FLUXO FATURA SIMPLIFICADO:
   * tipo_pagamento: "pix" ou "boleto" baseado na intenção do cliente
 - A função faz TUDO automaticamente: SGP + envio via WhatsApp + Mensagem específica
 - NÃO envie mensagens adicionais - a função já confirma tudo
+
+ENCERRAMENTO AUTOMÁTICO INTELIGENTE:
+- A IA detecta automaticamente quando o cliente está satisfeito
+- Palavras como "ok", "certo", "beleza", "obrigado", "tá bom", "resolvido" disparam encerramento automático
+- O sistema registra automaticamente na auditoria do provedor
+- O sistema dispara automaticamente a pesquisa de satisfação (CSAT)
+- Não precisa usar manualmente a função encerrar_atendimento - é automático
+- A IA responde com mensagem de despedida e encerra o atendimento
 """
             
             # Forçar uso de ferramentas quando necessário
@@ -1506,14 +2077,43 @@ FLUXO FATURA SIMPLIFICADO:
             for dado in dados_fixos_comuns:
                 if dado in resposta:
                     logger.error(f"ERRO: IA usando dados fixos: {dado}")
-                    resposta = "❌ Erro interno: Preciso consultar o sistema primeiro. Me informe seu CPF/CNPJ para buscar seus dados reais."
+                    resposta = "Erro interno: Preciso consultar o sistema primeiro. Me informe seu CPF/CNPJ para buscar seus dados reais."
                     break
+            
+            # DETECÇÃO AUTOMÁTICA DE SATISFAÇÃO DO CLIENTE
+            satisfacao_detectada = False
+            if contexto and contexto.get('conversation'):
+                # Detectar se o cliente está satisfeito
+                resultado_deteccao = self._detectar_satisfacao_cliente(mensagem)
+                
+                if resultado_deteccao['satisfeito'] and resultado_deteccao['confianca'] >= 0.6:
+                    logger.info(f"Cliente satisfeito detectado: {resultado_deteccao}")
+                    
+                    # Encerrar atendimento automaticamente
+                    try:
+                        encerramento_result = self._execute_sgp_function(
+                            provedor=provedor,
+                            function_name="encerrar_atendimento",
+                            function_args={'motivo': resultado_deteccao['motivo']},
+                            contexto=contexto
+                        )
+                        
+                        if encerramento_result.get('success'):
+                            satisfacao_detectada = True
+                            # Usar mensagem de encerramento da função
+                            resposta = encerramento_result.get('mensagem', resposta)
+                            logger.info("Atendimento encerrado automaticamente com sucesso")
+                        else:
+                            logger.warning(f"Falha ao encerrar atendimento automaticamente: {encerramento_result.get('erro')}")
+                    except Exception as e:
+                        logger.error(f"Erro ao encerrar atendimento automaticamente: {e}")
             
             return {
                 "success": True,
                 "resposta": resposta,
                 "model": self.model,
-                "provedor": provedor.nome
+                "provedor": provedor.nome,
+                "satisfacao_detectada": satisfacao_detectada
             }
             
         except Exception as e:
@@ -1696,11 +2296,11 @@ REGRA CRÍTICA PARA MEMÓRIA REDIS:
 FORMATO OBRIGATÓRIO PARA RESPOSTAS DAS FERRAMENTAS SGP:
 
 ATENÇÃO CRÍTICA: NUNCA use os formatos antigos:
-- ❌ NUNCA: "ℹ *Dados do Cliente:*"
-- ❌ NUNCA use nomes fixos - SEMPRE use dados reais do SGP
-- ❌ NUNCA: "🔒 *Status do Contrato:* Suspenso"
-- ❌ NUNCA: "*Cliente Encontrado*"
-- ❌ NUNCA: "Como posso te ajudar hoje, Pedro?"
+- NUNCA: "*Dados do Cliente:*"
+- NUNCA use nomes fixos - SEMPRE use dados reais do SGP
+- NUNCA: "*Status do Contrato:* Suspenso"
+- NUNCA: "*Cliente Encontrado*"
+- NUNCA: "Como posso te ajudar hoje, Pedro?"
 
 **Para consultar_cliente_sgp:**
 - SEMPRE formate EXATAMENTE assim (SEM EMOJIS):
@@ -1730,6 +2330,10 @@ Contratos:
   * Acessar fatura online
 - Use a função _send_fatura_via_uazapi para enviar a mensagem com botões
 - A função já confirma automaticamente o envio
+- IMPORTANTE: A função usa o CPF/CNPJ da memória Redis automaticamente
+- IMPORTANTE: A função formata o CPF/CNPJ automaticamente (adiciona pontos e traços)
+- IMPORTANTE: A função busca a fatura no SGP automaticamente usando o CPF/CNPJ formatado
+- IMPORTANTE: A função envia via WhatsApp automaticamente com QR Code PIX e botões interativos
 
 **Para todas as faturas:**
 - SEMPRE envie automaticamente via WhatsApp após gerar
@@ -1768,7 +2372,7 @@ REGRAS FINAIS:
                     "type": "function",
                     "function": {
                         "name": "consultar_cliente_sgp",
-                        "description": "Consulta dados reais do cliente no SGP usando CPF/CNPJ. SEMPRE use esta ferramenta quando receber CPF/CNPJ. FORMATO OBRIGATÓRIO: Para UM contrato use 'Contrato:' seguido de '*NOME*' e '1 - Contrato (ID): *ENDEREÇO*'. Para MÚLTIPLOS contratos use 'Contratos:' seguido da lista. NUNCA use emojis ℹ 👤 🔒 ou frases como 'Cliente Encontrado', 'Nome:', 'Status do Contrato:'.",
+                        "description": "Consulta dados reais do cliente no SGP usando CPF/CNPJ. SEMPRE use esta ferramenta quando receber CPF/CNPJ. FORMATO OBRIGATÓRIO: Para UM contrato use 'Contrato:' seguido de '*NOME*' e '1 - Contrato (ID): *ENDEREÇO*'. Para MÚLTIPLOS contratos use 'Contratos:' seguido da lista. NUNCA use emojis ou frases como 'Cliente Encontrado', 'Nome:', 'Status do Contrato:'.",
                         "parameters": {
                             "type": "object",
                             "properties": {
@@ -1785,7 +2389,7 @@ REGRAS FINAIS:
                     "type": "function",
                     "function": {
                         "name": "verificar_acesso_sgp",
-                        "description": "Verifica status de acesso/conexão de um contrato no SGP. Use após identificar o contrato do cliente. IMPORTANTE: Formate a resposta EXATAMENTE assim: 📡 *Status do seu acesso:* seguido de Status e Contrato.",
+                        "description": "Verifica status de acesso/conexão de um contrato no SGP. Use após identificar o contrato do cliente. IMPORTANTE: Formate a resposta EXATAMENTE assim: *Status do seu acesso:* seguido de Status e Contrato.",
                         "parameters": {
                             "type": "object",
                             "properties": {
@@ -1872,6 +2476,32 @@ REGRAS FINAIS:
                             "required": ["cpf_cnpj"]
                         }
                     }
+                },
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "enviar_formato_adicional",
+                        "description": "Envia formato adicional de pagamento (PIX ou Boleto) quando cliente pede depois do primeiro envio. Use quando cliente já recebeu um formato e pede o outro.",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "cpf_cnpj": {
+                                    "type": "string",
+                                    "description": "CPF ou CNPJ do cliente"
+                                },
+                                "formato_solicitado": {
+                                    "type": "string",
+                                    "description": "Formato que o cliente pediu adicionalmente: 'pix' ou 'boleto'",
+                                    "enum": ["pix", "boleto"]
+                                },
+                                "numero_whatsapp": {
+                                    "type": "string",
+                                    "description": "Número do WhatsApp do cliente"
+                                }
+                            },
+                            "required": ["cpf_cnpj", "formato_solicitado"]
+                        }
+                    }
                 }
             ]
             
@@ -1888,6 +2518,11 @@ REGRAS FINAIS:
 - Exemplo: "Para gerar sua fatura, preciso do seu CPF ou CNPJ. Pode me informar?"
 - Só use gerar_fatura_completa quando tiver um CPF/CNPJ válido (11 ou 14 dígitos)
 - NUNCA tente gerar fatura sem CPF/CNPJ válido
+
+🎯 LÓGICA DE FORMATOS ADICIONAIS:
+- Se cliente já recebeu PIX e pede "também PDF/boleto" → Use enviar_formato_adicional(formato_solicitado: "boleto")
+- Se cliente já recebeu Boleto e pede "também PIX" → Use enviar_formato_adicional(formato_solicitado: "pix")
+- Só envie o formato que o cliente ainda não recebeu
 """
             
             # Fazer chamada inicial COM ferramentas disponíveis

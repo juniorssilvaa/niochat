@@ -267,13 +267,43 @@ python version_manager.py [major|minor|patch]
         """Mostra a versão atual"""
         print(f"📋 Versão atual: {self.current_version}")
     
+    def sync_files(self):
+        """Sincroniza a versão em todos os arquivos sem incrementar"""
+        print(f"🔄 Sincronizando versão {self.current_version} em todos os arquivos")
+        
+        self.update_package_json(self.current_version)
+        self.update_package_lock(self.current_version)
+        self.update_pnpm_lock(self.current_version)
+        self.update_django_settings(self.current_version)
+        self.update_telegram_service(self.current_version)
+        self.update_frontend_version_config(self.current_version)
+        
+        # Atualizar changelog apenas se necessário
+        changelog_path = Path("CHANGELOG.json")
+        if changelog_path.exists():
+            try:
+                with open(changelog_path, 'r', encoding='utf-8') as f:
+                    changelog_data = json.load(f)
+                if (changelog_data.get("versions") and 
+                    changelog_data["versions"][0].get("version") != self.current_version):
+                    # Copiar para frontend
+                    frontend_public_path = Path("frontend/frontend/public/CHANGELOG.json")
+                    if frontend_public_path.parent.exists():
+                        import shutil
+                        shutil.copy2(changelog_path, frontend_public_path)
+            except:
+                pass
+        
+        print(f"✅ Arquivos sincronizados com versão {self.current_version}")
+
     def run(self):
         """Executa o gerenciador de versões"""
         if len(sys.argv) < 2:
-            print("📋 Uso: python version_manager.py [major|minor|patch|show]")
+            print("📋 Uso: python version_manager.py [major|minor|patch|show|sync]")
             print("   major: incrementa versão principal (1.0.0 → 2.0.0)")
             print("   minor: incrementa versão secundária (1.0.0 → 1.1.0)")
             print("   patch: incrementa versão de correção (1.0.0 → 1.0.1)")
+            print("   sync: sincroniza versão atual em todos os arquivos")
             print("   show: mostra a versão atual")
             return
         
@@ -281,12 +311,14 @@ python version_manager.py [major|minor|patch]
         
         if command == "show":
             self.show_current_version()
+        elif command == "sync":
+            self.sync_files()
         elif command in ["major", "minor", "patch"]:
             new_version = self.bump_version(command)
             self.update_all_files(new_version, command)
         else:
             print(f"❌ Comando inválido: {command}")
-            print("Comandos válidos: major, minor, patch, show")
+            print("Comandos válidos: major, minor, patch, sync, show")
 
 if __name__ == "__main__":
     manager = VersionManager()

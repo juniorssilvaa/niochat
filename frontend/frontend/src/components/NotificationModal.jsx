@@ -155,7 +155,7 @@ const NotificationModal = ({ isOpen, onClose, notification, onMarkAsRead }) => {
             <button
               onClick={handleConfirmRead}
               disabled={isLoading}
-              className="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-white font-medium flex items-center gap-2"
+              className="px-6 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-white font-medium flex items-center gap-2 shadow-lg hover:shadow-xl"
             >
               {isLoading ? (
                 <>

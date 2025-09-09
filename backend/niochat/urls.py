@@ -37,6 +37,8 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('webhook/evolution-uazapi/', webhook_evolution_uazapi, name='webhook_evolution_uazapi'),
     path('webhook/evolution-uazapi', webhook_evolution_uazapi, name='webhook_evolution_uazapi_no_slash'),
+    path('webhooks/evolution-uazapi/', webhook_evolution_uazapi, name='webhook_evolution_uazapi_plural'),
+    path('webhooks/evolution-uazapi', webhook_evolution_uazapi, name='webhook_evolution_uazapi_plural_no_slash'),
 ]
 
 # Servir arquivos de mídia em desenvolvimento

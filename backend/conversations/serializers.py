@@ -71,28 +71,107 @@ class MessageSerializer(serializers.ModelSerializer):
 
 
 class ConversationSerializer(serializers.ModelSerializer):
+    # Para criação, usamos IDs simples
+    contact_id = serializers.IntegerField(write_only=True, required=False)
+    inbox_id = serializers.IntegerField(write_only=True, required=False)
+    assignee_id = serializers.IntegerField(write_only=True, required=False)
+    
+    # Para leitura, usamos objetos completos
     contact = ContactSerializer(read_only=True)
     inbox = InboxSerializer(read_only=True)
     assignee = UserSerializer(read_only=True)
     labels = LabelSerializer(many=True, read_only=True)
     messages = MessageSerializer(many=True, read_only=True)
     
+    # Garantir que additional_attributes seja writeable
+    additional_attributes = serializers.JSONField(required=False)
+    
     class Meta:
         model = Conversation
         fields = [
             'id', 'contact', 'inbox', 'assignee', 'status',
+            'contact_id', 'inbox_id', 'assignee_id',
             'labels', 'additional_attributes',
             'last_message_at', 'created_at', 'messages'
         ]
         read_only_fields = ['id', 'last_message_at', 'created_at']
+    
+    def create(self, validated_data):
+        # Extrair os campos _id mas manter no validated_data com nome correto
+        contact_id = validated_data.pop('contact_id', None)
+        inbox_id = validated_data.pop('inbox_id', None)
+        assignee_id = validated_data.pop('assignee_id', None)
+        
+        # Buscar as instâncias dos objetos relacionados
+        if contact_id:
+            from .models import Contact
+            validated_data['contact'] = Contact.objects.get(id=contact_id)
+        if inbox_id:
+            from .models import Inbox
+            validated_data['inbox'] = Inbox.objects.get(id=inbox_id)
+        if assignee_id:
+            from core.models import User
+            validated_data['assignee'] = User.objects.get(id=assignee_id)
+            
+        return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        print(f"🔍 DEBUG ConversationSerializer.update")
+        print(f"    validated_data: {validated_data}")
+        print(f"    instance.id: {instance.id}")
+        
+        # Extrair os campos _id se presentes
+        contact_id = validated_data.pop('contact_id', None)
+        inbox_id = validated_data.pop('inbox_id', None)
+        assignee_id = validated_data.pop('assignee_id', None)
+        
+        # Atualizar as instâncias dos objetos relacionados se fornecidos
+        if contact_id is not None:
+            from .models import Contact
+            validated_data['contact'] = Contact.objects.get(id=contact_id) if contact_id else None
+        if inbox_id is not None:
+            from .models import Inbox
+            validated_data['inbox'] = Inbox.objects.get(id=inbox_id) if inbox_id else None
+        if assignee_id is not None:
+            from core.models import User
+            validated_data['assignee'] = User.objects.get(id=assignee_id) if assignee_id else None
+        
+        # Garantir que additional_attributes seja atualizado corretamente
+        if 'additional_attributes' in validated_data:
+            instance.additional_attributes = validated_data['additional_attributes']
+            validated_data.pop('additional_attributes')  # Remove para evitar conflito
+            
+        # Atualizar outros campos
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+            
+        instance.save()
+        return instance
 
 
 class ConversationUpdateSerializer(serializers.ModelSerializer):
     """Serializer para atualização de conversas, permitindo modificar assignee e status"""
+    assignee_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     
     class Meta:
         model = Conversation
-        fields = ['assignee', 'status']
+        fields = ['assignee', 'assignee_id', 'status']
+        read_only_fields = ['assignee']
+
+    def update(self, instance, validated_data):
+        # Suporte a assignee_id para facilitar PATCHs do frontend
+        assignee_id = validated_data.pop('assignee_id', None)
+        if assignee_id is not None:
+            from core.models import User
+            instance.assignee = User.objects.get(id=assignee_id) if assignee_id else None
+        
+        # Atualizar status se fornecido
+        status_value = validated_data.get('status', None)
+        if status_value is not None:
+            instance.status = status_value
+        
+        instance.save()
+        return instance
 
 
 class ConversationListSerializer(serializers.ModelSerializer):
@@ -108,7 +187,7 @@ class ConversationListSerializer(serializers.ModelSerializer):
         model = Conversation
         fields = [
             'id', 'contact', 'inbox', 'assignee', 'status',
-            'labels', 'last_message_at', 'created_at',
+            'labels', 'additional_attributes', 'last_message_at', 'created_at',
             'last_message', 'unread_count'
         ]
         read_only_fields = ['id', 'last_message_at', 'created_at']

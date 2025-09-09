@@ -61,7 +61,7 @@ const DashboardPrincipal = ({ provedorId }) => {
         }
         
         const statsData = await statsResponse.json();
-        setStats(statsData);
+        setStats(statsData.stats || statsData);
 
         // Buscar dados dos canais
         const canaisResponse = await fetch(`/api/canais/`, {

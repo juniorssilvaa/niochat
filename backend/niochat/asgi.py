@@ -36,21 +36,23 @@ class TokenAuthMiddleware:
         token = None
         
         if query_string:
-            params = dict(item.split('=') for item in query_string.split('&') if '=' in item)
-            token = params.get('token')
+            try:
+                params = dict(item.split('=') for item in query_string.split('&') if '=' in item)
+                token = params.get('token')
+            except ValueError:
+                # Se houver erro na parsing, tentar extrair token diretamente
+                if 'token=' in query_string:
+                    token = query_string.split('token=')[1].split('&')[0]
         
         if token:
             # Buscar usuário pelo token
             user = await self.get_user_from_token(token, database_sync_to_async, Token)
             if user:
                 scope['user'] = user
-                print(f"[DEBUG] Usuário autenticado via token: {user.username}")
             else:
                 scope['user'] = AnonymousUser()
-                print(f"[DEBUG] Token inválido: {token}")
         else:
             scope['user'] = AnonymousUser()
-            print(f"[DEBUG] Nenhum token fornecido")
         
         return await self.app(scope, receive, send)
     

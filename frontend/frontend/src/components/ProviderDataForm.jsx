@@ -138,19 +138,22 @@ export default function ProviderDataForm() {
         dataToSend.personalidade = null;
       }
       
-
-      
-      if (form.id) {
+            if (form.id) {
         await axios.patch(`/api/provedores/${form.id}/`, dataToSend, {
           headers: { Authorization: `Token ${token}` }
         });
       } else {
-        const response = await axios.post('/api/provedores/', dataToSend, {
+        await axios.post('/api/provedores/', dataToSend, {
           headers: { Authorization: `Token ${token}` }
         });
       }
+      
       setSuccess('Dados salvos com sucesso!');
-      await fetchData(); // Atualiza os dados após salvar
+      
+      // Aguardar um pouco antes de recarregar para dar tempo do backend processar
+      setTimeout(async () => {
+        await fetchData(); // Atualiza os dados após salvar
+      }, 1000);
     } catch (e) {
       console.error('Erro ao salvar:', e);
       setError('Erro ao salvar dados.');
@@ -164,8 +167,8 @@ export default function ProviderDataForm() {
       {loading ? (
         <div className="text-muted-foreground">Carregando...</div>
       ) : (
-        <div className="overflow-y-auto max-h-[80vh]">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="overflow-y-auto max-h-[75vh] pb-6">
+          <form onSubmit={handleSubmit} className="space-y-6 pb-4">
           {success && <div className="text-green-600 dark:text-green-400 mb-2">{success}</div>}
           {error && <div className="text-red-600 dark:text-red-400 mb-2">{error}</div>}
           <div>
@@ -370,7 +373,7 @@ export default function ProviderDataForm() {
             </div>
           </div>
           
-          <div className="flex justify-end">
+          <div className="flex justify-end pt-4 border-t border-border mt-6">
             <button type="submit" className="bg-primary text-primary-foreground px-6 py-2 rounded font-medium hover:bg-primary/90 transition" disabled={saving}>
               {saving ? 'Salvando...' : 'Salvar'}
             </button>

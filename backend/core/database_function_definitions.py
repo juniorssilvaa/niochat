@@ -23,7 +23,7 @@ DATABASE_FUNCTION_TOOLS = [
         "type": "function", 
         "function": {
             "name": "buscar_membro_disponivel_equipe",
-            "description": "👤 Busca membro disponível em uma equipe específica. Use antes de executar transferência para verificar se há alguém disponível na equipe de destino.",
+            "description": "Busca membro disponível em uma equipe específica. Use antes de executar transferência para verificar se há alguém disponível na equipe de destino.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -84,6 +84,25 @@ DATABASE_FUNCTION_TOOLS = [
     {
         "type": "function",
         "function": {
+            "name": "transferir_conversa_inteligente",
+            "description": "🤖 TRANSFERÊNCIA INTELIGENTE! Analisa automaticamente a conversa e transfere para a equipe mais adequada baseada no conteúdo das mensagens. Use quando a IA não conseguir resolver o problema do cliente e precisar transferir para equipe humana.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "conversation_id": {
+                        "type": "integer",
+                        "description": "ID da conversa que será analisada e transferida"
+                    }
+                },
+                "required": ["conversation_id"],
+                "additionalProperties": False
+            },
+            "strict": True
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "buscar_estatisticas_atendimento",
             "description": "Busca estatísticas gerais de atendimento do provedor. Use quando cliente ou agente pedir relatórios, números de atendimento ou visão geral do desempenho.",
             "parameters": {
@@ -95,13 +114,13 @@ DATABASE_FUNCTION_TOOLS = [
             "strict": True
         }
     }
-]
 
 # Mapeamento de nomes de função para implementação
 DATABASE_FUNCTION_MAPPING = {
     "buscar_equipes_disponiveis": "buscar_equipes_disponíveis",
     "buscar_membro_disponivel_equipe": "buscar_membro_disponível_equipe",
     "executar_transferencia_conversa": "executar_transferencia_conversa",
+    "transferir_conversa_inteligente": "transferir_conversa_inteligente",
     "buscar_conversas_ativas": "buscar_conversas_ativas",
     "buscar_estatisticas_atendimento": "buscar_estatisticas_atendimento"
 }
@@ -113,7 +132,8 @@ FERRAMENTAS DE BANCO DE DADOS DISPONÍVEIS:
 **Para Transferências (PRIORITÁRIO):**
 1. buscar_equipes_disponiveis() - Verificar equipes existentes
 2. buscar_membro_disponivel_equipe(nome_equipe) - Verificar disponibilidade  
-3. executar_transferencia_conversa(conversation_id, equipe_nome, motivo) - Executar transferência
+3. executar_transferencia_conversa(conversation_id, equipe_nome, motivo) - Executar transferência manual
+4. transferir_conversa_inteligente(conversation_id) - Transferência automática baseada na análise da conversa
 
 **Para Consultas e Relatórios:**
 4. buscar_conversas_ativas(status, assignee_id) - Listar conversas ativas
@@ -126,28 +146,34 @@ FERRAMENTAS DE BANCO DE DADOS DISPONÍVEIS:
    - IA: Execute executar_transferencia_conversa(equipe_nome="SUPORTE", motivo="Cliente solicitou suporte técnico")
    - Sistema: Move de "Com IA" → "Em Espera" automaticamente
 
-2. **MAPEAMENTO DE SOLICITAÇÕES:**
+2. **TRANSFERÊNCIA INTELIGENTE quando IA não conseguir resolver:**
+   - Se IA não conseguir resolver o problema do cliente
+   - Use transferir_conversa_inteligente(conversation_id) 
+   - Sistema analisa automaticamente a conversa e escolhe a equipe mais adequada
+   - Baseado em palavras-chave: técnico → SUPORTE, financeiro → FINANCEIRO, geral → ATENDIMENTO
+
+3. **MAPEAMENTO DE SOLICITAÇÕES:**
    - **GERAL**: "alguém", "ajuda", "atendente", "pessoa", "humano" → ATENDIMENTO
    - **TÉCNICO**: "suporte", "técnico", "internet", "problema", "conexão" → SUPORTE
    - **FINANCEIRO**: "financeiro", "fatura", "pagamento", "cobrança", "boleto" → FINANCEIRO  
    - **COMERCIAL**: "atendimento", "comercial", "dúvida geral", "informação" → ATENDIMENTO
 
-3. **NUNCA USE transferir_para_equipe (REMOVIDA):**
-   - Use APENAS executar_transferencia_conversa
-   - Esta é a ÚNICA função válida para transferências
+4. **NUNCA USE transferir_para_equipe (REMOVIDA):**
+   - Use APENAS executar_transferencia_conversa ou transferir_conversa_inteligente
+   - Estas são as ÚNICAS funções válidas para transferências
    - Parâmetros: equipe_nome, motivo (conversation_id é automático)
 
-4. **NÃO FAÇA BUSCAR_FATURAS após transferência ser solicitada:**
+5. **NÃO FAÇA BUSCAR_FATURAS após transferência ser solicitada:**
    - Se cliente quer transferência = Use executar_transferencia_conversa
    - Se cliente quer fatura = Use buscar_faturas_vencidas
    - NUNCA misture as duas ações
 
-4. **SEGURANÇA AUTOMÁTICA:**
+6. **SEGURANÇA AUTOMÁTICA:**
    - Todas as funções respeitam isolamento do provedor
    - Conversation_id é validado automaticamente
    - Transações são atômicas e seguras
 
-5. **MENSAGENS AO CLIENTE:**
+7. **MENSAGENS AO CLIENTE:**
    - Sempre confirme transferência: "Transferindo para [EQUIPE]..."
    - Use mensagem retornada pela função: mensagem_cliente
    - Seja educado e explique o motivo

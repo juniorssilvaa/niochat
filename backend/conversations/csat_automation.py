@@ -66,9 +66,9 @@ class CSATAutomationService:
 TAREFA: Criar uma mensagem personalizada para {cliente_nome} pedindo avaliação do atendimento.
 
 FORMATO OBRIGATÓRIO:
-1. Cumprimente: "Olá {cliente_nome}!"
+1. Cumprimente de forma amigável: "Olá {cliente_nome}!"
 2. Mencione a empresa: "{provedor.nome}"
-3. Peça feedback de forma amigável
+3. Peça feedback de forma natural e cordial
 4. SEMPRE termine com esta linha EXATA (copie exatamente):
 😡 Péssimo | 😕 Ruim | 😐 Regular | 🙂 Bom | 🤩 Excelente
 
@@ -77,7 +77,11 @@ Olá {cliente_nome}! Como foi sua experiência com nosso atendimento da {provedo
 
 😡 Péssimo | 😕 Ruim | 😐 Regular | 🙂 Bom | 🤩 Excelente
 
-IMPORTANTE: Use no máximo 3 linhas e seja cordial."""
+IMPORTANTE: 
+- Use no máximo 3 linhas
+- Seja cordial e natural
+- Não use emojis extras além dos obrigatórios
+- Mantenha o tom da {provedor.nome}"""
 
             # Gerar mensagem usando IA
             openai_service = OpenAIService()
@@ -208,6 +212,18 @@ Pode deixar sua opinião em uma única mensagem:
                 logger.info(f"CSAT request já existe para conversa {conversation.id}")
                 return existing_request
             
+            # Usar timezone local do provedor ou UTC como fallback
+            from django.conf import settings
+            import pytz
+            
+            # Tentar usar timezone do provedor, senão usar UTC
+            try:
+                timezone_name = getattr(settings, 'TIME_ZONE', 'UTC')
+                local_tz = pytz.timezone(timezone_name)
+                now = timezone.now().astimezone(local_tz)
+            except Exception:
+                now = timezone.now()
+            
             # Criar nova solicitação
             csat_request = CSATRequest.objects.create(
                 conversation=conversation,
@@ -215,11 +231,11 @@ Pode deixar sua opinião em uma única mensagem:
                 provedor=conversation.inbox.provedor,
                 channel_type=conversation.inbox.channel_type,
                 status='pending',
-                conversation_ended_at=timezone.now(),
-                scheduled_send_at=timezone.now() + timedelta(minutes=2)  # 2 minutos após encerramento
+                conversation_ended_at=now,
+                scheduled_send_at=now + timedelta(minutes=2)  # 2 minutos após encerramento
             )
             
-            logger.info(f"CSAT request criada: {csat_request.id} para conversa {conversation.id}")
+            logger.info(f"CSAT request criada: {csat_request.id} para conversa {conversation.id} - Agendada para: {csat_request.scheduled_send_at}")
             
             # Agendar envio da mensagem
             from .tasks import send_csat_message

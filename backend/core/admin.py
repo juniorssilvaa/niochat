@@ -250,23 +250,15 @@ class LabelAdmin(admin.ModelAdmin):
 
 @admin.register(SystemConfig)
 class SystemConfigAdmin(admin.ModelAdmin):
-    list_display = ('site_name', 'contact_email', 'default_language', 'timezone', 'allow_public_signup', 'max_users_per_company')
+    list_display = ('key', 'value', 'is_active', 'created_at')
+    search_fields = ('key', 'value', 'description')
+    list_filter = ('is_active', 'created_at')
     fieldsets = (
         (None, {
-            'fields': ('site_name', 'site_logo', 'contact_email', 'default_language', 'timezone')
-        }),
-        ('E-mail', {
-            'fields': ('smtp_host', 'smtp_port', 'smtp_user', 'smtp_password', 'email_from')
-        }),
-        ('Limites e Segurança', {
-            'fields': ('allow_public_signup', 'max_users_per_company')
+            'fields': ('key', 'value', 'description', 'is_active')
         }),
         ('SGP', {
             'fields': ('sgp_url', 'sgp_token', 'sgp_app')
-        }),
-        ('OpenAI', {
-            'fields': ('openai_api_key',),
-            'description': 'Configurações da API da OpenAI para geração de respostas automáticas'
         }),
     )
 

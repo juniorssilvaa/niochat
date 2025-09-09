@@ -13,14 +13,15 @@ import Contacts from './components/Contacts2';
 import SuperadminDashboard from './components/SuperadminDashboard';
 import Login from './components/Login';
 import Topbar from './components/Topbar';
+import UserStatusManager from './components/UserStatusManager';
 import './App.css';
 import {
-  BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
   useParams,
   useLocation,
+  useNavigate
 } from 'react-router-dom';
 import ConversationAudit from './components/ConversationAudit';
 import SuperadminSidebar from './components/SuperadminSidebar';
@@ -38,6 +39,7 @@ import { io } from 'socket.io-client';
 import axios from 'axios';
 import { AlertTriangle } from 'lucide-react';
 import { NotificationProvider } from './contexts/NotificationContext';
+import useSessionTimeout from './hooks/useSessionTimeout';
 
 // Configurar axios para usar URLs relativas (será resolvido pelo proxy do Vite)
 // axios.defaults.baseURL = 'http://192.168.100.55:8010'; // REMOVIDO - usar URLs relativas
@@ -54,6 +56,20 @@ axios.interceptors.request.use(config => {
   }
   return config;
 });
+
+// Interceptor para lidar com respostas não autorizadas
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response && error.response.status === 401) {
+      // Token inválido ou expirado - fazer logout
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 function ProvedorAppWrapper({ userRole, user, handleLogout, handleChangelog, handleNotifications, selectedConversation, setSelectedConversation, providerMenu, setProviderMenu, whatsappDisconnected, setWhatsappDisconnected }) {
   const { provedorId } = useParams();
@@ -155,6 +171,10 @@ function App() {
   const [whatsappDisconnected, setWhatsappDisconnected] = useState(false);
   const [provedorId, setProvedorId] = useState(null);
   const lastStatusRef = useRef(null);
+  const navigate = useNavigate();
+  
+  // Hook para timeout da sessão
+  const { startTimeout } = useSessionTimeout();
 
   // Debug: Log do estado do usuário
   useEffect(() => {
@@ -209,6 +229,9 @@ function App() {
           }
           
           setAuthLoading(false);
+          
+          // Iniciar timeout da sessão
+          startTimeout();
           
           // REMOVIDO: WebSocket desnecessário que estava causando reconexões
           // O WebSocket será gerenciado pelos componentes específicos
@@ -267,8 +290,8 @@ function App() {
     const tipo = userData.role || userData.user_type;
     setUserRole(tipo);
     
-    // REMOVIDO: WebSocket desnecessário que estava causando reconexões
-    // O WebSocket será gerenciado pelos componentes específicos
+    // Iniciar timeout da sessão
+    startTimeout();
   };
 
   const handleLogout = async () => {
@@ -315,11 +338,9 @@ function App() {
 
   if (!user) {
     return (
-      <Router>
-        <Routes>
-          <Route path="/*" element={<Login onLogin={handleLogin} />} />
-        </Routes>
-      </Router>
+      <Routes>
+        <Route path="/*" element={<Login onLogin={handleLogin} />} />
+      </Routes>
     );
   }
 
@@ -357,48 +378,49 @@ function App() {
             </div>
           </div>
         )}
-        <Router>
-          <Routes>
-            <Route path="/superadmin/*" element={
-              <NotificationProvider>
-                <SuperadminRoute>
-                  <div className="h-screen bg-background text-foreground flex overflow-hidden">
-                    <SuperadminSidebar onLogout={handleLogout} />
-                    <div className="flex-1 flex flex-col overflow-hidden">
-                      <Topbar onLogout={handleLogout} onChangelog={handleChangelog} onNotifications={handleNotifications} />
-                      <SuperadminDashboard onLogout={handleLogout} />
-                    </div>
+        <Routes>
+          <Route path="/superadmin/*" element={
+            <NotificationProvider>
+              <SuperadminRoute>
+                <div className="h-screen bg-background text-foreground flex overflow-hidden">
+                  <SuperadminSidebar onLogout={handleLogout} />
+                  <div className="flex-1 flex flex-col overflow-hidden">
+                    <Topbar onLogout={handleLogout} onChangelog={handleChangelog} onNotifications={handleNotifications} />
+                    <SuperadminDashboard onLogout={handleLogout} />
                   </div>
-                </SuperadminRoute>
-              </NotificationProvider>
-            } />
-            {/* Rotas multi-tenant para provedores */}
-            <Route path="/app/accounts/:provedorId/*" element={
-              <NotificationProvider>
-                <ProvedorAppWrapper
-                  userRole={userRole}
-                  user={user}
-                  handleLogout={handleLogout}
-                  handleChangelog={handleChangelog}
-                  handleNotifications={handleNotifications}
-                  selectedConversation={selectedConversation}
-                  setSelectedConversation={setSelectedConversation}
-                  providerMenu={providerMenu}
-                  setProviderMenu={setProviderMenu}
-                  whatsappDisconnected={whatsappDisconnected}
-                  setWhatsappDisconnected={setWhatsappDisconnected}
-                />
-              </NotificationProvider>
-            } />
-            {/* Redirecionamento padrão para login ou dashboard */}
-            <Route path="*" element={<SafeRedirect user={user} />} />
-          </Routes>
-        </Router>
+                </div>
+              </SuperadminRoute>
+            </NotificationProvider>
+          } />
+          {/* Rotas multi-tenant para provedores */}
+          <Route path="/app/accounts/:provedorId/*" element={
+            <NotificationProvider>
+              <ProvedorAppWrapper
+                userRole={userRole}
+                user={user}
+                handleLogout={handleLogout}
+                handleChangelog={handleChangelog}
+                handleNotifications={handleNotifications}
+                selectedConversation={selectedConversation}
+                setSelectedConversation={setSelectedConversation}
+                providerMenu={providerMenu}
+                setProviderMenu={setProviderMenu}
+                whatsappDisconnected={whatsappDisconnected}
+                setWhatsappDisconnected={setWhatsappDisconnected}
+              />
+            </NotificationProvider>
+          } />
+          {/* Redirecionamento padrão para login ou dashboard */}
+          <Route path="*" element={<SafeRedirect user={user} />} />
+        </Routes>
         {/* Changelog Modal */}
         <Changelog 
           isOpen={showChangelog} 
           onClose={() => setShowChangelog(false)} 
         />
+        
+        {/* Gerenciador de Status Online do Usuário */}
+        <UserStatusManager user={user} />
       </>
     );
   } catch (error) {

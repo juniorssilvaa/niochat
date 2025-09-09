@@ -59,8 +59,8 @@ class UserViewSet(viewsets.ModelViewSet):
                         provedor = provedores.first()
                         usuarios_admins = provedor.admins.all()
                         usuarios_atendentes = models.User.objects.filter(
-                            Q(user_type='agent', provedores_admin=provedor) | 
-                            Q(user_type='agent', provedor=provedor)
+                            Q(user_type='agent', provedores_admin=provedor) 
+                            
                         )
                         return (usuarios_admins | usuarios_atendentes).exclude(id=user.id).distinct()
                     return models.User.objects.none()
@@ -71,8 +71,8 @@ class UserViewSet(viewsets.ModelViewSet):
                         provedor = provedores.first()
                         usuarios_admins = provedor.admins.all()
                         usuarios_atendentes = models.User.objects.filter(
-                            Q(user_type='agent', provedores_admin=provedor) | 
-                            Q(user_type='agent', provedor=provedor)
+                            Q(user_type='agent', provedores_admin=provedor) 
+                            
                         )
                         return (usuarios_admins | usuarios_atendentes).exclude(id=user.id).distinct()
                     return models.User.objects.none()
@@ -83,8 +83,8 @@ class UserViewSet(viewsets.ModelViewSet):
                     if user.user_type == 'superadmin' or provedor in Provedor.objects.filter(admins=user):
                         usuarios_admins = provedor.admins.all()
                         usuarios_atendentes = models.User.objects.filter(
-                            Q(user_type='agent', provedores_admin=provedor) | 
-                            Q(user_type='agent', provedor=provedor)
+                            Q(user_type='agent', provedores_admin=provedor) 
+                            
                         )
                         return (usuarios_admins | usuarios_atendentes).distinct()
                     else:
@@ -98,21 +98,15 @@ class UserViewSet(viewsets.ModelViewSet):
         elif user.user_type == 'admin':
             # Admins veem apenas usuários do seu provedor
             provedores = Provedor.objects.filter(admins=user)
-            print(f"[DEBUG UserViewSet] Usuário {user.username} é admin")
-            print(f"[DEBUG UserViewSet] Provedores encontrados: {[p.nome for p in provedores]}")
             if provedores.exists():
                 provedor = provedores.first()
-                print(f"[DEBUG UserViewSet] Provedor selecionado: {provedor.nome}")
                 # Admins e atendentes do provedor
                 usuarios_admins = provedor.admins.all()
-                print(f"[DEBUG UserViewSet] Admins do provedor: {[u.username for u in usuarios_admins]}")
                 usuarios_atendentes = models.User.objects.filter(
-                    Q(user_type='agent', provedores_admin=provedor) | 
-                    Q(user_type='agent', provedor=provedor)
+                    Q(user_type='agent', provedores_admin=provedor) 
+                    
                 )
-                print(f"[DEBUG UserViewSet] Atendentes do provedor: {[u.username for u in usuarios_atendentes]}")
                 resultado = (usuarios_admins | usuarios_atendentes).distinct()
-                print(f"[DEBUG UserViewSet] Total de usuários retornados: {resultado.count()}")
                 return resultado
             return models.User.objects.none()
         else:
@@ -185,8 +179,8 @@ class UserViewSet(viewsets.ModelViewSet):
                 provedor = provedores.first()
                 usuarios_admins = provedor.admins.all()
                 usuarios_atendentes = models.User.objects.filter(
-                    Q(user_type='agent', provedores_admin=provedor) | 
-                    Q(user_type='agent', provedor=provedor)
+                    Q(user_type='agent', provedores_admin=provedor) 
+                    
                 )
                 users = (usuarios_admins | usuarios_atendentes).distinct()
             else:
@@ -208,6 +202,52 @@ class UserViewSet(viewsets.ModelViewSet):
             'users': users_status
         })
 
+    @action(detail=False, methods=['get'])
+    def my_provider_users(self, request):
+        """Endpoint específico para buscar usuários do provedor atual"""
+        user = request.user
+        
+        try:
+            if user.user_type == 'superadmin':
+                # Superadmin pode ver todos os usuários, exceto ele mesmo
+                users = models.User.objects.exclude(id=user.id)
+            elif user.user_type == 'admin':
+                # Admin vê usuários do seu provedor, exceto ele mesmo
+                provedores = Provedor.objects.filter(admins=user)
+                if provedores.exists():
+                    provedor = provedores.first()
+                    usuarios_admins = provedor.admins.all()
+                    usuarios_atendentes = models.User.objects.filter(
+                        Q(user_type='agent', provedores_admin=provedor)
+                    )
+                    users = (usuarios_admins | usuarios_atendentes).exclude(id=user.id).distinct()
+                else:
+                    users = models.User.objects.none()
+            else:
+                # Atendente vê outros usuários do mesmo provedor para transferência
+                provedores = user.provedores_admin.all()
+                if provedores.exists():
+                    provedor = provedores.first()
+                    usuarios_admins = provedor.admins.all()
+                    usuarios_atendentes = models.User.objects.filter(
+                        Q(user_type='agent', provedores_admin=provedor)
+                    )
+                    users = (usuarios_admins | usuarios_atendentes).exclude(id=user.id).distinct()
+                else:
+                    users = models.User.objects.none()
+            
+            serializer = self.get_serializer(users, many=True)
+            return Response({
+                'success': True,
+                'users': serializer.data
+            })
+            
+        except Exception as e:
+            return Response({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+
 
 class LabelViewSet(viewsets.ModelViewSet):
     queryset = Label.objects.all()
@@ -217,14 +257,30 @@ class LabelViewSet(viewsets.ModelViewSet):
     # Se Label for multi-tenant, filtrar por provedor do usuário
     def get_queryset(self):
         user = self.request.user
-        if hasattr(user, 'provedor_id'):
-            return Label.objects.filter(provedor_id=user.provedor_id)
-        return Label.objects.none()
+        # Para agentes, buscar labels dos provedores que administram
+        if user.user_type == 'agent':
+            provedores = user.provedores_admin.all()
+            if provedores.exists():
+                return Label.objects.filter(provedor__in=provedores)
+            return Label.objects.none()
+        # Para admins, buscar labels dos seus provedores
+        elif user.user_type == 'admin':
+            provedores = user.provedores_admin.all()
+            if provedores.exists():
+                return Label.objects.filter(provedor__in=provedores)
+            return Label.objects.none()
+        # Para superadmin, retornar todos
+        return Label.objects.all()
 
     def perform_create(self, serializer):
         user = self.request.user
-        if hasattr(user, 'provedor_id'):
-            serializer.save(provedor_id=user.provedor_id)
+        # Para agentes e admins, associar ao primeiro provedor que administram
+        if user.user_type in ['agent', 'admin']:
+            provedor = user.provedores_admin.first()
+            if provedor:
+                serializer.save(provedor=provedor)
+            else:
+                serializer.save()
         else:
             serializer.save()
 
@@ -244,42 +300,26 @@ class ProvedorViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         user = self.request.user
-        print(f"[DEBUG ProvedorViewSet] get_queryset - Usuário: {user.username}, user_type: {user.user_type}")
         if user.user_type == 'superadmin':
             provedores = Provedor.objects.all()
-            print(f"[DEBUG ProvedorViewSet] get_queryset - Superadmin vê {provedores.count()} provedores")
             return provedores
         else:
             # Usuários admin e agent só veem seus próprios provedores
             provedores = Provedor.objects.filter(admins=user)
-            print(f"[DEBUG ProvedorViewSet] get_queryset - Usuário {user.username} vê {provedores.count()} provedores")
             return provedores
     
     def create(self, request, *args, **kwargs):
-        print(f"[DEBUG ProvedorViewSet] create - Método chamado")
-        print(f"[DEBUG ProvedorViewSet] create - Dados recebidos: {request.data}")
-        print(f"[DEBUG ProvedorViewSet] create - Usuário: {request.user.username}")
-        print(f"[DEBUG ProvedorViewSet] create - Content-Type: {request.content_type}")
-        
         try:
             response = super().create(request, *args, **kwargs)
-            print(f"[DEBUG ProvedorViewSet] create - Resposta: {response.data}")
             return response
         except Exception as e:
-            print(f"[DEBUG ProvedorViewSet] create - Erro: {e}")
             raise
     
     def perform_create(self, serializer):
-        print(f"[DEBUG ProvedorViewSet] perform_create - Iniciando criação de provedor")
-        print(f"[DEBUG ProvedorViewSet] perform_create - Dados recebidos: {serializer.validated_data}")
-        print(f"[DEBUG ProvedorViewSet] perform_create - Usuário: {self.request.user.username}")
-        
         try:
             provedor = serializer.save()
-            print(f"[DEBUG ProvedorViewSet] perform_create - Provedor criado com sucesso: {provedor.id} - {provedor.nome}")
             return provedor
         except Exception as e:
-            print(f"[DEBUG ProvedorViewSet] perform_create - Erro ao criar provedor: {e}")
             raise
     
     def retrieve(self, request, *args, **kwargs):
@@ -394,7 +434,6 @@ class ProvedorViewSet(viewsets.ModelViewSet):
                 if chaves:
                     redis_client.delete(*chaves)
                     chaves_removidas += len(chaves)
-                    print(f"🔧 Padrão '{padrao}': {len(chaves)} chaves removidas")
             
             # Log da ação
             from .models import AuditLog
@@ -404,16 +443,6 @@ class ProvedorViewSet(viewsets.ModelViewSet):
                 provedor=provedor,
                 details=f'Redis limpo para provedor {provedor.nome}. Removidas {chaves_removidas} chaves'
             )
-            
-            # Log detalhado para debug
-            print(f"🔧 LIMPEZA REDIS - Provedor: {provedor.nome} (ID: {provedor.id})")
-            print(f"🔧 Chaves removidas: {chaves_removidas}")
-            print(f"🔧 Padrões utilizados: {padroes}")
-            print(f"🔧 Conversas do provedor: {list(conversas_provedor)}")
-            
-            # Verificar chaves restantes para debug
-            chaves_restantes = redis_client.keys('asgi:group:*')
-            print(f"🔧 Chaves ASGI restantes após limpeza: {chaves_restantes}")
             
             return Response({
                 'success': True,
@@ -433,46 +462,38 @@ class CanalViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        print(f"get_queryset - Usuário: {user.username}, user_type: {user.user_type}")
         
         # Superadmin vê todos os canais
         if user.user_type == 'superadmin':
             canais = Canal.objects.all()
-            print(f"get_queryset - Superadmin vê {canais.count()} canais")
             return canais
         
         # Usuários admin e agent só veem canais dos seus provedores
-        if hasattr(user, 'provedor_id') and user.provedor_id:
-            canais = Canal.objects.filter(provedor_id=user.provedor_id)
-            print(f"get_queryset - Canais encontrados por provedor_id: {canais.count()}")
-            return canais
-        else:
-            # Buscar provedor do usuário
-            prov = Provedor.objects.filter(admins=user).first()
-            if prov:
-                canais = Canal.objects.filter(provedor_id=prov.id)
-                print(f"get_queryset - Canais encontrados por admin: {canais.count()}")
+        if user.user_type in ['agent', 'admin']:
+            provedores = user.provedores_admin.all()
+            if provedores.exists():
+                canais = Canal.objects.filter(provedor__in=provedores)
                 return canais
             else:
-                print(f"get_queryset - Nenhum provedor encontrado para o usuário")
-                return Canal.objects.none()
+                canais = Canal.objects.none()
+                return canais
+        
+        # Fallback para outros tipos de usuário
+        return Canal.objects.none()
 
     def perform_create(self, serializer):
         from rest_framework.exceptions import ValidationError
         user = self.request.user
-        print(f"Usuário: {user.username}, user_type: {user.user_type}")
-        provedor_id = getattr(user, 'provedor_id', None)
-        print(f"provedor_id inicial: {provedor_id}")
-        if not provedor_id:
-            prov = Provedor.objects.filter(admins=user).first()
-            provedor_id = prov.id if prov else None
-            print(f"provedor_id após busca: {provedor_id}")
-        if not provedor_id:
+        
+        # Buscar provedor do usuário
+        provedor = user.provedores_admin.first()
+        if not provedor:
             raise ValidationError('Usuário não está associado a nenhum provedor. Não é possível criar canal.')
+        
         tipo = serializer.validated_data['tipo']
-        print(f"Dados do canal: {serializer.validated_data}")
+        
         # Checagem de unicidade simplificada
-        filtro = {'provedor_id': provedor_id, 'tipo': tipo}
+        filtro = {'provedor': provedor, 'tipo': tipo}
         nome = serializer.validated_data.get('nome')
         if nome:
             filtro['nome'] = nome
@@ -480,12 +501,10 @@ class CanalViewSet(viewsets.ModelViewSet):
             valor = serializer.validated_data.get(campo)
             if valor:
                 filtro[campo] = valor
-        print(f"Filtro para verificação: {filtro}")
         if Canal.objects.filter(**filtro).exists():
             raise ValidationError('Já existe um canal desse tipo com esse nome para este provedor.')
-        print(f"Salvando canal com provedor_id: {provedor_id}")
-        serializer.save(provedor_id=provedor_id)
-        print("Canal salvo com sucesso!")
+        
+        serializer.save(provedor=provedor)
 
     @action(detail=False, methods=['get'])
     def evolution_config(self, request):
@@ -543,19 +562,15 @@ class CanalViewSet(viewsets.ModelViewSet):
             return Response({'success': False, 'error': 'Nome da instância é obrigatório'})
         
         try:
-            print(f"Gerando QR Code para instância: {instance_name}")
-            
             # Primeiro, verificar se a instância existe
             check_url = f"https://evo.niochat.com.br/instance/fetchInstances"
             headers = {'apikey': '78be6d7e78e8be03ba5e3cbdf1443f1c'}
             
             # Verificar se a instância existe
             check_response = requests.get(check_url, headers=headers)
-            print(f"Status da verificação de instâncias: {check_response.status_code}")
             
             if check_response.status_code == 200:
                 instances = check_response.json()
-                print(f"Instâncias disponíveis: {instances}")
                 
                 # Procurar pela instância
                 instance_exists = any(inst.get('instance', {}).get('instanceName') == instance_name for inst in instances)
@@ -575,44 +590,34 @@ class CanalViewSet(viewsets.ModelViewSet):
                     }
                     
                     create_response = requests.post(create_url, json=create_data, headers=headers)
-                    print(f"Status da criação da instância: {create_response.status_code}")
-                    print(f"Resposta da criação: {create_response.text}")
             
             # Agora gerar o QR Code
             qr_url = f"https://evo.niochat.com.br/instance/connect/{instance_name}"
             qr_response = requests.get(qr_url, headers=headers)
-            print(f"Status da geração do QR Code: {qr_response.status_code}")
-            print(f"Resposta do QR Code: {qr_response.text}")
             
             if qr_response.status_code == 200:
                 data = qr_response.json()
-                print(f"Dados da resposta: {data}")
                 
                 # Verificar diferentes formatos possíveis do QR Code
                 qrcode = data.get('base64') or data.get('qrcode') or data.get('qrcode_url')
                 
                 if qrcode:
-                    print(f"QR Code encontrado, tamanho: {len(qrcode)} caracteres")
-                    print(f"Primeiros 100 caracteres do QR Code: {qrcode[:100]}")
                     return Response({
                         'success': True,
                         'qrcode': qrcode
                     })
                 else:
-                    print("QR Code não encontrado na resposta")
                     return Response({
                         'success': False,
                         'error': 'QR Code não encontrado na resposta'
                     })
             else:
                 error_data = qr_response.json() if qr_response.content else {}
-                print(f"Erro na API: {error_data}")
                 return Response({
                     'success': False,
                     'error': error_data.get('message', f'Erro HTTP {qr_response.status_code}')
                 })
         except Exception as e:
-            print(f"Erro completo: {str(e)}")
             return Response({
                 'success': False,
                 'error': f'Erro ao conectar com Evolution: {str(e)}'
@@ -1060,7 +1065,6 @@ class CanalViewSet(viewsets.ModelViewSet):
                     'success': False,
                     'error': 'ID da instância não encontrado. Conecte primeiro.'
                 }, status=400)
-            print(f"[DEBUG] Verificando status da instância: {instance_id}")
             # Criar cliente Uazapi com a URL e token do painel
             from .uazapi_client import UazapiClient
             client = UazapiClient(uazapi_url, token)
@@ -1097,13 +1101,10 @@ class CanalViewSet(viewsets.ModelViewSet):
                     )
                     return Response(response_data)
                 else:
-                    print(f"[DEBUG] Erro ao verificar status: {e}")
                     return Response({
                         'success': False,
                         'error': f'Erro ao verificar status: {str(e)}'
                     }, status=500)
-            
-            print(f"[DEBUG] Status da instância: {result}")
             
             # Processar resposta
             if result.get('instance'):
@@ -1151,7 +1152,6 @@ class CanalViewSet(viewsets.ModelViewSet):
                 else:
                     response_data['message'] = f'Status: {status}'
                 
-                print(f"[DEBUG] Retornando status: {response_data}")
                 # Emitir evento WebSocket se status mudou para connected ou disconnected
                 if status in ['connected', 'disconnected']:
                     channel_layer = get_channel_layer()
@@ -1178,7 +1178,6 @@ class CanalViewSet(viewsets.ModelViewSet):
                 }, status=400)
                 
         except Exception as e:
-            print(f"[DEBUG] Erro ao verificar status: {e}")
             return Response({
                 'success': False,
                 'error': f'Erro ao verificar status: {str(e)}'
@@ -1190,15 +1189,12 @@ class CanalViewSet(viewsets.ModelViewSet):
         try:
             instance_name = request.data.get('instance_name')
             method = request.data.get('method', 'qrcode')  # 'qrcode' ou 'paircode'
-            print(f"[DEBUG] Instance name recebido: {instance_name}")
-            print(f"[DEBUG] Método escolhido: {method}")
             
             if not instance_name:
                 return Response({'success': False, 'error': 'Nome da instância é obrigatório'}, status=400)
             
             # Buscar dados da Uazapi do provedor
             user = request.user
-            print(f"[DEBUG] Usuário: {user.username}")
             
             provedor = Provedor.objects.filter(admins=user).first()
             if not provedor:
@@ -1208,9 +1204,6 @@ class CanalViewSet(viewsets.ModelViewSet):
             uazapi_url = integracoes.get('whatsapp_url')
             uazapi_token = integracoes.get('whatsapp_token')
             
-            print(f"[DEBUG] Provedor: {provedor.nome}")
-            print(f"[DEBUG] Integrações: {integracoes}")
-            print(f"[DEBUG] Uazapi URL: {uazapi_url}")
             # Sensitive data log removed for security
             
             if not uazapi_url or not uazapi_token:
@@ -1219,12 +1212,9 @@ class CanalViewSet(viewsets.ModelViewSet):
                     'error': 'Configurações do WhatsApp não encontradas. Configure a URL e Token na seção "Configurações do WhatsApp".'
                 }, status=400)
             
-            print(f"[DEBUG] Importando UazapiClient...")
             from .uazapi_client import UazapiClient
-            print(f"[DEBUG] UazapiClient importado com sucesso")
             
             client = UazapiClient(uazapi_url, uazapi_token)
-            print(f"[DEBUG] Cliente Uazapi criado")
 
             # Buscar o canal correto antes de usar canal.dados_extras
             canal = Canal.objects.filter(nome=instance_name, provedor=provedor, tipo='whatsapp_beta').first()
@@ -1237,14 +1227,10 @@ class CanalViewSet(viewsets.ModelViewSet):
                 phone = request.data.get('phone')
                 if not phone:
                     return Response({'success': False, 'error': 'Número de telefone é obrigatório'}, status=400)
-                print(f"[DEBUG] Tentando conectar com paircode, phone: {phone}")
                 result = client.connect_instance(phone=phone)
             else:
                 # Para QR code, não passar phone
-                print(f"[DEBUG] Tentando conectar com QR code")
                 result = client.connect_instance()
-            
-            print(f"[DEBUG] Resposta da Uazapi: {result}")
             
             # Verificar se conectou e se tem QR code ou paircode
             if result.get('connected') is not None and result.get('instance'):
@@ -1258,7 +1244,6 @@ class CanalViewSet(viewsets.ModelViewSet):
                     canal.dados_extras = canal.dados_extras or {}
                     canal.dados_extras['instance_id'] = instance_id
                     canal.save()
-                    print(f"[DEBUG] Instance ID salvo: {instance_id}")
                 
                 response_data = {
                     'success': True,
@@ -1279,27 +1264,21 @@ class CanalViewSet(viewsets.ModelViewSet):
                 if not qrcode and not paircode:
                     response_data['message'] = result.get('response', 'Instância criada. Aguardando conexão...')
                 
-                print(f"[DEBUG] Retornando resposta: {response_data}")
                 return Response(response_data)
             else:
                 # Se não conectou, retornar erro
                 error_msg = result.get('response', 'Erro ao conectar instância')
-                print(f"[DEBUG] Erro na conexão: {error_msg}")
                 return Response({
                     'success': False,
                     'error': error_msg
                 }, status=400)
                 
         except ImportError as e:
-            print(f"[DEBUG] Erro de importação: {e}")
             return Response({
                 'success': False, 
                 'error': f'Erro de importação: {str(e)}'
             }, status=500)
         except Exception as e:
-            print(f"[DEBUG] Erro geral na chamada da Uazapi: {str(e)}")
-            import traceback
-            print(f"[DEBUG] Traceback: {traceback.format_exc()}")
             return Response({
                 'success': False, 
                 'error': f'Erro ao conectar WhatsApp Beta: {str(e)}'
@@ -1344,9 +1323,6 @@ class CanalViewSet(viewsets.ModelViewSet):
             else:
                 return Response({'success': False, 'error': 'Canal não é WhatsApp ou WhatsApp Beta'}, status=400)
         except Exception as e:
-            import traceback
-            print(f'[DEBUG] Erro ao deletar instância: {e}')
-            print(traceback.format_exc())
             return Response({'success': False, 'error': str(e)}, status=500)
 
     @action(detail=True, methods=['post'], url_path='desconectar-instancia')
@@ -1391,10 +1367,182 @@ class CanalViewSet(viewsets.ModelViewSet):
             )
             return Response({'success': True, 'result': result})
         except Exception as e:
-            import traceback
-            print(f'[DEBUG] Erro ao desconectar instância: {e}')
-            print(traceback.format_exc())
             return Response({'success': False, 'error': str(e)}, status=500)
+
+    @action(detail=True, methods=['post'], url_path='sincronizar-instancia')
+    def sincronizar_instancia(self, request, pk=None):
+        """Sincronizar manualmente a instância WhatsApp do canal com o provedor"""
+        try:
+            canal = self.get_object()
+            if canal.tipo != 'whatsapp_beta':
+                return Response({'success': False, 'error': 'Apenas WhatsApp Beta pode ser sincronizado'}, status=400)
+            
+            self._sync_provider_whatsapp_instance(canal)
+            
+            return Response({
+                'success': True, 
+                'message': f'Canal {canal.nome} sincronizado com sucesso!'
+            })
+        except Exception as e:
+            return Response({'success': False, 'error': str(e)}, status=500)
+
+    def perform_destroy(self, instance):
+        """Limpar configurações do provedor quando um canal é excluído"""
+        user = self.request.user
+        provedor = instance.provedor
+        
+        # Se é um canal WhatsApp Beta, limpar a instância do provedor
+        if instance.tipo == 'whatsapp_beta':
+            if provedor and provedor.integracoes_externas:
+                integracoes = provedor.integracoes_externas
+                # Verificar se a instância do canal corresponde à instância do provedor
+                canal_instance_id = instance.dados_extras.get('instance_id') if instance.dados_extras else None
+                provedor_instance = integracoes.get('whatsapp_instance')
+                
+                # Se a instância do canal corresponde à instância do provedor, limpar
+                if canal_instance_id and provedor_instance:
+                    # Para WhatsApp Beta, sempre limpar pois o canal foi excluído
+                    # O instance_id do canal é o ID da instância Uazapi, mas queremos limpar o número do provedor
+                    integracoes.pop('whatsapp_instance', None)
+                    provedor.integracoes_externas = integracoes
+                    provedor.save()
+                    
+                    # Remover inbox correspondente
+                    from conversations.models import Inbox
+                    inbox = Inbox.objects.filter(
+                        provedor=provedor,
+                        additional_attributes__instance=provedor_instance
+                    ).first()
+                    if inbox:
+                        inbox.delete()
+        
+        # Log da exclusão
+        models.AuditLog.objects.create(
+            user=user,
+            action='delete',
+            details=f'Canal excluído: {instance.nome} ({instance.tipo}) - Provedor: {provedor.nome if provedor else "N/A"}',
+            ip_address=self.request.META.get('REMOTE_ADDR')
+        )
+        
+        # Excluir o canal
+        instance.delete()
+    
+    def perform_create(self, serializer):
+        """Criar canal garantindo provedor e sincronizar configurações."""
+        # Garantir que o provedor seja definido (evita NOT NULL em provedor_id)
+        from rest_framework.exceptions import ValidationError
+        user = self.request.user
+        provedor = None
+        
+        # Se não for superadmin, usar o primeiro provedor administrado pelo usuário
+        if getattr(user, 'user_type', None) != 'superadmin':
+            provedor = user.provedores_admin.first()
+        
+        # Permitir explicitar provedor via payload se disponível e válido
+        if not provedor:
+            provedor = serializer.validated_data.get('provedor')
+        
+        if not provedor:
+            raise ValidationError('Usuário não está associado a nenhum provedor. Não é possível criar canal.')
+        
+        # Checagem de unicidade por provedor/tipo/nome e campos opcionais
+        tipo = serializer.validated_data.get('tipo')
+        filtro = {'provedor': provedor}
+        if tipo:
+            filtro['tipo'] = tipo
+        nome = serializer.validated_data.get('nome')
+        if nome:
+            filtro['nome'] = nome
+        for campo in ['username', 'email', 'url', 'page_id', 'chat_id']:
+            valor = serializer.validated_data.get(campo)
+            if valor:
+                filtro[campo] = valor
+        if Canal.objects.filter(**filtro).exists():
+            raise ValidationError('Já existe um canal desse tipo com esse nome para este provedor.')
+        
+        # Criar já vinculando ao provedor
+        canal = serializer.save(provedor=provedor)
+        
+        # Se é um canal WhatsApp Beta, sincronizar com o provedor
+        if canal.tipo == 'whatsapp_beta':
+            self._sync_provider_whatsapp_instance(canal)
+        
+        # Log da criação
+        models.AuditLog.objects.create(
+            user=self.request.user,
+            action='create',
+            details=f'Canal criado: {canal.nome} ({canal.tipo}) - Provedor: {canal.provedor.nome if canal.provedor else "N/A"}',
+            ip_address=self.request.META.get('REMOTE_ADDR')
+        )
+        
+        return canal
+    
+    def perform_update(self, serializer):
+        """Sincronizar configurações do provedor quando um canal é atualizado"""
+        canal = serializer.save()
+        
+        # Se é um canal WhatsApp Beta, sincronizar com o provedor
+        if canal.tipo == 'whatsapp_beta':
+            self._sync_provider_whatsapp_instance(canal)
+        
+        # Log da atualização
+        models.AuditLog.objects.create(
+            user=self.request.user,
+            action='update',
+            details=f'Canal atualizado: {canal.nome} ({canal.tipo}) - Provedor: {canal.provedor.nome if canal.provedor else "N/A"}',
+            ip_address=self.request.META.get('REMOTE_ADDR')
+        )
+        
+        return canal
+    
+    def _sync_provider_whatsapp_instance(self, canal):
+        """Sincronizar a instância WhatsApp do provedor com o canal"""
+        if not canal.provedor or canal.tipo != 'whatsapp_beta':
+            return
+        
+        instance_id = canal.dados_extras.get('instance_id') if canal.dados_extras else None
+        if not instance_id:
+            return
+        
+        # Buscar o número do telefone da instância Uazapi
+        try:
+            provedor = canal.provedor
+            integracoes = provedor.integracoes_externas or {}
+            uazapi_url = integracoes.get('whatsapp_url')
+            uazapi_token = integracoes.get('whatsapp_token')
+            
+            if uazapi_url and uazapi_token:
+                from .uazapi_client import UazapiClient
+                client = UazapiClient(uazapi_url, uazapi_token)
+                instance_info = client.get_instance_status(instance_id)
+                
+                if instance_info and 'instance' in instance_info:
+                    phone_number = instance_info['instance'].get('owner')
+                    if phone_number:
+                        # Atualizar o provedor com o número do telefone
+                        integracoes['whatsapp_instance'] = phone_number
+                        provedor.integracoes_externas = integracoes
+                        provedor.save()
+                        
+                        # Criar ou atualizar o inbox correspondente
+                        from conversations.models import Inbox
+                        inbox, created = Inbox.objects.get_or_create(
+                            provedor=provedor,
+                            additional_attributes__instance=phone_number,
+                            defaults={
+                                'name': f'WhatsApp {phone_number}',
+                                'additional_attributes': {'instance': phone_number}
+                            }
+                        )
+                        
+                        if not created:
+                            # Atualizar inbox existente
+                            inbox.name = f'WhatsApp {phone_number}'
+                            inbox.additional_attributes = {'instance': phone_number}
+                            inbox.save()
+        except Exception as e:
+            # Log do erro mas não falhar a operação
+            print(f"Erro ao sincronizar instância WhatsApp: {e}")
 
 
 class SystemConfigViewSet(viewsets.ViewSet):
@@ -1478,7 +1626,6 @@ class CustomAuthToken(APIView):
         from rest_framework.authtoken.models import Token
         from django.utils import timezone
         from core.models import AuditLog
-        print("Token importado de:", Token.__module__, Token)
         logger = logging.getLogger(__name__)
         username = request.data.get('username')
         password = request.data.get('password')
@@ -1497,18 +1644,20 @@ class CustomAuthToken(APIView):
                 logger.warning(f"Usuário {username} encontrado, mas inativo.")
                 return Response({'non_field_errors': ['Usuário inativo.']}, status=status.HTTP_400_BAD_REQUEST)
             
-            # Verificar se o provedor do usuário está suspenso
-            if user.provedor and user.provedor.status == 'suspenso':
-                logger.warning(f"Usuário {username} tentou fazer login, mas o provedor {user.provedor.nome} está suspenso.")
-                return Response({'non_field_errors': ['Seu provedor está temporariamente suspenso. Entre em contato com o suporte.']}, status=status.HTTP_400_BAD_REQUEST)
+            # Verificar se o provedor do usuário está ativo
+            provedores_user = user.provedores_admin.all()
+            for provedor in provedores_user:
+                if not provedor.is_active:
+                    logger.warning(f"Usuário {username} tentou fazer login, mas o provedor {provedor.nome} está inativo.")
+                    return Response({'non_field_errors': ['Seu provedor está temporariamente inativo. Entre em contato com o suporte.']}, status=status.HTTP_400_BAD_REQUEST)
             
-            # Verificar se o usuário é admin de um provedor suspenso
+            # Verificar se o usuário é admin de um provedor inativo
             if user.user_type == 'admin':
                 provedores_admin = Provedor.objects.filter(admins=user)
                 for provedor in provedores_admin:
-                    if provedor.status == 'suspenso':
-                        logger.warning(f"Admin {username} tentou fazer login, mas o provedor {provedor.nome} está suspenso.")
-                        return Response({'non_field_errors': ['Seu provedor está temporariamente suspenso. Entre em contato com o suporte.']}, status=status.HTTP_400_BAD_REQUEST)
+                    if not provedor.is_active:
+                        logger.warning(f"Admin {username} tentou fazer login, mas o provedor {provedor.nome} está inativo.")
+                        return Response({'non_field_errors': ['Seu provedor está temporariamente inativo. Entre em contato com o suporte.']}, status=status.HTTP_400_BAD_REQUEST)
             
             # Atualiza o campo last_login
             user.last_login = timezone.now()
@@ -1574,9 +1723,7 @@ class AtendimentoIAView(APIView):
                 status_conexao = None
                 # Se encontrou contrato, checa conexão
                 if contrato_id:
-                    print('DEBUG contrato_id:', contrato_id)
                     acesso_resp = sgp.verifica_acesso(contrato_id)
-                    print('DEBUG SGP verifica_acesso:', acesso_resp)
                     status_conexao = (
                         acesso_resp.get('msg')
                         or acesso_resp.get('status')
@@ -1661,6 +1808,10 @@ class UserMeView(APIView):
             'provedor_id': provedor_id,
             'user_type': getattr(user, 'user_type', None),
             'permissions': getattr(user, 'permissions', []),
+            'sound_notifications_enabled': getattr(user, 'sound_notifications_enabled', False),
+            'new_message_sound': getattr(user, 'new_message_sound', 'mixkit-bell-notification-933.wav'),
+            'new_conversation_sound': getattr(user, 'new_conversation_sound', 'mixkit-digital-quick-tone-2866.wav'),
+            'session_timeout': getattr(user, 'session_timeout', 30),
         }
         return Response(data)
     
@@ -1669,7 +1820,11 @@ class UserMeView(APIView):
         data = request.data
         
         # Campos permitidos para atualização
-        allowed_fields = ['first_name', 'last_name', 'email', 'phone']
+        allowed_fields = [
+            'first_name', 'last_name', 'email', 'phone',
+            'sound_notifications_enabled', 'new_message_sound', 'new_conversation_sound',
+            'session_timeout'
+        ]
         
         for field in allowed_fields:
             if field in data:
@@ -1825,7 +1980,7 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
                         'action_display': log.get_action_display(),
                         'user': log.user.username if log.user else 'Sistema',
                         'timestamp': log.timestamp,
-                        'resolution_type': log.resolution_type
+                        'resolution_type': log.resolution_type if hasattr(log, 'resolution_type') else None
                     }
                     for log in audit_logs
                 ]
@@ -1885,7 +2040,25 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     def conversation_stats(self, request):
         """Estatísticas de conversas encerradas para auditoria"""
         user = request.user
-        queryset = self.get_queryset()
+        provedor_id = request.GET.get('provedor_id')
+        
+        # Verificar permissões
+        if user.user_type != 'superadmin':
+            provedores = Provedor.objects.filter(admins=user)
+            if not provedores.exists():
+                return Response({'error': 'Acesso negado'}, status=403)
+            
+            if provedor_id and int(provedor_id) not in [p.id for p in provedores]:
+                return Response({'error': 'Acesso negado a este provedor'}, status=403)
+        
+        # Construir queryset base
+        queryset = models.AuditLog.objects.all()
+        
+        # Aplicar filtro por provedor
+        if provedor_id:
+            queryset = queryset.filter(provedor_id=provedor_id)
+        elif user.user_type != 'superadmin':
+            queryset = queryset.filter(provedor__in=provedores)
         
         # Filtrar apenas conversas encerradas
         conversation_logs = queryset.filter(
@@ -1917,9 +2090,9 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
                 provedor_stats[provedor_name]['by_ai'] += 1
             
             # Calcular médias
-            if log.conversation_duration:
+            if hasattr(log, 'conversation_duration') and log.conversation_duration:
                 provedor_stats[provedor_name]['avg_duration'] += log.conversation_duration.total_seconds()
-            if log.message_count:
+            if hasattr(log, 'message_count') and log.message_count:
                 provedor_stats[provedor_name]['avg_messages'] += log.message_count
         
         # Calcular médias finais
@@ -1942,7 +2115,7 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
                 channel_stats[channel]['by_ai'] += 1
         
         return Response({
-            'total_conversations_closed': total_closed,
+            'total_closed': total_closed,
             'closed_by_agent': closed_by_agent,
             'closed_by_ai': closed_by_ai,
             'provedor_stats': provedor_stats,
@@ -1973,7 +2146,7 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
         # Dados
         for log in queryset:
             duration_str = ''
-            if log.conversation_duration:
+            if hasattr(log, 'conversation_duration') and log.conversation_duration:
                 total_seconds = int(log.conversation_duration.total_seconds())
                 hours = total_seconds // 3600
                 minutes = (total_seconds % 3600) // 60
@@ -1991,8 +2164,8 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
                 log.contact_name or '',
                 log.channel_type or '',
                 duration_str,
-                log.message_count or '',
-                log.resolution_type or ''
+                log.message_count or '' if hasattr(log, 'message_count') else '',
+                log.resolution_type or '' if hasattr(log, 'resolution_type') else '',
             ])
         
         # Preparar resposta
@@ -2248,7 +2421,7 @@ class DashboardStatsView(APIView):
         total_conversas = Conversation.objects.filter(provedor_filter).count()
         conversas_abertas = Conversation.objects.filter(provedor_filter, status='open').count()
         conversas_pendentes = Conversation.objects.filter(provedor_filter, status='pending').count()
-        conversas_resolvidas = Conversation.objects.filter(provedor_filter, status='resolved').count()
+        conversas_resolvidas = Conversation.objects.filter(provedor_filter, status='closed').count()
         conversas_em_andamento = Conversation.objects.filter(provedor_filter, status='open').count()
         
         # Estatísticas de contatos únicos
@@ -2303,8 +2476,7 @@ class DashboardStatsView(APIView):
         # Calcular satisfação média - usar dados reais do CSAT
         try:
             from conversations.csat_service import CSATService
-            provedor_obj = Provedor.objects.get(id=provedor_id)
-            csat_stats = CSATService.get_csat_stats(provedor_obj, 30)
+            csat_stats = CSATService.get_csat_stats(provedor_id, 30)
             satisfacao_media = f"{csat_stats.get('average_rating', 0.0):.1f}"
         except Exception as e:
             # Fallback para cálculo simulado se CSAT não estiver disponível
@@ -2327,7 +2499,7 @@ class DashboardStatsView(APIView):
         if user.user_type in ['superadmin', 'admin']:
             # Buscar usuários do provedor
             usuarios_provedor = User.objects.filter(
-                Q(provedores_admin=provedor_id) | 
+                Q(provedores_admin=provedor_id)  |
                 Q(user_type='agent', provedores_admin=provedor_id)
             )
             
@@ -2416,51 +2588,46 @@ class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
-        user = request.user
-        
-        # Disparar signal de logout manualmente para garantir que o log seja criado
-        from django.contrib.auth.signals import user_logged_out
-        user_logged_out.send(sender=user.__class__, request=request, user=user)
-        
-        # Fazer logout
         logout(request)
-        
         return Response({'message': 'Logout realizado com sucesso'})
 
 
-class ResetPasswordView(APIView):
+class SessionTimeoutView(APIView):
     permission_classes = [IsAuthenticated]
     
-    def post(self, request):
+    def get(self, request):
+        """Retorna o timeout da sessão configurado para o usuário"""
         user = request.user
-        new_password = request.data.get('new_password')
+        timeout = getattr(user, 'session_timeout', 30)  # valor padrão de 30 minutos
+        return Response({
+            'session_timeout': timeout,
+            'user_id': user.id
+        })
+    
+    def post(self, request):
+        """Atualiza o timeout da sessão do usuário"""
+        user = request.user
+        timeout = request.data.get('session_timeout')
         
-        if not new_password:
-            return Response({'error': 'Nova senha é obrigatória'}, status=400)
+        if timeout is not None:
+            try:
+                timeout = int(timeout)
+                if timeout < 1:
+                    return Response({'error': 'Timeout deve ser pelo menos 1 minuto'}, status=400)
+                if timeout > 720:  # 12 horas máximo
+                    return Response({'error': 'Timeout não pode ser maior que 12 horas'}, status=400)
+                    
+                user.session_timeout = timeout
+                user.save(update_fields=['session_timeout'])
+                return Response({'message': 'Timeout da sessão atualizado com sucesso'})
+            except (ValueError, TypeError):
+                return Response({'error': 'Valor de timeout inválido'}, status=400)
         
-        if len(new_password) < 6:
-            return Response({'error': 'Senha deve ter pelo menos 6 caracteres'}, status=400)
-        
-        try:
-            # Garantir que a senha seja criptografada
-            user.set_password(new_password)
-            user.save(update_fields=['password'])
-            
-            # Registrar log de auditoria
-            from core.models import AuditLog
-            ip = request.META.get('REMOTE_ADDR')
-            AuditLog.objects.create(
-                user=user,
-                action='edit',
-                ip_address=ip,
-                details='Senha alterada pelo usuário',
-                provedor=user.provedores_admin.first() if hasattr(user, 'provedores_admin') else None
-            )
-            
-            return Response({'message': 'Senha alterada com sucesso'})
-        except Exception as e:
-            print(f"Erro ao alterar senha: {str(e)}")
-            return Response({'error': 'Erro ao alterar senha'}, status=400)
+        return Response({'error': 'Timeout da sessão não fornecido'}, status=400)
+
+
+# Adicionar no final do arquivo
+session_timeout_view = SessionTimeoutView.as_view()
 
 
 
@@ -2767,17 +2934,9 @@ class MensagemSistemaViewSet(viewsets.ModelViewSet):
     def minhas_mensagens(self, request):
         """Retorna mensagens destinadas ao usuário atual"""
         user = request.user
-        print(f"[DEBUG MensagemSistemaViewSet] minhas_mensagens - Usuário: {user.username}, user_type: {getattr(user, 'user_type', 'N/A')}")
-        print(f"[DEBUG MensagemSistemaViewSet] minhas_mensagens - Tem provedor direto: {hasattr(user, 'provedor') and user.provedor}")
-        print(f"[DEBUG MensagemSistemaViewSet] minhas_mensagens - É admin de provedores: {hasattr(user, 'provedores_admin') and user.provedores_admin.exists()}")
-        
-        if hasattr(user, 'provedores_admin') and user.provedores_admin.exists():
-            provedor = user.provedores_admin.first()
-            print(f"[DEBUG MensagemSistemaViewSet] minhas_mensagens - Admin do provedor: {provedor.nome} (ID: {provedor.id})")
         
         if user.is_superuser:
             queryset = MensagemSistema.objects.all()
-            print(f"[DEBUG MensagemSistemaViewSet] minhas_mensagens - Superadmin, total mensagens: {queryset.count()}")
         elif hasattr(user, 'provedores_admin') and user.provedores_admin.exists():
             # Usuário é admin de um ou mais provedores
             provedor_ids = list(user.provedores_admin.values_list('id', flat=True))
@@ -2787,12 +2946,9 @@ class MensagemSistemaViewSet(viewsets.ModelViewSet):
                 if any(provedor_id in mensagem.provedores for provedor_id in provedor_ids):
                     mensagens.append(mensagem.id)
             queryset = MensagemSistema.objects.filter(id__in=mensagens)
-            print(f"[DEBUG MensagemSistemaViewSet] minhas_mensagens - Admin provedor, mensagens encontradas: {queryset.count()}")
-            print(f"[DEBUG MensagemSistemaViewSet] minhas_mensagens - IDs das mensagens: {list(queryset.values_list('id', flat=True))}")
         else:
             # AGENTES/ATENDENTES NÃO VEEM NOTIFICAÇÕES
             queryset = MensagemSistema.objects.none()
-            print(f"[DEBUG MensagemSistemaViewSet] minhas_mensagens - Usuário sem acesso (agente/atendente)")
         
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

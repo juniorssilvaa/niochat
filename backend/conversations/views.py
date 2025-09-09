@@ -102,7 +102,7 @@ class ContactViewSet(viewsets.ModelViewSet):
             if provedores.exists():
                 # Verificar se algum provedor está suspenso
                 for provedor in provedores:
-                    if provedor.status == 'suspenso':
+                    if not provedor.is_active:
                         from rest_framework.exceptions import PermissionDenied
                         raise PermissionDenied('Seu provedor está temporariamente suspenso. Entre em contato com o suporte.')
                 return Contact.objects.filter(provedor__in=provedores)
@@ -123,7 +123,7 @@ class InboxViewSet(viewsets.ModelViewSet):
             if provedores.exists():
                 # Verificar se algum provedor está suspenso
                 for provedor in provedores:
-                    if provedor.status == 'suspenso':
+                    if not provedor.is_active:
                         from rest_framework.exceptions import PermissionDenied
                         raise PermissionDenied('Seu provedor está temporariamente suspenso. Entre em contato com o suporte.')
                 return Inbox.objects.filter(provedor__in=provedores)
@@ -176,7 +176,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
             if provedores.exists():
                 # Verificar se algum provedor está suspenso
                 for provedor in provedores:
-                    if provedor.status == 'suspenso':
+                    if not provedor.is_active:
                         from rest_framework.exceptions import PermissionDenied
                         raise PermissionDenied('Seu provedor está temporariamente suspenso. Entre em contato com o suporte.')
                 return Conversation.objects.filter(inbox__provedor__in=provedores)
@@ -207,19 +207,14 @@ class ConversationViewSet(viewsets.ModelViewSet):
             
             # Filtrar baseado nas permissões
             if 'view_ai_conversations' in user_permissions:
-                # Pode ver conversas com IA (identificadas por algum campo ou atributo)
-                ai_conversations = base_queryset.filter(
-                    additional_attributes__has_key='ai_assisted'
-                )
+                # Pode ver conversas com IA (status snoozed)
+                ai_conversations = base_queryset.filter(status='snoozed')
             else:
                 # Não pode ver conversas com IA
                 ai_conversations = Conversation.objects.none()
             
-            if 'view_assigned_conversations' in user_permissions:
-                # Pode ver conversas atribuídas a ele
-                assigned_conversations = base_queryset.filter(assignee=user)
-            else:
-                assigned_conversations = Conversation.objects.none()
+            # SEMPRE incluir conversas atribuídas ao usuário (para aba "Minhas")
+            assigned_conversations = base_queryset.filter(assignee=user)
             
             if 'view_team_unassigned' in user_permissions:
                 # Pode ver conversas não atribuídas da equipe dele
@@ -231,7 +226,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
             final_queryset = ai_conversations | assigned_conversations | team_unassigned
             
             # Se não tem nenhuma permissão específica, só vê conversas atribuídas a ele
-            if not user_permissions:
+            if not user_permissions and not user.is_superuser and not user.is_staff:
                 final_queryset = base_queryset.filter(assignee=user)
             
             return final_queryset.distinct()
@@ -439,6 +434,66 @@ class ConversationViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=True, methods=['post'])
+    def assign(self, request, pk=None):
+        """Atribuir conversa para o usuário atual"""
+        conversation = self.get_object()
+        user = request.user
+        
+        # Verificar se o usuário tem permissão para atribuir a conversa
+        if not self._can_manage_conversation(user, conversation):
+            return Response({'error': 'Sem permissão para atribuir esta conversa'}, status=403)
+        
+        # Verificar se a conversa já está fechada
+        if conversation.status == 'closed':
+            return Response({'error': 'Não é possível atribuir uma conversa fechada'}, status=400)
+        
+        # Atribuir conversa para o usuário atual
+        conversation.assignee = user
+        conversation.status = 'open'  # Mudar para 'open' quando atribuída
+        conversation.updated_at = timezone.now()
+        conversation.save()
+        
+        # Registrar auditoria
+        AuditLog.objects.create(
+            user=user,
+            action='conversation_assigned',
+            ip_address=request.META.get('REMOTE_ADDR', '127.0.0.1'),
+            details=f"Conversa atribuída para {user.get_full_name() or user.username}",
+            provedor=conversation.inbox.provedor if conversation.inbox else None,
+            conversation_id=conversation.id,
+            contact_name=conversation.contact.name,
+            channel_type=conversation.inbox.channel_type if conversation.inbox else None
+        )
+        
+        # Adicionar mensagem de sistema sobre a atribuição
+        Message.objects.create(
+            conversation=conversation,
+            content=f"Conversa atribuída para {user.get_full_name() or user.username}",
+            message_type='text',
+            is_from_customer=False,
+            additional_attributes={
+                'system_message': True,
+                'action': 'conversation_assigned',
+                'assigned_to': user.id
+            }
+        )
+        
+        return Response({
+            'success': True,
+            'message': f'Conversa atribuída para {user.get_full_name() or user.username}',
+            'conversation': {
+                'id': conversation.id,
+                'assignee': {
+                    'id': user.id,
+                    'username': user.username,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name
+                },
+                'status': conversation.status
+            }
+        })
+
+    @action(detail=True, methods=['post'])
     def close_conversation_agent(self, request, pk=None):
         """Encerrar conversa por atendente"""
         print(f"🔍 DEBUG: close_conversation_agent chamada para conversa {pk}")
@@ -501,6 +556,30 @@ class ConversationViewSet(viewsets.ModelViewSet):
         )
         
         print(f"✅ DEBUG: Mensagem de sistema criada")
+        
+        # Enviar notificação WebSocket para atualizar o frontend
+        try:
+            from channels.layers import get_channel_layer
+            from asgiref.sync import async_to_sync
+            
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f'painel_{conversation.inbox.provedor.id}',
+                {
+                    'type': 'conversation_status_changed',
+                    'conversation': {
+                        'id': conversation.id,
+                        'status': conversation.status,
+                        'assignee': conversation.assignee.username if conversation.assignee else None,
+                        'updated_at': conversation.updated_at.isoformat()
+                    },
+                    'message': f'Conversa {conversation.id} encerrada por {user.username}',
+                    'timestamp': timezone.now().isoformat()
+                }
+            )
+            print(f"✅ DEBUG: Notificação WebSocket enviada")
+        except Exception as e:
+            print(f"⚠️ DEBUG: Erro ao enviar notificação WebSocket: {e}")
         
         return Response({
             'status': 'success',
@@ -621,15 +700,20 @@ def send_media_via_uazapi(conversation, file_url, media_type, caption):
             #     uazapi_url = whatsapp_integration.webhook_url
             # URL da integração WhatsApp
         else:
-            # Fallback para integracoes_externas
-            if not uazapi_token or uazapi_token == '':
-                integracoes = provedor.integracoes_externas or {}
-                uazapi_token = integracoes.get('whatsapp_token')
-            if not uazapi_url or uazapi_url == '':
-                integracoes = provedor.integracoes_externas or {}
-                uazapi_url = integracoes.get('whatsapp_url')
+            # Fallback inicial para integracoes_externas
+            integracoes = provedor.integracoes_externas or {}
+            uazapi_token = uazapi_token or integracoes.get('whatsapp_token')
+            uazapi_url = uazapi_url or integracoes.get('whatsapp_url')
+
+        # Reforço: mesmo que exista integração WhatsApp, garanta preenchimento a partir de integracoes_externas
+        integracoes_ref = provedor.integracoes_externas or {}
+        if not uazapi_token:
+            uazapi_token = integracoes_ref.get('whatsapp_token')
+        if not uazapi_url:
+            uazapi_url = integracoes_ref.get('whatsapp_url')
         
         if not uazapi_token or not uazapi_url:
+            print(f"DEBUG: Falha credenciais Uazapi - url={uazapi_url} token={'SET' if uazapi_token else 'MISSING'}")
             return False, "Token ou URL do Uazapi não configurados"
         
         # Garantir que a URL termina com /send/media
@@ -657,63 +741,90 @@ def send_media_via_uazapi(conversation, file_url, media_type, caption):
         
         if chatid:
             try:
-                # Converter URL para base64 se necessário
+                # Converter URL para base64 e manter bytes (para usar no client)
                 file_base64 = None
+                file_bytes = None
                 
                 # Se file_url é uma URL local, ler o arquivo e converter para base64
                 if file_url.startswith('/api/media/'):
                     # Construir caminho completo do arquivo
-                    file_path = file_url.replace('/api/media/messages/', '')
+                    normalized_url = file_url.rstrip('/')
+                    file_path = normalized_url.replace('/api/media/messages/', '')
                     conversation_id, filename = file_path.split('/', 1)
                     full_path = os.path.join(settings.MEDIA_ROOT, 'messages', conversation_id, filename)
                     
                     if os.path.exists(full_path):
                         with open(full_path, 'rb') as f:
-                            file_data = f.read()
-                            file_base64 = base64.b64encode(file_data).decode('utf-8')
+                            file_bytes = f.read()
+                            file_base64 = base64.b64encode(file_bytes).decode('utf-8')
                     else:
                         return False, f"Arquivo não encontrado: {full_path}"
                 elif file_url.startswith('data:'):
                     # Já é base64
-                    file_base64 = file_url
+                    # data URL contém base64 depois de ","
+                    try:
+                        file_base64 = file_url.split(',', 1)[1]
+                    except Exception:
+                        file_base64 = file_url
                 else:
                     # URL externa, tentar baixar
                     try:
                         response = requests.get(file_url, timeout=30)
                         if response.status_code == 200:
-                            file_base64 = base64.b64encode(response.content).decode('utf-8')
+                            file_bytes = response.content
+                            file_base64 = base64.b64encode(file_bytes).decode('utf-8')
                         else:
                             return False, f"Erro ao baixar arquivo: {response.status_code}"
                     except Exception as e:
                         return False, f"Erro ao baixar arquivo: {str(e)}"
                 
+                # Detectar MIME básico a partir do tipo/arquivo
+                mime = None
+                if media_type == 'image':
+                    # Tentar inferir pelo nome do arquivo
+                    ext = (filename.split('.')[-1].lower() if 'filename' in locals() else 'png')
+                    mime = 'image/jpeg' if ext in ['jpg', 'jpeg'] else 'image/png'
+                elif media_type == 'video':
+                    mime = 'video/mp4'
+                elif media_type in ['audio', 'ptt']:
+                    # ptt = push-to-talk (ogg/opus normalmente)
+                    mime = 'audio/ogg'
+                
+                file_field = file_base64
+                # Para imagens/vídeos/áudios enviar como data URL base64 quando tivermos os bytes
+                if mime and file_base64 and not (isinstance(file_base64, str) and file_base64.startswith('data:')):
+                    file_field = f"data:{mime};base64,{file_base64}"
+                
+                # Limpar número (chatid -> apenas dígitos)
+                number_clean = chatid.replace('@s.whatsapp.net', '').replace('@c.us', '')
+
                 # Formato correto da API Uazapi para mídia
                 payload = {
-                    'number': chatid,
-                    'type': media_type,
-                    'file': file_base64
+                    'number': number_clean,
+                    'type': 'ptt' if media_type == 'ptt' else media_type,
+                    'file': file_field,
+                    'readchat': True
                 }
                 
-                # Para PTT (mensagens de voz), NÃO enviar caption
+                # Legenda: Uazapi usa campo 'text'
                 if caption and media_type != 'ptt':
-                    payload['caption'] = caption
+                    payload['text'] = caption
                 
-                response = requests.post(
-                    uazapi_url,
-                    headers={'token': uazapi_token, 'Content-Type': 'application/json'},
-                    json=payload,
-                    timeout=30  # Timeout maior para upload de mídia
-                )
-                
-                print(f"DEBUG: Status code = {response.status_code}")
-                print(f"DEBUG: Response = {response.text}")
-                
-                if response.status_code == 200:
-                    send_result = response.json() if response.content else response.status_code
-                    success = True
-                    print(f"DEBUG: Mídia enviada com sucesso para {chatid}")
-                else:
-                    print(f"DEBUG: Erro na API Uazapi - Status: {response.status_code}, Response: {response.text}")
+                # Enviar usando o mesmo cliente da rotina manual (mais robusto)
+                try:
+                    from core.uazapi_client import UazapiClient
+                    client = UazapiClient(uazapi_url.replace('/send/media',''), uazapi_token)
+                    # Preferir bytes quando disponíveis
+                    if not file_bytes and file_base64:
+                        import base64 as _b64
+                        file_bytes = _b64.b64decode(file_base64)
+                    numero_envio = number_clean
+                    ok = client.enviar_imagem(numero_envio, file_bytes, legenda=(caption or ''), instance_id=None)
+                    success = bool(ok)
+                    send_result = {'ok': ok}
+                except Exception as e:
+                    success = False
+                    send_result = {'error': str(e)}
                     
             except Exception as e:
                 print(f' DEBUG: Erro ao enviar mídia para {chatid}: {e}')
@@ -1001,7 +1112,7 @@ class MessageViewSet(viewsets.ModelViewSet):
                     if 'view_ai_conversations' in user_permissions:
                         # Pode ver mensagens de conversas com IA
                         ai_messages = base_queryset.filter(
-                            conversation__additional_attributes__has_key='ai_assisted'
+                            conversation__status='snoozed'
                         )
                     else:
                         ai_messages = Message.objects.none()
