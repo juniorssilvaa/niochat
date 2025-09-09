@@ -1,0 +1,66 @@
+version: "3.8"
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14
+    container_name: niochat-postgres
+    environment:
+      - POSTGRES_DB=niochat
+      - POSTGRES_USER=niochat_user
+      - POSTGRES_PASSWORD=E0sJT3wAYFuahovmHkxgy
+    volumes:
+      - niochat-postgres:/var/lib/postgresql/data
+    networks:
+      - nioNet
+    restart: unless-stopped
+
+  # Backend Django
+  niochat-backend:
+    image: ghcr.io/juniorsilvacmd/niotchat-backend:latest
+    container_name: niochat-backend
+    environment:
+      - SECRET_KEY=OFfGQLqPs5osrBBnhOBdIfkjq1F6vpb74YoAWNkjwbY4BwTNK5
+      - DEBUG=False
+      - ALLOWED_HOSTS=api.niochat.com.br,admin.niochat.com.br,app.niochat.com.br,localhost
+      - DATABASE_URL=postgresql://niochat_user:E0sJT3wAYFuahovmHkxgy@postgres:5432/niochat
+      - REDIS_URL=redis://redis:6379
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CORS_ALLOWED_ORIGINS=https://app.niochat.com.br,https://admin.niochat.com.br
+      - CSRF_TRUSTED_ORIGINS=https://app.niochat.com.br,https://admin.niochat.com.br,https://api.niochat.com.br
+      - MEDIA_URL=/media/
+      - STATIC_URL=/static/
+      - LOG_LEVEL=INFO
+    volumes:
+      - niochat-media:/app/backend/media
+      - niochat-static:/app/backend/staticfiles
+    networks:
+      - nioNet
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  # Frontend React
+  niochat-frontend:
+    image: ghcr.io/juniorsilvacmd/niotchat-frontend:latest
+    container_name: niochat-frontend
+    environment:
+      - VITE_API_URL=https://api.niochat.com.br
+      - VITE_WS_URL=wss://api.niochat.com.br
+    networks:
+      - nioNet
+    restart: unless-stopped
+
+networks:
+  nioNet:
+    external: true
+    name: nioNet
+
+volumes:
+  niochat-media:
+    driver: local
+  niochat-static:
+    driver: local
+  niochat-postgres:
+    driver: local
