@@ -22,7 +22,7 @@ FROM nginx:alpine
 # Copiar arquivos buildados
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# ✅ Configuração SIMPLES do Nginx (sem loops)
+# ✅ CONFIGURAÇÃO CORRIGIDA (sem loop)
 RUN echo 'events {\
     worker_connections 1024;\
 }\
@@ -37,13 +37,21 @@ http {\
         root /usr/share/nginx/html;\
         index index.html;\
         \
+        # ✅ CONFIGURAÇÃO CORRETA PARA REACT ROUTER\
         location / {\
-            try_files \$uri \$uri/ /index.html;\
+            # Primeiro tenta servir o arquivo exato\
+            try_files $uri $uri/ @rewrites;\
         }\
         \
-        error_page 500 502 503 504 /50x.html;\
-        location = /50x.html {\
-            root /usr/share/nginx/html;\
+        # ✅ Regra para redirecionar tudo para index.html\
+        location @rewrites {\
+            rewrite ^.*$ /index.html last;\
+        }\
+        \
+        # ✅ Arquivos estáticos\
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {\
+            expires 1y;\
+            add_header Cache-Control "public, immutable";\
         }\
     }\
 }' > /etc/nginx/nginx.conf
@@ -60,7 +68,7 @@ RUN mkdir -p /var/cache/nginx/client_temp && \
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
 
-# ✅ Manter como root para evitar problemas
+# ✅ Executar como root para evitar problemas de permissão
 # USER nginx
 
 CMD ["nginx", "-g", "daemon off;"]
