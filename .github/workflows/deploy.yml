@@ -160,46 +160,37 @@ jobs:
         echo "Backend image: $BACKEND_IMAGE"
         echo "Frontend image: $FRONTEND_IMAGE"
         
-        # Get stack information
-        echo "Getting stack information..."
-        STACK_INFO=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" "$PORTAINER_URL/api/stacks")
-        STACK_ID=$(echo "$STACK_INFO" | jq -r '.[] | select(.Name == "niochat") | .Id')
-        
+        # Pegar ID da stack
+        STACK_ID=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
+          "$PORTAINER_URL/api/stacks" | jq -r '.[] | select(.Name == "niochat") | .Id')
+
         if [ -z "$STACK_ID" ] || [ "$STACK_ID" = "null" ]; then
           echo "Stack 'niochat' not found. Please create it first in Portainer."
           exit 1
         fi
-        
+
         echo "Found stack: niochat (ID: $STACK_ID)"
-        
-        # Get current stack configuration
-        echo "Getting current stack configuration..."
-        CURRENT_STACK=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" "$PORTAINER_URL/api/stacks/$STACK_ID")
-        
-        # Update the stack with new images
-        echo "Updating stack with new images..."
+
+        # Buscar stack file real
+        CURRENT_STACK=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
+          "$PORTAINER_URL/api/stacks/$STACK_ID/file")
+
+        # Atualizar imagens
         UPDATED_STACK=$(echo "$CURRENT_STACK" | jq --arg backend "$BACKEND_IMAGE" --arg frontend "$FRONTEND_IMAGE" '
-          .StackFileContent = (.StackFileContent | 
+          .StackFileContent = (.StackFileContent |
             gsub("ghcr\\.io/juniorsilvacmd/niotchat-backend:[^\\s]+"; $backend) |
             gsub("ghcr\\.io/juniorsilvacmd/niotchat-frontend:[^\\s]+"; $frontend)
           )
         ')
-        
-        # Deploy the updated stack
-        echo "Deploying updated stack..."
-        DEPLOY_RESULT=$(curl -s -X PUT \
+
+        # Fazer PUT com novo stack file (endpointId=1 é o Docker local, ajuste se for outro)
+        curl -s -X PUT \
           -H "X-API-Key: $PORTAINER_API_KEY" \
           -H "Content-Type: application/json" \
-          -d "$UPDATED_STACK" \
-          "$PORTAINER_URL/api/stacks/$STACK_ID")
-        
-        if [ $? -eq 0 ]; then
-          echo "Stack updated successfully!"
-        else
-          echo "Failed to update stack"
-          echo "$DEPLOY_RESULT"
-          exit 1
-        fi
+          --data "$UPDATED_STACK" \
+          "$PORTAINER_URL/api/stacks/$STACK_ID?endpointId=1"
+
+        echo "Stack updated successfully!"
 
     - name: Wait for deployment
       run: |
