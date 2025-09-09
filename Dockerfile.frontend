@@ -4,18 +4,24 @@ FROM node:18-alpine as build
 # Set work directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files first
 COPY frontend/frontend/package*.json ./
 COPY frontend/frontend/pnpm-lock.yaml ./
 
 # Install pnpm
 RUN npm install -g pnpm
 
-# Install dependencies
-RUN pnpm install
+# Clean install dependencies with legacy peer deps
+RUN pnpm install --legacy-peer-deps --frozen-lockfile
 
-# Copy source code
-COPY frontend/frontend/ .
+# Copy source code (excluding node_modules)
+COPY frontend/frontend/src ./src
+COPY frontend/frontend/public ./public
+COPY frontend/frontend/index.html ./
+COPY frontend/frontend/vite.config.js ./
+COPY frontend/frontend/jsconfig.json ./
+COPY frontend/frontend/components.json ./
+COPY frontend/frontend/eslint.config.js ./
 
 # Build the application
 RUN pnpm run build
