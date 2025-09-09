@@ -62,7 +62,7 @@ jobs:
     - name: Install Node.js dependencies
       run: |
         cd frontend/frontend
-        npm install
+        npm install --legacy-peer-deps
 
     - name: Run Python tests
       env:
