@@ -565,6 +565,13 @@ Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes
 
 Para suporte técnico ou dúvidas, abra uma issue no GitHub ou entre em contato através do email de suporte.
 
+## 🚀 Deploy Automático
+
+Sistema configurado com GitHub Actions para deploy automático no Portainer.
+- Push para `main` → Deploy automático
+- Health checks integrados
+- Monitoramento em tempo real
+
 ### Inteligência Artificial Avançada
 - **IA ChatGPT Integrada**: Atendimento automatizado inteligente
 - **Transcrição de Áudio**: Conversão automática de mensagens de voz para texto
