@@ -29,9 +29,11 @@ jobs:
       run: |
         # Obter mensagem do último commit
         COMMIT_MSG=$(git log -1 --pretty=%B)
-        # Escapar caracteres especiais para evitar problemas
-        COMMIT_MSG_ESCAPED=$(echo "$COMMIT_MSG" | sed 's/"/\\"/g' | sed 's/`/\\`/g')
-        echo "commit_message=$COMMIT_MSG_ESCAPED" >> $GITHUB_OUTPUT
+        # Escapar caracteres especiais e quebras de linha
+        COMMIT_MSG_ESCAPED=$(echo "$COMMIT_MSG" | sed 's/"/\\"/g' | sed 's/`/\\`/g' | tr '\n' ' ' | sed 's/  */ /g')
+        echo "commit_message<<EOF" >> $GITHUB_OUTPUT
+        echo "$COMMIT_MSG_ESCAPED" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
         
         # Determinar tipo de versão
         COMMIT_LOWER=$(echo "$COMMIT_MSG" | tr '[:upper:]' '[:lower:]')
