@@ -1,6 +1,19 @@
 {
   "versions": [
     {
+      "version": "2.5.4",
+      "date": "2025-09-08",
+      "type": "patch",
+      "title": "Correções e Melhorias",
+      "changes": [
+        {
+          "type": "fix",
+          "title": "Correções de Bugs",
+          "description": "Correções de problemas e melhorias de estabilidade"
+        }
+      ]
+    },
+    {
       "version": "2.5.3",
       "date": "2025-09-08",
       "type": "patch",

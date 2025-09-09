@@ -194,4 +194,4 @@ Resultado: Conversa move de "Com IA" para "Em Espera" + Notificação WebSocket
 Cliente: "Preciso do financeiro" 
 IA: "Vou buscar suas faturas..." + executa buscar_faturas_vencidas
 ERRADO! Cliente quer transferência, não fatura!
-"""
+"""]

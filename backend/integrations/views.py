@@ -575,6 +575,19 @@ def evolution_webhook(request):
                 print(f"DEBUG: External ID extraído: {external_id}")
             
             # Adicionar informações de mensagem respondida se existir
+            # Verificar se há informações de resposta no msg_data
+            quoted_message = msg_data.get('quotedMessage') or msg_data.get('quoted_message') or msg_data.get('reply_to')
+            reply_to_message_id = None
+            reply_to_content = None
+            
+            if quoted_message:
+                if isinstance(quoted_message, dict):
+                    reply_to_message_id = quoted_message.get('id') or quoted_message.get('messageId')
+                    reply_to_content = quoted_message.get('text') or quoted_message.get('content')
+                elif isinstance(quoted_message, str):
+                    reply_to_message_id = quoted_message
+                    reply_to_content = "Mensagem respondida"
+            
             if reply_to_message_id:
                 additional_attrs['reply_to_message_id'] = reply_to_message_id
                 additional_attrs['reply_to_content'] = reply_to_content
@@ -604,6 +617,10 @@ def evolution_webhook(request):
                     return JsonResponse({'status': 'csat_processed'}, status=200)
             except Exception as csat_error:
                 print(f"DEBUG: Erro ao processar CSAT: {csat_error}")
+            
+            # Determinar o tipo de mensagem para salvar no banco
+            message_type = msg_data.get('messageType') or msg_data.get('type', 'text')
+            db_message_type = message_type if message_type in ['audio', 'image', 'video', 'document', 'sticker', 'ptt', 'media'] else 'incoming'
             
             # SALVAR MENSAGEM DO CLIENTE NO REDIS
             try:
