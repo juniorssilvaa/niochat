@@ -20,9 +20,11 @@ services:
   niochat-backend:
     image: ghcr.io/juniorsilvacmd/niochat-backend:latest
     container_name: niochat-backend
+    pull_policy: always
     deploy:
       update_config:
         order: start-first
+        parallelism: 1
       restart_policy:
         condition: on-failure
     environment:
@@ -61,9 +63,11 @@ services:
   niochat-frontend:
     image: ghcr.io/juniorsilvacmd/niochat-frontend:latest
     container_name: niochat-frontend
+    pull_policy: always
     deploy:
       update_config:
         order: start-first
+        parallelism: 1
       restart_policy:
         condition: on-failure
     ports:
