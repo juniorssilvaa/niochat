@@ -4,7 +4,8 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:14
-    container_name: niochat-postgres
+    ports:
+      - 5432:5432
     environment:
       - POSTGRES_DB=niochat
       - POSTGRES_USER=niochat_user
@@ -43,6 +44,13 @@ services:
       - "traefik.http.routers.niochat-backend-api.tls.certresolver=letsencryptresolver"
       - "traefik.http.routers.niochat-backend-api.priority=100"
       - "traefik.http.services.niochat-backend.loadbalancer.server.port=8010"
+      
+      # Rota para WebSocket
+      - "traefik.http.routers.niochat-backend-ws.rule=Host(`app.niochat.com.br`) && PathPrefix(`/ws/`)"
+      - "traefik.http.routers.niochat-backend-ws.entrypoints=websecure"
+      - "traefik.http.routers.niochat-backend-ws.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.niochat-backend-ws.priority=100"
+      - "traefik.http.services.niochat-backend-ws.loadbalancer.server.port=8010"
 
   # Frontend React - PORTA 8012
   niochat-frontend:
@@ -55,7 +63,7 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      # Rota para frontend (tudo que não for API, admin, media, etc.)
+      # Rota para frontend (tudo que não for API, admin, media, websocket, etc.)
       - "traefik.http.routers.niochat-frontend.rule=Host(`app.niochat.com.br`)"
       - "traefik.http.routers.niochat-frontend.entrypoints=websecure"
       - "traefik.http.routers.niochat-frontend.tls.certresolver=letsencryptresolver"
