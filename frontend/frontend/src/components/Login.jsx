@@ -20,7 +20,7 @@ export default function Login({ onLogin }) {
       const token = res.data.token;
       localStorage.setItem('token', token);
       // 2. Busca dados do usuário logado
-      const userRes = await axios.get('/api/auth/me/', {
+      const userRes = await axios.get(`${apiUrl}/api/auth/me/`, {
         headers: { Authorization: `Token ${token}` }
       });
       const userData = userRes.data;

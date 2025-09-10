@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { User, Shield, Bell, Volume2, Save, Key } from 'lucide-react';
+import { User, Shield, Bell, Volume2, Save, Key, Settings } from 'lucide-react';
 import axios from 'axios';
 import useSessionTimeout from '../hooks/useSessionTimeout';
 
