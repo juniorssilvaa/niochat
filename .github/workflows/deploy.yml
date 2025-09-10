@@ -146,7 +146,7 @@ jobs:
 
     - name: Deploy to Portainer
       env:
-        PORTAINER_URL: https://portainer.niochat.com.br
+        PORTAINER_URL: https://portainer.niochat.com.br  
         PORTAINER_API_KEY: ${{ secrets.PORTAINER_API_KEY }}
         BACKEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
         FRONTEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
@@ -197,17 +197,19 @@ jobs:
         echo "Checking application health..."
         
         # Check backend health
-        if curl -f -s "https://api.niochat.com.br/api/health/" > /dev/null; then
+        if curl -f -s --retry 5 --retry-connrefused "https://api.niochat.com.br/api/health/" > /dev/null; then
           echo "Backend is healthy"
         else
           echo "Backend health check failed"
+          exit 1
         fi
         
         # Check frontend
-        if curl -f -s "https://app.niochat.com.br/" > /dev/null; then
+        if curl -f -s --retry 5 --retry-connrefused "https://app.niochat.com.br/" > /dev/null; then
           echo "Frontend is healthy"
         else
           echo "Frontend health check failed"
+          exit 1
         fi
 
     - name: Notify deployment
@@ -215,5 +217,4 @@ jobs:
         echo "NioChat deployed successfully!"
         echo "Frontend: https://app.niochat.com.br"
         echo "API: https://api.niochat.com.br"
-        echo "Admin: https://admin.niochat.com.br"
         echo "Superadmin: Junior / semfim01@"
