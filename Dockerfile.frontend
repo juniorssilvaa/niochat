@@ -15,7 +15,7 @@ COPY frontend/frontend/components.json ./
 COPY frontend/frontend/eslint.config.js ./
 
 # Configurar variáveis de ambiente para build
-ENV VITE_API_URL=https://api.niochat.com.br  
+ENV VITE_API_URL=https://api.niochat.com.br
 ENV VITE_WS_URL=wss://api.niochat.com.br
 
 RUN pnpm run build
@@ -29,12 +29,12 @@ RUN npm install -g serve && apk add --no-cache wget
 # Copiar arquivos buildados
 COPY --from=build /app/dist /app/dist
 
-# Expor porta 8012 (igual ao dev)
+# Expor porta 8012
 EXPOSE 8012
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8012/ || exit 1
 
-# Servir arquivos estáticos na porta 8012
-CMD ["serve", "-s", "/app/dist", "-l", "8012"]
+# Servir arquivos estáticos na porta 8012, escutando em todas as interfaces
+CMD ["serve", "-s", "/app/dist", "-l", "8012", "-H", "0.0.0.0"]
