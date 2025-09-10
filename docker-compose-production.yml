@@ -42,27 +42,27 @@ services:
       # ✅ ROTA DA API via app.niochat.com.br
       - "traefik.http.routers.niochat-api.rule=Host(`app.niochat.com.br`) && PathPrefix(`/api`)"
       - "traefik.http.routers.niochat-api.entrypoints=websecure"
-      - "traefik.http.routers.niochat-api.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.niochat-api.tls.certresolver=letsencryptresolver"
       - "traefik.http.services.niochat-api.loadbalancer.server.port=8000"
       # ✅ ROTA DO ADMIN via app.niochat.com.br
       - "traefik.http.routers.niochat-admin.rule=Host(`app.niochat.com.br`) && PathPrefix(`/admin`)"
       - "traefik.http.routers.niochat-admin.entrypoints=websecure"
-      - "traefik.http.routers.niochat-admin.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.niochat-admin.tls.certresolver=letsencryptresolver"
       - "traefik.http.services.niochat-admin.loadbalancer.server.port=8000"
       # ✅ ROTA DE MEDIA via app.niochat.com.br
       - "traefik.http.routers.niochat-media.rule=Host(`app.niochat.com.br`) && PathPrefix(`/media`)"
       - "traefik.http.routers.niochat-media.entrypoints=websecure"
-      - "traefik.http.routers.niochat-media.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.niochat-media.tls.certresolver=letsencryptresolver"
       - "traefik.http.services.niochat-media.loadbalancer.server.port=8000"
       # ✅ ROTA DE TOKEN AUTH via app.niochat.com.br
       - "traefik.http.routers.niochat-token-auth.rule=Host(`app.niochat.com.br`) && PathPrefix(`/api-token-auth`)"
       - "traefik.http.routers.niochat-token-auth.entrypoints=websecure"
-      - "traefik.http.routers.niochat-token-auth.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.niochat-token-auth.tls.certresolver=letsencryptresolver"
       - "traefik.http.services.niochat-token-auth.loadbalancer.server.port=8000"
       # ✅ ROTA DE TOKEN AUTH (sem barra final)
       - "traefik.http.routers.niochat-token-auth-2.rule=Host(`app.niochat.com.br`) && PathPrefix(`/api-token-auth/`)"
       - "traefik.http.routers.niochat-token-auth-2.entrypoints=websecure"
-      - "traefik.http.routers.niochat-token-auth-2.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.niochat-token-auth-2.tls.certresolver=letsencryptresolver"
       - "traefik.http.services.niochat-token-auth-2.loadbalancer.server.port=8000"
 
   # Frontend React
@@ -79,7 +79,7 @@ services:
       # ✅ ROTA DO FRONTEND (todas as outras requisições)
       - "traefik.http.routers.niochat-frontend.rule=Host(`app.niochat.com.br`)"
       - "traefik.http.routers.niochat-frontend.entrypoints=websecure"
-      - "traefik.http.routers.niochat-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.niochat-frontend.tls.certresolver=letsencryptresolver"
       - "traefik.http.services.niochat-frontend.loadbalancer.server.port=3000"
       # ✅ PRIORIDADE: API tem prioridade sobre frontend
       - "traefik.http.routers.niochat-api.priority=100"
