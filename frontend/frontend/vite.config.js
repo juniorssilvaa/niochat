@@ -45,10 +45,25 @@ export default defineConfig({
         secure: false
       },
       '/media/': {
-        target: 'http://192.168.100.55:8000',
+        target: 'http://192.168.100.55:8010',
         changeOrigin: true,
         secure: false
       },
+    }
+  },
+  // ✅ Configuração para produção
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    minify: 'terser',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom']
+        }
+      }
     }
   }
 })

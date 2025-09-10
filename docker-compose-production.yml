@@ -60,7 +60,7 @@ services:
       - "traefik.http.routers.niochat-token-auth.tls.certresolver=letsencrypt"
       - "traefik.http.services.niochat-token-auth.loadbalancer.server.port=8000"
 
-  # Frontend React - SERVIDO DIRETAMENTE PELO TRAEFIK
+  # Frontend React
   niochat-frontend:
     image: ghcr.io/juniorsilvacmd/niochat-frontend:latest
     container_name: niochat-frontend
