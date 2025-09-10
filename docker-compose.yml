@@ -20,11 +20,11 @@ services:
   niochat-backend:
     image: ghcr.io/juniorsilvacmd/niochat-backend:latest
     container_name: niochat-backend
-    pull_policy: always
     deploy:
       update_config:
         order: start-first
         parallelism: 1
+        failure_action: rollback
       restart_policy:
         condition: on-failure
     environment:
@@ -45,29 +45,29 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      # Rota para API (incluindo /api-token-auth/)
+      # Rota para API com prioridade alta
       - "traefik.http.routers.niochat-backend-api.rule=Host(`app.niochat.com.br`) && (PathPrefix(`/api/`) || PathPrefix(`/api-token-auth/`) || PathPrefix(`/admin/`) || PathPrefix(`/media/`))"
       - "traefik.http.routers.niochat-backend-api.entrypoints=websecure"
       - "traefik.http.routers.niochat-backend-api.tls.certresolver=letsencryptresolver"
-      - "traefik.http.routers.niochat-backend-api.priority=100"
-      - "traefik.http.services.niochat-backend.loadbalancer.server.port=8010"
+      - "traefik.http.routers.niochat-backend-api.priority=200"
+      - "traefik.http.services.niochat-backend-api.loadbalancer.server.port=8010"
       
-      # Rota para WebSocket
+      # Rota para WebSocket com prioridade alta
       - "traefik.http.routers.niochat-backend-ws.rule=Host(`app.niochat.com.br`) && PathPrefix(`/ws/`)"
       - "traefik.http.routers.niochat-backend-ws.entrypoints=websecure"
       - "traefik.http.routers.niochat-backend-ws.tls.certresolver=letsencryptresolver"
-      - "traefik.http.routers.niochat-backend-ws.priority=100"
+      - "traefik.http.routers.niochat-backend-ws.priority=200"
       - "traefik.http.services.niochat-backend-ws.loadbalancer.server.port=8010"
 
   # Frontend React - PORTA 8012
   niochat-frontend:
     image: ghcr.io/juniorsilvacmd/niochat-frontend:latest
     container_name: niochat-frontend
-    pull_policy: always
     deploy:
       update_config:
         order: start-first
         parallelism: 1
+        failure_action: rollback
       restart_policy:
         condition: on-failure
     ports:
@@ -77,7 +77,7 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      # Rota para frontend (tudo que não for API, admin, media, websocket, etc.)
+      # Rota para frontend com prioridade baixa (catch-all)
       - "traefik.http.routers.niochat-frontend.rule=Host(`app.niochat.com.br`)"
       - "traefik.http.routers.niochat-frontend.entrypoints=websecure"
       - "traefik.http.routers.niochat-frontend.tls.certresolver=letsencryptresolver"
