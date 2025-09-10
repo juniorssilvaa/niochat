@@ -50,20 +50,5 @@ export default defineConfig({
         secure: false
       },
     }
-  },
-  // ✅ Configuração para produção
-  build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    sourcemap: false,
-    minify: 'terser',
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom']
-        }
-      }
-    }
   }
 })
