@@ -1,4 +1,4 @@
-# Frontend Dockerfile - SERVIDO DIRETAMENTE PELO TRAEFIK
+# Frontend Dockerfile - SERVIDO DIRETAMENTE PELO TRAEFIK, PORTA 8012
 FROM node:18-alpine AS build
 
 WORKDIR /app
@@ -15,26 +15,26 @@ COPY frontend/frontend/components.json ./
 COPY frontend/frontend/eslint.config.js ./
 
 # Configurar variáveis de ambiente para build
-ENV VITE_API_URL=https://app.niochat.com.br
-ENV VITE_WS_URL=wss://app.niochat.com.br
+ENV VITE_API_URL=https://api.niochat.com.br  
+ENV VITE_WS_URL=wss://api.niochat.com.br
 
 RUN pnpm run build
 
 # Production stage - USANDO SERVIDOR HTTP SIMPLES
 FROM node:18-alpine
 
-# Instalar serve para servir arquivos estáticos
-RUN npm install -g serve
+# Instalar serve e wget (para healthcheck)
+RUN npm install -g serve && apk add --no-cache wget
 
 # Copiar arquivos buildados
 COPY --from=build /app/dist /app/dist
 
-# Expor porta 3000 (mapeada para 8012 no host)
-EXPOSE 3000
+# Expor porta 8012 (igual ao dev)
+EXPOSE 8012
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8012/ || exit 1
 
-# Servir arquivos estáticos na porta 3000
-CMD ["serve", "-s", "/app/dist", "-l", "3000"]
+# Servir arquivos estáticos na porta 8012
+CMD ["serve", "-s", "/app/dist", "-l", "8012"]
