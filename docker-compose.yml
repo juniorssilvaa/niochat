@@ -20,6 +20,11 @@ services:
   niochat-backend:
     image: ghcr.io/juniorsilvacmd/niochat-backend:latest
     container_name: niochat-backend
+    deploy:
+      update_config:
+        order: start-first
+      restart_policy:
+        condition: on-failure
     environment:
       - SECRET_KEY=OFfGQLqPs5osrBBnhOBdIfkjq1F6vpb74YoAWNkjwbY4BwTNK5
       - DEBUG=True
@@ -56,6 +61,11 @@ services:
   niochat-frontend:
     image: ghcr.io/juniorsilvacmd/niochat-frontend:latest
     container_name: niochat-frontend
+    deploy:
+      update_config:
+        order: start-first
+      restart_policy:
+        condition: on-failure
     ports:
       - "8012:8012"
     networks:
