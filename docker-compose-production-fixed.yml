@@ -1,0 +1,79 @@
+version: "3.8"
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14
+    container_name: niochat-postgres
+    environment:
+      - POSTGRES_DB=niochat
+      - POSTGRES_USER=niochat_user
+      - POSTGRES_PASSWORD=E0sJT3wAYFuahovmHkxgy
+    volumes:
+      - niochat-postgres:/var/lib/postgresql/data
+    networks:
+      - nioNet
+    restart: unless-stopped
+
+  # Backend Django - PORTA 8010
+  niochat-backend:
+    image: ghcr.io/juniorsilvacmd/niochat-backend:latest
+    container_name: niochat-backend
+    environment:
+      - SECRET_KEY=OFfGQLqPs5osrBBnhOBdIfkjq1F6vpb74YoAWNkjwbY4BwTNK5
+      - DEBUG=True
+      - ALLOWED_HOSTS=*
+      - DATABASE_URL=postgresql://niochat_user:E0sJT3wAYFuahovmHkxgy@postgres:5432/niochat
+      - MEDIA_URL=/media/
+      - STATIC_URL=/static/
+      - LOG_LEVEL=DEBUG
+    volumes:
+      - niochat-media:/app/backend/media
+      - niochat-static:/app/backend/staticfiles
+    ports:
+      - "8010:8010"
+    networks:
+      - nioNet
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      # Rota para API (incluindo /api-token-auth/)
+      - "traefik.http.routers.niochat-backend-api.rule=Host(`app.niochat.com.br`) && (PathPrefix(`/api/`) || PathPrefix(`/api-token-auth/`) || PathPrefix(`/admin/`) || PathPrefix(`/media/`))"
+      - "traefik.http.routers.niochat-backend-api.entrypoints=websecure"
+      - "traefik.http.routers.niochat-backend-api.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.niochat-backend-api.priority=100"
+      - "traefik.http.services.niochat-backend.loadbalancer.server.port=8010"
+
+  # Frontend React - PORTA 8012
+  niochat-frontend:
+    image: ghcr.io/juniorsilvacmd/niochat-frontend:latest
+    container_name: niochat-frontend
+    ports:
+      - "8012:8012"
+    networks:
+      - nioNet
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      # Rota para frontend (tudo que não for API, admin, media, etc.)
+      - "traefik.http.routers.niochat-frontend.rule=Host(`app.niochat.com.br`)"
+      - "traefik.http.routers.niochat-frontend.entrypoints=websecure"
+      - "traefik.http.routers.niochat-frontend.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.niochat-frontend.priority=1"
+      - "traefik.http.services.niochat-frontend.loadbalancer.server.port=8012"
+
+networks:
+  nioNet:
+    external: true
+    name: nioNet
+
+volumes:
+  niochat-media:
+    external: true
+    name: niochat-media
+  niochat-static:
+    external: true
+    name: niochat-static
+  niochat-postgres:
+    external: true
+    name: niochat-postgres
