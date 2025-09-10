@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: juniorsilvacmd/niotchat
+  IMAGE_NAME: juniorsilvacmd/niochat  # Corrigido: removeu o 't' extra
 
 jobs:
   test:
@@ -109,18 +109,7 @@ jobs:
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Extract metadata
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=sha,prefix={{branch}}-
-          type=raw,value=latest,enable={{is_default_branch}}
+        password: ${{ secrets.GHCR_TOKEN }}  # Corrigido: usando GHCR_TOKEN
 
     - name: Build and push backend image
       uses: docker/build-push-action@v5
@@ -128,8 +117,11 @@ jobs:
         context: .
         file: ./Dockerfile.backend
         push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
-        labels: ${{ steps.meta.outputs.labels }}
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
     - name: Build and push frontend image
       uses: docker/build-push-action@v5
@@ -137,8 +129,11 @@ jobs:
         context: .
         file: ./Dockerfile.frontend
         push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
-        labels: ${{ steps.meta.outputs.labels }}
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
   deploy:
     needs: [test, build-and-push]
@@ -153,53 +148,44 @@ jobs:
       env:
         PORTAINER_URL: https://portainer.niochat.com.br
         PORTAINER_API_KEY: ${{ secrets.PORTAINER_API_KEY }}
-        BACKEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
-        FRONTEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
+        BACKEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
+        FRONTEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
       run: |
         echo "Deploying to Portainer..."
         echo "Backend image: $BACKEND_IMAGE"
         echo "Frontend image: $FRONTEND_IMAGE"
         
-        # Get stack information
-        echo "Getting stack information..."
-        STACK_INFO=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" "$PORTAINER_URL/api/stacks")
-        STACK_ID=$(echo "$STACK_INFO" | jq -r '.[] | select(.Name == "niochat") | .Id')
-        
+        # Pegar ID da stack
+        STACK_ID=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
+          "$PORTAINER_URL/api/stacks" | jq -r '.[] | select(.Name == "niochat") | .Id')
+
         if [ -z "$STACK_ID" ] || [ "$STACK_ID" = "null" ]; then
           echo "Stack 'niochat' not found. Please create it first in Portainer."
           exit 1
         fi
-        
+
         echo "Found stack: niochat (ID: $STACK_ID)"
-        
-        # Get current stack configuration
-        echo "Getting current stack configuration..."
-        CURRENT_STACK=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" "$PORTAINER_URL/api/stacks/$STACK_ID")
-        
-        # Update the stack with new images
-        echo "Updating stack with new images..."
+
+        # Buscar stack file real
+        CURRENT_STACK=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
+          "$PORTAINER_URL/api/stacks/$STACK_ID/file")
+
+        # Atualizar imagens
         UPDATED_STACK=$(echo "$CURRENT_STACK" | jq --arg backend "$BACKEND_IMAGE" --arg frontend "$FRONTEND_IMAGE" '
-          .StackFileContent = (.StackFileContent | 
-            gsub("ghcr\\.io/juniorsilvacmd/niotchat-backend:[^\\s]+"; $backend) |
-            gsub("ghcr\\.io/juniorsilvacmd/niotchat-frontend:[^\\s]+"; $frontend)
+          .StackFileContent = (.StackFileContent |
+            gsub("ghcr\\.io/juniorsilvacmd/niochat-backend:[^\\s]+"; $backend) |
+            gsub("ghcr\\.io/juniorsilvacmd/niochat-frontend:[^\\s]+"; $frontend)
           )
         ')
-        
-        # Deploy the updated stack
-        echo "Deploying updated stack..."
-        DEPLOY_RESULT=$(curl -s -X PUT \
+
+        # Fazer PUT com novo stack file (endpointId=1 é o Docker local, ajuste se for outro)
+        curl -s -X PUT \
           -H "X-API-Key: $PORTAINER_API_KEY" \
           -H "Content-Type: application/json" \
-          -d "$UPDATED_STACK" \
-          "$PORTAINER_URL/api/stacks/$STACK_ID")
-        
-        if [ $? -eq 0 ]; then
-          echo "Stack updated successfully!"
-        else
-          echo "Failed to update stack"
-          echo "$DEPLOY_RESULT"
-          exit 1
-        fi
+          --data "$UPDATED_STACK" \
+          "$PORTAINER_URL/api/stacks/$STACK_ID?endpointId=1"
+
+        echo "Stack updated successfully!"
 
     - name: Wait for deployment
       run: |

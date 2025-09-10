@@ -1,190 +1,6 @@
 version: "3.8"
 
 services:
-  # Backend Django
-  niochat-backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    container_name: niochat-backend
-    environment:
-      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
-      - DEBUG=False
-      - ALLOWED_HOSTS=api.niochat.com.br,admin.niochat.com.br,app.niochat.com.br,localhost
-      - DATABASE_URL=postgresql://niochat_user:${POSTGRES_PASSWORD:-niochat_password}@postgres:5432/niochat
-      - REDIS_URL=redis://redis:6379
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - CORS_ALLOWED_ORIGINS=https://app.niochat.com.br,https://admin.niochat.com.br
-      - CSRF_TRUSTED_ORIGINS=https://app.niochat.com.br,https://admin.niochat.com.br,https://api.niochat.com.br
-      - MEDIA_URL=/media/
-      - STATIC_URL=/static/
-      - LOG_LEVEL=INFO
-    volumes:
-      - niochat-media:/app/backend/media
-      - niochat-static:/app/backend/staticfiles
-    networks:
-      - nioNet
-    depends_on:
-      - postgres
-      - redis
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-      resources:
-        limits:
-          cpus: "2"
-          memory: 2048M
-        reservations:
-          cpus: "1"
-          memory: 1024M
-      labels:
-        - traefik.enable=true
-        - traefik.http.routers.niochat-api.rule=Host(`api.niochat.com.br`)
-        - traefik.http.routers.niochat-api.entrypoints=websecure
-        - traefik.http.routers.niochat-api.tls.certresolver=letsencryptresolver
-        - traefik.http.routers.niochat-api.service=niochat-backend
-        - traefik.http.services.niochat-backend.loadbalancer.server.port=8000
-        - traefik.http.services.niochat-backend.loadbalancer.passHostHeader=true
-        - traefik.http.routers.niochat-api.middlewares=niochat-cors
-        - traefik.http.middlewares.niochat-cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE,PATCH
-        - traefik.http.middlewares.niochat-cors.headers.accesscontrolallowheaders=*
-        - traefik.http.middlewares.niochat-cors.headers.accesscontrolalloworiginlist=https://app.niochat.com.br,https://admin.niochat.com.br
-        - traefik.http.middlewares.niochat-cors.headers.accesscontrolmaxage=100
-        - traefik.http.middlewares.niochat-cors.headers.addvaryheader=true
-        # Admin route
-        - traefik.http.routers.niochat-admin.rule=Host(`admin.niochat.com.br`)
-        - traefik.http.routers.niochat-admin.entrypoints=websecure
-        - traefik.http.routers.niochat-admin.tls.certresolver=letsencryptresolver
-        - traefik.http.routers.niochat-admin.service=niochat-backend
-        - traefik.http.routers.niochat-admin.priority=100
-        # Healthcheck
-        - traefik.http.services.niochat-backend.loadbalancer.healthcheck.path=/api/health/
-        - traefik.http.services.niochat-backend.loadbalancer.healthcheck.interval=30s
-        - traefik.http.services.niochat-backend.loadbalancer.healthcheck.timeout=10s
-    restart: unless-stopped
-
-  # Frontend React
-  niochat-frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    container_name: niochat-frontend
-    environment:
-      - VITE_API_URL=https://api.niochat.com.br
-      - VITE_WS_URL=wss://api.niochat.com.br
-    networks:
-      - nioNet
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-      resources:
-        limits:
-          cpus: "1"
-          memory: 512M
-        reservations:
-          cpus: "0.5"
-          memory: 256M
-      labels:
-        - traefik.enable=true
-        - traefik.http.routers.niochat-app.rule=Host(`app.niochat.com.br`)
-        - traefik.http.routers.niochat-app.entrypoints=websecure
-        - traefik.http.routers.niochat-app.tls.certresolver=letsencryptresolver
-        - traefik.http.routers.niochat-app.service=niochat-frontend
-        - traefik.http.services.niochat-frontend.loadbalancer.server.port=80
-        - traefik.http.services.niochat-frontend.loadbalancer.passHostHeader=true
-        # Healthcheck
-        - traefik.http.services.niochat-frontend.loadbalancer.healthcheck.path=/
-        - traefik.http.services.niochat-frontend.loadbalancer.healthcheck.interval=30s
-        - traefik.http.services.niochat-frontend.loadbalancer.healthcheck.timeout=10s
-    restart: unless-stopped
-
-  # Celery Worker
-  niochat-celery:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    container_name: niochat-celery
-    command: celery -A niochat worker -l info
-    environment:
-      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
-      - DEBUG=False
-      - ALLOWED_HOSTS=api.niochat.com.br,admin.niochat.com.br,app.niochat.com.br,localhost
-      - DATABASE_URL=postgresql://niochat_user:${POSTGRES_PASSWORD:-niochat_password}@postgres:5432/niochat
-      - REDIS_URL=redis://redis:6379
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - MEDIA_URL=/media/
-      - STATIC_URL=/static/
-      - LOG_LEVEL=INFO
-    volumes:
-      - niochat-media:/app/backend/media
-    networks:
-      - nioNet
-    depends_on:
-      - postgres
-      - redis
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-      resources:
-        limits:
-          cpus: "1"
-          memory: 1024M
-        reservations:
-          cpus: "0.5"
-          memory: 512M
-    restart: unless-stopped
-
-  # Celery Beat (Scheduler)
-  niochat-celery-beat:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    container_name: niochat-celery-beat
-    command: celery -A niochat beat -l info
-    environment:
-      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
-      - DEBUG=False
-      - ALLOWED_HOSTS=api.niochat.com.br,admin.niochat.com.br,app.niochat.com.br,localhost
-      - DATABASE_URL=postgresql://niochat_user:${POSTGRES_PASSWORD:-niochat_password}@postgres:5432/niochat
-      - REDIS_URL=redis://redis:6379
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - MEDIA_URL=/media/
-      - STATIC_URL=/static/
-      - LOG_LEVEL=INFO
-    volumes:
-      - niochat-media:/app/backend/media
-    networks:
-      - nioNet
-    depends_on:
-      - postgres
-      - redis
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 512M
-        reservations:
-          cpus: "0.25"
-          memory: 256M
-    restart: unless-stopped
-
   # PostgreSQL Database
   postgres:
     image: postgres:14
@@ -192,25 +8,67 @@ services:
     environment:
       - POSTGRES_DB=niochat
       - POSTGRES_USER=niochat_user
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-niochat_password}
+      - POSTGRES_PASSWORD=E0sJT3wAYFuahovmHkxgy
     volumes:
       - niochat-postgres:/var/lib/postgresql/data
     networks:
       - nioNet
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-      resources:
-        limits:
-          cpus: "1"
-          memory: 1024M
-        reservations:
-          cpus: "0.5"
-          memory: 512M
     restart: unless-stopped
+
+  # Backend Django
+  niochat-backend:
+    image: ghcr.io/juniorsilvacmd/niochat-backend:latest
+    container_name: niochat-backend
+    environment:
+      - SECRET_KEY=OFfGQLqPs5osrBBnhOBdIfkjq1F6vpb74YoAWNkjwbY4BwTNK5
+      - DEBUG=True
+      - ALLOWED_HOSTS=*
+      - DATABASE_URL=postgresql://niochat_user:E0sJT3wAYFuahovmHkxgy@postgres:5432/niochat
+      - MEDIA_URL=/media/
+      - STATIC_URL=/static/
+      - LOG_LEVEL=DEBUG
+    volumes:
+      - niochat-media:/app/backend/media
+      - niochat-static:/app/backend/staticfiles
+    ports:
+      - "8010:8000"  # ✅ MANTER PORTA 8010
+    networks:
+      - nioNet
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.niochat-backend.rule=Host(`api.niochat.com.br`)"
+      - "traefik.http.routers.niochat-backend.entrypoints=websecure"
+      - "traefik.http.routers.niochat-backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.niochat-backend.loadbalancer.server.port=8000"
+      # Admin route
+      - "traefik.http.routers.niochat-admin.rule=Host(`admin.niochat.com.br`)"
+      - "traefik.http.routers.niochat-admin.entrypoints=websecure"
+      - "traefik.http.routers.niochat-admin.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.niochat-admin.service=niochat-backend"
+
+  # Frontend React - SERVIDO DIRETAMENTE PELO TRAEFIK
+  niochat-frontend:
+    image: ghcr.io/juniorsilvacmd/niochat-frontend:latest
+    container_name: niochat-frontend
+    ports:
+      - "8012:3000"  # ✅ MANTER PORTA 8012
+    networks:
+      - nioNet
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.niochat-frontend.rule=Host(`app.niochat.com.br`)"
+      - "traefik.http.routers.niochat-frontend.entrypoints=websecure"
+      - "traefik.http.routers.niochat-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.niochat-frontend.loadbalancer.server.port=3000"
+      # Rota para arquivos estáticos
+      - "traefik.http.routers.niochat-static.rule=Host(`app.niochat.com.br`) && PathPrefix(`/assets/`)"
+      - "traefik.http.routers.niochat-static.entrypoints=websecure"
+      - "traefik.http.routers.niochat-static.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.niochat-static.service=niochat-frontend"
 
 networks:
   nioNet:
