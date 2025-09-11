@@ -166,27 +166,33 @@ jobs:
         # 1. REMOVER IMAGENS ANTIGAS
         echo "Removing old images..."
         
-        # Listar e remover imagens antigas do backend
-        OLD_BACKEND_IMAGES=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
+        # Remover TODAS as imagens antigas do backend (exceto a mais recente)
+        echo "Removing old backend images..."
+        curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
           "$PORTAINER_URL/api/endpoints/1/docker/images/json" | \
-          jq -r '.[] | select(.RepoTags[]? | contains("niochat-backend") and (contains("latest") | not)) | .Id')
+          jq -r '.[] | select(.RepoTags[]? | contains("niochat-backend")) | .Id' | \
+          head -n -1 | \
+          while read image; do
+            if [ ! -z "$image" ]; then
+              echo "Removing old backend image: $image"
+              curl -s -X DELETE -H "X-API-Key: $PORTAINER_API_KEY" \
+                "$PORTAINER_URL/api/endpoints/1/docker/images/$image?force=true"
+            fi
+          done
         
-        for image in $OLD_BACKEND_IMAGES; do
-          echo "Removing old backend image: $image"
-          curl -s -X DELETE -H "X-API-Key: $PORTAINER_API_KEY" \
-            "$PORTAINER_URL/api/endpoints/1/docker/images/$image?force=true"
-        done
-        
-        # Listar e remover imagens antigas do frontend
-        OLD_FRONTEND_IMAGES=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
+        # Remover TODAS as imagens antigas do frontend (exceto a mais recente)
+        echo "Removing old frontend images..."
+        curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
           "$PORTAINER_URL/api/endpoints/1/docker/images/json" | \
-          jq -r '.[] | select(.RepoTags[]? | contains("niochat-frontend") and (contains("latest") | not)) | .Id')
-        
-        for image in $OLD_FRONTEND_IMAGES; do
-          echo "Removing old frontend image: $image"
-          curl -s -X DELETE -H "X-API-Key: $PORTAINER_API_KEY" \
-            "$PORTAINER_URL/api/endpoints/1/docker/images/$image?force=true"
-        done
+          jq -r '.[] | select(.RepoTags[]? | contains("niochat-frontend")) | .Id' | \
+          head -n -1 | \
+          while read image; do
+            if [ ! -z "$image" ]; then
+              echo "Removing old frontend image: $image"
+              curl -s -X DELETE -H "X-API-Key: $PORTAINER_API_KEY" \
+                "$PORTAINER_URL/api/endpoints/1/docker/images/$image?force=true"
+            fi
+          done
         
         # 2. PULL DAS NOVAS IMAGENS
         echo "Pulling new images..."
