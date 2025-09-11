@@ -553,7 +553,7 @@ export default function ConversasDashboard() {
           
           // Conectar ao WebSocket para atualizações de status em tempo real
           const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-          const wsUrl = `${wsProtocol}://${window.location.hostname}:8010/ws/user_status/?token=${token}`;
+          const wsUrl = `${wsProtocol}://${window.location.host}/ws/user_status/?token=${token}`;
           const statusWs = new WebSocket(wsUrl);
           
           statusWs.onmessage = (event) => {

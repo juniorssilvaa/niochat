@@ -10,9 +10,9 @@ function UserStatusManager({ user }) {
   const pingIntervalRef = useRef(null);
 
   const connectUserWebSocket = () => {
-    if (!user || !user.id) return;
+    if (!user || !user.id || !user.token) return;
 
-    const token = localStorage.getItem('token');
+    const token = user.token || localStorage.getItem('token');
     if (!token) return;
 
     // Fechar conexão anterior se existir
@@ -23,13 +23,13 @@ function UserStatusManager({ user }) {
     try {
       // Conectar ao WebSocket individual do usuário na porta do Django
       const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      const wsUrl = `${wsProtocol}://${window.location.hostname}:8010/ws/user/${user.id}/?token=${token}`;
+      const wsUrl = `${wsProtocol}://${window.location.host}/ws/user/${user.id}/?token=${token}`;
       
-      console.log(`🔗 Conectando WebSocket do usuário ${user.username}:`, wsUrl);
+      console.log('Conectando WebSocket do usuário');
       const ws = new WebSocket(wsUrl);
       
       ws.onopen = () => {
-        console.log(`✅ WebSocket do usuário ${user.username} conectado`);
+        console.log('WebSocket do usuário conectado');
         websocketRef.current = ws;
         
         // Limpar timeout de reconexão
@@ -59,7 +59,7 @@ function UserStatusManager({ user }) {
       };
       
       ws.onclose = () => {
-        console.log(`🔌 WebSocket do usuário ${user.username} desconectado`);
+        console.log('WebSocket do usuário desconectado');
         websocketRef.current = null;
         
         // Limpar ping interval
@@ -76,7 +76,7 @@ function UserStatusManager({ user }) {
       };
       
       ws.onerror = (error) => {
-        console.error(`❌ Erro WebSocket do usuário ${user.username}:`, error);
+        console.error('Erro WebSocket do usuário:', error);
       };
       
     } catch (error) {
@@ -86,23 +86,26 @@ function UserStatusManager({ user }) {
 
   // Conectar quando o usuário for definido
   useEffect(() => {
-    if (user && user.id) {
-      connectUserWebSocket();
+    if (user && user.id && user.token) {
+      // Aguardar um pouco para garantir que o usuário esteja totalmente carregado
+      const timer = setTimeout(() => {
+        connectUserWebSocket();
+      }, 1000);
+      
+      return () => {
+        clearTimeout(timer);
+        if (websocketRef.current && websocketRef.current.readyState === WebSocket.OPEN) {
+          websocketRef.current.close();
+        }
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
+        }
+        if (pingIntervalRef.current) {
+          clearInterval(pingIntervalRef.current);
+        }
+      };
     }
-
-    // Cleanup ao desmontar ou trocar usuário
-    return () => {
-      if (websocketRef.current && websocketRef.current.readyState === WebSocket.OPEN) {
-        websocketRef.current.close();
-      }
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-      if (pingIntervalRef.current) {
-        clearInterval(pingIntervalRef.current);
-      }
-    };
-  }, [user?.id]);
+  }, [user?.id, user?.token]);
 
   // Não renderiza nada - é apenas um gerenciador de estado
   return null;

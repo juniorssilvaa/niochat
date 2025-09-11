@@ -55,13 +55,13 @@ export default function useOnlineUsers() {
     try {
       // Conectar ao WebSocket correto na porta do Django (8010)
       const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      const wsUrl = `${wsProtocol}://${window.location.hostname}:8010/ws/user_status/?token=${token}`;
+      const wsUrl = `${wsProtocol}://${window.location.host}/ws/user_status/?token=${token}`;
       
-      console.log('🔗 Conectando ao WebSocket de status:', wsUrl);
+      console.log('Conectando ao WebSocket de status');
       const ws = new WebSocket(wsUrl);
       
       ws.onopen = () => {
-        console.log('✅ WebSocket de status conectado');
+        console.log('WebSocket de status conectado');
         setWebsocket(ws);
         
         // Buscar status inicial via API
@@ -92,18 +92,18 @@ export default function useOnlineUsers() {
       };
       
       ws.onclose = () => {
-        console.log('🔌 WebSocket de status desconectado');
+        console.log('WebSocket de status desconectado');
         setWebsocket(null);
         
         // Reconectar após 5 segundos
         reconnectTimeoutRef.current = setTimeout(() => {
-          console.log('🔄 Tentando reconectar WebSocket...');
+          console.log('Tentando reconectar WebSocket...');
           connectWebSocket();
         }, 5000);
       };
       
       ws.onerror = (error) => {
-        console.error('❌ Erro WebSocket status:', error);
+        console.error('Erro WebSocket status:', error);
       };
       
     } catch (error) {
@@ -115,13 +115,17 @@ export default function useOnlineUsers() {
 
   // Inicializar sistema de status online
   useEffect(() => {
-    connectWebSocket();
+    // Aguardar um pouco para garantir que o sistema esteja totalmente carregado
+    const timer = setTimeout(() => {
+      connectWebSocket();
+    }, 2000);
     
     // Buscar via API a cada 30 segundos como fallback
     const apiInterval = setInterval(fetchOnlineUsers, 30000);
 
     // Cleanup
     return () => {
+      clearTimeout(timer);
       if (websocket && websocket.readyState === WebSocket.OPEN) {
         websocket.close();
       }
