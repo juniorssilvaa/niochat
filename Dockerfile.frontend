@@ -15,7 +15,7 @@ COPY frontend/frontend/components.json ./
 COPY frontend/frontend/eslint.config.js ./
 
 # Configurar variáveis de ambiente para build
-ENV VITE_API_URL=https://app.niochat.com.br
+ENV VITE_API_URL=https://api.niochat.com.br
 ENV VITE_WS_URL=wss://api.niochat.com.br
 
 RUN pnpm run build
