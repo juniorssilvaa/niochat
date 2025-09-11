@@ -255,19 +255,21 @@ jobs:
       run: |
         echo "Checking application health..."
         
-        # Check backend health
-        if curl -f -s --retry 5 --retry-connrefused "https://app.niochat.com.br/api/auth/me/" > /dev/null; then
-          echo "Backend is healthy"
+        # Check backend health (401 is expected without token)
+        BACKEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://app.niochat.com.br/api/auth/me/")
+        if [ "$BACKEND_STATUS" = "401" ] || [ "$BACKEND_STATUS" = "200" ]; then
+          echo "Backend is healthy (status: $BACKEND_STATUS)"
         else
-          echo "Backend health check failed"
+          echo "Backend health check failed (status: $BACKEND_STATUS)"
           exit 1
         fi
         
         # Check frontend
-        if curl -f -s --retry 5 --retry-connrefused "https://app.niochat.com.br/" > /dev/null; then
-          echo "Frontend is healthy"
+        FRONTEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://app.niochat.com.br/")
+        if [ "$FRONTEND_STATUS" = "200" ]; then
+          echo "Frontend is healthy (status: $FRONTEND_STATUS)"
         else
-          echo "Frontend health check failed"
+          echo "Frontend health check failed (status: $FRONTEND_STATUS)"
           exit 1
         fi
 
