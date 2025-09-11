@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: juniorsilvacmd/niochat  # Corrigido: removeu o 't' extra
+  IMAGE_NAME: juniorsilvacmd/niochat
 
 jobs:
   test:
@@ -109,7 +109,7 @@ jobs:
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
-        password: ${{ secrets.GHCR_TOKEN }}  # Corrigido: usando GHCR_TOKEN
+        password: ${{ secrets.GHCR_TOKEN }}
 
     - name: Build and push backend image
       uses: docker/build-push-action@v5
@@ -146,7 +146,7 @@ jobs:
 
     - name: Deploy to Portainer
       env:
-        PORTAINER_URL: https://portainer.niochat.com.br  
+        PORTAINER_URL: https://portainer.niochat.com.br
         PORTAINER_API_KEY: ${{ secrets.PORTAINER_API_KEY }}
         BACKEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
         FRONTEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
@@ -215,8 +215,8 @@ jobs:
       run: |
         echo "Checking application health..."
         
-        # Check backend health
-        if curl -f -s --retry 5 --retry-connrefused "https://app.niochat.com.br/api/health/" > /dev/null; then
+        # Check backend health - CORRIGIDO PARA O ENDPOINT CORRETO
+        if curl -f -s --retry 5 --retry-connrefused "https://app.niochat.com.br/health/" > /dev/null; then
           echo "Backend is healthy"
         else
           echo "Backend health check failed"
