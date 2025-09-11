@@ -166,12 +166,11 @@ jobs:
         # 1. REMOVER IMAGENS ANTIGAS
         echo "Removing old images..."
         
-        # Remover TODAS as imagens antigas do backend (exceto a mais recente)
+        # Remover imagens antigas do backend (exceto a que tem tag 'latest')
         echo "Removing old backend images..."
         curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
           "$PORTAINER_URL/api/endpoints/1/docker/images/json" | \
-          jq -r '.[] | select(.RepoTags[]? | contains("niochat-backend")) | .Id' | \
-          head -n -1 | \
+          jq -r '.[] | select(.RepoTags[]? | contains("niochat-backend") and (contains("latest") | not)) | .Id' | \
           while read image; do
             if [ ! -z "$image" ]; then
               echo "Removing old backend image: $image"
@@ -180,12 +179,11 @@ jobs:
             fi
           done
         
-        # Remover TODAS as imagens antigas do frontend (exceto a mais recente)
+        # Remover imagens antigas do frontend (exceto a que tem tag 'latest')
         echo "Removing old frontend images..."
         curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
           "$PORTAINER_URL/api/endpoints/1/docker/images/json" | \
-          jq -r '.[] | select(.RepoTags[]? | contains("niochat-frontend")) | .Id' | \
-          head -n -1 | \
+          jq -r '.[] | select(.RepoTags[]? | contains("niochat-frontend") and (contains("latest") | not)) | .Id' | \
           while read image; do
             if [ ! -z "$image" ]; then
               echo "Removing old frontend image: $image"
