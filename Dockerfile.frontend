@@ -36,5 +36,5 @@ EXPOSE 8012
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8012/ || exit 1
 
-# Servir arquivos estáticos na porta 8012 (escuta em 0.0.0.0 por padrão)
-CMD ["serve", "-s", "/app/dist", "-l", "8012"]
+# Servir arquivos estáticos na porta 8012, escutando em todas as interfaces
+CMD ["serve", "-s", "/app/dist", "-l", "8012", "-L"]
