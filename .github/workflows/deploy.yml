@@ -186,6 +186,25 @@ jobs:
           "$PORTAINER_URL/api/stacks/$STACK_ID?endpointId=1"
 
         echo "Stack updated successfully!"
+        
+        # Forçar pull das imagens mais recentes
+        echo "Forcing pull of latest images..."
+        
+        # Pull backend image
+        curl -s -X POST \
+          -H "X-API-Key: $PORTAINER_API_KEY" \
+          -H "Content-Type: application/json" \
+          -d "{\"fromImage\":\"$BACKEND_IMAGE\"}" \
+          "$PORTAINER_URL/api/endpoints/1/docker/images/create?fromImage=$BACKEND_IMAGE"
+        
+        # Pull frontend image  
+        curl -s -X POST \
+          -H "X-API-Key: $PORTAINER_API_KEY" \
+          -H "Content-Type: application/json" \
+          -d "{\"fromImage\":\"$FRONTEND_IMAGE\"}" \
+          "$PORTAINER_URL/api/endpoints/1/docker/images/create?fromImage=$FRONTEND_IMAGE"
+        
+        echo "Images pulled successfully!"
 
     - name: Wait for deployment
       run: |
