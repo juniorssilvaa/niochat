@@ -18,32 +18,47 @@ export default function Login({ onLogin }) {
       // 1. Autentica e pega o token
       const res = await axios.post('/api-token-auth/', { username, password });
       const token = res.data.token;
+      // console.log('Token recebido:', token); // Para debug
+
+      // Salva o token no localStorage
       localStorage.setItem('token', token);
-      // 2. Busca dados do usuário logado
-      const userRes = await axios.get('/api/auth/me/', {
+
+      // 2. Busca dados do usuário logado usando o endpoint CORRETO
+      // ❌ Antes: /api/auth/me/ (errado)
+      // ✅ Agora: /auth/me/ (correto)
+      const userRes = await axios.get('/auth/me/', {
         headers: { Authorization: `Token ${token}` }
       });
+
       const userData = userRes.data;
+      // console.log('Dados do usuário:', userData); // Para debug
+
       setLoading(false);
       onLogin({ ...userData, token });
-      // Redireciona para o painel do provedor
-      if (userData.user_type === 'superadmin') {
-        navigate('/superadmin', { replace: true });
-      } else if (userData.provedor_id) {
-        // Verifica o tipo de usuário para redirecionamento específico
-        if (userData.user_type === 'agent') {
-          // Atendentes vão para o painel de atendimento
-          navigate(`/app/accounts/${userData.provedor_id}/conversations`, { replace: true });
+
+      // Pequeno delay antes do redirecionamento para garantir que o localStorage seja salvo
+      setTimeout(() => {
+        // Redireciona para o painel do provedor
+        if (userData.user_type === 'superadmin') {
+          navigate('/superadmin', { replace: true });
+        } else if (userData.provedor_id) {
+          // Verifica o tipo de usuário para redirecionamento específico
+          if (userData.user_type === 'agent') {
+            // Atendentes vão para o painel de atendimento
+            navigate(`/app/accounts/${userData.provedor_id}/conversations`, { replace: true });
+          } else {
+            // Admins vão para o dashboard
+            navigate(`/app/accounts/${userData.provedor_id}/dashboard`, { replace: true });
+          }
         } else {
-          // Admins vão para o dashboard
-          navigate(`/app/accounts/${userData.provedor_id}/dashboard`, { replace: true });
+          // fallback: vai para dashboard geral
+          navigate('/dashboard', { replace: true });
         }
-      } else {
-        // fallback: vai para dashboard geral
-        navigate('/dashboard', { replace: true });
-      }
+      }, 500); // Delay de 500ms
+
     } catch (err) {
       setLoading(false);
+      console.error('Erro no login:', err); // Para debug
       setError('Usuário ou senha inválidos');
     }
   };
@@ -109,4 +124,4 @@ export default function Login({ onLogin }) {
       </div>
     </div>
   );
-} 
+}
