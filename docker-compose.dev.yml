@@ -1,0 +1,147 @@
+version: "3.8"
+
+services:
+  # Traefik para desenvolvimento local
+  traefik:
+    image: traefik:v3.4.0
+    container_name: traefik-dev
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--log.level=DEBUG"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Dashboard do Traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - dev-network
+    restart: unless-stopped
+
+  # PostgreSQL para desenvolvimento
+  postgres-dev:
+    image: postgres:14
+    container_name: postgres-dev
+    environment:
+      - POSTGRES_DB=niochat_dev
+      - POSTGRES_USER=niochat_user
+      - POSTGRES_PASSWORD=dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    networks:
+      - dev-network
+    restart: unless-stopped
+
+  # Redis para desenvolvimento
+  redis-dev:
+    image: redis:7-alpine
+    container_name: redis-dev
+    ports:
+      - "6379:6379"
+    networks:
+      - dev-network
+    restart: unless-stopped
+
+  # Backend Django - Desenvolvimento
+  niochat-backend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: niochat-backend-dev
+    environment:
+      - SECRET_KEY=dev-secret-key-12345
+      - DEBUG=True
+      - ALLOWED_HOSTS=*
+      - DATABASE_URL=postgresql://niochat_user:dev_password@postgres-dev:5432/niochat_dev
+      - MEDIA_URL=/media/
+      - STATIC_URL=/static/
+      - LOG_LEVEL=DEBUG
+      - CELERY_BROKER_URL=redis://redis-dev:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis-dev:6379/0
+    volumes:
+      - ./backend:/app/backend
+      - ./media:/app/backend/media
+      - ./staticfiles:/app/backend/staticfiles
+    ports:
+      - "8010:8010"
+    networks:
+      - dev-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      # Rota para API
+      - "traefik.http.routers.niochat-backend-api.rule=Host(`localhost`) && (PathPrefix(`/api/`) || PathPrefix(`/api-token-auth/`) || PathPrefix(`/admin/`) || PathPrefix(`/media/`))"
+      - "traefik.http.routers.niochat-backend-api.entrypoints=web"
+      - "traefik.http.routers.niochat-backend-api.priority=200"
+      - "traefik.http.services.niochat-backend-api.loadbalancer.server.port=8010"
+      
+      # Rota para WebSocket
+      - "traefik.http.routers.niochat-backend-ws.rule=Host(`localhost`) && PathPrefix(`/ws/`)"
+      - "traefik.http.routers.niochat-backend-ws.entrypoints=web"
+      - "traefik.http.routers.niochat-backend-ws.priority=200"
+      - "traefik.http.services.niochat-backend-ws.loadbalancer.server.port=8010"
+
+  # Frontend React - Desenvolvimento
+  niochat-frontend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: niochat-frontend-dev
+    environment:
+      - VITE_API_URL=http://localhost
+      - VITE_WS_URL=ws://localhost
+    ports:
+      - "8012:8012"
+    networks:
+      - dev-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      # Rota para assets do frontend
+      - "traefik.http.routers.niochat-frontend-assets.rule=Host(`localhost`) && (PathPrefix(`/assets/`) || PathPrefix(`/favicon.ico`) || PathPrefix(`/manifest.json`))"
+      - "traefik.http.routers.niochat-frontend-assets.entrypoints=web"
+      - "traefik.http.routers.niochat-frontend-assets.priority=150"
+      - "traefik.http.services.niochat-frontend-assets.loadbalancer.server.port=8012"
+      
+      # Rota para frontend (catch-all)
+      - "traefik.http.routers.niochat-frontend.rule=Host(`localhost`)"
+      - "traefik.http.routers.niochat-frontend.entrypoints=web"
+      - "traefik.http.routers.niochat-frontend.priority=1"
+      - "traefik.http.services.niochat-frontend.loadbalancer.server.port=8012"
+
+  # Celery Worker para desenvolvimento
+  niochat-celery-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: niochat-celery-dev
+    command: celery -A niochat worker -l info
+    environment:
+      - SECRET_KEY=dev-secret-key-12345
+      - DEBUG=True
+      - ALLOWED_HOSTS=*
+      - DATABASE_URL=postgresql://niochat_user:dev_password@postgres-dev:5432/niochat_dev
+      - CELERY_BROKER_URL=redis://redis-dev:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis-dev:6379/0
+    volumes:
+      - ./backend:/app/backend
+    networks:
+      - dev-network
+    restart: unless-stopped
+    depends_on:
+      - postgres-dev
+      - redis-dev
+
+networks:
+  dev-network:
+    driver: bridge
+
+volumes:
+  postgres_dev_data:
+

@@ -165,7 +165,7 @@ function App() {
   });
 
   const [user, setUser] = useState(null);
-  const [userRole, setUserRole] = useState('superadmin');
+  const [userRole, setUserRole] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [providerMenu, setProviderMenu] = useState('dados');
   const [whatsappDisconnected, setWhatsappDisconnected] = useState(false);

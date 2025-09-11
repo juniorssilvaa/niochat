@@ -99,3 +99,4 @@ volumes:
   niochat-postgres:
     external: true
     name: niochat-postgres
+

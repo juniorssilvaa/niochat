@@ -55,3 +55,4 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Default command — escuta na porta 8010
 CMD ["gunicorn", "--bind", "0.0.0.0:8010", "--workers", "3", "--timeout", "120", "niochat.wsgi:application"]
+
