@@ -77,6 +77,13 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
+      # Rota para assets do frontend com prioridade média
+      - "traefik.http.routers.niochat-frontend-assets.rule=Host(`app.niochat.com.br`) && (PathPrefix(`/assets/`) || PathPrefix(`/favicon.ico`) || PathPrefix(`/manifest.json`))"
+      - "traefik.http.routers.niochat-frontend-assets.entrypoints=websecure"
+      - "traefik.http.routers.niochat-frontend-assets.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.niochat-frontend-assets.priority=150"
+      - "traefik.http.services.niochat-frontend-assets.loadbalancer.server.port=8012"
+      
       # Rota para frontend com prioridade baixa (catch-all)
       - "traefik.http.routers.niochat-frontend.rule=Host(`app.niochat.com.br`)"
       - "traefik.http.routers.niochat-frontend.entrypoints=websecure"
