@@ -203,7 +203,7 @@ export default function Integrations({ provedorId }) {
     setLoading(true);
     setError('');
       const token = localStorage.getItem('token');
-    console.log('Carregando canais...', { token: token ? 'presente' : 'ausente' });
+    console.log('Carregando canais...');
     
     // Se não há token, mostrar erro
     if (!token) {

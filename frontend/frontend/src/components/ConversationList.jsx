@@ -289,11 +289,11 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
 
   // Função para verificar e fazer login automático
   const checkAuthAndLogin = async () => {
-    console.log('🔐 Verificando autenticação...');
+    console.log('Verificando autenticação...');
     
     try {
       const token = localStorage.getItem('token');
-      console.log('# Debug logging removed for security Token no localStorage:', token ? `${token.substring(0, 10)}...` : 'NENHUM');
+      console.log('Token verificado no localStorage');
       if (token) {
         const userRes = await axios.get('/api/auth/me/', {
           headers: { Authorization: `Token ${token}` }
@@ -307,7 +307,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
           return true;
         }
       } else {
-        console.log('# Debug logging removed for security Nenhum token encontrado no localStorage');
+        console.log('Nenhum token encontrado no localStorage');
       }
     } catch (error) {
       console.log('# Debug logging removed for security Token inválido ou expirado:', error.message);
@@ -463,7 +463,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
     
     try {
       const token = localStorage.getItem('token');
-      console.log('# Debug logging removed for security Token encontrado:', token ? `${token.substring(0, 10)}...` : 'NULO');
+      console.log('Token encontrado');
       if (!token) {
         console.error('# Debug logging removed for security Token não encontrado');
         return;

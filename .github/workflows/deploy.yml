@@ -78,7 +78,7 @@ jobs:
     - name: Build frontend
       run: |
         cd frontend/frontend
-        npm run build
+        npm run build:prod
 
     - name: Lint Python code
       run: |
