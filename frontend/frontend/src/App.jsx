@@ -217,7 +217,7 @@ function App() {
           return res.data;
         })
         .then(userData => {
-          console.log('Dados do usuário recebidos:', userData);
+          console.log('Dados do usuário recebidos');
           setUser({ ...userData, token });
           const tipo = userData.role || userData.user_type;
           setUserRole(tipo);
@@ -225,7 +225,7 @@ function App() {
           // Definir provedorId se disponível
           if (userData.provedor_id) {
             setProvedorId(userData.provedor_id);
-            console.log('ProvedorId definido:', userData.provedor_id);
+            console.log('ProvedorId definido');
           }
           
           setAuthLoading(false);
@@ -285,7 +285,7 @@ function App() {
   }, [selectedConversation]);
 
   const handleLogin = (userData) => {
-    console.log('Login realizado:', userData);
+    console.log('Login realizado com sucesso');
     setUser(userData);
     const tipo = userData.role || userData.user_type;
     setUserRole(tipo);

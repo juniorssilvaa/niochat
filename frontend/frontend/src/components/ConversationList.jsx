@@ -303,7 +303,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
           setUser(userRes.data);
           setUserPermissions(userRes.data.permissions || []);
           setAuthReady(true);
-          console.log('# Debug logging removed for security Usuário autenticado:', userRes.data.username);
+          console.log('Usuário autenticado com sucesso');
           return true;
         }
       } else {
@@ -326,7 +326,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
         setUser(userRes.data);
         setUserPermissions(userRes.data.permissions || []);
         setAuthReady(true);
-        console.log('# Debug logging removed for security Usuário logado via sessão:', userRes.data);
+        console.log('Usuário logado via sessão');
         console.log('# Debug logging removed for security AuthReady definido como true via sessão');
         return true;
       }

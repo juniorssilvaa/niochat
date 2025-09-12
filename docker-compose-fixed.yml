@@ -78,6 +78,13 @@ services:
       - "traefik.http.routers.niochat-backend-websockets.tls.certresolver=letsencryptresolver"
       - "traefik.http.routers.niochat-backend-websockets.priority=300"
       - "traefik.http.routers.niochat-backend-websockets.service=niochat-backend-service"
+      
+      # Regra para assets do frontend (CSS/JS) - PRIORIDADE MÁXIMA
+      - "traefik.http.routers.niochat-frontend-assets.rule=Host(`app.niochat.com.br`) && PathPrefix(`/assets/`)"
+      - "traefik.http.routers.niochat-frontend-assets.entrypoints=websecure"
+      - "traefik.http.routers.niochat-frontend-assets.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.niochat-frontend-assets.priority=400"
+      - "traefik.http.routers.niochat-frontend-assets.service=niochat-frontend-service"
 
   # Frontend React - PORTA 8012
   niochat-frontend:

@@ -51,7 +51,7 @@ function UserStatusManager({ user }) {
           const data = JSON.parse(event.data);
           
           if (data.type === 'pong') {
-            console.log(`🏓 Pong recebido do usuário ${user.username}`);
+            console.log('Pong recebido do usuário');
           }
         } catch (error) {
           console.warn('Erro ao processar mensagem WebSocket do usuário:', error);

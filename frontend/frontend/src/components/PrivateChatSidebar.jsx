@@ -157,7 +157,7 @@ const WS_BASE = `wss://${window.location.host}`;
         markAsRead(null, selectedUser.id);
       }
       
-      console.log(`[DEBUG] Carregadas ${allMessages.length} mensagens para o chat com ${selectedUser.username}`);
+      console.log(`Carregadas ${allMessages.length} mensagens para o chat`);
       console.log(`[DEBUG] Primeira mensagem:`, allMessages[0]);
       console.log(`[DEBUG] Última mensagem:`, allMessages[allMessages.length - 1]);
     } catch (error) {

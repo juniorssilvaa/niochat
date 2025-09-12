@@ -409,7 +409,7 @@ export default function ConversasDashboard() {
         const atendimento = filteredConversas.filter(isEmAtendimento).length;
         
         console.log('Contagem de conversas (com permissões):', { ia, fila, atendimento });
-        console.log('Permissões do usuário:', userPermissions);
+        console.log('Permissões do usuário atualizadas');
         setCounts({ ia, fila, atendimento });
       } catch (e) {
         console.error('Erro ao carregar conversas:', e);
