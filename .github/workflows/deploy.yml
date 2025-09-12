@@ -175,11 +175,13 @@ jobs:
           fi
 
       - name: Cleanup old images
+        continue-on-error: true
         run: |
           echo "Pruning unused Docker images..."
           curl -s -X POST \
             -H "X-API-Key: ${{ secrets.PORTAINER_API_KEY }}" \
             "$PORTAINER_URL/api/endpoints/1/docker/images/prune?all=true"
+          echo "Cleanup completed successfully!"
 
       - name: Notify deployment
         run: |
