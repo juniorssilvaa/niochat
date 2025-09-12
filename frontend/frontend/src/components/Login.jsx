@@ -18,51 +18,54 @@ export default function Login({ onLogin }) {
       // 1. Autentica e pega o token
       const res = await axios.post('/api-token-auth/', { username, password });
       const token = res.data.token;
-      // console.log('Token recebido:', token); // Para debug
 
       // Salva o token no localStorage
       localStorage.setItem('token', token);
+      
+      // 🔥 CONFIGURAÇÃO IMPORTANTE: Define o token como padrão para todas as requisições
+      axios.defaults.headers.common['Authorization'] = `Token ${token}`;
 
-      // 2. Busca dados do usuário logado usando o endpoint CORRETO
-      // ❌ Antes: /api/auth/me/ (errado)
-      // ✅ Agora: /auth/me/ (correto)
-      const userRes = await axios.get('/auth/me/', {
-        headers: { Authorization: `Token ${token}` }
-      });
-
+      // 2. Busca dados do usuário logado
+      const userRes = await axios.get('/auth/me/');
       const userData = userRes.data;
-      // console.log('Dados do usuário:', userData); // Para debug
 
-      setLoading(false);
+      // 3. Atualiza estado da aplicação
       onLogin({ ...userData, token });
+      
+      setLoading(false);
 
-      // Pequeno delay antes do redirecionamento para garantir que o localStorage seja salvo
+      // 4. Pequeno delay para garantir que tudo está configurado
       setTimeout(() => {
         // Redireciona para o painel do provedor
         if (userData.user_type === 'superadmin') {
           navigate('/superadmin', { replace: true });
         } else if (userData.provedor_id) {
-          // Verifica o tipo de usuário para redirecionamento específico
           if (userData.user_type === 'agent') {
-            // Atendentes vão para o painel de atendimento
             navigate(`/app/accounts/${userData.provedor_id}/conversations`, { replace: true });
           } else {
-            // Admins vão para o dashboard
             navigate(`/app/accounts/${userData.provedor_id}/dashboard`, { replace: true });
           }
         } else {
-          // fallback: vai para dashboard geral
           navigate('/dashboard', { replace: true });
         }
-      }, 500); // Delay de 500ms
+        
+        // 🔥 FORÇA UM RELOAD PARA INICIALIZAR TODOS OS COMPONENTES
+        window.location.reload();
+      }, 100);
 
     } catch (err) {
       setLoading(false);
-      console.error('Erro no login:', err); // Para debug
+      console.error('Erro no login:', err);
+      
+      // Limpa token inválido
+      localStorage.removeItem('token');
+      delete axios.defaults.headers.common['Authorization'];
+      
       setError('Usuário ou senha inválidos');
     }
   };
 
+  // O restante do componente permanece igual
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#1a1f2e' }}>
       <div className="rounded-lg shadow-lg flex flex-col md:flex-row w-full max-w-3xl border" 
