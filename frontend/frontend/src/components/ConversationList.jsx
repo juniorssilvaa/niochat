@@ -293,7 +293,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
     
     try {
       const token = localStorage.getItem('token');
-      console.log('Token verificado no localStorage');
+      console.log('Credenciais verificadas no localStorage');
       if (token) {
         const userRes = await axios.get('/api/auth/me/', {
           headers: { Authorization: `Token ${token}` }
@@ -307,7 +307,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
           return true;
         }
       } else {
-        console.log('Nenhum token encontrado');
+        console.log('Nenhuma credencial encontrada no localStorage');
       }
     } catch (error) {
       console.log('# Debug logging removed for security Token inválido ou expirado:', error.message);
@@ -463,7 +463,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
     
     try {
       const token = localStorage.getItem('token');
-      console.log('Token encontrado');
+      console.log('Credenciais encontradas');
       if (!token) {
         console.error('# Debug logging removed for security Token não encontrado');
         return;

@@ -65,7 +65,7 @@ const InternalChatButton = () => {
       const token = localStorage.getItem('token');
       
       if (!token) {
-        console.error('Token não encontrado no localStorage. Faça login novamente.');
+        console.error('Credenciais não encontradas no localStorage. Faça login novamente.');
         setUsers([]);
         return;
       }
@@ -80,7 +80,7 @@ const InternalChatButton = () => {
     } catch (error) {
       console.error('Erro ao carregar usuários:', error);
       if (error.response?.status === 401) {
-        console.error('Token inválido! Faça login novamente.');
+        console.error('Credenciais inválidas! Faça login novamente.');
       }
       setUsers([]);
     } finally {

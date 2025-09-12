@@ -192,6 +192,11 @@ class PainelConsumer(AsyncWebsocketConsumer):
 class UserStatusConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         # Verificar se o usuário está autenticado
+        self.user = self.scope.get('user')
+        
+        if not self.user or not self.user.is_authenticated:
+            await self.close()
+            return
         user = self.scope.get('user')
         if user and user.is_authenticated:
             self.user_id = user.id

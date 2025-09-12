@@ -207,7 +207,7 @@ export default function Integrations({ provedorId }) {
     
     // Se não há token, mostrar erro
     if (!token) {
-      console.error('Token não encontrado no localStorage');
+      console.error('Credenciais não encontradas no localStorage');
       setError('Usuário não autenticado');
       setLoading(false);
       return;

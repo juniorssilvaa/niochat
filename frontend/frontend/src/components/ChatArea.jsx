@@ -1236,7 +1236,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
     try {
       const token = localStorage.getItem('token');
       console.log('# Debug logging removed for security DEBUG: Tentando excluir mensagem:', messageId);
-      console.log('DEBUG: Token verificado');
+      console.log('DEBUG: Credenciais verificadas');
       
       // Chamar endpoint do backend para deletar mensagem
       const response = await axios.post('/api/messages/delete_message/', {

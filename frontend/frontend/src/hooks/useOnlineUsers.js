@@ -35,7 +35,7 @@ export default function useOnlineUsers() {
           .filter(user => user.is_online)
           .map(user => user.id);
         setOnlineUsers(new Set(onlineUserIds));
-        console.log('👥 Status online atualizado via API:', onlineUserIds);
+        console.log('Status online atualizado via API:', onlineUserIds);
       }
     } catch (error) {
       console.warn('Erro ao buscar usuários online via API:', error);
@@ -77,14 +77,14 @@ export default function useOnlineUsers() {
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('📨 Mensagem WebSocket status:', data);
+          console.log('Mensagem WebSocket status:', data);
           
           if (data.type === 'user_status_update' && data.users) {
             const onlineUserIds = data.users
               .filter(u => u.is_online)
               .map(u => u.id);
             setOnlineUsers(new Set(onlineUserIds));
-            console.log('👥 Status online atualizado via WebSocket:', onlineUserIds);
+            console.log('Status online atualizado via WebSocket:', onlineUserIds);
           }
         } catch (error) {
           console.warn('Erro ao processar mensagem WebSocket:', error);

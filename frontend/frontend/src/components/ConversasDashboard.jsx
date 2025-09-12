@@ -137,7 +137,7 @@ export default function ConversasDashboard() {
         return true;
       }
     } catch (error) {
-      console.log('Token inválido, removendo...');
+      console.log('Credenciais inválidas, removendo...');
       localStorage.removeItem('token');
     }
 
@@ -205,10 +205,10 @@ export default function ConversasDashboard() {
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('📨 WebSocket modal recebeu:', data);
+          console.log('WebSocket modal recebeu:', data);
           
           if (data.type === 'message' || data.type === 'new_message' || data.type === 'chat_message') {
-            console.log('💬 Nova mensagem recebida via WebSocket');
+            console.log('Nova mensagem recebida via WebSocket');
             
             // Recarregar mensagens para garantir dados atualizados
             const token = localStorage.getItem('token');

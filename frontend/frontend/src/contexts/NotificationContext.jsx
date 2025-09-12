@@ -306,7 +306,7 @@ export const NotificationProvider = ({ children }) => {
       };
       
       websocketRef.current.onerror = (error) => {
-        console.error('=== ERRO WEBSOCKET GLOBAL ===', error);
+        console.error('Erro WebSocket global:', error);
         setIsConnected(false);
       };
       

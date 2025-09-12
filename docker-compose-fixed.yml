@@ -71,6 +71,13 @@ services:
       - "traefik.http.routers.niochat-backend-webhooks.tls.certresolver=letsencryptresolver"
       - "traefik.http.routers.niochat-backend-webhooks.priority=250"
       - "traefik.http.routers.niochat-backend-webhooks.service=niochat-backend-service"
+      
+      # Regra para WebSockets - PRIORIDADE MÁXIMA
+      - "traefik.http.routers.niochat-backend-websockets.rule=Host(`app.niochat.com.br`) && PathPrefix(`/ws/`)"
+      - "traefik.http.routers.niochat-backend-websockets.entrypoints=websecure"
+      - "traefik.http.routers.niochat-backend-websockets.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.niochat-backend-websockets.priority=300"
+      - "traefik.http.routers.niochat-backend-websockets.service=niochat-backend-service"
 
   # Frontend React - PORTA 8012
   niochat-frontend:
