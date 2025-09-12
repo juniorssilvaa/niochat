@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: juniorsilvacmd/niochat
+  IMAGE_NAME: juniorssilvaa/niochat
 
 jobs:
   test:
@@ -138,8 +138,8 @@ jobs:
 
           UPDATED_STACK=$(echo "$CURRENT_STACK" | jq --arg backend "$BACKEND_IMAGE" --arg frontend "$FRONTEND_IMAGE" '
             .StackFileContent = (.StackFileContent |
-              gsub("ghcr\\.io/juniorsilvacmd/niochat-backend:[^\\s]+"; $backend) |
-              gsub("ghcr\\.io/juniorsilvacmd/niochat-frontend:[^\\s]+"; $frontend)
+              gsub("ghcr\\.io/juniorssilvaa/niochat-backend:[^\\s]+"; $backend) |
+              gsub("ghcr\\.io/juniorssilvaa/niochat-frontend:[^\\s]+"; $frontend)
             )
           ')
 
