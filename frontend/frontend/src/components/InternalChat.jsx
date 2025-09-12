@@ -48,7 +48,7 @@ const InternalChat = () => {
   // Usar URL relativa (será resolvida pelo proxy do Vite)
   const API_BASE = '/api';
   // Usar URL relativa para WebSocket (será resolvida pelo proxy do Vite)
-  const WS_BASE = `ws://${window.location.host}`;
+  const WS_BASE = `wss://${window.location.host}`;
 
   // ===== EFEITOS =====
   

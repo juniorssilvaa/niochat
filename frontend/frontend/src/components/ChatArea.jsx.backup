@@ -301,7 +301,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
       
       // Conectar WebSocket para receber notificações do painel
       const wsHost = window.location.hostname;
-      const ws = new WebSocket(`ws://${wsHost}:8010/ws/painel/${conversation.inbox?.provedor}/`);
+      const ws = new WebSocket(`wss://${wsHost}/ws/painel/${conversation.inbox?.provedor}/`);
       
       ws.onopen = () => {
         console.log('🔌 ChatArea WebSocket: Conectado para notificações do painel');

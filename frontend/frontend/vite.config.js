@@ -22,33 +22,7 @@ export default defineConfig({
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
       'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
     },
-    proxy: {
-      '/api': {
-        target: 'http://192.168.100.55:8010',
-        changeOrigin: true,
-        secure: false
-      },
-      '/api-token-auth/': {
-        target: 'http://192.168.100.55:8010',
-        changeOrigin: true,
-        secure: false
-      },
-      '/admin': {
-        target: 'http://192.168.100.55:8010',
-        changeOrigin: true,
-        secure: false
-      },
-      '/ws/': {
-        target: 'ws://192.168.100.55:8010',
-        ws: true,
-        changeOrigin: true,
-        secure: false
-      },
-      '/media/': {
-        target: 'http://192.168.100.55:8010',
-        changeOrigin: true,
-        secure: false
-      },
-    }
+    // Proxy removido para produção - usar URLs relativas
+    // Em produção, o Traefik faz o roteamento
   }
 })

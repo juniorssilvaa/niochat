@@ -70,7 +70,7 @@ function UserStatusManager({ user }) {
         
         // Reconectar após 5 segundos
         reconnectTimeoutRef.current = setTimeout(() => {
-          console.log(`🔄 Tentando reconectar WebSocket do usuário ${user.username}...`);
+          console.log('Tentando reconectar WebSocket do usuário');
           connectUserWebSocket();
         }, 5000);
       };

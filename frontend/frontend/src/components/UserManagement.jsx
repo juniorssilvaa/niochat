@@ -259,7 +259,7 @@ const UserManagement = ({ provedorId }) => {
           detail: { permissions: editUserPermissions }
         }));
         
-        console.log('✅ Permissões do usuário atual atualizadas:', editUserPermissions);
+        console.log('Permissões do usuário atual atualizadas');
       }
       
       alert('Permissões salvas com sucesso!');

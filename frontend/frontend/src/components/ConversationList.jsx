@@ -592,7 +592,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
       wsRef.current = ws;
       
       const wsTimeout = setTimeout(() => {
-        console.log('⏰ Timeout do WebSocket');
+        console.log('Timeout do WebSocket');
         setWsConnected(false);
       }, 5000);
       
@@ -712,7 +712,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
   // CORREÇÃO: Listener para atualização de permissões do usuário atual
   useEffect(() => {
     const handlePermissionsUpdate = (event) => {
-      console.log('🔄 Permissões do usuário atualizadas:', event.detail.permissions);
+      console.log('Permissões do usuário atualizadas');
       setUserPermissions(event.detail.permissions);
       
       // Recarregar conversas para aplicar as novas permissões

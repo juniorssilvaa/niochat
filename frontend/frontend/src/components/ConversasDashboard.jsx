@@ -518,7 +518,7 @@ export default function ConversasDashboard() {
   // CORREÇÃO: Listener para atualização de permissões do usuário atual
   useEffect(() => {
     const handlePermissionsUpdate = (event) => {
-      console.log('🔄 ConversasDashboard: Permissões do usuário atualizadas:', event.detail.permissions);
+      console.log('ConversasDashboard: Permissões do usuário atualizadas');
       
       // Atualizar o usuário local com as novas permissões
       setUser(prevUser => ({
@@ -612,7 +612,7 @@ export default function ConversasDashboard() {
         headers: { Authorization: `Token ${token}` }
       });
       
-      console.log('✅ Transferência para equipe realizada:', response.data);
+      console.log('Transferência para equipe realizada');
       setModalTransferirEquipe(null);
       setEquipesTransferir([]);
       
@@ -667,17 +667,17 @@ export default function ConversasDashboard() {
     
     // Primeiro, verificar se há informação da equipe específica da transferência
     if (conversa.additional_attributes?.assigned_team?.name) {
-      console.log('✅ Retornando equipe do assigned_team:', conversa.additional_attributes.assigned_team.name);
+      console.log('Retornando equipe do assigned_team');
       return conversa.additional_attributes.assigned_team.name;
     }
     
     // Se tem assignee, tentar obter da equipe do usuário
     if (conversa.assignee?.team?.name) {
-      console.log('✅ Retornando equipe do assignee:', conversa.assignee.team.name);
+      console.log('Retornando equipe do assignee');
       return conversa.assignee.team.name;
     }
     
-    console.log('❌ Nenhuma equipe encontrada, retornando string vazia');
+    console.log('Nenhuma equipe encontrada, retornando string vazia');
     return ''; // Não usar mais fallback fixo
   }
 

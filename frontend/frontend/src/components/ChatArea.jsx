@@ -470,7 +470,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
     // Sistema de refresh automático para evitar cache desatualizado
     const refreshInterval = setInterval(() => {
       if (conversation && conversation.id) {
-        console.log('🔄 Refresh automático de conversa para evitar cache desatualizado');
+        console.log('Refresh automático de conversa para evitar cache desatualizado');
         
         // Recarregar mensagens da conversa
         fetchMessages();
@@ -550,7 +550,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
       // # Debug logging removed for security Se o WebSocket não funcionar, adicionar mensagem do response
       setTimeout(() => {
         if (pendingMessages.has(messageKey)) {
-          console.log('⏰ WebSocket não recebeu mensagem, adicionando do response...');
+          console.log('WebSocket não recebeu mensagem, adicionando do response');
           if (response.data && response.data.id) {
             const processedMessage = {
               ...response.data,
@@ -838,7 +838,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
     setSendingMedia(true);
     const token = localStorage.getItem('token');
     
-    console.log('📤 Iniciando envio de mídia:', {
+    console.log('Iniciando envio de mídia:', {
       fileName: file.name,
       fileSize: file.size,
       mediaType,
@@ -891,8 +891,8 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
         formData.append('caption', formattedCaption);
       }
       
-      console.log('📤 Enviando mídia para o backend...');
-      console.log('📦 FormData contents:');
+      console.log('Enviando mídia para o backend');
+      console.log('FormData contents:');
       for (let [key, value] of formData.entries()) {
         if (key === 'file') {
           console.log(`   - ${key}: File(${value.name}, ${value.size} bytes, ${value.type})`);
@@ -917,7 +917,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
           setMessages(currentMessages => {
             const messageExists = currentMessages.some(m => m.id === response.data.id);
             if (!messageExists) {
-              console.log('⏰ WebSocket não recebeu mídia, adicionando do response...');
+              console.log('WebSocket não recebeu mídia, adicionando do response');
               return [...currentMessages, response.data].sort((a, b) => 
                 new Date(a.created_at) - new Date(b.created_at)
               );
