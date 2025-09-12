@@ -109,7 +109,7 @@ const DashboardPrincipal = ({ provedorId }) => {
     const connectWebSocket = () => {
       const token = localStorage.getItem('token');
       // Usar URL relativa para WebSocket (será resolvida pelo proxy do Vite)
-      const wsUrl = `wss://${window.location.host}/ws/conversas_dashboard/?token=${token}`;
+      const wsUrl = `wss://${window.location.host}/ws/conversas_dashboard/`;
       
       const websocket = new WebSocket(wsUrl);
       

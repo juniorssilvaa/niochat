@@ -7,7 +7,7 @@ echo "🚀 Instalação inicial do NioChat na VPS..."
 
 # Configurações
 PROJECT_DIR="/var/www/niochat"
-GITHUB_REPO="https://github.com/Juniorsilvacmd/niochat.git"
+GITHUB_REPO="https://github.com/juniorssilvaa/niochat.git"
 
 # Cores para output
 RED='\033[0;31m'

@@ -7,7 +7,7 @@ echo "🚀 Iniciando deploy automatizado..."
 
 # Configurações
 PROJECT_DIR="/var/www/niochat"
-GITHUB_REPO="https://github.com/Juniorsilvacmd/niochat.git"
+GITHUB_REPO="https://github.com/juniorssilvaa/niochat.git"
 BRANCH="main"
 
 # Cores para output

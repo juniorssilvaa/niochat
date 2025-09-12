@@ -31,7 +31,7 @@ Conecte-se à VPS como root e execute:
 
 ```bash
 # Baixar o script de instalação
-wget https://raw.githubusercontent.com/Juniorsilvacmd/niochat/main/install_vps_native.sh
+wget https://raw.githubusercontent.com/juniorssilvaa/niochat/main/install_vps_native.sh
 
 # Dar permissão de execução
 chmod +x install_vps_native.sh

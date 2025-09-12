@@ -103,7 +103,7 @@ niochat/
 
 ### 1. Clone o repositório
 ```bash
-git clone https://github.com/Juniorsilvacmd/niochat.git
+git clone https://github.com/juniorssilvaa/niochat.git
 cd niochat
 ```
 

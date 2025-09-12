@@ -4,8 +4,6 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:14
-    ports:
-      - 5432:5432
     environment:
       - POSTGRES_DB=niochat
       - POSTGRES_USER=niochat_user
@@ -18,15 +16,7 @@ services:
 
   # Backend Django - PORTA 8010
   niochat-backend:
-    image: ghcr.io/juniorsilvacmd/niochat-backend:latest
-    container_name: niochat-backend
-    deploy:
-      update_config:
-        order: start-first
-        parallelism: 1
-        failure_action: rollback
-      restart_policy:
-        condition: on-failure
+    image: ghcr.io/juniorssilvaa/niochat-backend:latest
     environment:
       - SECRET_KEY=OFfGQLqPs5osrBBnhOBdIfkjq1F6vpb74YoAWNkjwbY4BwTNK5
       - DEBUG=True
@@ -38,58 +28,65 @@ services:
     volumes:
       - niochat-media:/app/backend/media
       - niochat-static:/app/backend/staticfiles
-    ports:
-      - "8010:8010"
     networks:
       - nioNet
     restart: unless-stopped
+    depends_on:
+      - postgres
     labels:
       - "traefik.enable=true"
-      # Rota para API com prioridade alta
-      - "traefik.http.routers.niochat-backend-api.rule=Host(`app.niochat.com.br`) && (PathPrefix(`/api/`) || PathPrefix(`/api-token-auth/`) || PathPrefix(`/admin/`) || PathPrefix(`/media/`))"
+      
+      # Regra para autenticação - PRIORIDADE MÁXIMA
+      - "traefik.http.routers.niochat-backend-auth.rule=Host(`app.niochat.com.br`) && Path(`/api-token-auth/`)"
+      - "traefik.http.routers.niochat-backend-auth.entrypoints=websecure"
+      - "traefik.http.routers.niochat-backend-auth.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.niochat-backend-auth.priority=300"
+      - "traefik.http.routers.niochat-backend-auth.service=niochat-backend-service"
+      - "traefik.http.services.niochat-backend-service.loadbalancer.server.port=8010"
+      
+      # Regra para todas as APIs - PRIORIDADE ALTA
+      - "traefik.http.routers.niochat-backend-api.rule=Host(`app.niochat.com.br`) && PathPrefix(`/api/`)"
       - "traefik.http.routers.niochat-backend-api.entrypoints=websecure"
       - "traefik.http.routers.niochat-backend-api.tls.certresolver=letsencryptresolver"
       - "traefik.http.routers.niochat-backend-api.priority=200"
-      - "traefik.http.services.niochat-backend-api.loadbalancer.server.port=8010"
+      - "traefik.http.routers.niochat-backend-api.service=niochat-backend-service"
       
-      # Rota para WebSocket com prioridade alta
+      # Regra para media files - PRIORIDADE ALTA
+      - "traefik.http.routers.niochat-backend-media.rule=Host(`app.niochat.com.br`) && PathPrefix(`/media/`)"
+      - "traefik.http.routers.niochat-backend-media.entrypoints=websecure"
+      - "traefik.http.routers.niochat-backend-media.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.niochat-backend-media.priority=200"
+      - "traefik.http.routers.niochat-backend-media.service=niochat-backend-service"
+      
+      # Regra para static files - PRIORIDADE ALTA
+      - "traefik.http.routers.niochat-backend-static.rule=Host(`app.niochat.com.br`) && PathPrefix(`/static/`)"
+      - "traefik.http.routers.niochat-backend-static.entrypoints=websecure"
+      - "traefik.http.routers.niochat-backend-static.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.niochat-backend-static.priority=200"
+      - "traefik.http.routers.niochat-backend-static.service=niochat-backend-service"
+
+      # Regra para WebSockets - PRIORIDADE MÁXIMA
       - "traefik.http.routers.niochat-backend-ws.rule=Host(`app.niochat.com.br`) && PathPrefix(`/ws/`)"
       - "traefik.http.routers.niochat-backend-ws.entrypoints=websecure"
       - "traefik.http.routers.niochat-backend-ws.tls.certresolver=letsencryptresolver"
-      - "traefik.http.routers.niochat-backend-ws.priority=200"
-      - "traefik.http.services.niochat-backend-ws.loadbalancer.server.port=8010"
+      - "traefik.http.routers.niochat-backend-ws.priority=300"
+      - "traefik.http.routers.niochat-backend-ws.service=niochat-backend-service"
 
   # Frontend React - PORTA 8012
   niochat-frontend:
-    image: ghcr.io/juniorsilvacmd/niochat-frontend:latest
-    container_name: niochat-frontend
-    deploy:
-      update_config:
-        order: start-first
-        parallelism: 1
-        failure_action: rollback
-      restart_policy:
-        condition: on-failure
-    ports:
-      - "8012:8012"
+    image: ghcr.io/juniorssilvaa/niochat-frontend:latest
     networks:
       - nioNet
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      # Rota para assets do frontend com prioridade média
-      - "traefik.http.routers.niochat-frontend-assets.rule=Host(`app.niochat.com.br`) && (PathPrefix(`/assets/`) || PathPrefix(`/favicon.ico`) || PathPrefix(`/manifest.json`))"
-      - "traefik.http.routers.niochat-frontend-assets.entrypoints=websecure"
-      - "traefik.http.routers.niochat-frontend-assets.tls.certresolver=letsencryptresolver"
-      - "traefik.http.routers.niochat-frontend-assets.priority=150"
-      - "traefik.http.services.niochat-frontend-assets.loadbalancer.server.port=8012"
-      
-      # Rota para frontend com prioridade baixa (catch-all)
+      # Regra para frontend - PRIORIDADE BAIXA (catch-all)
       - "traefik.http.routers.niochat-frontend.rule=Host(`app.niochat.com.br`)"
       - "traefik.http.routers.niochat-frontend.entrypoints=websecure"
       - "traefik.http.routers.niochat-frontend.tls.certresolver=letsencryptresolver"
       - "traefik.http.routers.niochat-frontend.priority=1"
-      - "traefik.http.services.niochat-frontend.loadbalancer.server.port=8012"
+      - "traefik.http.routers.niochat-frontend.service=niochat-frontend-service"
+      - "traefik.http.services.niochat-frontend-service.loadbalancer.server.port=8012"
 
 networks:
   nioNet:

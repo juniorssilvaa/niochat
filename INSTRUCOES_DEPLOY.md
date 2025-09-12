@@ -31,11 +31,11 @@ Conecte-se à VPS como root e execute:
 
 ```bash
 # Baixar os arquivos de configuração
-wget https://raw.githubusercontent.com/Juniorsilvacmd/niochat/main/setup_vps.sh
-wget https://raw.githubusercontent.com/Juniorsilvacmd/niochat/main/deploy.sh
-wget https://raw.githubusercontent.com/Juniorsilvacmd/niochat/main/niochat.service
-wget https://raw.githubusercontent.com/Juniorsilvacmd/niochat/main/nginx-niochat.conf
-wget https://raw.githubusercontent.com/Juniorsilvacmd/niochat/main/redis-ai.conf
+wget https://raw.githubusercontent.com/juniorssilvaa/niochat/main/setup_vps.sh
+wget https://raw.githubusercontent.com/juniorssilvaa/niochat/main/deploy.sh
+wget https://raw.githubusercontent.com/juniorssilvaa/niochat/main/niochat.service
+wget https://raw.githubusercontent.com/juniorssilvaa/niochat/main/nginx-niochat.conf
+wget https://raw.githubusercontent.com/juniorssilvaa/niochat/main/redis-ai.conf
 
 # Dar permissão de execução
 chmod +x setup_vps.sh

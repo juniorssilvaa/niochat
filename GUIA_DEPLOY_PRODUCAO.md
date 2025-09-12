@@ -29,7 +29,7 @@ apt update && apt upgrade -y
 ### **1.3 Baixar e executar o script de instalação**
 ```bash
 cd /tmp
-wget https://raw.githubusercontent.com/Juniorsilvacmd/niochat/main/install_vps_native.sh
+wget https://raw.githubusercontent.com/juniorssilvaa/niochat/main/install_vps_native.sh
 chmod +x install_vps_native.sh
 ./install_vps_native.sh
 ```

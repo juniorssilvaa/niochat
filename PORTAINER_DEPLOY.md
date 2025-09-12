@@ -202,8 +202,8 @@ docker service logs redis
 ### Atualização Manual
 ```bash
 # Pull das novas imagens
-docker service update --image ghcr.io/juniorsilvacmd/niotchat-backend:latest niochat_backend
-docker service update --image ghcr.io/juniorsilvacmd/niotchat-frontend:latest niochat_frontend
+docker service update --image ghcr.io/juniorssilvaa/niochat-backend:latest niochat_backend
+docker service update --image ghcr.io/juniorssilvaa/niochat-frontend:latest niochat_frontend
 ```
 
 ### Atualização Automática

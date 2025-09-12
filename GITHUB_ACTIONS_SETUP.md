@@ -5,7 +5,7 @@ Este guia explica como conectar o GitHub Actions ao Portainer para deploy autom�
 ## 🔧 **Passo 1: Configurar Secrets no GitHub**
 
 ### 1.1 Acessar as Configurações
-1. Vá para: `https://github.com/Juniorsilvacmd/niotchat`
+1. Vá para: `https://github.com/juniorssilvaa/niochat.git`
 2. Clique em **Settings** (aba superior)
 3. No menu lateral, clique em **Secrets and variables** → **Actions**
 
@@ -81,7 +81,7 @@ git push origin main
 ```
 
 ### 4.2 Verificar o GitHub Actions
-1. Vá para: `https://github.com/Juniorsilvacmd/niotchat/actions`
+1. Vá para: `https://github.com/juniorssilvaa/niochat.git/actions`
 2. Clique no workflow que está rodando
 3. Acompanhe os logs em tempo real
 
@@ -126,7 +126,7 @@ git push origin main
 ## 📊 **Monitoramento**
 
 ### GitHub Actions
-- **URL**: `https://github.com/Juniorsilvacmd/niotchat/actions`
+- **URL**: `https://github.com/juniorssilvaa/niochat.git/actions`
 - **Status**: Verde = sucesso, Vermelho = erro
 - **Logs**: Clique no workflow para ver detalhes
 

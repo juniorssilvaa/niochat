@@ -588,7 +588,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
     const connectWebSocket = () => {
       const token = localStorage.getItem('token');
       const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      const ws = new WebSocket(`${wsProtocol}://${window.location.host}/ws/painel/${provedorId}/?token=${token}`);
+      const ws = new WebSocket(`${wsProtocol}://${window.location.host}/ws/painel/${provedorId}/`);
       wsRef.current = ws;
       
       const wsTimeout = setTimeout(() => {

@@ -21,7 +21,7 @@ ssh root@194.238.25.164
 ### 2. Executar script de instalação
 ```bash
 # Baixar o script
-wget https://raw.githubusercontent.com/Juniorsilvacmd/niochat/main/install_vps.sh
+wget https://raw.githubusercontent.com/juniorssilvaa/niochat/main/install_vps.sh
 chmod +x install_vps.sh
 
 # Executar instalação
@@ -40,7 +40,7 @@ admin.niochat.com.br   A    194.238.25.164
 
 ### 1. Configurar Webhook no GitHub
 
-1. Acesse: https://github.com/Juniorsilvacmd/niochat/settings/hooks
+1. Acesse: https://github.com/juniorssilvaa/niochat/settings/hooks
 2. Clique em "Add webhook"
 3. Configure:
    - **Payload URL**: `http://194.238.25.164:8080`

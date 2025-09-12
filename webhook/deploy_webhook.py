@@ -119,5 +119,5 @@ if __name__ == '__main__':
     server = HTTPServer(('0.0.0.0', port), DeployWebhook)
     print(f"🚀 Webhook de deploy iniciado na porta {port}")
     print(f"📝 URL: http://194.238.25.164:{port}/deploy")
-    print(f"🔗 Configure no GitHub: https://github.com/Juniorsilvacmd/niochat/settings/hooks")
+    print(f"🔗 Configure no GitHub: https://github.com/juniorssilvaa/niochat/settings/hooks")
     server.serve_forever() 

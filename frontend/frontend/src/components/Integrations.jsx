@@ -264,7 +264,7 @@ export default function Integrations({ provedorId }) {
     try {
       const token = localStorage.getItem('token');
       const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      ws = new window.WebSocket(`${wsProtocol}://${window.location.host}/ws/painel/${provedorId}/?token=${token}`);
+      ws = new window.WebSocket(`${wsProtocol}://${window.location.host}/ws/painel/${provedorId}/`);
       
       ws.onopen = () => {
         console.log('# Debug logging removed for security WebSocket Integrations: Conectado com sucesso');

@@ -129,7 +129,7 @@ const PrivateChat = () => {
   const connectWebSocket = () => {
     try {
       const token = localStorage.getItem('token');
-      const wsUrl = `wss://${window.location.host}/ws/private-chat/?token=${token}`;
+      const wsUrl = `wss://${window.location.host}/ws/private-chat/`;
       
       const websocket = new WebSocket(wsUrl);
       

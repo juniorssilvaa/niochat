@@ -8,8 +8,8 @@ set -e
 # Configuration
 PORTAINER_URL="https://portainer.niochat.com.br"
 STACK_NAME="niochat"
-BACKEND_IMAGE="ghcr.io/juniorsilvacmd/niotchat-backend:latest"
-FRONTEND_IMAGE="ghcr.io/juniorsilvacmd/niotchat-frontend:latest"
+BACKEND_IMAGE="ghcr.io/juniorssilvaa/niochat-backend:latest"
+FRONTEND_IMAGE="ghcr.io/juniorssilvaa/niochat-frontend:latest"
 
 # Colors for output
 RED='\033[0;31m'
@@ -73,8 +73,8 @@ echo -e "${YELLOW}🔄 Updating stack with new images...${NC}"
 # Create updated stack configuration
 UPDATED_STACK=$(echo "$CURRENT_STACK" | jq --arg backend "$BACKEND_IMAGE" --arg frontend "$FRONTEND_IMAGE" '
     .StackFileContent = (.StackFileContent | 
-        gsub("ghcr\\.io/juniorsilvacmd/niotchat-backend:[^\\s]+"; $backend) |
-        gsub("ghcr\\.io/juniorsilvacmd/niotchat-frontend:[^\\s]+"; $frontend)
+        gsub("ghcr\\.io/juniorssilvaa/niochat-backend:[^\\s]+"; $backend) |
+        gsub("ghcr\\.io/juniorssilvaa/niochat-frontend:[^\\s]+"; $frontend)
     )
 ')
 

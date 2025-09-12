@@ -125,4 +125,4 @@ git push origin main
 
 - **Aplicação**: https://app.niochat.com.br
 - **Portainer**: https://portainer.niochat.com.br
-- **GitHub Actions**: https://github.com/Juniorsilvacmd/niotchat/actions
+- **GitHub Actions**: https://github.com/juniorssilvaa/niochat.git/actions

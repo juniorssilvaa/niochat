@@ -7,7 +7,7 @@ echo "🚀 Instalação inicial do NioChat na VPS (sem Docker)..."
 
 # Configurações
 PROJECT_DIR="/var/www/niochat"
-GITHUB_REPO="https://github.com/Juniorsilvacmd/niochat.git"
+GITHUB_REPO="https://github.com/juniorssilvaa/niochat.git"
 DOMAIN_APP="app.niochat.com.br"
 DOMAIN_API="api.niochat.com.br"
 DOMAIN_ADMIN="admin.niochat.com.br"

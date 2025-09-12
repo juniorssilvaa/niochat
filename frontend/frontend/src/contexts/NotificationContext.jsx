@@ -174,7 +174,7 @@ export const NotificationProvider = ({ children }) => {
 
     try {
       const token = localStorage.getItem('token');
-      const wsUrl = `wss://${window.location.host}/ws/internal-chat-notifications/?token=${token}`;
+      const wsUrl = `wss://${window.location.host}/ws/internal-chat-notifications/`;
       
       internalChatWsRef.current = new WebSocket(wsUrl);
       
@@ -235,7 +235,7 @@ export const NotificationProvider = ({ children }) => {
     try {
       const token = localStorage.getItem('token');
       // Conectar ao WebSocket de chat privado para notificações
-      const wsUrl = `wss://${window.location.host}/ws/private-chat/?token=${token}`;
+      const wsUrl = `wss://${window.location.host}/ws/private-chat/`;
       
       websocketRef.current = new WebSocket(wsUrl);
       
@@ -321,7 +321,7 @@ export const NotificationProvider = ({ children }) => {
       if (!currentUser?.provedor_id) return;
       const token = localStorage.getItem('token');
       const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      const wsUrl = `${wsProtocol}://${window.location.host}/ws/painel/${currentUser.provedor_id}/?token=${token}`;
+      const wsUrl = `${wsProtocol}://${window.location.host}/ws/painel/${currentUser.provedor_id}/`;
       if (painelWsRef.current?.readyState === WebSocket.OPEN) return;
       if (painelWsRef.current && painelWsRef.current.readyState !== WebSocket.CLOSED) {
         painelWsRef.current.close();
