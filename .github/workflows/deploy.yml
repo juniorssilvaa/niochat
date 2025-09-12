@@ -158,7 +158,7 @@ jobs:
         run: |
           echo "Checking application health..."
           
-          BACKEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://app.niochat.com.br/api/healthz")
+          BACKEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://app.niochat.com.br/api/health/")
           if [ "$BACKEND_STATUS" = "200" ]; then
             echo "Backend is healthy (status: $BACKEND_STATUS)"
           else
