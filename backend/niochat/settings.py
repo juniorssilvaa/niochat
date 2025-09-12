@@ -14,7 +14,7 @@ from pathlib import Path
 import dj_database_url
 
 # Version
-VERSION = "2.8.10"
+VERSION = "2.8.11"
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -142,7 +142,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
+    # BASE_DIR / 'static',  # Diretório não existe, comentado
 ]
 
 MEDIA_URL = 'media/'

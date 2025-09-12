@@ -68,6 +68,7 @@ class User(AbstractUser):
     class Meta:
         verbose_name = 'Usuário'
         verbose_name_plural = 'Usuários'
+        ordering = ['-date_joined']
 
     def __str__(self):
         return self.username
@@ -89,6 +90,7 @@ class Company(models.Model):
     class Meta:
         verbose_name = 'Empresa'
         verbose_name_plural = 'Empresas'
+        ordering = ['name']
 
     def __str__(self):
         return self.name
@@ -149,6 +151,7 @@ class Provedor(models.Model):
     class Meta:
         verbose_name = 'Provedor'
         verbose_name_plural = 'Provedores'
+        ordering = ['nome']
 
     def __str__(self):
         return self.nome
@@ -217,6 +220,7 @@ class Canal(models.Model):
     class Meta:
         verbose_name = 'Canal'
         verbose_name_plural = 'Canais'
+        ordering = ['nome']
 
     def __str__(self):
         return f"{self.nome} ({self.tipo})"

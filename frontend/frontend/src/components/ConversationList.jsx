@@ -307,7 +307,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
           return true;
         }
       } else {
-        console.log('Nenhum token encontrado no localStorage');
+        console.log('Nenhum token encontrado');
       }
     } catch (error) {
       console.log('# Debug logging removed for security Token inválido ou expirado:', error.message);

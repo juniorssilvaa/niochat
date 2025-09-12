@@ -40,7 +40,7 @@ echo "Collecting static files..."\n\
 python manage.py collectstatic --noinput --settings=niochat.settings\n\
 echo "Creating superuser..."\n\
 echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username=\"Junior\").exists() or User.objects.create_superuser(\"Junior\", \"admin@niochat.com.br\", \"semfim01@\")" | python manage.py shell --settings=niochat.settings\n\
-echo "Starting Gunicorn..."\n\
+echo "Starting Daphne (ASGI server for WebSocket)..."\n\
 exec "$@"' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 # Expose porta 8010 (igual ao dev)
@@ -53,6 +53,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # Use entrypoint script
 ENTRYPOINT ["/app/entrypoint.sh"]
 
-# Default command — escuta na porta 8010
-CMD ["gunicorn", "--bind", "0.0.0.0:8010", "--workers", "3", "--timeout", "120", "niochat.wsgi:application"]
+# Default command — escuta na porta 8010 com Daphne para WebSocket
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8010", "niochat.asgi:application"]
 
