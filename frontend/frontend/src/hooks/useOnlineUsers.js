@@ -55,7 +55,8 @@ export default function useOnlineUsers() {
     try {
       // Conectar ao WebSocket correto na porta do Django (8010)
       const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      const wsUrl = `${wsProtocol}://${window.location.host}/ws/user_status/`;
+      const token = localStorage.getItem('token');
+      const wsUrl = `${wsProtocol}://${window.location.host}/ws/user_status/?token=${token}`;
       
       console.log('Conectando ao WebSocket de status');
       const ws = new WebSocket(wsUrl);

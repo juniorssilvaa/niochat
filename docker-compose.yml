@@ -71,7 +71,6 @@ services:
       - "traefik.http.routers.niochat-backend-ws.tls.certresolver=letsencryptresolver"
       - "traefik.http.routers.niochat-backend-ws.priority=300"
       - "traefik.http.routers.niochat-backend-ws.service=niochat-backend-service"
-      - "traefik.http.services.niochat-backend-service.loadbalancer.server.port=8010"
 
   # Frontend React - PORTA 8012
   niochat-frontend:

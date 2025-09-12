@@ -31,11 +31,41 @@ class TokenAuthMiddleware:
         from django.contrib.auth.models import AnonymousUser
         from rest_framework.authtoken.models import Token
         
-        # Para WebSockets, vamos permitir conexões sem token por enquanto
-        # e autenticar depois na conexão
-        scope['user'] = AnonymousUser()
+        # Extrair token da query string
+        query_string = scope.get('query_string', b'').decode()
+        token = None
+        
+        if query_string:
+            try:
+                params = dict(item.split('=') for item in query_string.split('&') if '=' in item)
+                token = params.get('token')
+            except ValueError:
+                # Se houver erro na parsing, tentar extrair token diretamente
+                if 'token=' in query_string:
+                    token = query_string.split('token=')[1].split('&')[0]
+        
+        if token:
+            # Buscar usuário pelo token
+            user = await self.get_user_from_token(token, database_sync_to_async, Token)
+            if user:
+                scope['user'] = user
+            else:
+                scope['user'] = AnonymousUser()
+        else:
+            scope['user'] = AnonymousUser()
         
         return await self.app(scope, receive, send)
+    
+    async def get_user_from_token(self, token, database_sync_to_async, Token):
+        @database_sync_to_async
+        def _get_user():
+            try:
+                token_obj = Token.objects.get(key=token)
+                return token_obj.user
+            except Token.DoesNotExist:
+                return None
+        
+        return await _get_user()
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
