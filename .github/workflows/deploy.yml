@@ -163,34 +163,38 @@ jobs:
         echo "Backend image: $BACKEND_IMAGE"
         echo "Frontend image: $FRONTEND_IMAGE"
         
-        # 1. REMOVER IMAGENS ANTIGAS
-        echo "Removing old images..."
+        # 1. REMOVER TODAS AS IMAGENS ANTIGAS (AGGRESSIVE CLEANUP)
+        echo "Removing ALL old images..."
         
-        # Remover imagens antigas do backend (exceto a que tem tag 'latest')
-        echo "Removing old backend images..."
+        # Remover TODAS as imagens do backend (incluindo latest antiga)
+        echo "Removing ALL backend images..."
         curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
           "$PORTAINER_URL/api/endpoints/1/docker/images/json" | \
-          jq -r '.[] | select(.RepoTags[]? | contains("niochat-backend") and (contains("latest") | not)) | .Id' | \
+          jq -r '.[] | select(.RepoTags[]? | contains("niochat-backend")) | .Id' | \
           while read image; do
             if [ ! -z "$image" ]; then
-              echo "Removing old backend image: $image"
+              echo "Removing backend image: $image"
               curl -s -X DELETE -H "X-API-Key: $PORTAINER_API_KEY" \
                 "$PORTAINER_URL/api/endpoints/1/docker/images/$image?force=true"
             fi
           done
         
-        # Remover imagens antigas do frontend (exceto a que tem tag 'latest')
-        echo "Removing old frontend images..."
+        # Remover TODAS as imagens do frontend (incluindo latest antiga)
+        echo "Removing ALL frontend images..."
         curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
           "$PORTAINER_URL/api/endpoints/1/docker/images/json" | \
-          jq -r '.[] | select(.RepoTags[]? | contains("niochat-frontend") and (contains("latest") | not)) | .Id' | \
+          jq -r '.[] | select(.RepoTags[]? | contains("niochat-frontend")) | .Id' | \
           while read image; do
             if [ ! -z "$image" ]; then
-              echo "Removing old frontend image: $image"
+              echo "Removing frontend image: $image"
               curl -s -X DELETE -H "X-API-Key: $PORTAINER_API_KEY" \
                 "$PORTAINER_URL/api/endpoints/1/docker/images/$image?force=true"
             fi
           done
+        
+        # Aguardar limpeza
+        echo "Waiting for cleanup to complete..."
+        sleep 10
         
         # 2. PULL DAS NOVAS IMAGENS
         echo "Pulling new images..."
