@@ -191,29 +191,24 @@ class PainelConsumer(AsyncWebsocketConsumer):
 
 class UserStatusConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # Verificar se o usuário está autenticado
-        self.user = self.scope.get('user')
+        # Permitir conexão mesmo sem autenticação para testar
+        self.room_group_name = 'user_status_global'
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+        await self.accept()
         
-        if not self.user or not self.user.is_authenticated:
-            await self.close()
-            return
+        # Se usuário estiver autenticado, marcar como online
         user = self.scope.get('user')
         if user and user.is_authenticated:
             self.user_id = user.id
-            self.room_group_name = 'user_status_global'
-            await self.channel_layer.group_add(
-                self.room_group_name,
-                self.channel_name
-            )
-            await self.accept()
-        else:
-            await self.close()
-        # Marcar usuário como online
-        await self.set_user_online(True)
+            await self.set_user_online(True)
 
     async def disconnect(self, close_code):
-        # Marcar usuário como offline
-        await self.set_user_online(False)
+        # Marcar usuário como offline se estiver autenticado
+        if hasattr(self, 'user_id'):
+            await self.set_user_online(False)
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
