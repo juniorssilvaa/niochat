@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createAuthenticatedWebSocket } from '@/utils/websocketAuth';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { 
   MessageCircle, 
@@ -69,10 +70,9 @@ const Dashboard = ({ provedorId }) => {
     let ws = null;
     
     if (provedorId) {
-      const token = localStorage.getItem('token');
       const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      const token = localStorage.getItem('token');
-      ws = new WebSocket(`${wsProtocol}://${window.location.host}/ws/painel/${provedorId}/?token=${token}`);
+      const wsUrl = `${wsProtocol}://${window.location.host}/ws/painel/${provedorId}/`;
+      ws = createAuthenticatedWebSocket(wsUrl);
       
       ws.onopen = () => {
         console.log('# Debug logging removed for security WebSocket Dashboard: Conectado com sucesso');
