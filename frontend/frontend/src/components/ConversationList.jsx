@@ -588,7 +588,6 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
     const connectWebSocket = () => {
       const token = localStorage.getItem('token');
       const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      const token = localStorage.getItem('token');
       const ws = new WebSocket(`${wsProtocol}://${window.location.host}/ws/painel/${provedorId}/?token=${token}`);
       wsRef.current = ws;
       

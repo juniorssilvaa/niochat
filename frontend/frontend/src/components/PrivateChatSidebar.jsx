@@ -172,7 +172,6 @@ const WS_BASE = `wss://${window.location.host}`;
   
   const connectWebSocket = () => {
     const token = localStorage.getItem('token');
-    const token = localStorage.getItem('token');
     const wsUrl = `${WS_BASE}/ws/private-chat/?token=${token}`;
     
     
