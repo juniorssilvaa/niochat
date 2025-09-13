@@ -23,7 +23,8 @@ function UserStatusManager({ user }) {
     try {
       // Conectar ao WebSocket individual do usuário na porta do Django
       const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      const wsUrl = `${wsProtocol}://${window.location.host}/ws/user/${user.id}/`;
+      const token = localStorage.getItem('token');
+      const wsUrl = `${wsProtocol}://${window.location.host}/ws/user/${user.id}/?token=${token}`;
       
       console.log('Conectando WebSocket do usuário');
       const ws = new WebSocket(wsUrl);

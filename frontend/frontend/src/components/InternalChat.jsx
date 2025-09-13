@@ -167,7 +167,8 @@ const InternalChat = () => {
     if (!selectedRoom) return;
     
     const token = localStorage.getItem('token');
-    const wsUrl = `${WS_BASE}/ws/internal-chat/${selectedRoom.id}/`;
+    const token = localStorage.getItem('token');
+    const wsUrl = `${WS_BASE}/ws/internal-chat/${selectedRoom.id}/?token=${token}`;
     
     const websocket = new WebSocket(wsUrl);
     

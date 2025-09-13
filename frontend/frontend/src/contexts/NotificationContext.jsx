@@ -174,7 +174,7 @@ export const NotificationProvider = ({ children }) => {
 
     try {
       const token = localStorage.getItem('token');
-      const wsUrl = `wss://${window.location.host}/ws/internal-chat-notifications/`;
+      const wsUrl = `wss://${window.location.host}/ws/internal-chat-notifications/?token=${token}`;
       
       internalChatWsRef.current = new WebSocket(wsUrl);
       
@@ -235,7 +235,7 @@ export const NotificationProvider = ({ children }) => {
     try {
       const token = localStorage.getItem('token');
       // Conectar ao WebSocket de chat privado para notificações
-      const wsUrl = `wss://${window.location.host}/ws/private-chat/`;
+      const wsUrl = `wss://${window.location.host}/ws/private-chat/?token=${token}`;
       
       websocketRef.current = new WebSocket(wsUrl);
       
