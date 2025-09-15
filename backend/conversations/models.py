@@ -47,6 +47,7 @@ class Conversation(models.Model):
     inbox = models.ForeignKey(Inbox, on_delete=models.CASCADE, related_name='conversations')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
     assignee = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_conversations')
+    team = models.ForeignKey('Team', on_delete=models.SET_NULL, null=True, blank=True, related_name='conversations', verbose_name='Equipe')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_message_at = models.DateTimeField(null=True, blank=True)
