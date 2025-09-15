@@ -107,6 +107,9 @@ const UserManagement = ({ provedorId }) => {
   const [showResetModal, setShowResetModal] = useState(false);
   const [userToReset, setUserToReset] = useState(null);
   const [editUserPermissions, setEditUserPermissions] = useState([]);
+  const [editUserName, setEditUserName] = useState('');
+  const [editUserUsername, setEditUserUsername] = useState('');
+  const [editUserEmail, setEditUserEmail] = useState('');
   const userRole = getUserRole();
   const initialAddUserForm = {
     new_username: '',
@@ -235,6 +238,9 @@ const UserManagement = ({ provedorId }) => {
     try {
       const token = localStorage.getItem('token');
       await axios.patch(`/api/users/${selectedUser.id}/`, {
+        name: editUserName,
+        username: editUserUsername,
+        email: editUserEmail,
         permissions: editUserPermissions
       }, {
         headers: { Authorization: `Token ${token}` }
@@ -243,7 +249,7 @@ const UserManagement = ({ provedorId }) => {
       // Atualizar a lista de usuários
       const updatedUsers = usersState.map(user => 
         user.id === selectedUser.id 
-          ? { ...user, permissions: editUserPermissions }
+          ? { ...user, name: editUserName, username: editUserUsername, email: editUserEmail, permissions: editUserPermissions }
           : user
       );
       setUsersState(updatedUsers);
@@ -251,7 +257,13 @@ const UserManagement = ({ provedorId }) => {
       // CORREÇÃO: Se o usuário editado é o usuário atual, atualizar suas permissões no localStorage
       const currentUser = JSON.parse(localStorage.getItem('user'));
       if (currentUser && currentUser.id === selectedUser.id) {
-        const updatedCurrentUser = { ...currentUser, permissions: editUserPermissions };
+        const updatedCurrentUser = { 
+          ...currentUser, 
+          name: editUserName,
+          username: editUserUsername,
+          email: editUserEmail,
+          permissions: editUserPermissions 
+        };
         localStorage.setItem('user', JSON.stringify(updatedCurrentUser));
         
         // Disparar evento customizado para notificar outros componentes sobre a atualização
@@ -344,6 +356,9 @@ const UserManagement = ({ provedorId }) => {
   const handleEditUser = (user) => {
     setSelectedUser(user);
     setEditUserPermissions(user.permissions || []);
+    setEditUserName(user.name || '');
+    setEditUserUsername(user.username || '');
+    setEditUserEmail(user.email || '');
     setShowEditModal(true);
     setShowMenuId(null);
   };
@@ -383,6 +398,9 @@ const UserManagement = ({ provedorId }) => {
     setShowEditModal(false);
     setSelectedUser(null);
     setEditUserPermissions([]);
+    setEditUserName('');
+    setEditUserUsername('');
+    setEditUserEmail('');
   };
 
   // Sempre resetar o formulário ao abrir o modal
@@ -675,11 +693,30 @@ const UserManagement = ({ provedorId }) => {
               <form className="space-y-4" onSubmit={handleSaveUserPermissions}>
                 <div>
                   <label className="block text-sm font-medium mb-1">Nome</label>
-                  <input type="text" className="niochat-input w-full" defaultValue={selectedUser.name} />
+                  <input 
+                    type="text" 
+                    className="niochat-input w-full" 
+                    value={editUserName}
+                    onChange={(e) => setEditUserName(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Usuário</label>
+                  <input 
+                    type="text" 
+                    className="niochat-input w-full" 
+                    value={editUserUsername}
+                    onChange={(e) => setEditUserUsername(e.target.value)}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">E-mail</label>
-                  <input type="email" className="niochat-input w-full" defaultValue={selectedUser.email} />
+                  <input 
+                    type="email" 
+                    className="niochat-input w-full" 
+                    value={editUserEmail}
+                    onChange={(e) => setEditUserEmail(e.target.value)}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Permissões</label>
