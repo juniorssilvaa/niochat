@@ -81,7 +81,7 @@ services:
     labels:
       - "traefik.enable=true"
       # Regra para frontend - PRIORIDADE BAIXA (catch-all)
-      - "traefik.http.routers.niochat-frontend.rule=Host(`app.niochat.com.br`)"
+      - "traefik.http.routers.niochat-frontend.rule=Host(`app.niochat.com.br`) && !PathPrefix(`/api/`) && !PathPrefix(`/media/`) && !PathPrefix(`/static/`) && !PathPrefix(`/ws/`) && !PathPrefix(`/webhook/`) && !PathPrefix(`/webhooks/`)"
       - "traefik.http.routers.niochat-frontend.entrypoints=websecure"
       - "traefik.http.routers.niochat-frontend.tls.certresolver=letsencryptresolver"
       - "traefik.http.routers.niochat-frontend.priority=1"

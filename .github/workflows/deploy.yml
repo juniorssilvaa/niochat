@@ -194,6 +194,7 @@ jobs:
         run: |
           echo "Checking application health..."
           
+          # Verificar backend
           BACKEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://app.niochat.com.br/api/health/")
           if [ "$BACKEND_STATUS" = "200" ]; then
             echo "Backend is healthy (status: $BACKEND_STATUS)"
@@ -202,11 +203,33 @@ jobs:
             exit 1
           fi
 
-          FRONTEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://app.niochat.com.br/")
-          if [ "$FRONTEND_STATUS" = "200" ]; then
-            echo "Frontend is healthy (status: $FRONTEND_STATUS)"
-          else
-            echo "Frontend health check failed (status: $FRONTEND_STATUS)"
+          # Aguardar mais tempo para o frontend inicializar
+          echo "Waiting for frontend to initialize..."
+          sleep 30
+
+          # Verificar frontend com retry
+          FRONTEND_STATUS=""
+          for i in {1..5}; do
+            FRONTEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://app.niochat.com.br/")
+            echo "Frontend check attempt $i: status $FRONTEND_STATUS"
+            
+            if [ "$FRONTEND_STATUS" = "200" ]; then
+              echo "Frontend is healthy (status: $FRONTEND_STATUS)"
+              break
+            fi
+            
+            if [ $i -lt 5 ]; then
+              echo "Waiting 10 seconds before retry..."
+              sleep 10
+            fi
+          done
+
+          if [ "$FRONTEND_STATUS" != "200" ]; then
+            echo "Frontend health check failed after 5 attempts (final status: $FRONTEND_STATUS)"
+            echo "Checking container status..."
+            curl -s -H "X-API-Key: ${{ secrets.PORTAINER_API_KEY }}" \
+              "https://portainer.niochat.com.br/api/endpoints/1/docker/containers/json?all=true" | \
+              jq -r '.[] | select(.Labels."com.docker.compose.project" == "niochat") | "\(.Names[0]): \(.Status)"'
             exit 1
           fi
 
