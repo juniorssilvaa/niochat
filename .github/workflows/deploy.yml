@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: juniorsilvacmd/niotchat
+  IMAGE_NAME: juniorssilvaa/niochat
 
 jobs:
   test:
