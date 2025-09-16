@@ -57,18 +57,23 @@ def log_conversation_closure(request, conversation, action_type, resolution_type
         print(f"🔍 DEBUG: IP: {ip_address}")
         
         # Criar log de auditoria
+        details = f"Conversa encerrada com {conversation.contact.name} via {conversation.inbox.channel_type}"
+        if resolution_type:
+            details += f" | Resolução: {resolution_type}"
+        if duration:
+            details += f" | Duração: {duration}"
+        if message_count:
+            details += f" | Mensagens: {message_count}"
+        
         audit_log = AuditLog.objects.create(
             user=user or request.user,
             action=action_type,
             ip_address=ip_address,
-            details=f"Conversa encerrada com {conversation.contact.name} via {conversation.inbox.channel_type}",
+            details=details,
             provedor=provedor,
             conversation_id=conversation.id,
             contact_name=conversation.contact.name,
-            channel_type=conversation.inbox.channel_type,
-            conversation_duration=duration,
-            message_count=message_count,
-            resolution_type=resolution_type
+            channel_type=conversation.inbox.channel_type
         )
         
         print(f"✅ DEBUG: AuditLog criado com sucesso! ID: {audit_log.id}")
