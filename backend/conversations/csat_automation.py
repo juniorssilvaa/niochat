@@ -3,6 +3,7 @@ import json
 from datetime import datetime, timedelta
 from django.utils import timezone
 from celery import shared_task
+import pytz
 from .models import Conversation, CSATRequest, CSATFeedback
 # WhatsAppService removido - usando UazapiClient
 from integrations.telegram_service import TelegramService
@@ -214,7 +215,6 @@ Pode deixar sua opinião em uma única mensagem:
             
             # Usar timezone local do provedor ou UTC como fallback
             from django.conf import settings
-            import pytz
             
             # Tentar usar timezone do provedor, senão usar UTC
             try:

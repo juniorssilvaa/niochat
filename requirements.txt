@@ -18,4 +18,5 @@ openai==1.95.1
 requests==2.32.4
 qrcode[pil]==8.2
 dj-database-url==3.0.1
+pytz==2024.2
 
