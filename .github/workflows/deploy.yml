@@ -111,21 +111,28 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GHCR_TOKEN }}
 
-    - name: Build and push backend image (latest)
+    - name: Build and push backend image
       uses: docker/build-push-action@v5
       with:
         context: .
         file: ./Dockerfile.backend
         push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
 
-    - name: Build and push frontend image (latest)
+    - name: Build and push frontend image
       uses: docker/build-push-action@v5
       with:
         context: .
         file: ./Dockerfile.frontend
         push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
+
+    - name: Cleanup dangling images
+      run: docker image prune -f
 
   deploy:
     needs: [test, build-and-push]
