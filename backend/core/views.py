@@ -2980,7 +2980,7 @@ class ChangelogView(APIView):
                 changelog_data = json.load(f)
             
             # Adicionar versão atual
-            changelog_data['current_version'] = '2.1.7'
+            changelog_data['current_version'] = '2.1.8'
             
             return Response(changelog_data)
             

@@ -483,11 +483,31 @@ export default function ConversationAudit({ provedorId }) {
                       onClick={() => openConversationModal(conv.conversation_id)}
                     >
                       <td className="px-4 py-3">
-                        <div className="font-medium text-foreground">
-                          {conv.contact_name || 'Cliente'}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          Conversa #{conv.conversation_id}
+                        <div className="flex items-center gap-3">
+                          {conv.contact_photo && conv.channel_type === 'whatsapp' ? (
+                            <img 
+                              src={conv.contact_photo} 
+                              alt={conv.contact_name || 'Cliente'}
+                              className="w-8 h-8 rounded-full object-cover border border-border"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                              <span className="text-xs font-medium text-muted-foreground">
+                                {(conv.contact_name || 'C').charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
+                          <div>
+                            <div className="font-medium text-foreground">
+                              {conv.contact_name || 'Cliente'}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              Conversa #{conv.conversation_id}
+                            </div>
+                          </div>
                         </div>
                       </td>
                       <td className="px-4 py-3">

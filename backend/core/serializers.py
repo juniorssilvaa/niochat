@@ -80,14 +80,89 @@ class LabelSerializer(serializers.ModelSerializer):
 class AuditLogSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField()
     provedor = serializers.StringRelatedField()
+    contact_photo = serializers.SerializerMethodField()
     
     class Meta:
         model = AuditLog
         fields = [
             'id', 'user', 'action', 'timestamp', 'ip_address', 'details',
-            'provedor', 'conversation_id', 'contact_name', 'channel_type', 'csat_rating'
+            'provedor', 'conversation_id', 'contact_name', 'channel_type', 'csat_rating', 'contact_photo'
         ]
     
+    def get_contact_photo(self, obj):
+        """Buscar foto do perfil do contato para WhatsApp"""
+        if not obj.contact_name or not obj.channel_type:
+            return None
+            
+        # Só buscar foto para WhatsApp
+        if obj.channel_type != 'whatsapp':
+            return None
+            
+        try:
+            from conversations.models import Contact
+            from integrations.utils import fetch_whatsapp_profile_picture
+            
+            # Buscar contato pelo nome (fuzzy matching)
+            contact_name_clean = obj.contact_name.lower().strip()
+            contacts = Contact.objects.filter(
+                provedor=obj.provedor
+            ).exclude(phone__isnull=True).exclude(phone='')
+            
+            contact = None
+            for c in contacts:
+                if c.name and c.name.lower().strip() == contact_name_clean:
+                    contact = c
+                    break
+                # Busca por similaridade
+                elif c.name and contact_name_clean in c.name.lower():
+                    contact = c
+                    break
+            
+            if not contact:
+                print(f"Audit Log Contact Name: {obj.contact_name} - Contato não encontrado")
+                return None
+                
+            print(f"Audit Log Contact Name: {obj.contact_name} Contact Name Clean: {contact_name_clean}")
+            print(f"CONTATO ENCONTRADO! Phone: {contact.phone} | Avatar: {bool(contact.avatar)}")
+            
+            # Se já tem avatar salvo, usar ele
+            if contact.avatar:
+                try:
+                    avatar_url = contact.avatar.url
+                    print(f"Contact Photo: {avatar_url}")
+                    return avatar_url
+                except:
+                    pass
+            
+            # Buscar foto via Uazapi
+            if contact.phone and obj.provedor:
+                provedor = obj.provedor
+                if hasattr(provedor, 'integracoes_externas') and provedor.integracoes_externas:
+                    integration = provedor.integracoes_externas
+                    if isinstance(integration, dict):
+                        whatsapp_url = integration.get('whatsapp_url')
+                        whatsapp_token = integration.get('whatsapp_token')
+                        instance_id = integration.get('instance_id')
+                        
+                        if whatsapp_url and whatsapp_token and instance_id:
+                            profile_pic_url = fetch_whatsapp_profile_picture(
+                                phone=contact.phone,
+                                instance_name=instance_id,
+                                integration_type='uazapi',
+                                provedor=provedor
+                            )
+                            
+                            if profile_pic_url:
+                                print(f"Contact Photo from Uazapi: {profile_pic_url}")
+                                return profile_pic_url
+            
+            print(f"Contact Photo: None")
+            return None
+            
+        except Exception as e:
+            print(f"Erro ao buscar foto do contato: {e}")
+            return None
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         

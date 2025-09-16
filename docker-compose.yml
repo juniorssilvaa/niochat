@@ -95,6 +95,26 @@ services:
       - "traefik.http.routers.niochat-frontend.service=niochat-frontend-service"
       - "traefik.http.services.niochat-frontend-service.loadbalancer.server.port=8012"
 
+  # Celery Worker para CSAT e tarefas assíncronas
+  niochat-celery:
+    image: ghcr.io/juniorssilvaa/niochat-backend:latest
+    command: celery -A niochat worker -l info
+    environment:
+      - SECRET_KEY=OFfGQLqPs5osrBBnhOBdIfkjq1F6vpb74YoAWNkjwbY4BwTNK5
+      - DEBUG=True
+      - ALLOWED_HOSTS=*
+      - DATABASE_URL=postgresql://niochat_user:E0sJT3wAYFuahovmHkxgy@postgres:5432/niochat
+      - REDIS_URL=redis://niochat:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6379/0
+      - CELERY_BROKER_URL=redis://niochat:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6379/0
+      - CELERY_RESULT_BACKEND=redis://niochat:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6379/0
+    volumes:
+      - niochat-media:/app/backend/media
+    networks:
+      - nioNet
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
 networks:
   nioNet:
     external: true
