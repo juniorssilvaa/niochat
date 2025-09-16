@@ -171,19 +171,24 @@ jobs:
 
         echo "Found stack: niochat (ID: $STACK_ID)"
 
-        # Buscar stack file real
+        # Buscar stack file atual
         CURRENT_STACK=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
           "$PORTAINER_URL/api/stacks/$STACK_ID/file")
 
-        # Atualizar imagens
+        if [ -z "$CURRENT_STACK" ]; then
+          echo "Erro ao buscar stack atual"
+          exit 1
+        fi
+
+        # Atualizar imagens com o repo correto
         UPDATED_STACK=$(echo "$CURRENT_STACK" | jq --arg backend "$BACKEND_IMAGE" --arg frontend "$FRONTEND_IMAGE" '
           .StackFileContent = (.StackFileContent |
-            gsub("ghcr\\.io/juniorsilvacmd/niotchat-backend:[^\\s]+"; $backend) |
-            gsub("ghcr\\.io/juniorsilvacmd/niotchat-frontend:[^\\s]+"; $frontend)
+            gsub("ghcr\\.io/juniorssilvaa/niochat-backend:[^\\s]+"; $backend) |
+            gsub("ghcr\\.io/juniorssilvaa/niochat-frontend:[^\\s]+"; $frontend)
           )
         ')
 
-        # Fazer PUT com novo stack file (endpointId=1 é o Docker local, ajuste se for outro)
+        # Fazer PUT com novo stack file (endpointId=1 é o Docker local, ajuste se necessário)
         curl -s -X PUT \
           -H "X-API-Key: $PORTAINER_API_KEY" \
           -H "Content-Type: application/json" \
