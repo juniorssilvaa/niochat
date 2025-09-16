@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.signals import user_logged_in
 from django.db.models import Q
+import os
+import json
 from .models import User, Label, SystemConfig, Provedor, Canal, Company, CompanyUser, MensagemSistema
 from .serializers import UserSerializer, LabelSerializer, SystemConfigSerializer, ProvedorSerializer, AuditLogSerializer, CanalSerializer, CompanySerializer, CompanyUserSerializer, CompanyUserCreateSerializer, MensagemSistemaSerializer
 from rest_framework.authtoken.models import Token
