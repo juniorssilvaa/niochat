@@ -2957,5 +2957,37 @@ class MensagemSistemaViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
+class ChangelogView(APIView):
+    """
+    View para servir o changelog do sistema
+    """
+    def get(self, request):
+        try:
+            # Caminho para o arquivo CHANGELOG.json
+            changelog_path = os.path.join(settings.BASE_DIR, '..', 'frontend', 'frontend', 'public', 'CHANGELOG.json')
+            
+            # Verificar se o arquivo existe
+            if not os.path.exists(changelog_path):
+                return Response(
+                    {'error': 'Changelog file not found'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Ler o arquivo JSON
+            with open(changelog_path, 'r', encoding='utf-8') as f:
+                changelog_data = json.load(f)
+            
+            # Adicionar versão atual
+            changelog_data['current_version'] = '2.1.7'
+            
+            return Response(changelog_data)
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Error reading changelog: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
 
 

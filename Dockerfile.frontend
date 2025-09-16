@@ -20,7 +20,7 @@ ENV VITE_WS_URL=wss://api.niochat.com.br
 
 RUN pnpm run build
 
-# Production stage - USANDO SERVIDOR HTTP SIMPLES
+# ------------------ Production ------------------
 FROM node:18-alpine
 
 # Instalar serve e wget (para healthcheck)
@@ -36,5 +36,5 @@ EXPOSE 8012
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8012/ || exit 1
 
-# Servir arquivos estáticos na porta 8012, escutando em todas as interfaces
-CMD ["serve", "-s", "/app/dist", "-l", "0.0.0.0:8012", "-L"]
+# ✅ Forma correta de ouvir em todas interfaces
+CMD ["serve", "-s", "/app/dist", "-l", "tcp://0.0.0.0:8012"]

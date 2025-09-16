@@ -28,7 +28,7 @@ urlpatterns = [
     # path('media/<path:path>/', views.serve_media_file, name='serve_media_file'),
     path('uazapi/file/<str:file_id>/', views.serve_uazapi_file, name='serve_uazapi_file'),
     path('health/', views.health_check, name='health_check'),
-    # path('changelog/', views.ChangelogView.as_view(), name='changelog'),
+    path('changelog/', views.ChangelogView.as_view(), name='changelog'),
     path('', views.frontend_view, name='frontend'),
 ]
 
