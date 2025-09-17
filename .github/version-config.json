@@ -23,23 +23,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker images
+      - name: Build and push Docker image
         run: |
           docker buildx create --use
-          
-          # Build backend
           docker buildx build \
             --platform linux/amd64 \
-            --file Dockerfile.backend \
             --push \
-            -t $REGISTRY/${IMAGE_NAME}-backend:latest .
-          
-          # Build frontend
-          docker buildx build \
-            --platform linux/amd64 \
-            --file Dockerfile.frontend \
-            --push \
-            -t $REGISTRY/${IMAGE_NAME}-frontend:latest .
+            -t $REGISTRY/${IMAGE_NAME}:latest .
 
       - name: Deploy container on Portainer
         run: |
