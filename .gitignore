@@ -150,6 +150,8 @@ docker-compose.local.yml
 .env.local
 .env.development
 .env.test
+env.local
+expose-local.js
 
 # Database files
 *.db
