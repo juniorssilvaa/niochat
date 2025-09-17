@@ -23,47 +23,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker images
+      - name: Build and push Docker image
         run: |
           docker buildx create --use
-          
-          # Build backend
           docker buildx build \
             --platform linux/amd64 \
-            --file Dockerfile.backend \
             --push \
-            -t $REGISTRY/${IMAGE_NAME}-backend:latest \
-            -t $REGISTRY/${IMAGE_NAME}-backend:${{ github.sha }} .
-          
-          # Build frontend
-          docker buildx build \
-            --platform linux/amd64 \
-            --file Dockerfile.frontend \
-            --push \
-            -t $REGISTRY/${IMAGE_NAME}-frontend:latest \
-            -t $REGISTRY/${IMAGE_NAME}-frontend:${{ github.sha }} .
-
-      - name: Cleanup old GitHub Packages images
-        run: |
-          echo "Cleaning up old images from GitHub Packages..."
-          
-          # Instalar GitHub CLI
-          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-          sudo apt update
-          sudo apt install gh -y
-          
-          # Login no GitHub CLI
-          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
-          
-          # Listar e remover imagens antigas (manter apenas as 5 mais recentes)
-          echo "Removing old backend images..."
-          gh api repos/${{ github.repository }}/packages/container/${IMAGE_NAME}-backend/versions --jq '.[5:] | .[].id' | xargs -I {} gh api repos/${{ github.repository }}/packages/container/${IMAGE_NAME}-backend/versions/{} -X DELETE || true
-          
-          echo "Removing old frontend images..."
-          gh api repos/${{ github.repository }}/packages/container/${IMAGE_NAME}-frontend/versions --jq '.[5:] | .[].id' | xargs -I {} gh api repos/${{ github.repository }}/packages/container/${IMAGE_NAME}-frontend/versions/{} -X DELETE || true
-          
-          echo "Cleanup completed!"
+            -t $REGISTRY/${IMAGE_NAME}:latest .
 
       - name: Deploy container on Portainer
         run: |
