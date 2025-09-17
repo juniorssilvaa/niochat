@@ -154,7 +154,6 @@ jobs:
         echo "Backend image: $BACKEND_IMAGE"
         echo "Frontend image: $FRONTEND_IMAGE"
         
-        # Pegar ID da stack
         STACK_ID=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
           "$PORTAINER_URL/api/stacks" | jq -r '.[] | select(.Name == "niochat") | .Id')
 
@@ -165,7 +164,6 @@ jobs:
 
         echo "Found stack: niochat (ID: $STACK_ID)"
 
-        # Buscar stack file atual
         CURRENT_STACK=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
           "$PORTAINER_URL/api/stacks/$STACK_ID/file")
 
@@ -174,7 +172,6 @@ jobs:
           exit 1
         fi
 
-        # Atualizar imagens com latest
         UPDATED_STACK=$(echo "$CURRENT_STACK" | jq --arg backend "$BACKEND_IMAGE" --arg frontend "$FRONTEND_IMAGE" '
           .StackFileContent = (.StackFileContent |
             gsub("ghcr\\.io/juniorssilvaa/niochat-backend:[^\\s]+"; $backend) |
@@ -182,7 +179,6 @@ jobs:
           )
         ')
 
-        # Forçar Portainer a atualizar a stack
         curl -s -X PUT \
           -H "X-API-Key: $PORTAINER_API_KEY" \
           -H "Content-Type: application/json" \
@@ -190,6 +186,13 @@ jobs:
           "$PORTAINER_URL/api/stacks/$STACK_ID?endpointId=1"
 
         echo "Stack updated successfully!"
+
+    - name: Cleanup dangling images on server
+      run: |
+        echo "Cleaning dangling images on server..."
+        curl -s -X POST \
+          -H "X-API-Key: ${{ secrets.PORTAINER_API_KEY }}" \
+          "$PORTAINER_URL/api/endpoints/1/docker/images/prune?dangling=true"
 
     - name: Wait for deployment
       run: |
@@ -199,15 +202,11 @@ jobs:
     - name: Health check
       run: |
         echo "Checking application health..."
-        
-        # Check backend health
         if curl -f -s "https://api.niochat.com.br/api/health/" > /dev/null; then
           echo "Backend is healthy"
         else
           echo "Backend health check failed"
         fi
-        
-        # Check frontend
         if curl -f -s "https://app.niochat.com.br/" > /dev/null; then
           echo "Frontend is healthy"
         else
