@@ -7,14 +7,16 @@ ENV PYTHONUNBUFFERED=1
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies (inclui postgresql-client para pg_isready)
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    apt-transport-https \
+    ca-certificates \
     build-essential \
     libpq-dev \
     ffmpeg \
     curl \
-    netcat \
+    netcat-traditional \
     postgresql-client \
-    && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/*
 
 # Set work directory
 WORKDIR /app
