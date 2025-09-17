@@ -1,6 +1,32 @@
 {
   "versions": [
     {
+      "version": "2.19.1",
+      "date": "2025-09-17",
+      "type": "patch",
+      "title": "Correções e Melhorias",
+      "changes": [
+        {
+          "type": "fix",
+          "title": "Correções de Bugs",
+          "description": "Correções de problemas e melhorias de estabilidade"
+        }
+      ]
+    },
+    {
+      "version": "2.19.0",
+      "date": "2025-09-17",
+      "type": "minor",
+      "title": "Novas Funcionalidades",
+      "changes": [
+        {
+          "type": "feature",
+          "title": "Novas Funcionalidades",
+          "description": "Adição de novas funcionalidades mantendo compatibilidade"
+        }
+      ]
+    },
+    {
       "version": "2.18.3",
       "date": "2025-09-17",
       "type": "patch",
