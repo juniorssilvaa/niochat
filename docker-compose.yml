@@ -48,6 +48,13 @@ services:
     labels:
       - "traefik.enable=true"
 
+      # ✅ REGRA ESPECÍFICA PARA HEALTH CHECK - PRIORIDADE MÁXIMA
+      - "traefik.http.routers.niochat-backend-health.rule=Host(`api.niochat.com.br`) && Path(`/api/health/`)"
+      - "traefik.http.routers.niochat-backend-health.entrypoints=websecure"
+      - "traefik.http.routers.niochat-backend-health.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.niochat-backend-health.priority=400"
+      - "traefik.http.routers.niochat-backend-health.service=niochat-backend-service"
+
       # Regra para autenticação - PRIORIDADE MÁXIMA
       - "traefik.http.routers.niochat-backend-auth.rule=Host(`app.niochat.com.br`) && Path(`/api-token-auth/`)"
       - "traefik.http.routers.niochat-backend-auth.entrypoints=websecure"
@@ -111,7 +118,6 @@ services:
   niochat-celery:
     image: ghcr.io/juniorssilvaa/niochat-backend:latest
     # ✅ REMOVIDO --max-tasks-per-child=1 → causa do reinício
-    # ✅ ADICIONADO --pool=processes para estabilidade
     command: bash -c "cd /app/backend && python -m celery -A niochat worker --loglevel=info --concurrency=1 --pool=processes"
     environment:
       - SECRET_KEY=OFfGQLqPs5osrBBnhOBdIfkjq1F6vpb74YoAWNkjwbY4BwTNK5
