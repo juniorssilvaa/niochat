@@ -105,7 +105,7 @@ services:
   # Celery Worker para CSAT e tarefas assíncronas
   niochat-celery:
     image: ghcr.io/juniorssilvaa/niochat-backend:latest
-    command: celery -A niochat worker --loglevel=info
+    command: celery -A niochat worker --loglevel=info --without-gossip --without-mingle --without-heartbeat
     environment:
       - SECRET_KEY=OFfGQLqPs5osrBBnhOBdIfkjq1F6vpb74YoAWNkjwbY4BwTNK5
       - DEBUG=True
@@ -114,6 +114,12 @@ services:
       - REDIS_URL=redis://niochat:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6379/0
       - CELERY_BROKER_URL=redis://niochat:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6379/0
       - CELERY_RESULT_BACKEND=redis://niochat:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6379/0
+      - CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP=True
+      - CELERY_BROKER_CONNECTION_RETRY=True
+      - CELERY_BROKER_CONNECTION_MAX_RETRIES=10
+      - CELERY_WORKER_PREFETCH_MULTIPLIER=1
+      - CELERY_TASK_ACKS_LATE=True
+      - CELERY_WORKER_DISABLE_RATE_LIMITS=True
     networks:
       - nioNet
     restart: unless-stopped
