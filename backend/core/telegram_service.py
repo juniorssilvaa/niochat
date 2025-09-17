@@ -25,8 +25,8 @@ class TelegramMTProtoService:
                 int(channel.api_id),
                 channel.api_hash,
                 device_model=channel.app_title or "Nio Chat",
-                system_version="2.15.14",
-                app_version="2.15.14",
+                system_version="2.15.15",
+                app_version="2.15.15",
                 lang_code="pt"
             )
             

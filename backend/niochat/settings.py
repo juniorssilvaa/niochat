@@ -14,7 +14,7 @@ from pathlib import Path
 import dj_database_url
 
 # Version
-VERSION = "2.15.14"
+VERSION = "2.15.15"
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
