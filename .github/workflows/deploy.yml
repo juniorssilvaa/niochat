@@ -145,7 +145,7 @@ jobs:
 
     - name: Deploy to Portainer
       env:
-        PORTAINER_URL: https://portainer.niochat.com.br
+        PORTAINER_URL: https://portainer.niochat.com.br  
         PORTAINER_API_KEY: ${{ secrets.PORTAINER_API_KEY }}
         BACKEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
         FRONTEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
@@ -153,9 +153,6 @@ jobs:
         echo "Deploying to Portainer..."
         echo "Backend image: $BACKEND_IMAGE"
         echo "Frontend image: $FRONTEND_IMAGE"
-        
-        # Wait a moment for images to be available
-        sleep 10
         
         # Pegar ID da stack
         STACK_ID=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
@@ -172,76 +169,54 @@ jobs:
 
         echo "Found stack: niochat (ID: $STACK_ID)"
 
-        # Buscar stack file atual
-        CURRENT_STACK=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
-          "$PORTAINER_URL/api/stacks/$STACK_ID/file")
-
-        if [ -z "$CURRENT_STACK" ]; then
-          echo "Erro ao buscar stack atual"
-          exit 1
-        fi
-
-        # Atualizar imagens com latest - versão mais robusta
-        UPDATED_STACK=$(echo "$CURRENT_STACK" | jq '
-          .StackFileContent = (.StackFileContent |
-            gsub("ghcr\\.io/juniorssilvaa/niochat-backend:[^\\s]+"; "ghcr.io/juniorssilvaa/niochat-backend:latest") |
-            gsub("ghcr\\.io/juniorssilvaa/niochat-frontend:[^\\s]+"; "ghcr.io/juniorssilvaa/niochat-frontend:latest")
-          )
-        ')
-
-        # Forçar Portainer a atualizar a stack
+        # ⚡️ ATUALIZAÇÃO CHAVE: Enviar apenas o conteúdo mínimo necessário e forçar pull + recreate
         RESPONSE=$(curl -s -X PUT \
           -H "X-API-Key: $PORTAINER_API_KEY" \
           -H "Content-Type: application/json" \
-          --data "$UPDATED_STACK" \
-          "$PORTAINER_URL/api/stacks/$STACK_ID?endpointId=1")
+          --data "{
+            \"Env\": [],
+            \"StackFileContent\": \"version: '3.8'\\nservices:\\n  niochat-backend:\\n    image: $BACKEND_IMAGE\\n  niochat-frontend:\\n    image: $FRONTEND_IMAGE\\n  niochat-celery:\\n    image: $BACKEND_IMAGE\"
+          }" \
+          "$PORTAINER_URL/api/stacks/$STACK_ID?endpointId=1&pullImage=true&forceRecreate=true")
 
         if echo "$RESPONSE" | grep -q "error"; then
           echo "Error updating stack:"
-          echo "$RESPONSE"
+          echo "$RESPONSE" | jq .
           exit 1
         fi
 
-        echo "Stack updated successfully!"
+        echo "✅ Stack updated successfully with force pull and recreate!"
 
-    - name: Force image update
-      run: |
-        echo "Force pulling latest images..."
-        # This step ensures that the latest images are pulled
-        echo "If running on Portainer node, you might want to add commands to pull latest images"
-        
     - name: Wait for deployment
       run: |
         echo "Waiting for deployment to complete..."
-        sleep 30
+        sleep 45
 
-    - name: Apply database migrations
+    - name: Apply database migrations (if needed)
       run: |
-        echo "Applying database migrations..."
-        # This step ensures that any pending migrations are applied
-        echo "If running on production, you might want to add commands to apply migrations"
+        echo "ℹ️ If migrations are needed, consider running them via a separate job or manually."
 
     - name: Health check
       run: |
         echo "Checking application health..."
         
         # Check backend health
-        if curl -f -s "https://api.niochat.com.br/api/health/" > /dev/null; then
-          echo "Backend is healthy"
+        if curl -f -s "https://api.niochat.com.br/api/health/  " > /dev/null; then
+          echo "✅ Backend is healthy"
         else
-          echo "Backend health check failed"
+          echo "❌ Backend health check failed"
+          exit 1
         fi
         
-        # Check frontend
-        if curl -f -s "https://app.niochat.com.br/" > /dev/null; then
-          echo "Frontend is healthy"
+        # Check frontend (optional, may need adjustment)
+        if curl -f -s "https://app.niochat.com.br/  " > /dev/null; then
+          echo "✅ Frontend is healthy"
         else
-          echo "Frontend health check failed"
+          echo "⚠️ Frontend health check failed (may be normal if index.html not served at root)"
         fi
 
     - name: Notify deployment
       run: |
-        echo "NioChat deployed successfully!"
-        echo "Frontend: https://app.niochat.com.br"
-        echo "API: https://api.niochat.com.br"
-        echo "Admin: https://admin.niochat.com.br"tigas tbm do GitHub Packages 
+        echo "🚀 NioChat deployed successfully!"
+        echo "Frontend: https://app.niochat.com.br  "
+        echo "API: https://api.niochat.com.br  "

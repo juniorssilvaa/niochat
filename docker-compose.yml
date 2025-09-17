@@ -20,7 +20,6 @@ services:
       retries: 5
       start_period: 30s
 
-
   # Backend Django - PORTA 8010
   niochat-backend:
     image: ghcr.io/juniorssilvaa/niochat-backend:latest
@@ -48,7 +47,7 @@ services:
       start_period: 40s
     labels:
       - "traefik.enable=true"
-      
+
       # Regra para autenticação - PRIORIDADE MÁXIMA
       - "traefik.http.routers.niochat-backend-auth.rule=Host(`app.niochat.com.br`) && Path(`/api-token-auth/`)"
       - "traefik.http.routers.niochat-backend-auth.entrypoints=websecure"
@@ -56,21 +55,21 @@ services:
       - "traefik.http.routers.niochat-backend-auth.priority=300"
       - "traefik.http.routers.niochat-backend-auth.service=niochat-backend-service"
       - "traefik.http.services.niochat-backend-service.loadbalancer.server.port=8010"
-      
+
       # Regra para todas as APIs - PRIORIDADE ALTA
       - "traefik.http.routers.niochat-backend-api.rule=Host(`app.niochat.com.br`) && PathPrefix(`/api/`)"
       - "traefik.http.routers.niochat-backend-api.entrypoints=websecure"
       - "traefik.http.routers.niochat-backend-api.tls.certresolver=letsencryptresolver"
       - "traefik.http.routers.niochat-backend-api.priority=200"
       - "traefik.http.routers.niochat-backend-api.service=niochat-backend-service"
-      
+
       # Regra para media files - PRIORIDADE ALTA
       - "traefik.http.routers.niochat-backend-media.rule=Host(`app.niochat.com.br`) && PathPrefix(`/media/`)"
       - "traefik.http.routers.niochat-backend-media.entrypoints=websecure"
       - "traefik.http.routers.niochat-backend-media.tls.certresolver=letsencryptresolver"
       - "traefik.http.routers.niochat-backend-media.priority=200"
       - "traefik.http.routers.niochat-backend-media.service=niochat-backend-service"
-      
+
       # Regra para static files - PRIORIDADE ALTA
       - "traefik.http.routers.niochat-backend-static.rule=Host(`app.niochat.com.br`) && PathPrefix(`/static/`)"
       - "traefik.http.routers.niochat-backend-static.entrypoints=websecure"
@@ -84,7 +83,7 @@ services:
       - "traefik.http.routers.niochat-backend-ws.tls.certresolver=letsencryptresolver"
       - "traefik.http.routers.niochat-backend-ws.priority=300"
       - "traefik.http.routers.niochat-backend-ws.service=niochat-backend-service"
-      
+
       # Regra para Webhooks - PRIORIDADE MÁXIMA
       - "traefik.http.routers.niochat-backend-webhooks.rule=Host(`app.niochat.com.br`) && (PathPrefix(`/webhook/`) || PathPrefix(`/webhooks/`))"
       - "traefik.http.routers.niochat-backend-webhooks.entrypoints=websecure"
@@ -108,10 +107,12 @@ services:
       - "traefik.http.routers.niochat-frontend.service=niochat-frontend-service"
       - "traefik.http.services.niochat-frontend-service.loadbalancer.server.port=8012"
 
-  # Celery Worker para CSAT e tarefas assíncronas
+  # Celery Worker para CSAT e tarefas assíncronas — ✅ CORRIGIDO
   niochat-celery:
     image: ghcr.io/juniorssilvaa/niochat-backend:latest
-    command: bash -c "cd /app/backend && python -m celery -A niochat worker --loglevel=info --concurrency=1 --max-tasks-per-child=1"
+    # ✅ REMOVIDO --max-tasks-per-child=1 → causa do reinício
+    # ✅ ADICIONADO --pool=processes para estabilidade
+    command: bash -c "cd /app/backend && python -m celery -A niochat worker --loglevel=info --concurrency=1 --pool=processes"
     environment:
       - SECRET_KEY=OFfGQLqPs5osrBBnhOBdIfkjq1F6vpb74YoAWNkjwbY4BwTNK5
       - DEBUG=True
@@ -127,6 +128,13 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
+    # ✅ Healthcheck para monitorar o worker
+    healthcheck:
+      test: ["CMD", "celery", "status", "-A", "niochat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 networks:
   nioNet:
