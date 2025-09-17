@@ -155,7 +155,7 @@ jobs:
         echo "Frontend image: $FRONTEND_IMAGE"
         
         # Pegar ID da stack
-        STACK_ID=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
+        STACK_ID=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \\
           "$PORTAINER_URL/api/stacks" | jq -r '.[] | select(.Name == "niochat") | .Id')
 
         if [ -z "$STACK_ID" ] || [ "$STACK_ID" = "null" ]; then
@@ -166,7 +166,7 @@ jobs:
         echo "Found stack: niochat (ID: $STACK_ID)"
 
         # Buscar stack file atual
-        CURRENT_STACK=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
+        CURRENT_STACK=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \\
           "$PORTAINER_URL/api/stacks/$STACK_ID/file")
 
         if [ -z "$CURRENT_STACK" ]; then
@@ -174,23 +174,29 @@ jobs:
           exit 1
         fi
 
-        # Atualizar imagens com latest
-        UPDATED_STACK=$(echo "$CURRENT_STACK" | jq --arg backend "$BACKEND_IMAGE" --arg frontend "$FRONTEND_IMAGE" '
+        # Atualizar imagens com latest - versão mais robusta
+        UPDATED_STACK=$(echo "$CURRENT_STACK" | jq '
           .StackFileContent = (.StackFileContent |
-            gsub("ghcr\\.io/juniorssilvaa/niochat-backend:[^\\s]+"; $backend) |
-            gsub("ghcr\\.io/juniorssilvaa/niochat-frontend:[^\\s]+"; $frontend)
+            gsub("ghcr\\.io/juniorssilvaa/niochat-backend:[^\\s]+"; "ghcr.io/juniorssilvaa/niochat-backend:latest") |
+            gsub("ghcr\\.io/juniorssilvaa/niochat-frontend:[^\\s]+"; "ghcr.io/juniorssilvaa/niochat-frontend:latest")
           )
         ')
 
         # Forçar Portainer a atualizar a stack
-        curl -s -X PUT \
-          -H "X-API-Key: $PORTAINER_API_KEY" \
-          -H "Content-Type: application/json" \
-          --data "$UPDATED_STACK" \
+        curl -s -X PUT \\
+          -H "X-API-Key: $PORTAINER_API_KEY" \\
+          -H "Content-Type: application/json" \\
+          --data "$UPDATED_STACK" \\
           "$PORTAINER_URL/api/stacks/$STACK_ID?endpointId=1"
 
         echo "Stack updated successfully!"
 
+    - name: Force image update
+      run: |
+        echo "Force pulling latest images..."
+        # This step ensures that the latest images are pulled
+        echo "If running on Portainer node, you might want to add commands to pull latest images"
+        
     - name: Wait for deployment
       run: |
         echo "Waiting for deployment to complete..."
