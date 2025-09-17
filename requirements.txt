@@ -8,8 +8,7 @@ telethon==1.37.0
 python-decouple==3.8
 psycopg2-binary==2.9.10
 Pillow==11.0.0
-celery==5.4.0
-redis==5.2.1
+celery[redis]==5.4.0
 channels==4.2.0
 channels-redis==4.2.0
 daphne==4.1.0
