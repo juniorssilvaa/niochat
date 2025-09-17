@@ -3,50 +3,220 @@ name: Deploy NioChat to Production
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: juniorssilvaa/niochat
 
 jobs:
-  build-and-deploy:
+  test:
     runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: niochat_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
 
-      - name: Build and push Docker images
-        run: |
-          docker buildx create --use
-          
-          # Build backend
-          docker buildx build \
-            --platform linux/amd64 \
-            --file Dockerfile.backend \
-            --push \
-            -t $REGISTRY/${IMAGE_NAME}-backend:latest .
-          
-          # Build frontend
-          docker buildx build \
-            --platform linux/amd64 \
-            --file Dockerfile.frontend \
-            --push \
-            -t $REGISTRY/${IMAGE_NAME}-frontend:latest .
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/frontend/package-lock.json
 
-      - name: Deploy container on Portainer
-        run: |
-          echo "Triggering Portainer deployment..."
-          curl -s -X POST "https://portainer.niochat.com.br/api/webhooks/${{ secrets.PORTAINER_WEBHOOK }}" || true
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-      - name: Cleanup dangling images on server
-        run: |
-          echo "Cleaning dangling images..."
-          docker image prune -f || true
+    - name: Install Node.js dependencies
+      run: |
+        cd frontend/frontend
+        npm install --legacy-peer-deps
+
+    - name: Run Python tests
+      env:
+        SECRET_KEY: test-secret-key
+        DEBUG: True
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/niochat_test
+        REDIS_URL: redis://localhost:6379
+        CELERY_BROKER_URL: redis://localhost:6379/0
+        CELERY_RESULT_BACKEND: redis://localhost:6379/0
+      run: |
+        cd backend
+        python manage.py migrate
+        python manage.py test
+
+    - name: Build frontend
+      run: |
+        cd frontend/frontend
+        npm run build
+
+    - name: Lint Python code
+      run: |
+        pip install flake8
+        flake8 backend/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 backend/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GHCR_TOKEN }}
+
+    - name: Build and push backend image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.backend
+        push: true
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
+
+    - name: Build and push frontend image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.frontend
+        push: true
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
+
+    - name: Cleanup dangling images
+      run: docker image prune -f
+
+  deploy:
+    needs: [test, build-and-push]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to Portainer
+      env:
+        PORTAINER_URL: https://portainer.niochat.com.br
+        PORTAINER_API_KEY: ${{ secrets.PORTAINER_API_KEY }}
+        BACKEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
+        FRONTEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
+      run: |
+        echo "Deploying to Portainer..."
+        echo "Backend image: $BACKEND_IMAGE"
+        echo "Frontend image: $FRONTEND_IMAGE"
+        
+        # Pegar ID da stack
+        STACK_ID=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
+          "$PORTAINER_URL/api/stacks" | jq -r '.[] | select(.Name == "niochat") | .Id')
+
+        if [ -z "$STACK_ID" ] || [ "$STACK_ID" = "null" ]; then
+          echo "Stack 'niochat' not found. Please create it first in Portainer."
+          exit 1
+        fi
+
+        echo "Found stack: niochat (ID: $STACK_ID)"
+
+        # Buscar stack file atual
+        CURRENT_STACK=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
+          "$PORTAINER_URL/api/stacks/$STACK_ID/file")
+
+        if [ -z "$CURRENT_STACK" ]; then
+          echo "Erro ao buscar stack atual"
+          exit 1
+        fi
+
+        # Atualizar imagens com latest
+        UPDATED_STACK=$(echo "$CURRENT_STACK" | jq --arg backend "$BACKEND_IMAGE" --arg frontend "$FRONTEND_IMAGE" '
+          .StackFileContent = (.StackFileContent |
+            gsub("ghcr\\.io/juniorssilvaa/niochat-backend:[^\\s]+"; $backend) |
+            gsub("ghcr\\.io/juniorssilvaa/niochat-frontend:[^\\s]+"; $frontend)
+          )
+        ')
+
+        # Forçar Portainer a atualizar a stack
+        curl -s -X PUT \
+          -H "X-API-Key: $PORTAINER_API_KEY" \
+          -H "Content-Type: application/json" \
+          --data "$UPDATED_STACK" \
+          "$PORTAINER_URL/api/stacks/$STACK_ID?endpointId=1"
+
+        echo "Stack updated successfully!"
+
+    - name: Wait for deployment
+      run: |
+        echo "Waiting for deployment to complete..."
+        sleep 30
+
+    - name: Health check
+      run: |
+        echo "Checking application health..."
+        
+        # Check backend health
+        if curl -f -s "https://api.niochat.com.br/api/health/" > /dev/null; then
+          echo "Backend is healthy"
+        else
+          echo "Backend health check failed"
+        fi
+        
+        # Check frontend
+        if curl -f -s "https://app.niochat.com.br/" > /dev/null; then
+          echo "Frontend is healthy"
+        else
+          echo "Frontend health check failed"
+        fi
+
+    - name: Notify deployment
+      run: |
+        echo "NioChat deployed successfully!"
+        echo "Frontend: https://app.niochat.com.br"
+        echo "API: https://api.niochat.com.br"
+        echo "Admin: https://admin.niochat.com.br"tigas tbm do GitHub Packages 

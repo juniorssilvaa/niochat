@@ -6,22 +6,18 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies (inclui postgresql-client para pg_isready)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    apt-transport-https \
-    ca-certificates \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
     ffmpeg \
     curl \
-    netcat-traditional \
-    postgresql-client \
- && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
 # Set work directory
 WORKDIR /app
 
-# Copy requirements first (melhora cache do Docker)
+# Copy requirements and install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -34,12 +30,12 @@ WORKDIR /app/backend
 # Create directories for media and static files
 RUN mkdir -p media staticfiles
 
-# Entrypoint script
+# Create superuser script
 RUN echo '#!/bin/bash\n\
 set -e\n\
 echo "Starting Django application..."\n\
 echo "Waiting for PostgreSQL to be ready..."\n\
-while ! pg_isready -h postgres -p 5432 -U niochat_user -d niochat > /dev/null 2>&1; do\n\
+while ! pg_isready -h postgres -p 5432 -U niochat_user -d niochat; do\n\
   echo "PostgreSQL is unavailable - sleeping..."\n\
   sleep 2\n\
 done\n\
@@ -48,12 +44,12 @@ echo "Running migrations..."\n\
 python manage.py migrate --settings=niochat.settings\n\
 echo "Collecting static files..."\n\
 python manage.py collectstatic --noinput --settings=niochat.settings\n\
-echo "Ensuring superuser exists..."\n\
+echo "Creating superuser..."\n\
 echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username=\"Junior\").exists() or User.objects.create_superuser(\"Junior\", \"admin@niochat.com.br\", \"semfim01@\")" | python manage.py shell --settings=niochat.settings\n\
 echo "Starting Daphne (ASGI server for WebSocket)..."\n\
-exec \"$@\"' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
+exec "$@"' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
-# Expose porta 8010
+# Expose porta 8010 (igual ao dev)
 EXPOSE 8010
 
 # Health check
@@ -65,3 +61,44 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Default command — escuta na porta 8010 com Daphne para WebSocket
 CMD ["daphne", "-b", "0.0.0.0", "-p", "8010", "niochat.asgi:application"]
+
+docke filfe front: # Frontend Dockerfile - SERVIDO DIRETAMENTE PELO TRAEFIK, PORTA 8012
+FROM node:18-alpine AS build
+
+WORKDIR /app
+COPY frontend/frontend/package*.json ./
+RUN npm install -g pnpm
+RUN pnpm install
+
+COPY frontend/frontend/src ./src
+COPY frontend/frontend/public ./public
+COPY frontend/frontend/index.html ./
+COPY frontend/frontend/vite.config.js ./
+COPY frontend/frontend/jsconfig.json ./
+COPY frontend/frontend/components.json ./
+COPY frontend/frontend/eslint.config.js ./
+
+# Configurar variáveis de ambiente para build
+ENV VITE_API_URL=https://api.niochat.com.br
+ENV VITE_WS_URL=wss://api.niochat.com.br
+
+RUN pnpm run build
+
+# ------------------ Production ------------------
+FROM node:18-alpine
+
+# Instalar serve e wget (para healthcheck)
+RUN npm install -g serve && apk add --no-cache wget
+
+# Copiar arquivos buildados
+COPY --from=build /app/dist /app/dist
+
+# Expor porta 8012
+EXPOSE 8012
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8012/ || exit 1
+
+# ✅ Forma correta de ouvir em todas interfaces
+CMD ["serve", "-s", "/app/dist", "-l", "tcp://0.0.0.0:8012"]
