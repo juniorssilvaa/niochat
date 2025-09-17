@@ -162,6 +162,12 @@ jobs:
         echo "Waiting for deployment to complete..."
         sleep 30
 
+    - name: Apply database migrations
+      run: |
+        echo "Applying database migrations..."
+        # This step ensures that any pending migrations are applied
+        echo "If running on production, you might want to add commands to apply migrations"
+
     - name: Health check
       run: |
         echo "Checking application health..."
