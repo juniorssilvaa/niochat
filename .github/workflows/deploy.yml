@@ -149,7 +149,60 @@ jobs:
         PORTAINER_API_KEY: ${{ secrets.PORTAINER_API_KEY }}
         BACKEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
         FRONTEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
-      run: |\n        echo "Deploying to Portainer..."\n        echo "Backend image: $BACKEND_IMAGE"\n        echo "Frontend image: $FRONTEND_IMAGE"\n        \n        # Wait a moment for images to be available\n        sleep 10\n        \n        # Pegar ID da stack\n        STACK_ID=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \\\\\n          "$PORTAINER_URL/api/stacks" | jq -r '.[] | select(.Name == "niochat") | .Id')\n\n        if [ -z "$STACK_ID" ] || [ "$STACK_ID" = "null" ]; then\n          echo "Stack 'niochat' not found. Please create it first in Portainer."\n          # List available stacks for debugging\n          echo "Available stacks:"\n          curl -s -H "X-API-Key: $PORTAINER_API_KEY" \\\\\n            "$PORTAINER_URL/api/stacks" | jq '.[].Name'\n          exit 1\n        fi\n\n        echo "Found stack: niochat (ID: $STACK_ID)"\n\n        # Buscar stack file atual\n        CURRENT_STACK=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \\\\\n          "$PORTAINER_URL/api/stacks/$STACK_ID/file")\n\n        if [ -z "$CURRENT_STACK" ]; then\n          echo "Erro ao buscar stack atual"\n          exit 1\n        fi\n\n        # Atualizar imagens com latest - versão mais robusta\n        UPDATED_STACK=$(echo "$CURRENT_STACK" | jq '\n          .StackFileContent = (.StackFileContent |\n            gsub("ghcr\\\\.io/juniorssilvaa/niochat-backend:[^\\\\s]+"; "ghcr.io/juniorssilvaa/niochat-backend:latest") |\n            gsub("ghcr\\\\.io/juniorssilvaa/niochat-frontend:[^\\\\s]+"; "ghcr.io/juniorssilvaa/niochat-frontend:latest")\n          )\n        ')\n\n        # Forçar Portainer a atualizar a stack\n        RESPONSE=$(curl -s -X PUT \\\\\n          -H "X-API-Key: $PORTAINER_API_KEY" \\\\\n          -H "Content-Type: application/json" \\\\\n          --data "$UPDATED_STACK" \\\\\n          "$PORTAINER_URL/api/stacks/$STACK_ID?endpointId=1")\n\n        if echo "$RESPONSE" | grep -q "error"; then\n          echo "Error updating stack:"\n          echo "$RESPONSE"\n          exit 1\n        fi\n\n        echo "Stack updated successfully!"
+      run: |
+        echo "Deploying to Portainer..."
+        echo "Backend image: $BACKEND_IMAGE"
+        echo "Frontend image: $FRONTEND_IMAGE"
+        
+        # Wait a moment for images to be available
+        sleep 10
+        
+        # Pegar ID da stack
+        STACK_ID=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
+          "$PORTAINER_URL/api/stacks" | jq -r '.[] | select(.Name == "niochat") | .Id')
+
+        if [ -z "$STACK_ID" ] || [ "$STACK_ID" = "null" ]; then
+          echo "Stack 'niochat' not found. Please create it first in Portainer."
+          # List available stacks for debugging
+          echo "Available stacks:"
+          curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
+            "$PORTAINER_URL/api/stacks" | jq '.[].Name'
+          exit 1
+        fi
+
+        echo "Found stack: niochat (ID: $STACK_ID)"
+
+        # Buscar stack file atual
+        CURRENT_STACK=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
+          "$PORTAINER_URL/api/stacks/$STACK_ID/file")
+
+        if [ -z "$CURRENT_STACK" ]; then
+          echo "Erro ao buscar stack atual"
+          exit 1
+        fi
+
+        # Atualizar imagens com latest - versão mais robusta
+        UPDATED_STACK=$(echo "$CURRENT_STACK" | jq '
+          .StackFileContent = (.StackFileContent |
+            gsub("ghcr\\.io/juniorssilvaa/niochat-backend:[^\\s]+"; "ghcr.io/juniorssilvaa/niochat-backend:latest") |
+            gsub("ghcr\\.io/juniorssilvaa/niochat-frontend:[^\\s]+"; "ghcr.io/juniorssilvaa/niochat-frontend:latest")
+          )
+        ')
+
+        # Forçar Portainer a atualizar a stack
+        RESPONSE=$(curl -s -X PUT \
+          -H "X-API-Key: $PORTAINER_API_KEY" \
+          -H "Content-Type: application/json" \
+          --data "$UPDATED_STACK" \
+          "$PORTAINER_URL/api/stacks/$STACK_ID?endpointId=1")
+
+        if echo "$RESPONSE" | grep -q "error"; then
+          echo "Error updating stack:"
+          echo "$RESPONSE"
+          exit 1
+        fi
+
+        echo "Stack updated successfully!"
 
     - name: Force image update
       run: |
