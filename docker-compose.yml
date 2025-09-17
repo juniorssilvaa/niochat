@@ -105,7 +105,7 @@ services:
   # Celery Worker para CSAT e tarefas assíncronas
   niochat-celery:
     image: ghcr.io/juniorssilvaa/niochat-backend:latest
-    command: celery -A niochat worker --loglevel=info --without-gossip --without-mingle --without-heartbeat
+    command: bash -c "cd /app/backend && celery -A niochat worker --loglevel=info --without-gossip --without-mingle --without-heartbeat"
     environment:
       - SECRET_KEY=OFfGQLqPs5osrBBnhOBdIfkjq1F6vpb74YoAWNkjwbY4BwTNK5
       - DEBUG=True
