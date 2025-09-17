@@ -1,6 +1,6 @@
 # NioChat - Informações de Versão
 
-## Versão Atual: 2.16.0
+## Versão Atual: 2.16.1
 
 ### Data de Lançamento: 17/09/2025
 
@@ -12,13 +12,13 @@
 - Fluxo inteligente para faturas: CPF → SGP → Geração → Envio automático
 
 ### Arquivos de Versão Atualizados:
-- VERSION: 2.16.0
-- frontend/frontend/package.json: 2.16.0
-- frontend/frontend/package-lock.json: 2.16.0
-- frontend/frontend/pnpm-lock.yaml: 2.16.0
-- backend/niochat/settings.py: 2.16.0
-- backend/core/telegram_service.py: 2.16.0
-- CHANGELOG.json: 2.16.0
+- VERSION: 2.16.1
+- frontend/frontend/package.json: 2.16.1
+- frontend/frontend/package-lock.json: 2.16.1
+- frontend/frontend/pnpm-lock.yaml: 2.16.1
+- backend/niochat/settings.py: 2.16.1
+- backend/core/telegram_service.py: 2.16.1
+- CHANGELOG.json: 2.16.1
 
 ### Como Usar:
 Para atualizar a versão automaticamente, execute:

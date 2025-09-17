@@ -1,58 +1,42 @@
-{
-  "version_rules": {
-    "major_keywords": [
-      "breaking", "major", "incompatible", "refactor", "breaking change",
-      "major update", "major version", "breaking changes", "BREAKING"
-    ],
-    "minor_keywords": [
-      "feat", "feature", "minor", "add", "new", "implement", "enhancement",
-      "nova funcionalidade", "funcionalidade", "implementado", "adicionado"
-    ],
-    "patch_keywords": [
-      "fix", "patch", "bug", "correction", "hotfix", "bugfix",
-      "corrigido", "correção", "ajuste", "melhoria", "otimização"
-    ],
-    "security_keywords": [
-      "security", "segurança", "vulnerability", "cve", "exploit"
-    ]
-  },
-  "changelog_templates": {
-    "major": {
-      "title": "Atualização Principal",
-      "default_change": {
-        "type": "feature",
-        "title": "Mudanças Importantes",
-        "description": "Atualizações que podem afetar compatibilidade"
-      }
-    },
-    "minor": {
-      "title": "Novas Funcionalidades",
-      "default_change": {
-        "type": "feature", 
-        "title": "Nova Funcionalidade",
-        "description": "Funcionalidades adicionadas mantendo compatibilidade"
-      }
-    },
-    "patch": {
-      "title": "Correções e Melhorias",
-      "default_change": {
-        "type": "fix",
-        "title": "Melhorias Gerais",
-        "description": "Correções de problemas e melhorias de estabilidade"
-      }
-    }
-  },
-  "auto_deploy": {
-    "enabled": true,
-    "build_frontend": true,
-    "create_release_tag": true,
-    "update_production": true
-  },
-  "notifications": {
-    "success_message": "🎉 Sistema NioChat atualizado automaticamente!",
-    "error_message": "❌ Erro na atualização automática do NioChat"
-  }
-}
+name: Deploy NioChat to Production
 
+on:
+  push:
+    branches: [ main ]
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: juniorssilvaa/niochat
 
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        run: |
+          docker buildx create --use
+          docker buildx build \
+            --platform linux/amd64 \
+            --push \
+            -t $REGISTRY/${IMAGE_NAME}:latest .
+
+      - name: Deploy container on Portainer
+        run: |
+          echo "Triggering Portainer deployment..."
+          curl -s -X POST "https://portainer.niochat.com.br/api/webhooks/${{ secrets.PORTAINER_WEBHOOK }}" || true
+
+      - name: Cleanup dangling images on server
+        run: |
+          echo "Cleaning dangling images..."
+          docker image prune -f || true
