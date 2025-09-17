@@ -20,6 +20,7 @@ services:
       retries: 5
       start_period: 30s
 
+
   # Backend Django - PORTA 8010
   niochat-backend:
     image: ghcr.io/juniorssilvaa/niochat-backend:latest
@@ -104,31 +105,20 @@ services:
   # Celery Worker para CSAT e tarefas assíncronas
   niochat-celery:
     image: ghcr.io/juniorssilvaa/niochat-backend:latest
-    command: celery -A niochat worker -l info --uid=1000 --gid=1000
+    command: celery -A niochat worker --loglevel=info
     environment:
       - SECRET_KEY=OFfGQLqPs5osrBBnhOBdIfkjq1F6vpb74YoAWNkjwbY4BwTNK5
       - DEBUG=True
       - ALLOWED_HOSTS=*
       - DATABASE_URL=postgresql://niochat_user:E0sJT3wAYFuahovmHkxgy@postgres:5432/niochat
-      - REDIS_URL=redis://niochat:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6379/0
-      - CELERY_BROKER_URL=redis://niochat:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6379/0
-      - CELERY_RESULT_BACKEND=redis://niochat:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6379/0
-      - CELERY_WORKER_PREFETCH_MULTIPLIER=1
-      - CELERY_TASK_ACKS_LATE=True
-    volumes:
-      - niochat-media:/app/backend/media
+      - REDIS_URL=redis://niochat:E0sJT3wAYFuahovmHkxgy@10.0.1.12:6379/0
+      - CELERY_BROKER_URL=redis://niochat:E0sJT3wAYFuahovmHkxgy@10.0.1.12:6379/0
+      - CELERY_RESULT_BACKEND=redis://niochat:E0sJT3wAYFuahovmHkxgy@10.0.1.12:6379/0
     networks:
       - nioNet
     restart: unless-stopped
     depends_on:
-      postgres:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "celery", "-A", "niochat", "inspect", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      - postgres
 
 networks:
   nioNet:
