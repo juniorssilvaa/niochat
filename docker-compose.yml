@@ -39,8 +39,7 @@ services:
       - nioNet
     restart: unless-stopped
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8010/api/health/"]
       interval: 30s
@@ -131,8 +130,7 @@ services:
       - nioNet
     restart: unless-stopped
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
 
 networks:
   nioNet:
