@@ -58,7 +58,7 @@ python manage.py migrate --settings=niochat.settings\n\
 echo "Collecting static files..."\n\
 python manage.py collectstatic --noinput --settings=niochat.settings\n\
 echo "Creating superuser..."\n\
-echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username=\"Junior\").exists() or User.objects.create_superuser(\"Junior\", \"admin@niochat.com.br\", \"semfim01@\"); user, created = User.objects.get_or_create(username=\"niochat\", defaults={'email': 'niochat@niochat.com.br', 'is_staff': True, 'is_superuser': True}); user.set_password('semfim01@'); user.save()" | python manage.py shell --settings=niochat.settings\n\
+echo "from django.contrib.auth import get_user_model; User = get_user_model(); user, created = User.objects.get_or_create(username=\"Junior\", defaults={'email': 'admin@niochat.com.br', 'is_staff': True, 'is_superuser': True, 'is_active': True}); user.set_password('Semfim01@'); user.is_staff = True; user.is_superuser = True; user.is_active = True; user.save()" | python manage.py shell --settings=niochat.settings\n\
 echo "Starting Daphne (ASGI server for WebSocket)..."\n\
 exec "$@"' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
