@@ -36,9 +36,16 @@ RUN echo '#!/bin/bash\n\
 set -e\n\
 echo "Starting Django application..."\n\
 echo "Waiting for PostgreSQL to be ready..."\n\
-while ! pg_isready -h postgres -p 5432 -U niochat_user -d niochat; do\n\
-  echo "PostgreSQL is unavailable - sleeping..."\n\
-  sleep 2\n\
+MAX_ATTEMPTS=60\n\
+ATTEMPT=0\n\
+while ! pg_isready -h postgres -p 5432 -U niochat_user -d niochat > /dev/null 2>&1; do\n\
+  ATTEMPT=$((ATTEMPT + 1))\n\
+  if [ $ATTEMPT -ge $MAX_ATTEMPTS ]; then\n\
+    echo "PostgreSQL failed to start after $MAX_ATTEMPTS attempts. Exiting."\n\
+    exit 1\n\
+  fi\n\
+  echo "PostgreSQL is unavailable - sleeping... (attempt $ATTEMPT/$MAX_ATTEMPTS)"\n\
+  sleep 5\n\
 done\n\
 echo "PostgreSQL is ready!"\n\
 echo "Running migrations..."\n\
