@@ -156,8 +156,6 @@ services:
     networks:
       - nioNet
     restart: unless-stopped
-    depends_on:
-      - postgres
     # ✅ Healthcheck para monitorar o worker
     healthcheck:
       test: ["CMD", "python", "-c", "import celery; from celery import Celery; app = Celery('niochat'); print('Celery OK')"]

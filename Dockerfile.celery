@@ -32,40 +32,19 @@ WORKDIR /app/backend
 # Create directories for media and static files
 RUN mkdir -p media staticfiles
 
-# Entrypoint script específico para Celery
+# Entrypoint script específico para Celery - SIMPLIFICADO
 RUN echo '#!/bin/bash\n\
 set -e\n\
 echo "Starting Celery Worker..."\n\
-echo "Waiting for PostgreSQL to be ready..."\n\
-MAX_ATTEMPTS=60\n\
-ATTEMPT=0\n\
-while ! pg_isready -h postgres -p 5432 -U niochat_user -d niochat > /dev/null 2>&1; do\n\
-  ATTEMPT=$((ATTEMPT + 1))\n\
-  if [ $ATTEMPT -ge $MAX_ATTEMPTS ]; then\n\
-    echo "PostgreSQL failed to start after $MAX_ATTEMPTS attempts. Exiting."\n\
-    exit 1\n\
-  fi\n\
-  echo "PostgreSQL is unavailable - sleeping... (attempt $ATTEMPT/$MAX_ATTEMPTS)"\n\
-  sleep 5\n\
-done\n\
-echo "PostgreSQL is ready!"\n\
-echo "Starting Celery Worker with optimized settings..."\n\
 cd /app/backend\n\
-exec python -m celery -A niochat worker \
-  --loglevel=info \
-  --concurrency=1 \
-  --pool=prefork \
-  --without-gossip \
-  --without-mingle \
-  --without-heartbeat \
-  --prefetch-multiplier=1 \
-  --task-acks-late \
-  --worker-disable-rate-limits \
-  --max-tasks-per-child=1000' > /app/celery-entrypoint.sh && chmod +x /app/celery-entrypoint.sh
+echo "Current directory: $(pwd)"\n\
+echo "Python path: $(which python)"\n\
+echo "Starting Celery worker (same as local)..."\n\
+exec python -m celery -A niochat worker -l info' > /app/celery-entrypoint.sh && chmod +x /app/celery-entrypoint.sh
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import celery; from celery import Celery; app = Celery('niochat'); print('Celery OK')" || exit 1
+# Health check simplificado
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD python -c "import celery; print('Celery OK')" || exit 1
 
 # Use entrypoint script
 ENTRYPOINT ["/app/celery-entrypoint.sh"]
