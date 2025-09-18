@@ -131,6 +131,16 @@ jobs:
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
 
+    - name: Build and push celery image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.celery
+        push: true
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-celery:latest
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-celery:${{ github.sha }}
+
     - name: Cleanup dangling images
       run: docker image prune -f
 
@@ -149,10 +159,12 @@ jobs:
         PORTAINER_API_KEY: ${{ secrets.PORTAINER_API_KEY }}
         BACKEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
         FRONTEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
+        CELERY_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-celery:latest
       run: |
         echo "Deploying to Portainer..."
         echo "Backend image: $BACKEND_IMAGE"
         echo "Frontend image: $FRONTEND_IMAGE"
+        echo "Celery image: $CELERY_IMAGE"
         
         # Pegar ID da stack
         STACK_ID=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
@@ -171,7 +183,7 @@ jobs:
 
                  # ⚡️ ATUALIZAÇÃO CHAVE: Enviar o arquivo docker-compose.yml completo
                  # Ler o arquivo docker-compose.yml e substituir as imagens
-                 COMPOSE_CONTENT=$(cat docker-compose.yml | sed "s|ghcr.io/juniorssilvaa/niochat-backend:latest|$BACKEND_IMAGE|g" | sed "s|ghcr.io/juniorssilvaa/niochat-frontend:latest|$FRONTEND_IMAGE|g")
+                 COMPOSE_CONTENT=$(cat docker-compose.yml | sed "s|ghcr.io/juniorssilvaa/niochat-backend:latest|$BACKEND_IMAGE|g" | sed "s|ghcr.io/juniorssilvaa/niochat-frontend:latest|$FRONTEND_IMAGE|g" | sed "s|ghcr.io/juniorssilvaa/niochat-celery:latest|$CELERY_IMAGE|g")
                  
                  # Escapar aspas e quebras de linha para JSON
                  COMPOSE_CONTENT_ESCAPED=$(echo "$COMPOSE_CONTENT" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
