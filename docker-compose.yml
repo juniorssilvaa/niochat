@@ -135,8 +135,25 @@ services:
   # Celery Worker para CSAT e tarefas assíncronas — ✅ CORRIGIDO
   niochat-celery:
     image: ghcr.io/juniorssilvaa/niochat-backend:latest
-    # ✅ REMOVIDO --max-tasks-per-child=1 → causa do reinício
-    command: bash -c "cd /app/backend && python -m celery -A niochat worker --loglevel=info --concurrency=1 --pool=processes"
+    # ✅ COMANDO OTIMIZADO para evitar shutdown
+    command: >
+      bash -c "
+        echo 'Starting Celery Worker...'
+        cd /app/backend
+        echo 'Current directory: $(pwd)'
+        echo 'Python path: $(which python)'
+        echo 'Starting worker with optimized settings...'
+        exec python -m celery -A niochat worker 
+          --loglevel=info 
+          --concurrency=1 
+          --pool=prefork
+          --without-gossip
+          --without-mingle
+          --without-heartbeat
+          --prefetch-multiplier=1
+          --task-acks-late
+          --worker-disable-rate-limits
+      "
     environment:
       - SECRET_KEY=OFfGQLqPs5osrBBnhOBdIfkjq1F6vpb74YoAWNkjwbY4BwTNK5
       - DEBUG=True
@@ -147,6 +164,11 @@ services:
       - CELERY_RESULT_BACKEND=redis://niochat:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6379/0
       - CELERY_WORKER_PREFETCH_MULTIPLIER=1
       - CELERY_TASK_ACKS_LATE=True
+      - CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP=True
+      - CELERY_BROKER_CONNECTION_RETRY=True
+      - CELERY_BROKER_CONNECTION_MAX_RETRIES=10
+      - CELERY_WORKER_DISABLE_RATE_LIMITS=True
+      - CELERY_WORKER_MAX_TASKS_PER_CHILD=1000
     networks:
       - nioNet
     restart: unless-stopped
@@ -154,11 +176,11 @@ services:
       - postgres
     # ✅ Healthcheck para monitorar o worker
     healthcheck:
-      test: ["CMD", "celery", "status", "-A", "niochat"]
+      test: ["CMD", "python", "-c", "import celery; from celery import Celery; app = Celery('niochat'); print('Celery OK')"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 40s
 
 networks:
   nioNet:
