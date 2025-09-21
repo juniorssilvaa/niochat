@@ -132,12 +132,18 @@ services:
       - "traefik.http.routers.niochat-frontend.service=niochat-frontend-service"
       - "traefik.http.services.niochat-frontend-service.loadbalancer.server.port=8012"
 
-  # Celery Worker para CSAT e tarefas assíncronas — ✅ DOCKERFILE ESPECÍFICO
+  # Celery Worker para CSAT e tarefas assíncronas — ✅ USANDO IMAGEM BACKEND
   niochat-celery:
-    build:
-      context: .
-      dockerfile: Dockerfile.celery
-    image: ghcr.io/juniorssilvaa/niochat-celery:latest
+    image: ghcr.io/juniorssilvaa/niochat-backend:latest
+    command: >
+      bash -c "
+        echo 'Starting Celery Worker...'
+        cd /app/backend
+        echo 'Current directory: $(pwd)'
+        echo 'Python path: $(which python)'
+        echo 'Starting Celery worker (same as local)...'
+        exec python -m celery -A niochat worker -l info
+      "
     environment:
       - SECRET_KEY=OFfGQLqPs5osrBBnhOBdIfkjq1F6vpb74YoAWNkjwbY4BwTNK5
       - DEBUG=True
