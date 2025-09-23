@@ -25,6 +25,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . .
 
+# Copy Celery entrypoint script
+COPY celery_entrypoint.sh /app/celery_entrypoint.sh
+RUN chmod +x /app/celery_entrypoint.sh
+
 # Set backend directory
 WORKDIR /app/backend
 
