@@ -15,8 +15,6 @@ import asyncio
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
-import tempfile
-import traceback
 from conversations.models import Contact, Conversation, Message, Inbox
 from core.models import Company
 from django.utils import timezone
@@ -1357,6 +1355,7 @@ def webhook_evolution_uazapi(request):
                         
                 except Exception as e:
                     print(f"DEBUG: Erro ao buscar foto do perfil: {e}")
+                    import traceback
                     print(f"DEBUG: Traceback: {traceback.format_exc()}")
         else:
             print(f"DEBUG: Criando novo contato para phone_number: {phone_number}")
@@ -1429,6 +1428,7 @@ def webhook_evolution_uazapi(request):
                         
                 except Exception as e:
                     print(f"DEBUG: Erro ao buscar foto do perfil: {e}")
+                    import traceback
                     print(f"DEBUG: Traceback: {traceback.format_exc()}")
 
         # 3. Buscar ou criar inbox específica para esta instância
@@ -1778,9 +1778,9 @@ def webhook_evolution_uazapi(request):
         print(f"DEBUG: db_message_type final: {db_message_type}")
         
         # Extrair dados de mídia dos additional_attrs
-        file_url_value = additional_attrs.get('local_file_url') or additional_attrs.get('file_url') or getattr(locals(), 'file_url', None)
-        file_name_value = additional_attrs.get('file_name') or getattr(locals(), 'filename', None)
-        file_size_value = additional_attrs.get('file_size') or getattr(locals(), 'file_size', None)
+        file_url_value = additional_attrs.get('local_file_url') or additional_attrs.get('file_url') or file_url
+        file_name_value = additional_attrs.get('file_name') or filename
+        file_size_value = additional_attrs.get('file_size') or file_size
         
         msg = Message.objects.create(
             conversation=conversation,
@@ -1799,7 +1799,6 @@ def webhook_evolution_uazapi(request):
             print(f"DEBUG: Mensagem com mídia - file_url: {file_url}")
         
         # PROCESSAR PDFs AUTOMATICAMENTE
-        pdf_ja_respondeu = False  # Inicializar variável
         print(f"DEBUG: Verificando processamento de PDF - db_message_type: {db_message_type}, file_url_value: {file_url_value}, file_name_value: {file_name_value}")
         print(f"DEBUG: Content original para verificação: {content}")
         if db_message_type == 'document' and file_url_value:
@@ -1831,6 +1830,7 @@ def webhook_evolution_uazapi(request):
                     from core.pdf_processor import pdf_processor
                     import requests
                     import os
+                    import tempfile
                     
                     print(f"DEBUG: PDF detectado: {file_name_value}")
                     print(f"DEBUG: Content completo: {content}")
@@ -1840,25 +1840,17 @@ def webhook_evolution_uazapi(request):
                     print(f"DEBUG: Baixando PDF usando API da Uazapi...")
                     
                     # Usar a API da Uazapi para baixar o arquivo
-                    uazapi_url = provedor.integracoes_externas.get('whatsapp_url')
-                    uazapi_token = provedor.integracoes_externas.get('whatsapp_token')
-                    download_url = f"{uazapi_url}/message/download"
+                    download_url = f"{provedor.url}/message/download"
                     download_payload = {
                         'id': message_id,
                         'return_base64': False,
                         'return_link': True,
                     }
                     
-                    # Headers com autenticação
-                    headers = {
-                        'token': uazapi_token,
-                        'Content-Type': 'application/json'
-                    }
-                    
                     print(f"DEBUG: Fazendo download via API: {download_url}")
                     print(f"DEBUG: Payload: {download_payload}")
                     
-                    response = requests.post(download_url, json=download_payload, headers=headers, timeout=30)
+                    response = requests.post(download_url, json=download_payload, timeout=30)
                     if response.status_code == 200:
                         # A API retorna um JSON com fileURL
                         download_result = response.json()
@@ -1875,272 +1867,105 @@ def webhook_evolution_uazapi(request):
                                 with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
                                     temp_file.write(file_response.content)
                                     temp_pdf_path = temp_file.name
-                                
-                                print(f"DEBUG: PDF salvo temporariamente em: {temp_pdf_path}")
-                                
-                                # Verificar se o arquivo é realmente um PDF
-                                with open(temp_pdf_path, 'rb') as f:
-                                    file_content = f.read()
-                                    print(f"DEBUG: Tamanho do arquivo: {len(file_content)} bytes")
-                                    
-                                    if file_content.startswith(b'%PDF-'):
-                                        print(f"DEBUG: Arquivo é um PDF válido, iniciando processamento...")
-                                        # Processar PDF com IA
-                                        print(f"DEBUG: Iniciando processamento do PDF com IA...")
-                                        pdf_result = openai_service.process_pdf_with_ai(
-                                            pdf_path=temp_pdf_path,
-                                            provedor=provedor,
-                                            contexto={
-                                                'conversation_id': conversation.id,
-                                                'contact_name': contact.name,
-                                                'file_name': file_name_value
-                                            }
-                                        )
-                                        
-                                        print(f"DEBUG: Resultado do processamento PDF: {pdf_result}")
-                                        
-                                        # Limpar arquivo temporário
-                                        try:
-                                            os.unlink(temp_pdf_path)
-                                        except:
-                                            pass
-                                        
-                                        # Se o PDF foi processado com sucesso, atualizar o conteúdo para a IA
-                                        if pdf_result['success']:
-                                            print(f"DEBUG: PDF processado com sucesso: {pdf_result['resposta'][:100]}...")
-                                            
-                                            # Atualizar o conteúdo para que a IA processe o conteúdo do PDF
-                                            content = pdf_result['resposta']
-                                            
-                                            # Adicionar informações do PDF ao contexto para a IA
-                                            if 'additional_attrs' not in locals():
-                                                additional_attrs = {}
-                                            additional_attrs['pdf_processed'] = True
-                                            additional_attrs['pdf_info'] = pdf_result.get('pdf_info', {})
-                                            additional_attrs['file_name'] = file_name_value
-                                            
-                                            # Atualizar mensagem existente com as informações do PDF
-                                            msg.content = content
-                                            msg.additional_attributes = additional_attrs
-                                            msg.save()
-                                            
-                                            print(f"DEBUG: PDF processado com sucesso - conteúdo atualizado: {content[:100]}...")
-                                            
-                                            # Definir a resposta da IA como sendo a resposta do processamento do PDF
-                                            resposta_ia = pdf_result['resposta']
-                                            ia_result = {
-                                                'success': True,
-                                                'resposta': pdf_result['resposta'],
-                                                'model': 'gpt-4.1',
-                                                'provedor': provedor.nome,
-                                                'satisfacao_detectada': False
-                                            }
-                                            print(f"DEBUG: Usando resposta do processamento do PDF como resposta final")
-                                            
-                                            # Marcar que o PDF já foi processado e respondeu para evitar chamada duplicada da IA
-                                            pdf_ja_respondeu = True
-                                        else:
-                                            print(f"DEBUG: Erro ao processar PDF: {pdf_result.get('erro', 'Erro desconhecido')}")
-                                    else:
-                                        print(f"DEBUG: Arquivo não é um PDF válido (não começa com %PDF-)")
-                                        pdf_result = {
-                                            'success': False,
-                                            'erro': 'Arquivo não é um PDF válido',
-                                            'pdf_info': {'is_payment_receipt': False, 'message': 'Arquivo não é um PDF válido'}
-                                        }
-                                        
-                                        # Limpar arquivo temporário
-                                        try:
-                                            os.unlink(temp_pdf_path)
-                                        except:
-                                            pass
                             else:
                                 print(f"DEBUG: Erro ao baixar arquivo: {file_response.status_code}")
-                                pdf_result = {
-                                    'success': False,
-                                    'erro': 'Erro ao baixar arquivo',
-                                    'pdf_info': {'is_payment_receipt': False, 'message': 'Erro ao baixar o arquivo'}
-                                }
+                                temp_pdf_path = None
                         else:
                             print(f"DEBUG: fileURL não encontrado na resposta")
-                            pdf_result = {
-                                'success': False,
-                                'erro': 'fileURL não encontrado',
-                                'pdf_info': {'is_payment_receipt': False, 'message': 'URL do arquivo não encontrada'}
-                            }
+                            temp_pdf_path = None
                     else:
                         print(f"DEBUG: Erro na API: {response.status_code} - {response.text}")
-                        pdf_result = {
-                            'success': False,
-                            'erro': 'Erro na API da Uazapi',
-                            'pdf_info': {'is_payment_receipt': False, 'message': 'Erro ao acessar a API'}
-                        }
+                        temp_pdf_path = None
+                        
+                        if temp_pdf_path:
+                            print(f"DEBUG: PDF salvo temporariamente em: {temp_pdf_path}")
+                            
+                            # Verificar se o arquivo é realmente um PDF
+                            with open(temp_pdf_path, 'rb') as f:
+                                file_content = f.read()
+                                print(f"DEBUG: Tamanho do arquivo: {len(file_content)} bytes")
+                                
+                                if file_content.startswith(b'%PDF-'):
+                                    print(f"DEBUG: Arquivo é um PDF válido, iniciando processamento...")
+                                    # Processar PDF com IA
+                                    print(f"DEBUG: Iniciando processamento do PDF com IA...")
+                                    pdf_result = openai_service.process_pdf_with_ai(
+                                        pdf_path=temp_pdf_path,
+                                        provedor=provedor,
+                                        contexto={
+                                        'conversation_id': conversation.id,
+                                        'contact_name': contact.name,
+                                        'file_name': file_name_value
+                                    }
+                                )
+                                
+                                print(f"DEBUG: Resultado do processamento PDF: {pdf_result}")
+                                else:
+                                    print(f"DEBUG: Arquivo não é um PDF válido (não começa com %PDF-)")
+                                    pdf_result = {
+                                        'success': False,
+                                        'erro': 'Arquivo não é um PDF válido',
+                                        'pdf_info': {'is_payment_receipt': False, 'message': 'Arquivo não é um PDF válido'}
+                                    }
+                        else:
+                            print(f"DEBUG: Não foi possível baixar o PDF")
+                            pdf_result = {
+                                'success': False,
+                                'erro': 'Não foi possível baixar o PDF',
+                                'pdf_info': {'is_payment_receipt': False, 'message': 'Erro ao baixar o arquivo'}
+                            }
+                        
+                        if pdf_result['success']:
+                            print(f"DEBUG: PDF processado com sucesso: {pdf_result['resposta'][:100]}...")
+                            
+                            # Enviar resposta automática sobre o PDF
+                            from integrations.utils import send_whatsapp_message
+                            
+                            ai_response = pdf_result['resposta']
+                            
+                            # Enviar resposta via WhatsApp
+                            send_result = send_whatsapp_message(
+                                phone=contact.phone,
+                                message=ai_response,
+                                provedor=provedor
+                            )
+                            
+                            if send_result:
+                                print(f"DEBUG: Resposta automática sobre PDF enviada para {contact.phone}")
+                                
+                                # Salvar mensagem de resposta automática
+                                Message.objects.create(
+                                    conversation=conversation,
+                                    message_type='outgoing',
+                                    content=ai_response,
+                                    is_from_customer=False,
+                                    additional_attributes={
+                                        'auto_response': True,
+                                        'pdf_processed': True,
+                                        'pdf_info': pdf_result.get('pdf_info', {}),
+                                        'file_name': file_name_value
+                                    },
+                                    created_at=timezone.now()
+                                )
+                            else:
+                                print(f"DEBUG: Erro ao enviar resposta automática sobre PDF")
+                        else:
+                            print(f"DEBUG: Erro ao processar PDF: {pdf_result.get('erro', 'Erro desconhecido')}")
+                        
+                        # Limpar arquivo temporário
+                        try:
+                            os.unlink(temp_pdf_path)
+                        except:
+                            pass
+                            
+                    else:
+                        print(f"DEBUG: Erro ao baixar PDF: {response.status_code}")
                         
                 except Exception as pdf_error:
                     print(f"DEBUG: Erro ao processar PDF: {pdf_error}")
             else:
                 print(f"DEBUG: Arquivo não é PDF - mimetype: {content.get('mimetype') if isinstance(content, dict) else 'N/A'}, extensão: {file_name_value}")
         
-        # PROCESSAR IMAGENS AUTOMATICAMENTE
-        print(f"DEBUG: Verificando processamento de imagem - db_message_type: {db_message_type}, file_url_value: {file_url_value}, file_name_value: {file_name_value}")
-        if db_message_type in ['image', 'media'] and file_url_value:
-            # Verificar se é uma imagem usando msg_data original
-            is_image = False
-            if isinstance(msg_data, dict) and 'content' in msg_data:
-                msg_content = msg_data['content']
-                if isinstance(msg_content, dict) and msg_content.get('mimetype', '').startswith('image/'):
-                    is_image = True
-                    print(f"DEBUG: Imagem detectada por mimetype: {msg_content.get('mimetype')}")
-            elif file_name_value and file_name_value.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')):
-                is_image = True
-                print(f"DEBUG: Imagem detectada por extensão: {file_name_value}")
-            
-            if is_image:
-                print(f"DEBUG: Imagem confirmada - iniciando processamento com IA")
-                try:
-                    # Baixar a imagem usando a API da Uazapi
-                    print(f"DEBUG: Baixando imagem usando API da Uazapi...")
-                    
-                    uazapi_url = provedor.integracoes_externas.get('whatsapp_url')
-                    download_url = f"{uazapi_url}/message/download"
-                    uazapi_token = provedor.integracoes_externas.get('whatsapp_token')
-                    download_payload = {
-                        'id': message_id,
-                        'return_base64': False,
-                        'return_link': True,
-                    }
-                    
-                    headers = {
-                        'token': uazapi_token,
-                        'Content-Type': 'application/json'
-                    }
-                    
-                    print(f"DEBUG: Fazendo download via API: {download_url}")
-                    print(f"DEBUG: Payload: {download_payload}")
-                    
-                    response = requests.post(download_url, json=download_payload, headers=headers, timeout=30)
-                    if response.status_code == 200:
-                        download_result = response.json()
-                        print(f"DEBUG: Resposta da API: {download_result}")
-                        
-                        if 'fileURL' in download_result:
-                            file_url = download_result['fileURL']
-                            print(f"DEBUG: Baixando imagem de: {file_url}")
-                            
-                            file_response = requests.get(file_url, timeout=30)
-                            if file_response.status_code == 200:
-                                with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_file:
-                                    temp_file.write(file_response.content)
-                                    temp_image_path = temp_file.name
-                                    
-                                print(f"DEBUG: Imagem salva temporariamente em: {temp_image_path}")
-                                
-                                # Verificar se o arquivo é realmente uma imagem
-                                with open(temp_image_path, 'rb') as f:
-                                    file_content = f.read()
-                                    print(f"DEBUG: Tamanho da imagem: {len(file_content)} bytes")
-                                    
-                                    # Verificar se é uma imagem válida (JPEG, PNG, etc.)
-                                    if (file_content.startswith(b'\xff\xd8\xff') or  # JPEG
-                                        file_content.startswith(b'\x89PNG') or      # PNG
-                                        file_content.startswith(b'GIF8') or         # GIF
-                                        file_content.startswith(b'RIFF')):          # WEBP
-                                        
-                                        print(f"DEBUG: Imagem válida detectada, iniciando análise com IA...")
-                                        
-                                        # Processar imagem com IA
-                                        from core.openai_service import openai_service
-                                        ai_response = openai_service.analyze_image_with_ai(
-                                            image_path=temp_image_path,
-                                            provedor=provedor,
-                                            contexto={
-                                                'conversation_id': conversation.id,
-                                                'contact_name': contact.name,
-                                                'file_name': file_name_value,
-                                                'image_url': file_url
-                                            }
-                                        )
-                                        
-                                        if ai_response['success']:
-                                            print(f"DEBUG: Análise da imagem concluída: {ai_response['resposta'][:100]}...")
-                                            
-                                            # Verificar se deve transferir para suporte (LED vermelho detectado)
-                                            if ai_response.get('transferir_suporte', False):
-                                                print(f"DEBUG: LED vermelho detectado - transferindo para suporte")
-                                                # Aqui você pode adicionar lógica para transferir para suporte
-                                                # Por exemplo, marcar conversa como "precisa de suporte técnico"
-                                            
-                                            # Enviar resposta da IA sobre a imagem
-                                            from integrations.utils import send_whatsapp_message
-                                            send_result = send_whatsapp_message(
-                                                phone=contact.phone,
-                                                message=ai_response['resposta'],
-                                                provedor=provedor
-                                            )
-                                            
-                                            if send_result:
-                                                print(f"DEBUG: Resposta automática sobre imagem enviada para {contact.phone}")
-                                                Message.objects.create(
-                                                    conversation=conversation,
-                                                    message_type='outgoing',
-                                                    content=ai_response['resposta'],
-                                                    is_from_customer=False,
-                                                    additional_attributes={
-                                                        'auto_response': True,
-                                                        'image_analyzed': True,
-                                                        'led_vermelho_detectado': ai_response.get('led_vermelho_detectado', False),
-                                                        'transferir_suporte': ai_response.get('transferir_suporte', False),
-                                                        'file_name': file_name_value
-                                                    },
-                                                    created_at=timezone.now()
-                                                )
-                                                
-                                                # Imagem processada com sucesso - retornar para evitar processamento adicional pela IA
-                                                print(f"DEBUG: Imagem processada com sucesso - finalizando processamento")
-                                                return JsonResponse({'status': 'image_processed_successfully', 'ai_response_sent': True})
-                                            else:
-                                                print(f"DEBUG: Erro ao enviar resposta automática sobre imagem")
-                                                # Mesmo com erro no envio, salvar a resposta da IA no banco
-                                                Message.objects.create(
-                                                    conversation=conversation,
-                                                    message_type='outgoing',
-                                                    content=ai_response['resposta'],
-                                                    is_from_customer=False,
-                                                    additional_attributes={
-                                                        'auto_response': True,
-                                                        'image_analyzed': True,
-                                                        'led_vermelho_detectado': ai_response.get('led_vermelho_detectado', False),
-                                                        'transferir_suporte': ai_response.get('transferir_suporte', False),
-                                                        'file_name': file_name_value,
-                                                        'send_error': True
-                                                    },
-                                                    created_at=timezone.now()
-                                                )
-                                                
-                                                # Imagem processada com sucesso - retornar para evitar processamento adicional pela IA
-                                                print(f"DEBUG: Imagem processada com sucesso (com erro no envio) - finalizando processamento")
-                                                return JsonResponse({'status': 'image_processed_successfully', 'ai_response_saved': True, 'send_error': True})
-                                        else:
-                                            print(f"DEBUG: Erro na análise da imagem: {ai_response.get('erro', 'Erro desconhecido')}")
-                                    
-                                    # Limpar arquivo temporário
-                                    try:
-                                        os.unlink(temp_image_path)
-                                    except:
-                                        pass
-                            else:
-                                print(f"DEBUG: Erro ao baixar imagem: {file_response.status_code}")
-                        else:
-                            print(f"DEBUG: fileURL não encontrado na resposta")
-                    else:
-                        print(f"DEBUG: Erro na API: {response.status_code} - {response.text}")
-                        
-                except Exception as image_error:
-                    print(f"DEBUG: Erro ao processar imagem: {image_error}")
-                    traceback.print_exc()
-            else:
-                print(f"DEBUG: Arquivo não é uma imagem - mimetype: {content.get('mimetype') if isinstance(content, dict) else 'N/A'}, extensão: {file_name_value}")
-
         # SALVAR MENSAGEM NO REDIS (UAZAPI WEBHOOK)
         try:
             from core.redis_memory_service import redis_memory_service
@@ -2312,11 +2137,7 @@ def webhook_evolution_uazapi(request):
 
         # 2. Acionar IA para resposta automática (apenas se não foi CSAT e não estiver atribuída)
         
-        # Verificar se o PDF já foi processado e respondeu para evitar chamada duplicada da IA
-        if pdf_ja_respondeu:
-            print(f"DEBUG: PDF já foi processado e respondeu, pulando chamada da IA principal")
-            # A resposta já foi definida no processamento do PDF, não fazer nada aqui
-        elif content and str(content).strip():  # Verificar se há conteúdo válido antes de chamar a IA
+        if content and str(content).strip():  # Verificar se há conteúdo válido antes de chamar a IA
             # Importar openai_service
             from core.openai_service import openai_service
             
@@ -2346,21 +2167,7 @@ def webhook_evolution_uazapi(request):
         else:
             print("⚠️ IA: Mensagem sem conteúdo válido, pulando geração de resposta")
             ia_result = {'success': False, 'erro': 'Mensagem sem conteúdo válido'}
-        
-        # Definir resposta_ia baseada no processamento do PDF ou da IA
-        if pdf_ja_respondeu:
-            # Se o PDF foi processado, usar a resposta do PDF que já foi definida
-            if 'resposta_ia' in locals() and resposta_ia:
-                # resposta_ia já foi definida no processamento do PDF
-                pass
-            elif 'ia_result' in locals() and ia_result.get('success'):
-                resposta_ia = ia_result.get('resposta')
-            else:
-                # Usar o conteúdo que foi processado pelo PDF
-                resposta_ia = content if content else None
-        else:
-            # Se não foi PDF, usar a resposta da IA
-            resposta_ia = ia_result.get('resposta') if ia_result.get('success') else None
+        resposta_ia = ia_result.get('resposta') if ia_result.get('success') else None
         # 3. Enviar resposta para Uazapi (WhatsApp)
         import requests
         send_result = None

@@ -266,7 +266,7 @@ const WS_BASE = `wss://${window.location.host}`;
   
   const sendMessage = async () => {
     if (!newMessage.trim() && !replyingTo) return;
-    if (!selectedUser || !ws) return;
+    if (!selectedUser) return;
     
     try {
       const token = localStorage.getItem('token');
@@ -493,15 +493,6 @@ const WS_BASE = `wss://${window.location.host}`;
         </div>
         
         <div className="flex items-center gap-1">
-          <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-            <Phone className="h-4 w-4" />
-          </Button>
-          <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-            <VideoIcon className="h-4 w-4" />
-          </Button>
-          <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-            <MoreVertical className="h-4 w-4" />
-          </Button>
           <Button 
             size="sm" 
             variant="ghost" 

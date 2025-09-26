@@ -253,7 +253,7 @@ const InternalChat = () => {
   
   const sendMessage = async () => {
     if (!newMessage.trim() && !replyingTo) return;
-    if (!selectedRoom || !ws) return;
+    if (!selectedRoom) return;
     
     try {
       const token = localStorage.getItem('token');
@@ -281,7 +281,7 @@ const InternalChat = () => {
   };
   
   const sendFileMessage = async (file, messageType) => {
-    if (!selectedRoom || !ws) return;
+    if (!selectedRoom) return;
     
     try {
       const token = localStorage.getItem('token');
@@ -464,15 +464,7 @@ const InternalChat = () => {
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  <Button size="sm" variant="ghost">
-                    <Phone className="w-4 h-4" />
-                  </Button>
-                  <Button size="sm" variant="ghost">
-                    <Video className="w-4 h-4" />
-                  </Button>
-                  <Button size="sm" variant="ghost">
-                    <MoreVertical className="w-4 h-4" />
-                  </Button>
+                  {/* Ícones removidos conforme solicitado */}
                 </div>
               </div>
             </div>
@@ -662,7 +654,10 @@ const InternalChat = () => {
                 />
                 
                 <Button 
-                  onClick={sendMessage}
+                  onClick={() => {
+                    console.log('DEBUG: Botão de enviar clicado');
+                    sendMessage();
+                  }}
                   disabled={!newMessage.trim() && !replyingTo}
                   size="sm"
                 >

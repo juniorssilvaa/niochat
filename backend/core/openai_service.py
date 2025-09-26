@@ -7,6 +7,7 @@ import openai
 import logging
 import json
 import re
+import pdfplumber
 from typing import Dict, Any, Optional, List
 from django.conf import settings
 from django.utils import timezone
@@ -15,6 +16,7 @@ from asgiref.sync import sync_to_async
 from datetime import datetime
 from .redis_memory_service import redis_memory_service
 from .transfer_service import transfer_service
+from .pdf_processor import pdf_processor
 
 logger = logging.getLogger(__name__)
 
@@ -190,7 +192,7 @@ class OpenAIService:
             'satisfacao_detectada': satisfacao_detectada,
             'despedida_detectada': despedida_detectada
         }
-    
+
     def _get_greeting_time(self) -> str:
         """Retorna saudação baseada no horário atual"""
         from datetime import datetime
@@ -2881,5 +2883,224 @@ IMPORTANTE - EQUIPE NÃO DISPONÍVEL:
         except Exception as e:
             logger.error(f"Erro ao enviar fatura via FaturaService: {str(e)}")
             return False
+    
+    def process_pdf_with_ai(self, pdf_path: str, provedor: Provedor, contexto: Dict[str, Any] = None) -> Dict[str, Any]:
+        """
+        Processa um PDF usando pdfplumber e gera resposta com IA
+        """
+        try:
+            logger.info(f"Processando PDF: {pdf_path}")
+            
+            # Extrair informações do PDF usando pdfplumber
+            pdf_info = pdf_processor.extract_payment_info(pdf_path)
+            
+            if not pdf_info.get('is_payment_receipt'):
+                return {
+                    'success': False,
+                    'erro': 'PDF não é um comprovante de pagamento válido',
+                    'pdf_info': pdf_info
+                }
+            
+            # Gerar prompt para a IA baseado nas informações extraídas
+            ai_prompt = pdf_processor.generate_ai_prompt(pdf_info)
+            
+            # Adicionar contexto do PDF ao contexto geral
+            if contexto is None:
+                contexto = {}
+            
+            contexto['pdf_info'] = pdf_info
+            contexto['pdf_path'] = pdf_path
+            
+            # Gerar resposta da IA
+            ai_response = self.generate_response_sync(
+                mensagem=ai_prompt,
+                provedor=provedor,
+                contexto=contexto
+            )
+            
+            if ai_response['success']:
+                return {
+                    'success': True,
+                    'resposta': ai_response['resposta'],
+                    'pdf_info': pdf_info,
+                    'ai_response': ai_response
+                }
+            else:
+                return {
+                    'success': False,
+                    'erro': f"Erro na IA: {ai_response.get('erro', 'Erro desconhecido')}",
+                    'pdf_info': pdf_info
+                }
+                
+        except Exception as e:
+            logger.error(f"Erro ao processar PDF: {str(e)}")
+            return {
+                'success': False,
+                'erro': f'Erro ao processar PDF: {str(e)}'
+            }
+    
+    def analyze_image_with_ai(self, image_path: str, provedor: Provedor, contexto: Dict[str, Any] = None) -> Dict[str, Any]:
+        """
+        Analisa uma imagem usando a API da OpenAI com suporte a visão
+        """
+        try:
+            logger.info(f"Analisando imagem: {image_path}")
+            
+            # Buscar chave da API apenas quando necessário
+            if not self.api_key:
+                self.api_key = self._get_api_key()
+                if self.api_key:
+                    openai.api_key = self.api_key
+                else:
+                    return {
+                        'success': False,
+                        'erro': 'Chave da API OpenAI não encontrada'
+                    }
+            
+            # Verificar se o arquivo existe
+            if not os.path.exists(image_path):
+                return {
+                    'success': False,
+                    'erro': f'Arquivo de imagem não encontrado: {image_path}'
+                }
+            
+            # Criar prompt para análise da imagem
+            image_prompt = """
+            Analise esta imagem enviada pelo cliente com foco em problemas de internet.
+            
+            Se for um modem, roteador ou equipamento de internet:
+            - Verifique se há LEDs acesos ou apagados
+            - IDENTIFIQUE ESPECIFICAMENTE se há LEDs VERMELHOS (problema crítico)
+            - Verifique se há LEDs verdes/azuis (funcionando)
+            - Observe se há cabos conectados
+            - Identifique a marca/modelo se possível
+            - Descreva o estado geral do equipamento
+            
+            IMPORTANTE: Se detectar LED VERMELHO em modem/roteador:
+            - Responda APENAS: "Detectei que seu equipamento está com problema (LED vermelho). Vou transferir você para nossa equipe de suporte técnico que irá resolver isso para você."
+            - NÃO envie análise técnica detalhada
+            - NÃO explique o que é LED vermelho
+            - Apenas informe que será transferido para suporte
+            
+            Se for outro tipo de equipamento ou problema:
+            - Descreva o que você vê
+            - Identifique possíveis problemas
+            - Sugira soluções básicas
+            
+            Responda de forma técnica mas acessível ao cliente.
+            Se houver LED vermelho, SEMPRE mencione que será transferido para suporte técnico.
+            """
+            
+            # Fazer a chamada para a API da OpenAI com suporte a visão
+            client = openai.OpenAI(api_key=self.api_key)
+            
+            # Ler a imagem e converter para base64
+            import base64
+            with open(image_path, 'rb') as image_file:
+                image_data = base64.b64encode(image_file.read()).decode('utf-8')
+            
+            response = client.chat.completions.create(
+                model="gpt-4.1",  # Modelo com suporte a visão
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": image_prompt
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{image_data}"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                max_tokens=1000,
+                temperature=0.7
+            )
+            
+            resposta = response.choices[0].message.content
+            
+            # Detectar se há LED vermelho na resposta para transferir para suporte
+            led_vermelho_detectado = any(keyword in resposta.lower() for keyword in [
+                'led vermelho', 'led vermelha', 'vermelho', 'vermelha',
+                'problema físico', 'drop', 'fibra', 'conectores',
+                'transferir', 'suporte técnico', 'intervenção física'
+            ])
+            
+            return {
+                'success': True,
+                'resposta': resposta,
+                'model': 'gpt-4.1',
+                'provedor': provedor.nome,
+                'image_path': image_path,
+                'led_vermelho_detectado': led_vermelho_detectado,
+                'transferir_suporte': led_vermelho_detectado
+            }
+            
+        except Exception as e:
+            logger.error(f"Erro ao analisar imagem: {str(e)}")
+            return {
+                'success': False,
+                'erro': f'Erro ao analisar imagem: {str(e)}'
+            }
+    
+    async def process_pdf_with_ai_async(self, pdf_path: str, provedor: Provedor, contexto: Dict[str, Any] = None) -> Dict[str, Any]:
+        """
+        Versão assíncrona do processamento de PDF
+        """
+        try:
+            logger.info(f"Processando PDF (async): {pdf_path}")
+            
+            # Extrair informações do PDF usando pdfplumber
+            pdf_info = pdf_processor.extract_payment_info(pdf_path)
+            
+            if not pdf_info.get('is_payment_receipt'):
+                return {
+                    'success': False,
+                    'erro': 'PDF não é um comprovante de pagamento válido',
+                    'pdf_info': pdf_info
+                }
+            
+            # Gerar prompt para a IA baseado nas informações extraídas
+            ai_prompt = pdf_processor.generate_ai_prompt(pdf_info)
+            
+            # Adicionar contexto do PDF ao contexto geral
+            if contexto is None:
+                contexto = {}
+            
+            contexto['pdf_info'] = pdf_info
+            contexto['pdf_path'] = pdf_path
+            
+            # Gerar resposta da IA
+            ai_response = await self.generate_response(
+                mensagem=ai_prompt,
+                provedor=provedor,
+                contexto=contexto
+            )
+            
+            if ai_response['success']:
+                return {
+                    'success': True,
+                    'resposta': ai_response['resposta'],
+                    'pdf_info': pdf_info,
+                    'ai_response': ai_response
+                }
+            else:
+                return {
+                    'success': False,
+                    'erro': f"Erro na IA: {ai_response.get('erro', 'Erro desconhecido')}",
+                    'pdf_info': pdf_info
+                }
+                
+        except Exception as e:
+            logger.error(f"Erro ao processar PDF (async): {str(e)}")
+            return {
+                'success': False,
+                'erro': f'Erro ao processar PDF: {str(e)}'
+            }
 
 openai_service = OpenAIService() 

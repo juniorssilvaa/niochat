@@ -18,4 +18,5 @@ requests==2.32.4
 qrcode[pil]==8.2
 dj-database-url==3.0.1
 pytz==2024.2
+pdfplumber==0.11.4
 

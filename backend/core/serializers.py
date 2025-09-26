@@ -128,10 +128,16 @@ class AuditLogSerializer(serializers.ModelSerializer):
             # Se já tem avatar salvo, usar ele
             if contact.avatar:
                 try:
-                    avatar_url = contact.avatar.url
+                    # Se avatar é uma string (URL), usar diretamente
+                    if isinstance(contact.avatar, str):
+                        avatar_url = contact.avatar
+                    else:
+                        # Se é um campo de arquivo, usar .url
+                        avatar_url = contact.avatar.url
                     print(f"Contact Photo: {avatar_url}")
                     return avatar_url
-                except:
+                except Exception as e:
+                    print(f"Erro ao obter avatar: {e}")
                     pass
             
             # Buscar foto via Uazapi

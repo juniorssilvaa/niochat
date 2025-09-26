@@ -23,7 +23,18 @@ export default defineConfig({
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
       'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
     },
-    // Proxy removido para produção - usar URLs relativas
-    // Em produção, o Traefik faz o roteamento
+    // Proxy para desenvolvimento local
+    proxy: {
+      '/api': {
+        target: 'http://192.168.100.55:8010',
+        changeOrigin: true,
+        secure: false
+      },
+      '/ws': {
+        target: 'ws://192.168.100.55:8010',
+        ws: true,
+        changeOrigin: true
+      }
+    }
   }
 })

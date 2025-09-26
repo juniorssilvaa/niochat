@@ -2,6 +2,64 @@ import requests
 from core.uazapi_client import UazapiClient
 
 
+def send_whatsapp_message(phone, message, provedor):
+    """
+    Envia uma mensagem via WhatsApp usando a API da Uazapi
+    
+    Args:
+        phone: Número do telefone (formato: 556392484773)
+        message: Texto da mensagem
+        provedor: Objeto Provedor com configurações da Uazapi
+    
+    Returns:
+        bool: True se enviado com sucesso, False caso contrário
+    """
+    try:
+        if not provedor or not provedor.integracoes_externas:
+            print(f"DEBUG: Provedor ou integrações não configuradas")
+            return False
+        
+        token = provedor.integracoes_externas.get('whatsapp_token')
+        uazapi_url = provedor.integracoes_externas.get('whatsapp_url')
+        
+        if not token or not uazapi_url:
+            print(f"DEBUG: Token ou URL do Uazapi não configurados")
+            return False
+        
+        # Limpar o número do telefone
+        clean_phone = phone.replace('@s.whatsapp.net', '').replace('@c.us', '')
+        
+        # URL para enviar mensagem
+        if uazapi_url.endswith('/send/text'):
+            send_url = uazapi_url
+        else:
+            send_url = f"{uazapi_url.rstrip('/')}/send/text"
+        
+        payload = {
+            'number': clean_phone,
+            'text': message
+        }
+        
+        headers = {
+            'token': token,
+            'Content-Type': 'application/json'
+        }
+        
+        print(f"DEBUG: Enviando mensagem para {clean_phone}: {message[:50]}...")
+        response = requests.post(send_url, json=payload, headers=headers, timeout=30)
+        
+        if response.status_code == 200:
+            print(f"DEBUG: Mensagem enviada com sucesso")
+            return True
+        else:
+            print(f"DEBUG: Erro ao enviar mensagem: {response.status_code} - {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"DEBUG: Erro ao enviar mensagem: {e}")
+        return False
+
+
 def fetch_whatsapp_profile_picture(phone, instance_name, integration_type='evolution', provedor=None, is_client=True):
     """
     Busca a foto do perfil do WhatsApp de forma automática
