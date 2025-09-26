@@ -10,16 +10,10 @@ export default function ProfilePage() {
   const [userData, setUserData] = useState(null);
   const audioRef = useRef(null);
   const { updateTimeout } = useSessionTimeout();
-  const availableSounds = [
-    'mixkit-access-allowed-tone-2869.wav',
-    'mixkit-bell-notification-933.wav',
-    'mixkit-bubble-pop-up-alert-notification-2357.wav',
-    'mixkit-correct-answer-tone-2870.wav',
-    'mixkit-digital-quick-tone-2866.wav',
-    'mixkit-elevator-tone-2863.wav',
-    'mixkit-interface-option-select-2573.wav',
-    'mixkit-sci-fi-click-900.wav'
-  ];
+  // Sons disponíveis - carregados dinamicamente
+  const [availableSounds, setAvailableSounds] = useState([]);
+  const [messageSounds, setMessageSounds] = useState([]);
+  const [conversationSounds, setConversationSounds] = useState([]);
   const [settings, setSettings] = useState({
     profile: {
       name: '',
@@ -29,14 +23,59 @@ export default function ProfilePage() {
     },
     notifications: {
       soundNotifications: false,
-      newMessageSound: 'mixkit-bell-notification-933.wav',
-      newConversationSound: 'mixkit-digital-quick-tone-2866.wav'
+      newMessageSound: 'message_in_01.mp3',
+      newConversationSound: 'chat_new_01.mp3'
     },
     security: {
       twoFactorAuth: false,
       sessionTimeout: 30
     }
   });
+
+  // Carregar sons disponíveis
+  useEffect(() => {
+    const loadAvailableSounds = async () => {
+      try {
+        // Lista de sons disponíveis baseada nos arquivos na pasta /sounds
+        const allSounds = [
+          'message_in_01.mp3',
+          'message_in_02.mp3',
+          'message_in_03.mp3',
+          'message_in_04.mp3',
+          'message_in_05.mp3',
+          'message_in_06.mp3',
+          'message_in_07.mp3',
+          'message_in_08.mp3',
+          'message_in_09.mp3',
+          'message_in_010.mp3',
+          'message_in_011.mp3',
+          'chat_new_01.mp3',
+          'chat_new_02.mp3',
+          'chat_new_03.mp3',
+          'chat_new_04.mp3',
+          'chat_new_05.mp3',
+          'chat_new_06.mp3',
+          'chat_new_07.mp3',
+          'chat_new_08.mp3',
+          'chat_new_09.mp3',
+          'chat_new_010.mp3',
+          'chat_new_011.mp3'
+        ];
+        
+        // Filtrar sons por categoria
+        const messageSoundsList = allSounds.filter(sound => sound.startsWith('message_in_'));
+        const conversationSoundsList = allSounds.filter(sound => sound.startsWith('chat_new_'));
+        
+        setAvailableSounds(allSounds);
+        setMessageSounds(messageSoundsList);
+        setConversationSounds(conversationSoundsList);
+      } catch (error) {
+        console.error('Erro ao carregar sons:', error);
+      }
+    };
+    
+    loadAvailableSounds();
+  }, []);
 
   // Buscar dados do usuário
   useEffect(() => {
@@ -126,7 +165,16 @@ export default function ProfilePage() {
   };
 
   const formatSoundLabel = (fileName) => {
-    const base = fileName.replace(/\.wav$/i, '').replace(/-/g, ' ');
+    // Remover extensão e prefixos, formatar nome
+    let base = fileName.replace(/\.(mp3|wav)$/i, '');
+    
+    // Remover prefixos específicos
+    base = base.replace(/^(message_in_|chat_new_)/, '');
+    
+    // Converter para formato legível
+    base = base.replace(/_/g, ' ');
+    
+    // Capitalizar primeira letra
     return base.charAt(0).toUpperCase() + base.slice(1);
   };
 
@@ -339,9 +387,11 @@ export default function ProfilePage() {
                   onChange={(e) => handleSelectSound('newMessageSound', e.target.value)}
                   className="niochat-input"
                 >
-                  {availableSounds.map((s) => (
+                  {messageSounds.length > 0 ? messageSounds.map((s) => (
                     <option key={s} value={s}>{formatSoundLabel(s)}</option>
-                  ))}
+                  )) : (
+                    <option value="">Carregando sons...</option>
+                  )}
                 </select>
               </div>
               <div>
@@ -366,9 +416,11 @@ export default function ProfilePage() {
                   onChange={(e) => handleSelectSound('newConversationSound', e.target.value)}
                   className="niochat-input"
                 >
-                  {availableSounds.map((s) => (
+                  {conversationSounds.length > 0 ? conversationSounds.map((s) => (
                     <option key={s} value={s}>{formatSoundLabel(s)}</option>
-                  ))}
+                  )) : (
+                    <option value="">Carregando sons...</option>
+                  )}
                 </select>
               </div>
               <div>
