@@ -4,7 +4,7 @@ import { X, Calendar, Package, Sparkles, Shield, Zap, Database, Bug, Plus, Setti
 const Changelog = ({ isOpen, onClose }) => {
   const [versions, setVersions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentVersion, setCurrentVersion] = useState('2.1.5');
+  const [currentVersion, setCurrentVersion] = useState('2.8.4');
 
   useEffect(() => {
     const loadChangelog = async () => {
@@ -15,7 +15,7 @@ const Changelog = ({ isOpen, onClose }) => {
         if (response.ok) {
           const data = await response.json();
           setVersions(data.versions || []);
-          setCurrentVersion(data.current_version || '2.1.5');
+          setCurrentVersion(data.current_version || '2.8.4');
         } else {
           // Fallback para dados estáticos se a API falhar
           setVersions(fallbackVersions);
@@ -38,6 +38,58 @@ const Changelog = ({ isOpen, onClose }) => {
 
   // Dados fallback caso o arquivo não carregue
   const fallbackVersions = [
+    {
+      version: "2.8.4",
+      date: "2025-09-26",
+      type: "patch",
+      title: "Correções e Melhorias",
+      changes: [
+        {
+          type: "fix",
+          icon: <Bug className="w-4 h-4" />,
+          title: "Separação de Sons por Categoria",
+          description: "Corrigido sistema de sons na aba perfil - sons de mensagens e conversas agora são separados por categoria"
+        },
+        {
+          type: "fix",
+          icon: <Bug className="w-4 h-4" />,
+          title: "Chat Interno",
+          description: "Corrigido problema de envio de mensagens no chat interno"
+        },
+        {
+          type: "fix",
+          icon: <Bug className="w-4 h-4" />,
+          title: "Interface do Chat",
+          description: "Removidos ícones desnecessários (telefone, câmera, 3 pontos) do chat interno"
+        }
+      ]
+    },
+    {
+      version: "2.8.3",
+      date: "2025-09-26",
+      type: "minor",
+      title: "Sistema de Chat e Processamento de Mídia",
+      changes: [
+        {
+          type: "feature",
+          icon: <Sparkles className="w-4 h-4" />,
+          title: "Processamento de PDFs",
+          description: "Implementado sistema completo para análise de documentos PDF"
+        },
+        {
+          type: "feature",
+          icon: <Zap className="w-4 h-4" />,
+          title: "Análise de Imagens com IA",
+          description: "Detecção automática de problemas técnicos (LED vermelho em modems)"
+        },
+        {
+          type: "fix",
+          icon: <Bug className="w-4 h-4" />,
+          title: "Integração WhatsApp",
+          description: "Corrigido endpoint de envio de mensagens (Uazapi)"
+        }
+      ]
+    },
     {
       version: "2.1.5",
       date: "2025-01-23",
