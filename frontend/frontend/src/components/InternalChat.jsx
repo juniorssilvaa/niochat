@@ -110,7 +110,10 @@ const InternalChat = () => {
         headers: { Authorization: `Bearer ${token}` },
         params: { room_id: selectedRoom.id }
       });
-      setMessages(response.data.reverse()); // Mais antigas primeiro
+      
+      // Remover mensagens temporárias antes de carregar as mensagens do backend
+      const confirmedMessages = response.data.reverse(); // Mais antigas primeiro
+      setMessages(confirmedMessages);
       
       // Marcar todas as mensagens como lidas quando carregar
       await markAllMessagesAsRead();
@@ -194,7 +197,24 @@ const InternalChat = () => {
   const handleWebSocketMessage = (data) => {
     switch (data.type) {
       case 'new_message':
-        setMessages(prev => [...prev, data.message]);
+        // Verificar se é uma mensagem que já foi adicionada temporariamente
+        setMessages(prev => {
+          // Filtrar mensagens temporárias que correspondem à nova mensagem (mesmo conteúdo e remetente)
+          const filtered = prev.filter(msg => {
+            if (msg.id.startsWith && msg.id.startsWith('temp_')) {
+              // Se a mensagem temporária tem o mesmo conteúdo e foi enviada pelo mesmo usuário
+              return !(msg.content === data.message.content && 
+                       msg.sender.id === data.message.sender.id);
+            }
+            return true;
+          });
+          
+          // Adicionar a mensagem confirmada, evitando duplicatas
+          if (!filtered.some(msg => msg.id === data.message.id)) {
+            return [...filtered, data.message];
+          }
+          return filtered; // A mensagem já existe, não adicionar novamente
+        });
         break;
         
       case 'message_read':
@@ -257,6 +277,23 @@ const InternalChat = () => {
     
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('Token não encontrado');
+        return;
+      }
+      
+      // Decodificar token JWT de forma segura
+      let userId = null;
+      try {
+        const tokenParts = token.split('.');
+        if (tokenParts.length === 3) {
+          const payload = JSON.parse(atob(tokenParts[1]));
+          userId = payload.user_id;
+        }
+      } catch (decodeError) {
+        console.error('Erro ao decodificar token:', decodeError);
+      }
+      
       const messageData = {
         content: newMessage.trim(),
         room_id: selectedRoom.id,
@@ -266,6 +303,21 @@ const InternalChat = () => {
       if (replyingTo) {
         messageData.reply_to_id = replyingTo.id;
       }
+      
+      // Adiciona a mensagem imediatamente à lista local antes de enviar à API
+      // para exibição imediata (otimistic update)
+      const tempId = `temp_${Date.now()}`;
+      const tempMessage = {
+        id: tempId,
+        content: newMessage.trim(),
+        sender: { id: userId, name: 'Você' },
+        message_type: 'text',
+        created_at: new Date().toISOString(),
+        is_read: false,
+        reply_to: replyingTo || null
+      };
+      
+      setMessages(prev => [...prev, tempMessage]);
       
       await axios.post(`${API_BASE}/conversations/internal-chat/messages/`, messageData, {
         headers: { Authorization: `Bearer ${token}` }
@@ -277,6 +329,8 @@ const InternalChat = () => {
       
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error);
+      // Remover a mensagem temporária em caso de erro
+      setMessages(prev => prev.filter(msg => !msg.id.startsWith('temp_')));
     }
   };
   

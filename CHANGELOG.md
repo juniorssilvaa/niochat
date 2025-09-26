@@ -2,6 +2,11 @@
 
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
+## [2.8.4] - 2025-09-26
+
+### 🔧 Correções
+- **Corrigido**: Separação de sons por categoria na aba sons do perfil
+
 ## [2.8.3] - 2025-09-26
 
 ### 🚀 Novas Funcionalidades
