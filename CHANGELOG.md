@@ -2,6 +2,57 @@
 
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
+## [2.8.3] - 2025-09-26
+
+### 🚀 Novas Funcionalidades
+
+#### Sistema de Chat e Comunicação
+- **Implementado**: Processamento de PDFs
+  - Suporte completo para análise de documentos PDF
+  - Extração de texto e metadados de arquivos PDF
+  - Integração com sistema de IA para análise de conteúdo
+
+- **Melhorado**: Sistema de análise de imagens com IA
+  - Detecção automática de problemas técnicos (LED vermelho em modems)
+  - Respostas mais diretas e objetivas para problemas críticos
+  - Transferência automática para suporte técnico quando necessário
+
+#### Interface e Usabilidade
+- **Corrigido**: Chat interno agora funciona corretamente
+  - Removida dependência desnecessária do WebSocket para envio
+  - Mensagens são enviadas via API REST
+  - WebSocket mantido apenas para recebimento em tempo real
+
+- **Melhorado**: Interface do chat interno
+  - Removidos ícones desnecessários (telefone, câmera, 3 pontos)
+  - Interface mais limpa e focada na comunicação
+  - Mantido apenas botão de fechar
+
+### 🔧 Correções Técnicas
+
+#### Integração WhatsApp (Uazapi)
+- **Corrigido**: Endpoint de envio de mensagens
+  - URL correta: `/send/text` em vez de `/message/send`
+  - Payload otimizado para API da Uazapi
+  - Headers de autenticação corrigidos
+
+#### Sistema de Auditoria
+- **Melhorado**: Exibição de fotos de perfil
+  - Fotos aparecem corretamente na aba de auditoria
+  - Cache otimizado para carregamento de imagens
+  - Fallback para avatares quando foto não disponível
+
+#### Processamento de Mídia
+- **Implementado**: Sistema robusto de processamento de arquivos
+  - Suporte para múltiplos formatos (PDF, imagem, áudio, vídeo)
+  - Validação de tipos de arquivo
+  - Tratamento de erros melhorado
+
+### 🎯 Melhorias de Performance
+- **Otimizado**: Carregamento de mensagens
+- **Melhorado**: Sistema de cache para imagens
+- **Corrigido**: Problemas de timeout em requisições
+
 ## [2.8.2] - 2025-09-11
 
 ### 🔧 Correções Críticas
