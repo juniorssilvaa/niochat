@@ -2979,8 +2979,10 @@ class ChangelogView(APIView):
             with open(changelog_path, 'r', encoding='utf-8') as f:
                 changelog_data = json.load(f)
             
-            # Adicionar versão atual
-            changelog_data['current_version'] = '2.1.8'
+            # Adicionar versão atual do sistema (do settings)
+            from django.conf import settings as django_settings
+            current_version = getattr(django_settings, 'VERSION', '2.1.8')  # Valor padrão se não existir
+            changelog_data['current_version'] = current_version
             
             return Response(changelog_data)
             

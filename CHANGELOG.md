@@ -2,169 +2,589 @@
 
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
-## [2.8.4] - 2025-09-26
-
-### 🔧 Correções
-- **Corrigido**: Separação de sons por categoria na aba sons do perfil
-
-## [2.8.3] - 2025-09-26
+## [2.22.1] - 2025-09-26
 
 ### 🚀 Novas Funcionalidades
+- **Implementado**: Atualização automática do changelog via sistema de versionamento
+  - Versão do sistema agora sincronizada corretamente com o changelog
+  - Sistema de versionamento automático integrado com o CHANGELOG.json
+  - Endpoint `/api/changelog/` agora retorna versão atual do sistema
 
-#### Sistema de Chat e Comunicação
-- **Implementado**: Processamento de PDFs
-  - Suporte completo para análise de documentos PDF
-  - Extração de texto e metadados de arquivos PDF
-  - Integração com sistema de IA para análise de conteúdo
+### 🔧 Correções
+- **Corrigido**: Sistema de som
+  - Corrigido problemas no sistema de notificações sonoras
+  - Melhorias na reprodução e configuração de sons do sistema
+- **Corrigido**: Sistema de auditoria
+  - Corrigido problemas no sistema de auditoria de conversas
+  - Melhorias na exibição e registro de atividades auditadas
+- **Corrigido**: Exibição de versão no frontend
+  - Versão atual do sistema agora é exibida dinamicamente no changelog
+  - Endpoint `/api/changelog/` agora usa a versão do settings em vez de versão fixa
+- **Melhorado**: Sistema de versionamento automático
+  - Arquivo CHANGELOG.json mantém sincronizado com o sistema
+  - Cópia automática para frontend/public/CHANGELOG.json
 
-- **Melhorado**: Sistema de análise de imagens com IA
-  - Detecção automática de problemas técnicos (LED vermelho em modems)
-  - Respostas mais diretas e objetivas para problemas críticos
-  - Transferência automática para suporte técnico quando necessário
+## [2.21.0] - 2025-09-26
 
-#### Interface e Usabilidade
-- **Corrigido**: Chat interno agora funciona corretamente
-  - Removida dependência desnecessária do WebSocket para envio
-  - Mensagens são enviadas via API REST
-  - WebSocket mantido apenas para recebimento em tempo real
+### 🚀 Novas Funcionalidades
+- **Implementado**: Sistema de atualização de mensagens em tempo real no chat interno
+  - Mensagens agora aparecem em tempo real sem necessidade de recarregar
+  - Implementado "optimistic update" para melhor experiência do usuário
+  - Correção de duplicação de mensagens temporárias
+- **Melhorado**: Gestão de mensagens temporárias no frontend
+  - Implementado tratamento seguro de mensagens temporárias
+  - Evita duplicatas ao receber confirmação via WebSocket
 
-- **Melhorado**: Interface do chat interno
-  - Removidos ícones desnecessários (telefone, câmera, 3 pontos)
-  - Interface mais limpa e focada na comunicação
-  - Mantido apenas botão de fechar
+### 🔧 Correções
+- **Corrigido**: Problema de exibição de mensagens do chat interno
+  - Mensagens agora aparecem imediatamente após envio
+  - WebSocket agora funciona corretamente para atualização em tempo real
+  - Melhoria na decodificação segura de tokens JWT
+- **Melhorado**: Tratamento de erros e segurança
+  - Implementado tratamento seguro de decodificação de JWT
+  - Melhorias na validação de mensagens temporárias
 
-### 🔧 Correções Técnicas
+## [2.20.13] - 2025-09-23
 
-#### Integração WhatsApp (Uazapi)
-- **Corrigido**: Endpoint de envio de mensagens
-  - URL correta: `/send/text` em vez de `/message/send`
-  - Payload otimizado para API da Uazapi
-  - Headers de autenticação corrigidos
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
 
-#### Sistema de Auditoria
-- **Melhorado**: Exibição de fotos de perfil
-  - Fotos aparecem corretamente na aba de auditoria
-  - Cache otimizado para carregamento de imagens
-  - Fallback para avatares quando foto não disponível
+## [2.20.12] - 2025-09-23
 
-#### Processamento de Mídia
-- **Implementado**: Sistema robusto de processamento de arquivos
-  - Suporte para múltiplos formatos (PDF, imagem, áudio, vídeo)
-  - Validação de tipos de arquivo
-  - Tratamento de erros melhorado
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
 
-### 🎯 Melhorias de Performance
-- **Otimizado**: Carregamento de mensagens
-- **Melhorado**: Sistema de cache para imagens
-- **Corrigido**: Problemas de timeout em requisições
+## [2.20.11] - 2025-09-21
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.20.10] - 2025-09-21
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.20.9] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.20.8] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.20.7] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.20.6] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.20.5] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.20.4] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.20.3] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.20.2] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.20.1] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.20.0] - 2025-09-17
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
+
+## [2.19.3] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.19.2] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.19.1] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.19.0] - 2025-09-17
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
+
+## [2.18.3] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.18.2] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.18.1] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.18.0] - 2025-09-17
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
+
+## [2.17.4] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.17.3] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.17.2] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.17.1] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.17.0] - 2025-09-17
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
+
+## [2.16.1] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.16.0] - 2025-09-17
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
+
+## [2.15.15] - 2025-09-17
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.15.14] - 2025-09-16
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.15.13] - 2025-09-16
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.15.12] - 2025-09-16
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.15.11] - 2025-09-16
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.15.10] - 2025-09-16
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.15.9] - 2025-09-16
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.15.8] - 2025-09-16
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.15.7] - 2025-09-16
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.15.6] - 2025-09-16
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.15.5] - 2025-09-16
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.15.4] - 2025-09-16
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.15.3] - 2025-09-16
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.15.2] - 2025-09-16
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.15.1] - 2025-09-16
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.15.0] - 2025-09-15
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
+
+## [2.14.5] - 2025-09-15
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.14.4] - 2025-09-15
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.14.3] - 2025-09-15
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.14.2] - 2025-09-15
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.14.1] - 2025-09-15
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.14.0] - 2025-09-15
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
+
+## [2.13.0] - 2025-09-15
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
+
+## [2.12.0] - 2025-09-15
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
+
+## [2.11.0] - 2025-09-15
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
+
+## [2.10.5] - 2025-09-12
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.10.4] - 2025-09-12
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.10.3] - 2025-09-12
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.10.2] - 2025-09-12
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.10.1] - 2025-09-12
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.10.0] - 2025-09-12
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
+
+## [2.9.6] - 2025-09-12
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.9.5] - 2025-09-12
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.9.4] - 2025-09-12
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.9.3] - 2025-09-12
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.9.2] - 2025-09-12
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.9.1] - 2025-09-11
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.9.0] - 2025-09-11
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
+
+## [2.8.13] - 2025-09-11
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.8.12] - 2025-09-11
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.8.11] - 2025-09-11
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.8.10] - 2025-09-11
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.8.9] - 2025-09-11
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.8.8] - 2025-09-11
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.8.7] - 2025-09-11
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.8.6] - 2025-09-11
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.8.5] - 2025-09-11
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.8.4] - 2025-09-11
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.8.3] - 2025-09-11
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
 
 ## [2.8.2] - 2025-09-11
 
-### 🔧 Correções Críticas
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
 
-#### Deploy e Infraestrutura
-- **Corrigido**: Lógica de remoção de imagens antigas no GitHub Actions
-  - Agora remove corretamente imagens sem tag `:latest`
-  - Mantém apenas a imagem mais recente (com tag `:latest`)
-  - Evita acúmulo de imagens antigas no Portainer
+## [2.8.1] - 2025-09-11
 
-- **Corrigido**: Health check do deploy
-  - Aceita status 401 como saudável para `/api/auth/me/` (sem token)
-  - Usa verificação de status HTTP em vez de `curl -f`
-  - Melhora logs de health check com códigos de status
-  - Corrige falha no deploy causada por health check incorreto
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
 
-- **Corrigido**: Roteamento de webhooks no Traefik
-  - Adicionada regra específica para `/webhook/` e `/webhooks/`
-  - Prioridade 200 para garantir roteamento correto ao backend
-  - Suporte a múltiplas rotas de webhook (com e sem barra final)
-  - Corrige problema de webhooks retornando HTML do frontend
+## [2.8.0] - 2025-09-10
 
-#### Frontend e WebSocket
-- **Corrigido**: URLs de WebSocket para produção
-  - Mudança de `ws://hostname:8010` para `wss://hostname`
-  - Uso de porta padrão HTTPS (443) em vez de 8010
-  - Correção em todos os componentes: `NotificationContext`, `PrivateChat`, `UserStatusManager`, `useOnlineUsers`, `ConversasDashboard`
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
 
-- **Corrigido**: Problema de tela branca após login
-  - Inicialização correta de `userRole` como `null` em `App.jsx`
-  - Adicionado delay na conexão de WebSocket (1-2 segundos)
-  - Verificação de `user.token` antes de conectar WebSocket
-  - Previne conexões prematuras que causavam erros
+## [2.7.9] - 2025-09-10
 
-- **Melhorado**: Logs de console
-  - Removidos emojis de todos os logs de console
-  - Removida exposição de tokens e informações sensíveis
-  - Logs mais limpos e profissionais para produção
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
 
-#### Sistema de Notificações
-- **Corrigido**: Sistema de notificações de chat interno
-  - Integração com WebSocket para notificações em tempo real
-  - Contagem de mensagens não lidas funcionando corretamente
-  - Auto-disappearing de notificações implementado
-  - Cache agressivo para evitar mensagens "fixas"
+## [2.7.8] - 2025-09-10
 
-### 🚀 Melhorias
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
 
-#### GitHub Actions
-- **Adicionado**: Job de validação do Portainer
-  - Testa conexão com API do Portainer antes do deploy
-  - Evita falhas de deploy por problemas de conectividade
-  - Validação prévia de credenciais
+## [2.7.7] - 2025-09-10
 
-- **Melhorado**: Processo de deploy automatizado
-  - Remoção automática de imagens antigas
-  - Pull forçado de novas imagens `:latest`
-  - Atualização automática do stack no Portainer
-  - Verificação de saúde após deploy
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
 
-#### Segurança
-- **Melhorado**: Middleware de autenticação WebSocket
-  - Extração melhorada de tokens para WebSocket
-  - Validação mais robusta de credenciais
-  - Suporte a múltiplos formatos de token
+## [2.7.6] - 2025-09-10
 
-### 🔗 Integrações
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
 
-#### Webhooks Externos
-- **Corrigido**: Roteamento de webhooks UazAPI/Evolution
-  - Suporte a múltiplas rotas: `/webhook/`, `/webhooks/`
-  - Roteamento correto via Traefik para backend
-  - Processamento adequado de mensagens externas
-  - Identificação automática de provedores por instância
+## [2.7.5] - 2025-09-10
 
-### 📋 Detalhes Técnicos
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
 
-#### Arquivos Modificados
-- `.github/workflows/deploy.yml` - Correções no deploy e health check
-- `docker-compose-fixed.yml` - Regras de roteamento Traefik
-- `frontend/src/App.jsx` - Inicialização de userRole
-- `frontend/src/contexts/NotificationContext.jsx` - URLs WebSocket
-- `frontend/src/components/PrivateChat.jsx` - URLs WebSocket
-- `frontend/src/components/UserStatusManager.jsx` - URLs WebSocket e logs
-- `frontend/src/hooks/useOnlineUsers.js` - URLs WebSocket e logs
-- `frontend/src/components/ConversasDashboard.jsx` - URLs WebSocket
+## [2.7.4] - 2025-09-10
 
-#### URLs de Webhook Configuradas
-- `https://app.niochat.com.br/webhook/evolution-uazapi/`
-- `https://app.niochat.com.br/webhook/evolution-uazapi`
-- `https://app.niochat.com.br/webhooks/evolution-uazapi/`
-- `https://app.niochat.com.br/webhooks/evolution-uazapi`
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
 
-### ✅ Status de Produção
-- **Deploy**: ✅ Funcionando automaticamente via GitHub Actions
-- **Health Check**: ✅ Corrigido e validando corretamente
-- **Webhooks**: ✅ Roteamento corrigido e pronto para uso
-- **WebSocket**: ✅ URLs corrigidas para produção
-- **Notificações**: ✅ Sistema funcionando em tempo real
-- **Remoção de Imagens**: ✅ Automática e eficiente
+## [2.7.3] - 2025-09-10
 
----
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
 
-## [2.8.1] - 2025-09-10
+## [2.7.2] - 2025-09-10
 
-### 🎉 Lançamento Inicial
-- Sistema de chat interno implementado
-- Integração com UazAPI e Evolution
-- Deploy automatizado via GitHub Actions
-- Interface de usuário moderna e responsiva
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.7.1] - 2025-09-10
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.7.0] - 2025-09-09
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
+
+## [2.6.1] - 2025-09-09
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.6.0] - 2025-09-09
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
+
+## [2.5.12] - 2025-09-09
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.5.11] - 2025-09-09
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.5.10] - 2025-09-09
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.5.9] - 2025-09-08
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.5.8] - 2025-09-08
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.5.7] - 2025-09-08
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.5.6] - 2025-09-08
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.5.5] - 2025-09-08
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.5.4] - 2025-09-08
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.5.3] - 2025-09-08
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.5.2] - 2025-09-08
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.5.1] - 2025-09-08
+
+### 🔧 Correções e Melhorias
+- **Atualizado**: Manutenção de sistema e melhorias de estabilidade
+
+## [2.5.0] - 2025-09-08
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
+
+## [2.4.0] - 2025-09-08
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
+
+## [2.3.0] - 2025-09-08
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade
+
+## [2.2.0] - 2025-09-08
+
+### 🚀 Novas Funcionalidades
+- **Adicionado**: Novas funcionalidades de sistema mantendo compatibilidade

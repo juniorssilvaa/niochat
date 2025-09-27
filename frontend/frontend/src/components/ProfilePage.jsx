@@ -232,19 +232,66 @@ export default function ProfilePage() {
     }
   };
 
-  const handlePreviewSound = (fileName) => {
+  const handlePreviewSound = async (fileName) => {
     try {
-      const src = `/sounds/${fileName}`;
-      if (!audioRef.current) {
-        audioRef.current = new Audio(src);
-      } else {
-        audioRef.current.pause();
-        audioRef.current.src = src;
+      if (!fileName) {
+        console.warn('Nenhum arquivo de som selecionado');
+        return;
       }
-      audioRef.current.currentTime = 0;
-      audioRef.current.play();
-    } catch (e) {
-      console.error('Erro ao reproduzir som:', e);
+      
+      const src = `/sounds/${fileName}`;
+      console.log('Tentando reproduzir som:', src);
+      
+      // Verificar se o arquivo existe fazendo uma requisição HEAD
+      try {
+        const response = await fetch(src, { method: 'HEAD' });
+        if (!response.ok) {
+          throw new Error(`Arquivo não encontrado: ${src} (Status: ${response.status})`);
+        }
+        console.log('Arquivo de som encontrado:', src);
+      } catch (fetchError) {
+        console.error('Erro ao verificar arquivo:', fetchError);
+        alert(`Arquivo de som não encontrado: ${fileName}`);
+        return;
+      }
+      
+      // Pausar som atual se estiver tocando
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      
+      // Criar novo elemento de áudio
+      const audio = new Audio(src);
+      audioRef.current = audio;
+      
+      // Configurar eventos de erro
+      audio.onerror = (e) => {
+        console.error('Erro ao carregar arquivo de som:', e);
+        alert('Erro ao carregar arquivo de som. Verifique se o arquivo existe.');
+      };
+      
+      audio.onloadstart = () => {
+        console.log('Iniciando carregamento do som...');
+      };
+      
+      audio.oncanplay = () => {
+        console.log('Som carregado e pronto para reproduzir');
+      };
+      
+      // Tentar reproduzir
+      await audio.play();
+      console.log('Som reproduzido com sucesso');
+      
+    } catch (error) {
+      console.error('Erro ao reproduzir som:', error);
+      if (error.name === 'NotAllowedError') {
+        alert('Reprodução de áudio bloqueada pelo navegador. Clique em qualquer lugar da página e tente novamente.');
+      } else if (error.name === 'NotSupportedError') {
+        alert('Formato de arquivo não suportado ou arquivo não encontrado.');
+      } else {
+        alert('Erro ao reproduzir som: ' + error.message);
+      }
     }
   };
 
