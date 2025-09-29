@@ -2,6 +2,24 @@
 
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
+## [2.22.2] - 2025-09-27
+
+### 🔧 Correções
+- **Sistema de Atendimento**: Corrigida lógica de transferência de atendimentos
+  - Transferências agora vão para 'Não atribuídas' para atribuição manual
+  - Backend suporta transferência por user_id ou team_id
+  - Corrigida lógica de filtro das abas de conversas
+- **Sistema de Áudio**: Melhorado tratamento de erros no CustomAudioPlayer
+  - Adicionada verificação de existência de arquivo antes de carregar
+  - Corrigida lógica de tentativa de formatos alternativos
+  - Sistema de áudio mais robusto com fallback de formatos
+- **IA e Processamento**: Corrigido prompt da IA para LED vermelho
+  - Resposta mais concisa para problemas críticos
+  - Melhorado sistema de análise de imagens
+- **Interface**: Removidos ícones desnecessários do chat interno
+  - Corrigido sistema de sons por categoria no perfil
+  - Melhorada experiência do usuário com mensagens de erro claras
+
 ## [2.22.1] - 2025-09-26
 
 ### 🚀 Novas Funcionalidades
