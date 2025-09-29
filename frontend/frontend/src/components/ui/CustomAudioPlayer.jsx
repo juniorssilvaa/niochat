@@ -211,11 +211,15 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
         const testUrl = src.replace(/\.[^/.]+$/, format.ext);
         console.log(` Tentando formato: ${format.ext}`);
         
-        // Não fazer verificação HEAD, apenas tentar carregar diretamente
-        if (audioRef.current) {
-          audioRef.current.src = testUrl;
-          audioRef.current.load();
-          return;
+        // Verificar se o arquivo existe antes de tentar carregar
+        const response = await fetch(testUrl, { method: 'HEAD' });
+        if (response.ok) {
+          if (audioRef.current) {
+            audioRef.current.src = testUrl;
+            audioRef.current.load();
+            setError(null);
+            return;
+          }
         }
       } catch (error) {
         console.log(` Formato ${format.ext} não disponível:`, error);
@@ -223,6 +227,7 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
     }
     
     console.log(' Nenhum formato alternativo disponível');
+    setError('Formato não suportado - nenhum formato alternativo disponível');
   };
 
   // Função para normalizar URL
@@ -372,7 +377,7 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
           }
           
           // Se for erro de formato não suportado, tentar outros formatos
-          if (audioRef.current?.error?.code === 4) {
+          if (audioRef.current?.error?.code === 4 || audioRef.current?.error?.code === 3) {
             console.log(' Formato não suportado, tentando outros formatos...');
             tryDifferentFormats();
             setError('Tentando formatos alternativos...');

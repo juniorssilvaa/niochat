@@ -387,7 +387,6 @@ export default function ConversasDashboard() {
         const res = await axios.get('/api/conversations/', { headers });
         const conversasData = res.data.results || res.data;
         setConversas(conversasData);
-        console.log('Conversas carregadas da API:', conversasData);
         
         // Aplicar permissões do usuário para filtrar conversas
         const userPermissions = user?.permissions || [];

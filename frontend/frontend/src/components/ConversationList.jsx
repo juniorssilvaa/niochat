@@ -751,11 +751,34 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
       }).length,
     });
 
-    // Aba Não atribuídas - apenas conversas em espera (pending)
+    // Aba Não atribuídas - conversas em espera (pending) OU com IA (snoozed) OU transferidas
     tabs.push({
       id: 'unassigned',
       label: 'Não atribuídas',
-      count: activeConversations.filter(c => !c.assignee && (c.status || c.additional_attributes?.status) === 'pending').length,
+      count: activeConversations.filter(c => {
+        const status = c.status || c.additional_attributes?.status;
+        const assignedUser = c.additional_attributes?.assigned_user;
+        const assignedTeam = c.additional_attributes?.assigned_team;
+        
+        if (!c.assignee) {
+          // Conversas com IA ou em espera geral
+          if (status === 'pending' || status === 'snoozed') {
+            return true;
+          }
+          
+          // Conversas transferidas para este usuário específico
+          if (assignedUser && user && (assignedUser.id === user.id || assignedUser.id === user.id.toString())) {
+            return true;
+          }
+          
+          // Conversas transferidas para equipe do usuário
+          if (assignedTeam && user && user.team && assignedTeam.id === user.team.id) {
+            return true;
+          }
+        }
+        
+        return false;
+      }).length,
     });
 
     // Aba Com IA se o usuário tiver a permissão específica - depois de Não atribuídas
@@ -791,17 +814,49 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
         return status === 'snoozed' && !c.assignee;
       });
     } else if (activeTab === 'mine') {
-      // Sempre mostrar conversas atribuídas ao usuário atual
+      // Mostrar conversas atribuídas ao usuário atual (qualquer status)
       filtered = filtered.filter(c => {
         const a = c.assignee;
         if (!a || !user) return false;
         return (a.id && a.id === user.id) || (a.username && a.username === user.username);
       });
     } else if (activeTab === 'unassigned') {
-      // Mostrar apenas conversas não atribuídas em espera (pending)
+      // Mostrar conversas não atribuídas em espera (pending) OU com IA (snoozed)
+      // OU transferidas para o usuário atual (assigned_user)
       filtered = filtered.filter(c => {
         const status = c.status || c.additional_attributes?.status;
-        return !c.assignee && status === 'pending';
+        const assignedUser = c.additional_attributes?.assigned_user;
+        const assignedTeam = c.additional_attributes?.assigned_team;
+        
+        console.log('🔍 DEBUG Não atribuídas:', {
+          conversationId: c.id,
+          status: status,
+          assignee: c.assignee,
+          assignedUser: assignedUser,
+          assignedTeam: assignedTeam,
+          userId: user?.id,
+          userTeam: user?.team?.id
+        });
+        
+        // Conversas sem assignee OU transferidas para este usuário/equipe
+        if (!c.assignee || (assignedUser && user && (assignedUser.id === user.id || assignedUser.id === user.id.toString()))) {
+          // Conversas com IA ou em espera geral
+          if (status === 'pending' || status === 'snoozed') {
+            return true;
+          }
+          
+          // Conversas transferidas para este usuário específico
+          if (assignedUser && user && (assignedUser.id === user.id || assignedUser.id === user.id.toString())) {
+            return true;
+          }
+          
+          // Conversas transferidas para equipe do usuário (se ele pertence à equipe)
+          if (assignedTeam && user && user.team && assignedTeam.id === user.team.id) {
+            return true;
+          }
+        }
+        
+        return false;
       });
     }
 

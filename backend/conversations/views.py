@@ -429,14 +429,29 @@ class ConversationViewSet(viewsets.ModelViewSet):
     def transfer(self, request, pk=None):
         conversation = self.get_object()
         user_id = request.data.get('user_id')
-        if not user_id:
-            return Response({'error': 'user_id é obrigatório'}, status=status.HTTP_400_BAD_REQUEST)
+        team_id = request.data.get('team_id')
+        
+        if not user_id and not team_id:
+            return Response({'error': 'user_id ou team_id é obrigatório'}, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
-            new_assignee = User.objects.get(id=user_id)
-            # Remover assignee para deixar como "não atribuída"
-            conversation.assignee = None
-            # Mudar status para 'pending' (Em Espera) quando transferir
-            conversation.status = 'pending'
+            if user_id:
+                # Transferir para usuário específico (deixar sem assignee para ele se atribuir)
+                conversation.assignee = None
+                conversation.status = 'pending'
+                # Salvar informação do usuário de destino nos additional_attributes
+                if not conversation.additional_attributes:
+                    conversation.additional_attributes = {}
+                conversation.additional_attributes['assigned_user'] = {'id': user_id}
+            elif team_id:
+                # Transferir para equipe (deixar sem assignee)
+                conversation.assignee = None
+                conversation.status = 'pending'
+                # Salvar informação da equipe nos additional_attributes
+                if not conversation.additional_attributes:
+                    conversation.additional_attributes = {}
+                conversation.additional_attributes['assigned_team'] = {'id': team_id}
+            
             conversation.save()
             return Response({'success': True})
         except User.DoesNotExist:

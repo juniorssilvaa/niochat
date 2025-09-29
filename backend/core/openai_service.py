@@ -17,6 +17,8 @@ from datetime import datetime
 from .redis_memory_service import redis_memory_service
 from .transfer_service import transfer_service
 from .pdf_processor import pdf_processor
+from .database_function_definitions import DATABASE_FUNCTION_TOOLS, DATABASE_FUNCTION_MAPPING, DATABASE_SYSTEM_INSTRUCTIONS
+from .database_tools import DatabaseTools
 
 logger = logging.getLogger(__name__)
 
@@ -459,6 +461,33 @@ DATA E HORA ATUAL: {data_atual}"""
             return False
             
         return True
+
+    def _execute_database_function(self, provedor: Provedor, function_name: str, function_args: dict, contexto: dict = None) -> dict:
+        """Executa funções de banco de dados chamadas pela IA"""
+        try:
+            db_tools = DatabaseTools(provedor=provedor)
+            
+            # Mapear nome da função para método da classe
+            method_name = DATABASE_FUNCTION_MAPPING.get(function_name)
+            if not method_name:
+                return {
+                    "success": False,
+                    "erro": f"Função {function_name} não encontrada"
+                }
+            
+            # Executar método correspondente
+            method = getattr(db_tools, method_name)
+            result = method(**function_args)
+            
+            logger.info(f"Função de banco executada: {function_name} -> {method_name}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Erro ao executar função de banco {function_name}: {e}")
+            return {
+                "success": False,
+                "erro": f"Erro ao executar {function_name}: {str(e)}"
+            }
 
     def _execute_sgp_function(self, provedor: Provedor, function_name: str, function_args: dict, contexto: dict = None) -> dict:
         """Executa funções do SGP chamadas pela IA"""
@@ -1808,7 +1837,12 @@ FLUXO FATURA SIMPLIFICADO:
             messages.append({"role": "user", "content": mensagem})
             
             # Definir ferramentas disponíveis
-            tools = [
+            tools = []
+            
+            # Adicionar ferramentas SGP se habilitadas
+            sgp_enabled = provedor.integracoes_externas and provedor.integracoes_externas.get('sgp_enabled', False)
+            if sgp_enabled:
+                tools.extend([
                 {
                     "type": "function",
                     "function": {
@@ -1909,7 +1943,7 @@ FLUXO FATURA SIMPLIFICADO:
                         }
                     }
                 }
-            ]
+            ])
             
             # Detectar se cliente pediu fatura/pagamento
             mensagem_lower = mensagem.lower()
@@ -1948,8 +1982,146 @@ ENCERRAMENTO AUTOMÁTICO INTELIGENTE:
 - A IA responde com mensagem de despedida e encerra o atendimento
 """
             
+            # DETECTAR NECESSIDADE DE TRANSFERÊNCIA BASEADA NA CONVERSA
+            transfer_necessario = False
+            equipe_sugerida = ""
+            motivo_transferencia = ""
+
+            # Analisar mensagem atual para transferência
+            mensagem_lower = mensagem.lower()
+
+            # Problemas técnicos
+            problemas_tecnicos = [
+                'sem internet', 'internet lenta', 'não funciona', 'problema de conexão',
+                'modem', 'roteador', 'led vermelho', 'wi-fi', 'sinal', 'caiu', 'offline',
+                'sem acesso', 'velocidade baixa', 'queda', 'instável', 'travando',
+                'ping alto', 'conexão ruim', 'fibra rompida', 'cabo', 'conector'
+            ]
+
+            # Problemas financeiros  
+            problemas_financeiros = [
+                'fatura', 'boleto', 'pagamento', 'conta', 'débito', 'vencimento',
+                'pagar', 'valor', 'cobrança', 'segunda via', 'atraso', 'multa',
+                'juros', 'negociar', 'parcelar', 'divida', 'inadimplente'
+            ]
+
+            # Vendas/novos clientes
+            vendas_interesse = [
+                'planos', 'contratar', 'preços', 'ofertas', 'mudar plano', 'quero assinar',
+                'valores', 'velocidades', 'instalação', 'novo cliente', 'contratação',
+                'melhor plano', 'comparar', 'promoção'
+            ]
+
+            # Atendimento humano
+            solicitacao_humano = [
+                'humano', 'atendente', 'pessoa', 'falar com alguém', 'supervisor',
+                'reclamação', 'não resolveu', 'quero falar com', 'transferir'
+            ]
+
+            # Verificar categoria da mensagem atual
+            if any(problema in mensagem_lower for problema in problemas_tecnicos):
+                transfer_necessario = True
+                equipe_sugerida = "SUPORTE TÉCNICO"
+                motivo_transferencia = f"Cliente relatou problema técnico: {mensagem}"
+                
+            elif any(problema in mensagem_lower for problema in problemas_financeiros):
+                transfer_necessario = True
+                equipe_sugerida = "FINANCEIRO"
+                motivo_transferencia = f"Cliente relatou questão financeira: {mensagem}"
+                
+            elif any(problema in mensagem_lower for problema in vendas_interesse):
+                transfer_necessario = True
+                equipe_sugerida = "VENDAS"
+                motivo_transferencia = f"Cliente demonstrou interesse comercial: {mensagem}"
+                
+            elif any(problema in mensagem_lower for problema in solicitacao_humano):
+                transfer_necessario = True
+                equipe_sugerida = "ATENDIMENTO GERAL"
+                motivo_transferencia = f"Cliente solicitou atendimento humano: {mensagem}"
+
+            # Verificar também no histórico da conversa se há necessidade de transferência
+            if conversation and not transfer_necessario:
+                try:
+                    # Buscar últimas mensagens para contexto mais amplo
+                    from conversations.models import Message
+                    ultimas_mensagens = Message.objects.filter(
+                        conversation=conversation
+                    ).order_by('-created_at')[:5]  # Últimas 5 mensagens
+                    
+                    mensagens_texto = " ".join([msg.content.lower() for msg in ultimas_mensagens])
+                    
+                    # Analisar contexto mais amplo
+                    if any(problema in mensagens_texto for problema in problemas_tecnicos):
+                        transfer_necessario = True
+                        equipe_sugerida = "SUPORTE TÉCNICO"
+                        motivo_transferencia = "Análise do histórico indica problema técnico"
+                        
+                    elif any(problema in mensagens_texto for problema in problemas_financeiros):
+                        transfer_necessario = True  
+                        equipe_sugerida = "FINANCEIRO"
+                        motivo_transferencia = "Análise do histórico indica questão financeira"
+                        
+                except Exception as e:
+                    logger.warning(f"Erro ao analisar histórico para transferência: {e}")
+
+            # Log da detecção
+            if transfer_necessario:
+                logger.info(f"TRANSFERÊNCIA DETECTADA: {equipe_sugerida} - {motivo_transferencia}")
+            else:
+                logger.info("Nenhuma transferência detectada")
+
             # Forçar uso de ferramentas quando necessário
             force_tools = any(word in mensagem_lower for word in ['pix', 'boleto', 'fatura', 'pagar'])
+            
+            # ADICIONAR FERRAMENTAS DE TRANSFERÊNCIA SE NECESSÁRIO
+            if transfer_necessario:
+                # Adicionar ferramentas de banco de dados para transferências
+                from core.database_function_definitions import DATABASE_FUNCTION_TOOLS
+                tools.extend(DATABASE_FUNCTION_TOOLS)
+                
+                # Adicionar ferramentas específicas de transferência
+                tools.extend([
+                    {
+                        "type": "function",
+                        "function": {
+                            "name": "buscar_equipes_disponiveis",
+                            "description": "BUSCAR EQUIPES: Verifica quais equipes estão disponíveis para transferência. USE SEMPRE ANTES de transferir. Retorna lista de equipes como SUPORTE TÉCNICO, FINANCEIRO, VENDAS, etc.",
+                            "parameters": {
+                                "type": "object", 
+                                "properties": {},
+                                "required": []
+                            }
+                        }
+                    },
+                    {
+                        "type": "function",
+                        "function": {
+                            "name": "executar_transferencia_conversa", 
+                            "description": "TRANSFERIR CONVERSA: Executa transferência REAL para equipe especializada. USE APÓS buscar_equipes_disponiveis(). Analise a conversa e escolha a equipe MAIS ADEQUADA: SUPORTE TÉCNICO (problemas internet), FINANCEIRO (faturas/pagamentos), VENDAS (novos clientes), ATENDIMENTO GERAL (outros casos).",
+                            "parameters": {
+                                "type": "object",
+                                "properties": {
+                                    "conversation_id": {
+                                        "type": "string", 
+                                        "description": "ID da conversa atual (OBRIGATÓRIO)"
+                                    },
+                                    "equipe_nome": {
+                                        "type": "string",
+                                        "description": "Nome da equipe baseado na análise: SUPORTE TÉCNICO (problemas técnicos), FINANCEIRO (faturas/pagamentos), VENDAS (planos/contratações), ATENDIMENTO GERAL (outros)"
+                                    },
+                                    "motivo": {
+                                        "type": "string", 
+                                        "description": "Motivo detalhado baseado na análise da conversa. Ex: 'Cliente relata internet lenta há 3 dias - precisa diagnóstico técnico'"
+                                    }
+                                },
+                                "required": ["conversation_id", "equipe_nome", "motivo"]
+                            }
+                        }
+                    }
+                ])
+
+            # FORÇAR USO DE FERRAMENTAS PARA TRANSFERÊNCIA
+            force_tools = force_tools or transfer_necessario
             
             response = openai.chat.completions.create(
                 model=self.model,
@@ -1970,7 +2142,12 @@ ENCERRAMENTO AUTOMÁTICO INTELIGENTE:
                     logger.info(f"IA chamou função: {function_name} com argumentos: {function_args}")
                     
                     # Executar a função chamada pela IA
-                    function_result = self._execute_sgp_function(provedor, function_name, function_args, contexto)
+                    if function_name in DATABASE_FUNCTION_MAPPING:
+                        # Executar função de banco de dados
+                        function_result = self._execute_database_function(provedor, function_name, function_args, contexto)
+                    else:
+                        # Executar função SGP
+                        function_result = self._execute_sgp_function(provedor, function_name, function_args, contexto)
                     
                     # Salvar informações importantes na memória Redis
                     if conversation_id and function_result.get('success'):
@@ -2508,6 +2685,50 @@ REGRAS FINAIS:
                 }
             ]
             
+            # SEMPRE adicionar ferramentas de banco de dados para transferências
+            tools.extend(DATABASE_FUNCTION_TOOLS)
+            
+            # ADICIONAR FERRAMENTAS DE TRANSFERÊNCIA COM DESCRIÇÕES MELHORADAS
+            tools.extend([
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "buscar_equipes_disponiveis",
+                        "description": "BUSCAR EQUIPES: Verifica quais equipes estão disponíveis para transferência. USE SEMPRE ANTES de transferir. Retorna lista de equipes como SUPORTE TÉCNICO, FINANCEIRO, VENDAS, etc.",
+                        "parameters": {
+                            "type": "object", 
+                            "properties": {},
+                            "required": []
+                        }
+                    }
+                },
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "executar_transferencia_conversa", 
+                        "description": "TRANSFERIR CONVERSA: Executa transferência REAL para equipe especializada. USE APÓS buscar_equipes_disponiveis(). Analise a conversa e escolha a equipe MAIS ADEQUADA: SUPORTE TÉCNICO (problemas internet), FINANCEIRO (faturas/pagamentos), VENDAS (novos clientes), ATENDIMENTO GERAL (outros casos).",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "conversation_id": {
+                                    "type": "string", 
+                                    "description": "ID da conversa atual (OBRIGATÓRIO)"
+                                },
+                                "equipe_nome": {
+                                    "type": "string",
+                                    "description": "Nome da equipe baseado na análise: SUPORTE TÉCNICO (problemas técnicos), FINANCEIRO (faturas/pagamentos), VENDAS (planos/contratações), ATENDIMENTO GERAL (outros)"
+                                },
+                                "motivo": {
+                                    "type": "string", 
+                                    "description": "Motivo detalhado baseado na análise da conversa. Ex: 'Cliente relata internet lenta há 3 dias - precisa diagnóstico técnico'"
+                                }
+                            },
+                            "required": ["conversation_id", "equipe_nome", "motivo"]
+                        }
+                    }
+                }
+            ])
+            
             # FORÇAR USO DE FERRAMENTAS quando cliente pedir fatura/PIX/boleto
             mensagem_lower = mensagem.lower()
             force_tools = any(word in mensagem_lower for word in ['pix', 'boleto', 'fatura', 'pagar', 'pagamento'])
@@ -2548,7 +2769,12 @@ REGRAS FINAIS:
                     logger.info(f"IA chamou função: {function_name} com argumentos: {function_args}")
                     
                     # Executar a função chamada pela IA
-                    function_result = self._execute_sgp_function(provedor, function_name, function_args, contexto)
+                    if function_name in DATABASE_FUNCTION_MAPPING:
+                        # Executar função de banco de dados
+                        function_result = self._execute_database_function(provedor, function_name, function_args, contexto)
+                    else:
+                        # Executar função SGP
+                        function_result = self._execute_sgp_function(provedor, function_name, function_args, contexto)
                     
                     # Adicionar resultado da função à conversa
                     messages.append({
@@ -2637,79 +2863,157 @@ REGRAS FINAIS:
                 logger.info(f"CPF/CNPJ na memória: {message_context.get('context:cpf_cnpj_detected', 'Não encontrado')}")
             
             # LÓGICA DE TRANSFERÊNCIA INTELIGENTE PARA EQUIPES
+            provedor_capability = None
             if conversation:
-                # Verificar capacidade de transferência do provedor ANTES de analisar
+                # Verificar capacidade de transferência do provedor
                 provedor_capability = transfer_service.check_provedor_transfer_capability(provedor)
                 logger.info(f"Capacidade de transferência do provedor {provedor.nome}: {provedor_capability.get('capability_score', 0)}%")
                 
-                # Analisar contexto da conversa para decidir transferência
-                transfer_decision = transfer_service.analyze_transfer_decision(
-                    mensagem=mensagem,
-                    provedor=provedor,
-                    conversation_context=conversation_memory.get('context', {}) if conversation_memory else {}
-                )
+            # Adicionar instrução para IA tentar resolver primeiro ANTES da análise de transferência
+            system_prompt += """
+
+IMPORTANTE - LÓGICA DE ATENDIMENTO:
+1. SEMPRE tente resolver o problema do cliente primeiro
+2. Se conseguir resolver, não transfira
+3. Se NÃO conseguir resolver ou cliente solicitar especificamente uma equipe, ENTÃO transfira
+4. Para transferências, use as ferramentas de banco de dados disponíveis
+5. Seja proativo e tente ajudar antes de transferir
+
+EXEMPLOS:
+- Cliente: "Minha internet está lenta" → Tente diagnosticar e resolver primeiro
+- Cliente: "Quero falar com o financeiro" → Transfira diretamente para financeiro
+- Cliente: "Preciso de ajuda técnica" → Tente resolver, se não conseguir, transfira para suporte técnico
+
+FERRAMENTAS DISPONÍVEIS PARA TRANSFERÊNCIA:
+- buscar_equipes_disponiveis() - Busca equipes disponíveis
+- executar_transferencia_conversa(team_id, team_name) - Executa transferência real
+
+🚨 OBRIGATÓRIO: Quando cliente solicitar transferência, você DEVE:
+1. PRIMEIRO: Tentar resolver o problema
+2. SE NÃO CONSEGUIR: Use buscar_equipes_disponiveis() para encontrar equipe
+3. DEPOIS: Use executar_transferencia_conversa() para transferir REALMENTE
+4. NUNCA apenas confirme que vai transferir - EXECUTE a transferência!
+
+""" + DATABASE_SYSTEM_INSTRUCTIONS
                 
-                if transfer_decision:
-                    logger.info(f"Decisão de transferência: {transfer_decision}")
-                    
-                    # Verificar se o provedor pode atender este tipo de transferência
-                    transfer_type = transfer_decision.get('transfer_type')
-                    if transfer_type and provedor_capability.get('can_handle_transfers', {}).get(transfer_type, {}).get('available', False):
-                        # Marcar transferência na memória (versão síncrona)
-                        redis_memory_service.set_conversation_memory_sync(
-                            provedor_id=provedor.id,
-                            conversation_id=conversation.id,
-                            data={
-                                'last_transfer': transfer_decision,
-                                'transfer_executed_at': datetime.now().isoformat(),
-                                'context:transfer_decision': transfer_decision
-                            }
-                        )
-                        
-                        logger.info(f"Transferência marcada para equipe: {transfer_decision['team_name']}")
-                        
-                        # Adicionar instrução de transferência ao prompt
-                        system_prompt += f"""
+            
+            # INSTRUÇÕES ESPECÍFICAS PARA TRANSFERÊNCIA INTELIGENTE
+            system_prompt += """
 
-IMPORTANTE - TRANSFERÊNCIA PARA EQUIPE ESPECIALIZADA:
-- Baseado na conversa, transfira para: {transfer_decision['team_name']}
-- Motivo: {transfer_decision['reason']}
-- Confiança da detecção: {transfer_decision['confidence']:.1%}
-- Informe ao cliente que será transferido para a equipe especializada
-- Seja educado e explique o motivo da transferência
-- Exemplo: "Vou transferir você para nossa equipe de {transfer_decision['team_name']} que é especializada em {transfer_decision['reason']}."
-"""
-                    else:
-                        # O provedor não tem equipe para este tipo de transferência
-                        logger.warning(f"Provedor {provedor.nome} não possui equipe para atender transferência do tipo: {transfer_type}")
-                        
-                        # Adicionar instrução para lidar com situação sem equipe adequada
-                        system_prompt += f"""
+TRANSFERÊNCIA INTELIGENTE OBRIGATÓRIA - ANALISE A CONVERSA E TRANSFIRA PARA EQUIPE CORRETA
 
-IMPORTANTE - EQUIPE NÃO DISPONÍVEL:
-- O cliente solicitou: {transfer_decision.get('reason', 'atendimento especializado')}
-- INFELIZMENTE, não possuímos equipe especializada para este tipo de atendimento
-- Tente resolver a solicitação do cliente da melhor forma possível
-- Se não conseguir resolver, explique educadamente que não temos equipe especializada
-- Ofereça alternativas ou encaminhe para atendimento geral
-- NUNCA mencione equipes de outros provedores
-- Exemplo: "Infelizmente não temos equipe especializada para {transfer_decision.get('reason', 'este tipo de atendimento')}, mas vou tentar te ajudar da melhor forma possível."
+VOCÊ DEVE ANALISAR A CONVERSA E TRANSFERIR AUTOMATICAMENTE QUANDO IDENTIFICAR:
+
+CATEGORIAS DE TRANSFERÊNCIA:
+
+1. SUPORTE TÉCNICO (Problemas de internet/conexão):
+   - Cliente relata: "sem internet", "internet lenta", "não funciona", "problema de conexão"
+   - Cliente menciona: "modem", "roteador", "LED vermelho", "wi-fi", "sinal"
+   - Cliente diz: "caiu", "offline", "sem acesso", "velocidade baixa"
+   - Após verificar_acesso_sgp mostrar problema técnico
+
+2. FINANCEIRO (Problemas de pagamento/faturas):
+   - Cliente relata: "fatura", "boleto", "pagamento", "conta", "débito", "vencimento"
+   - Cliente menciona: "pagar", "valor", "cobrança", "segunda via", "atraso"
+   - Cliente diz: "não consegui pagar", "problema com pagamento", "dúvida na fatura"
+
+3. VENDAS (Novos clientes ou mudança de plano):
+   - Cliente pergunta: "planos", "contratar", "preços", "ofertas", "mudar plano"
+   - Cliente menciona: "quero assinar", "valores", "velocidades", "instalação"
+   - Cliente é NOVO CLIENTE interessado em serviços
+
+4. ATENDIMENTO GERAL (Outras solicitações):
+   - Cliente pede: "humano", "atendente", "pessoa", "falar com alguém"
+   - Cliente diz: "não resolveu", "quero falar com supervisor", "reclamação"
+   - Casos não cobertos pelas categorias acima
+
+FLUXO OBRIGATÓRIO PARA TRANSFERÊNCIA:
+
+1. ANALISAR a conversa e identificar a necessidade real do cliente
+2. USAR buscar_equipes_disponiveis() para ver equipes disponíveis
+3. ESCOLHER a equipe MAIS ADEQUADA baseada na análise
+4. EXECUTAR executar_transferencia_conversa() com a equipe correta
+
+NUNCA FAÇA:
+- Transferir para equipe errada (ex: técnico para problema financeiro)
+- Pedir confirmação do cliente para transferir
+- Deixar de transferir quando identificou necessidade clara
+- Continuar atendendo quando cliente precisa de equipe especializada
+
+SEMPRE FAÇA:
+- Analisar o contexto completo da conversa
+- Transferir IMEDIATAMENTE quando identificar necessidade
+- Escolher a equipe MAIS ESPECÍFICA para o problema
+- Executar AMBAS as funções (buscar e transferir)
+
+EXEMPLOS PRÁTICOS:
+
+CLIENTE: "Minha internet está lenta há 3 dias"
+→ Analisar: Problema técnico persistente
+→ Equipe: SUPORTE TÉCNICO
+→ Motivo: "Cliente relata internet lenta há 3 dias - precisa de diagnóstico técnico"
+
+CLIENTE: "Não consegui pagar a fatura deste mês"
+→ Analisar: Problema financeiro/pagamento
+→ Equipe: FINANCEIRO  
+→ Motivo: "Cliente com dificuldade no pagamento da fatura"
+
+CLIENTE: "Quero conhecer os planos de internet"
+→ Analisar: Interesse em contratação
+→ Equipe: VENDAS
+→ Motivo: "Cliente interessado em planos de internet"
+
+CLIENTE: "Preciso falar com um atendente humano"
+→ Analisar: Solicitação explícita por humano
+→ Equipe: ATENDIMENTO GERAL
+→ Motivo: "Cliente solicitou atendimento humano"
 """
-                        
-                        # Marcar na memória que não há equipe disponível
-                        redis_memory_service.set_conversation_memory_sync(
-                            provedor_id=provedor.id,
-                            conversation_id=conversation.id,
-                            data={
-                                'transfer_attempted': True,
-                                'transfer_type': transfer_type,
-                                'no_team_available': True,
-                                'reason': transfer_decision.get('reason'),
-                                'timestamp': datetime.now().isoformat()
-                            }
-                        )
-                else:
-                    logger.info("Nenhuma transferência necessária para esta mensagem")
+
+            # ADICIONAR INSTRUÇÃO ESPECÍFICA SE DETECTOU NECESSIDADE DE TRANSFERÊNCIA
+            if transfer_necessario:
+                system_prompt += f"""
+
+TRANSFERÊNCIA IDENTIFICADA - EXECUTE AGORA!
+
+ANÁLISE DA CONVERSA: {motivo_transferencia}
+EQUIPE RECOMENDADA: {equipe_sugerida}
+
+VOCÊ DEVE EXECUTAR IMEDIATAMENTE:
+
+1. buscar_equipes_disponiveis() - para verificar equipes
+2. executar_transferencia_conversa(
+   conversation_id={conversation.id},
+   equipe_nome="{equipe_sugerida}",
+   motivo="{motivo_transferencia}"
+)
+
+NÃO PERGUNTE - NÃO CONFIRME - EXECUTE A TRANSFERÊNCIA AGORA!
+
+O cliente precisa de atendimento especializado e você deve transferir IMEDIATAMENTE.
+
+IMPORTANTE: Você DEVE usar as ferramentas de banco de dados disponíveis:
+- buscar_equipes_disponiveis() - para verificar equipes disponíveis
+- executar_transferencia_conversa() - para executar a transferência real
+
+NÃO APENAS CONFIRME - EXECUTE A TRANSFERÊNCIA REAL!
+"""
+            
+            # REGRAS FINAIS PARA TRANSFERÊNCIA
+            system_prompt += """
+
+REGRAS FINAIS DE TRANSFERÊNCIA:
+
+1. SEMPRE analise o contexto completo da conversa antes de transferir
+2. TRANSFIRA IMEDIATAMENTE quando identificar necessidade clara de equipe especializada
+3. NÃO tente resolver problemas complexos que requerem equipe especializada
+4. USE buscar_equipes_disponiveis() PRIMEIRO para ver disponibilidade
+5. USE executar_transferencia_conversa() DEPOIS para transferir REALMENTE
+
+LEMBRE-SE: A transferência só acontece se você USAR as duas funções!
+"""
+            
+            if transfer_necessario:
+                logger.info("Solicitação de transferência detectada - instruções adicionadas ao prompt")
             
             # Verificar se precisa marcar que perguntou sobre ser cliente
             already_asked_if_client = conversation.additional_attributes.get('asked_if_client', False) if conversation else False

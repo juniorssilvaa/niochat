@@ -28,7 +28,7 @@ class DatabaseTools:
             equipes = Team.objects.filter(
                 provedor=self.provedor,
                 is_active=True
-            ).values('id', 'nome', 'description')
+            ).values('id', 'name', 'description')
             
             equipes_list = list(equipes)
             
@@ -60,7 +60,7 @@ class DatabaseTools:
             # Buscar equipe
             equipe = Team.objects.filter(
                 provedor=self.provedor,
-                nome__icontains=nome_equipe,
+                name__icontains=nome_equipe,
                 is_active=True
             ).first()
             
@@ -70,10 +70,9 @@ class DatabaseTools:
                     'erro': f'Equipe {nome_equipe} não encontrada ou inativa'
                 }
             
-            # Buscar membros ativos da equipe
+            # Buscar membros da equipe
             membros = TeamMember.objects.filter(
-                team=equipe,
-                is_active=True
+                team=equipe
             ).select_related('user')
             
             if not membros.exists():
@@ -95,7 +94,7 @@ class DatabaseTools:
                 },
                 'equipe': {
                     'id': equipe.id,
-                    'nome': equipe.nome,
+                    'name': equipe.name,
                     'description': equipe.description
                 }
             }
@@ -188,14 +187,14 @@ class DatabaseTools:
             
             # Verificar se a equipe recomendada existe
             equipe_existe = any(
-                equipe['nome'].upper() == equipe_recomendada.upper() 
+                equipe['name'].upper() == equipe_recomendada.upper() 
                 for equipe in equipes_disponiveis['equipes']
             )
             
             if not equipe_existe:
                 # Se não existe, usar primeira equipe disponível
                 if equipes_disponiveis['equipes']:
-                    equipe_recomendada = equipes_disponiveis['equipes'][0]['nome']
+                    equipe_recomendada = equipes_disponiveis['equipes'][0]['name']
                 else:
                     return {
                         'success': False,
@@ -319,7 +318,7 @@ class DatabaseTools:
                     conversa.additional_attributes = {}
                 conversa.additional_attributes['assigned_team'] = {
                     'id': equipe_data['id'],
-                    'name': equipe_data['nome']
+                    'name': equipe_data['name']
                 }
                 conversa.additional_attributes['transfer_motivo'] = motivo
                 conversa.additional_attributes['transfer_timestamp'] = str(timezone.now())
@@ -335,7 +334,7 @@ class DatabaseTools:
                             'conversation': {
                                 'id': conversa.id,
                                 'status': conversa.status,
-                                'assigned_team': equipe_data['nome'],
+                                'assigned_team': equipe_data['name'],
                                 'contact': {
                                     'name': conversa.contact.name,
                                     'phone': conversa.contact.phone
@@ -433,9 +432,9 @@ class DatabaseTools:
                     additional_attributes__assigned_team__id=team.id
                 ).count()
                 
-                equipes_stats[team.nome] = {
+                equipes_stats[team.name] = {
                     'total_conversas': conversas_equipe,
-                    'membros_ativos': team.members.filter(is_active=True).count()
+                    'membros_ativos': team.members.count()
                 }
             
             return {
