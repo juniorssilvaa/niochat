@@ -378,12 +378,13 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
         audioRef.current.src = src;
       }
       audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(() => {
-        // Autoplay bloqueado: solicitar interação do usuário
-        setShowSoundPrompt(true);
+      audioRef.current.play().catch((error) => {
+        // Autoplay bloqueado: silenciar erro
+        console.log('Autoplay bloqueado pelo navegador:', error);
       });
     } catch (e) {
       // Silenciar erros de autoplay
+      console.log('Erro ao reproduzir som:', e);
     }
   };
 

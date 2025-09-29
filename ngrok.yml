@@ -1,0 +1,11 @@
+version: "2"
+authtoken: # Seu token do ngrok aqui
+tunnels:
+  backend:
+    addr: 8010
+    proto: http
+    subdomain: niochat-backend
+  frontend:
+    addr: 8012
+    proto: http
+    subdomain: niochat-frontend

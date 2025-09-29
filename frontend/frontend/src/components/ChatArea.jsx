@@ -1527,7 +1527,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
           const hasVideo = (msg.attachments && msg.attachments.some(att => att.file_type === 'video')) || 
                           (msg.message_type === 'video' && msg.file_url);
           const hasAudio = (msg.attachments && msg.attachments.some(att => att.file_type === 'audio')) || 
-                          (msg.message_type === 'audio' && msg.file_url);
+                          ((msg.message_type === 'audio' || msg.message_type === 'ptt') && msg.file_url);
           const hasDocument = (msg.attachments && msg.attachments.some(att => att.file_type === 'file')) || 
                              (msg.message_type === 'document' && msg.file_url);
 
@@ -1645,7 +1645,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                   ))}
                   
                   {/* Áudios via file_url */}
-                  {hasAudio && msg.message_type === 'audio' && msg.file_url && (
+                  {hasAudio && (msg.message_type === 'audio' || msg.message_type === 'ptt') && msg.file_url && (
                     <div className="mb-2">
                       <CustomAudioPlayer 
                         src={msg.file_url.startsWith('http') ? msg.file_url : `http://192.168.100.55:8012${msg.file_url}`} 
