@@ -4,7 +4,7 @@ import { X, Calendar, Package, Sparkles, Shield, Zap, Database, Bug, Plus, Setti
 const Changelog = ({ isOpen, onClose }) => {
   const [versions, setVersions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentVersion, setCurrentVersion] = useState('2.8.4');
+  const [currentVersion, setCurrentVersion] = useState('2.23.2');
 
   useEffect(() => {
     const loadChangelog = async () => {
@@ -15,7 +15,7 @@ const Changelog = ({ isOpen, onClose }) => {
         if (response.ok) {
           const data = await response.json();
           setVersions(data.versions || []);
-          setCurrentVersion(data.current_version || '2.8.4');
+          setCurrentVersion(data.current_version || '2.23.2');
         } else {
           // Fallback para dados estáticos se a API falhar
           setVersions(fallbackVersions);
@@ -346,7 +346,7 @@ const Changelog = ({ isOpen, onClose }) => {
               Sistema Nio Chat - Versão atual: <span className="text-primary font-medium">{currentVersion}</span>
             </div>
             <div>
-              Desenvolvido com ❤️ pela equipe Nio Chat
+              Sistema Nio Chat
             </div>
           </div>
         </div>
