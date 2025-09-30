@@ -38,6 +38,58 @@ from django.conf import settings
 from datetime import datetime, timedelta
 
 
+def process_sent_message(data, msg_data, chatid_full, clean_instance, uazapi_url, uazapi_token):
+    """
+    Processa mensagens enviadas pelo sistema para salvar external_id
+    """
+    try:
+        print(f"DEBUG: Processando mensagem enviada - ID: {msg_data.get('id')}, messageid: {msg_data.get('messageid')}")
+        
+        # Extrair external_id da mensagem enviada
+        external_id = msg_data.get('id') or msg_data.get('messageid')
+        print(f"DEBUG: External ID da mensagem enviada: {external_id}")
+        
+        if not external_id:
+            print("DEBUG: Mensagem enviada sem external_id, ignorando")
+            return JsonResponse({'status': 'ignored', 'reason': 'no external_id'}, status=200)
+        
+        # Buscar conversa existente
+        phone = chatid_full.replace('@s.whatsapp.net', '').replace('@c.us', '')
+        
+        # Buscar contato
+        contact = Contact.objects.filter(phone=phone).first()
+        if not contact:
+            print(f"DEBUG: Contato não encontrado para mensagem enviada: {phone}")
+            return JsonResponse({'status': 'ignored', 'reason': 'contact not found'}, status=200)
+        
+        # Buscar conversa
+        conversation = Conversation.objects.filter(contact=contact).first()
+        if not conversation:
+            print(f"DEBUG: Conversa não encontrada para mensagem enviada: {contact.id}")
+            return JsonResponse({'status': 'ignored', 'reason': 'conversation not found'}, status=200)
+        
+        # Buscar mensagem mais recente da conversa (provavelmente a que acabou de ser enviada)
+        recent_message = Message.objects.filter(
+            conversation=conversation,
+            is_from_customer=False
+        ).order_by('-created_at').first()
+        
+        if recent_message:
+            # Atualizar external_id na mensagem
+            recent_message.external_id = external_id
+            recent_message.save()
+            
+            print(f"DEBUG: External ID salvo na mensagem {recent_message.id}: {external_id}")
+            return JsonResponse({'status': 'processed', 'external_id': external_id}, status=200)
+        else:
+            print("DEBUG: Mensagem recente não encontrada para atualizar external_id")
+            return JsonResponse({'status': 'ignored', 'reason': 'recent message not found'}, status=200)
+            
+    except Exception as e:
+        print(f"DEBUG: Erro ao processar mensagem enviada: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
 def verify_and_normalize_number(chatid, uazapi_url, uazapi_token):
     """
     Verifica e normaliza um número usando o endpoint /chat/check da Uazapi
@@ -568,7 +620,7 @@ def evolution_webhook(request):
                 return JsonResponse({'status': 'ignored_duplicate'}, status=200)
             
             # Extrair external_id da mensagem
-            external_id = msg_data.get('id') or msg_data.get('key', {}).get('id')
+            external_id = msg_data.get('id') or msg_data.get('key', {}).get('id') or msg_data.get('messageid')
             
             # Preparar additional_attributes com external_id e informações de resposta
             additional_attrs = {}
@@ -749,6 +801,7 @@ def evolution_webhook(request):
                             message_type='text',  # Corrigido para valor válido
                             content=resposta_ia,
                             is_from_customer=False,  # Corrigido para identificar como mensagem da IA
+                            external_id=ia_external_id,  # Salvar external_id no campo correto
                             additional_attributes=ia_additional_attrs,
                             created_at=django.utils.timezone.now()
                         )
@@ -925,8 +978,9 @@ def webhook_evolution_uazapi(request):
         # Verificar se é uma mensagem enviada pelo sistema (fromMe: true)
         fromMe = msg_data.get('fromMe', False)
         if fromMe:
-            print(f"DEBUG: Ignorando mensagem enviada pelo sistema (fromMe: {fromMe})")
-            return JsonResponse({'status': 'ignored', 'reason': 'message sent by system'}, status=200)
+            print(f"DEBUG: Mensagem enviada pelo sistema detectada (fromMe: {fromMe})")
+            # Processar mensagem enviada para salvar external_id
+            return process_sent_message(data, msg_data, chatid_full, clean_instance, uazapi_url, uazapi_token)
         
         phone = chatid_full
         name = msg_data.get('pushName') or msg_data.get('senderName') or phone or 'Contato'
@@ -967,6 +1021,11 @@ def webhook_evolution_uazapi(request):
                     reply_to_content = extended_msg.get('text', 'Mensagem respondida')
                     if not reply_to_message_id:
                         reply_to_message_id = quoted_id or "ID_da_mensagem_respondida" # Fallback if quoted_id is also missing
+                # Verificar se tem conversation (formato mais simples)
+                elif 'conversation' in quoted_message:
+                    reply_to_content = quoted_message.get('conversation', 'Mensagem respondida')
+                    if not reply_to_message_id:
+                        reply_to_message_id = quoted_id or "ID_da_mensagem_respondida"
                 else:
                     reply_to_message_id = quoted_message.get('id') or quoted_message.get('messageId') or quoted_message.get('key', {}).get('id')
                     reply_to_content = quoted_message.get('text') or quoted_message.get('content') or quoted_message.get('caption')
@@ -1079,7 +1138,7 @@ def webhook_evolution_uazapi(request):
             
             # Extrair ID da mensagem deletada de diferentes possíveis locais
             deleted_message_id = (
-                msg_data.get('id') or 
+                msg_data.get('id') or msg_data.get('messageid') or 
                 msg_data.get('key', {}).get('id') or
                 msg_data.get('messageId') or
                 msg_data.get('message_id') or
@@ -1095,7 +1154,7 @@ def webhook_evolution_uazapi(request):
                 
                 # Buscar a mensagem no banco de dados pelo external_id
                 try:
-                    message = Message.objects.get(additional_attributes__external_id=deleted_message_id)
+                    message = Message.objects.get(external_id=deleted_message_id)
                     print(f"DEBUG: Mensagem encontrada por external_id: {message.id}")
                     
                     # Marcar como deletada
@@ -1493,7 +1552,9 @@ def webhook_evolution_uazapi(request):
                 print(f"DEBUG: Conversa {conversation.id} reaberta como 'snoozed' para IA responder")
         
         # 4. Extrair external_id da mensagem
-        external_id = msg_data.get('id') or msg_data.get('key', {}).get('id')
+        external_id = msg_data.get('id') or msg_data.get('key', {}).get('id') or msg_data.get('messageid')
+        print(f"DEBUG: Tentando extrair external_id - id: {msg_data.get('id')}, key.id: {msg_data.get('key', {}).get('id')}, messageid: {msg_data.get('messageid')}")
+        print(f"DEBUG: External ID final: {external_id}")
         
         # 5. Processar mídia se for mensagem de mídia
         additional_attrs = {}
@@ -1630,15 +1691,15 @@ def webhook_evolution_uazapi(request):
                                     file_url = response_data['fileURL']
                                     print(f"DEBUG: URL do arquivo obtida")
                                     
-                                    # Preparar atributos adicionais
-                                    additional_attrs = {
+                                    # Preparar atributos adicionais (manter external_id existente)
+                                    additional_attrs.update({
                                         'file_url': file_url,
                                         'file_name': filename,
                                         'message_type': message_type,
                                         'original_message_id': message_id,
                                         'mimetype': response_data.get('mimetype', ''),
                                         'uazapi_response': response_data
-                                    }
+                                    })
                                     
                                     # Baixar arquivo de forma otimizada
                                     try:
@@ -1731,11 +1792,11 @@ def webhook_evolution_uazapi(request):
         print(f"DEBUG: reply_to_message_id: {reply_to_message_id}")
         print(f"DEBUG: reply_to_content: {reply_to_content}")
         
-        if quoted_message and reply_to_message_id and reply_to_content:
+        if quoted_message and reply_to_content:
             additional_attrs['is_reply'] = True
-            additional_attrs['reply_to_message_id'] = reply_to_message_id
+            additional_attrs['reply_to_message_id'] = reply_to_message_id or quoted_id
             additional_attrs['reply_to_content'] = reply_to_content
-            print(f"DEBUG: Mensagem respondida detectada - ID: {reply_to_message_id}, Conteúdo: {reply_to_content}")
+            print(f"DEBUG: Mensagem respondida detectada - ID: {reply_to_message_id or quoted_id}, Conteúdo: {reply_to_content}")
         else:
             print(f"DEBUG: Não é mensagem respondida ou faltam informações")
             print(f"DEBUG: quoted_message: {quoted_message}")
@@ -1787,6 +1848,7 @@ def webhook_evolution_uazapi(request):
             message_type=db_message_type,
             content=content or '',
             is_from_customer=is_from_customer,  # Usar a variável controlada
+            external_id=external_id,  # Salvar external_id no campo correto
             file_url=file_url_value,
             file_name=file_name_value,
             file_size=file_size_value,
@@ -1795,6 +1857,7 @@ def webhook_evolution_uazapi(request):
         )
         content_preview = str(content)[:30] if content else "sem conteúdo"
         print(f"DEBUG: Nova mensagem salva: {msg.id} - Conversa: {conversation.id}, Contato: {contact.name} - {content_preview}...")
+        print(f"DEBUG: Additional attributes salvos: {additional_attrs}")
         if file_url:
             print(f"DEBUG: Mensagem com mídia - file_url: {file_url}")
         
@@ -2203,7 +2266,7 @@ def webhook_evolution_uazapi(request):
         # 2.a Se for áudio, tentar baixar/transcrever via Uazapi e anexar ao conteúdo para IA
         try:
             if db_message_type in ['audio', 'ptt'] and 'id' in msg_data:
-                audio_msg_id = (msg_data.get('id') or msg_data.get('messageId') or msg_data.get('key', {}).get('id'))
+                audio_msg_id = (msg_data.get('id') or msg_data.get('messageId') or msg_data.get('messageid') or msg_data.get('key', {}).get('id'))
                 if audio_msg_id:
                     from core.uazapi_client import UazapiClient
                     client = UazapiClient(uazapi_url, uazapi_token)

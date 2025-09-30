@@ -277,3 +277,37 @@ frontend/frontend/.env.local
 # Temporary files
 *.tmp
 *.temp
+
+# Cloudflare Tunnel (conforme CLOUDFLARE_TUNNEL_REPORT.md)
+.cloudflared/
+*.cloudflared/
+
+# Nginx local (conforme CLOUDFLARE_TUNNEL_REPORT.md)
+/etc/nginx/sites-available/front.niochat.com.br.conf
+/etc/nginx/sites-enabled/front.niochat.com.br.conf
+
+# Certificados SSL locais (conforme CLOUDFLARE_TUNNEL_REPORT.md)
+/etc/ssl/localcerts/
+
+# Configurações de sistema (conforme CLOUDFLARE_TUNNEL_REPORT.md)
+/etc/hosts
+
+# Logs locais (conforme CLOUDFLARE_TUNNEL_REPORT.md)
+logs/
+*.log
+
+# Configurações de ambiente local (conforme CLOUDFLARE_TUNNEL_REPORT.md)
+.env.local
+.env.development
+
+# Arquivos de desenvolvimento local (conforme CLOUDFLARE_TUNNEL_REPORT.md)
+CLOUDFLARE_TUNNEL_REPORT.md
+cloudflare-redirect.html
+nginx/sites/front.niochat.com.br.conf
+ngrok-config.yml
+test-nginx.conf
+.gitignore.local
+
+# Arquivos de cache Python
+backend/*/__pycache__/
+backend/*/__pycache__/*.pyc

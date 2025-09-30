@@ -16,7 +16,7 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 8012,
     strictPort: true,
-    allowedHosts: 'all',         // aceita qualquer host (simplificado)
+    allowedHosts: ['front.niochat.com.br', 'localhost', '127.0.0.1'], // hosts permitidos
     cors: true,                  // habilitar CORS
     headers: {
       'Access-Control-Allow-Origin': '*',
@@ -26,14 +26,15 @@ export default defineConfig({
     // Proxy para desenvolvimento local
     proxy: {
       '/api': {
-        target: 'http://192.168.100.55:8010',
+        target: 'http://localhost:8010',
         changeOrigin: true,
         secure: false
       },
       '/ws': {
-        target: 'ws://192.168.100.55:8010',
+        target: 'ws://localhost:8010',
         ws: true,
-        changeOrigin: true
+        changeOrigin: true,
+        secure: false
       }
     }
   }

@@ -131,7 +131,8 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
       networkState: audioRef.current.networkState
     });
     
-    if (isFinite(duration) && duration > 0) {
+    // Verificar se a duração é válida (não é Infinity, NaN ou negativa)
+    if (isFinite(duration) && duration > 0 && duration !== Infinity) {
       setDuration(duration);
       setIsLoaded(true);
       setLoading(false);
@@ -139,8 +140,23 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
       console.log(' Áudio carregado com sucesso, duração:', duration);
     } else {
       console.log(' Duração inválida:', duration);
-      setError('Duração do áudio inválida');
-      setLoading(false);
+      // Tentar aguardar um pouco mais para os metadados carregarem completamente
+      setTimeout(() => {
+        if (audioRef.current && isFinite(audioRef.current.duration) && audioRef.current.duration > 0) {
+          setDuration(audioRef.current.duration);
+          setIsLoaded(true);
+          setLoading(false);
+          setError(null);
+          console.log(' Áudio carregado após timeout, duração:', audioRef.current.duration);
+        } else {
+          // Se ainda não carregou, tentar reproduzir mesmo assim (para áudios ao vivo/streaming)
+          console.log(' Tentando reproduzir áudio sem duração definida (streaming/ao vivo)');
+          setDuration(0); // Definir como 0 para áudios sem duração definida
+          setIsLoaded(true);
+          setLoading(false);
+          setError(null);
+        }
+      }, 500);
     }
   };
 
@@ -163,7 +179,7 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
 
   // Format time in mm:ss
   const formatTime = (time) => {
-    if (isNaN(time) || !isFinite(time)) return '00:00';
+    if (isNaN(time) || !isFinite(time) || time < 0) return '00:00';
     const min = Math.floor(time / 60);
     const sec = Math.floor(time % 60);
     return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
@@ -302,7 +318,7 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
       <div className="w-full h-2 bg-gray-300 rounded cursor-pointer" onClick={handleProgressBarClick} style={{ position: 'relative' }}>
         <div
           className="h-2 bg-blue-500 rounded"
-          style={{ width: duration ? `${(progress / duration) * 100}%` : '0%' }}
+          style={{ width: duration > 0 ? `${(progress / duration) * 100}%` : '0%' }}
         ></div>
       </div>
       <audio
@@ -323,6 +339,15 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
         onLoadedMetadata={() => {
           console.log(' Metadados do áudio carregados');
           handleLoadedMetadata();
+        }}
+        onDurationChange={() => {
+          console.log(' Duração do áudio mudou:', audioRef.current?.duration);
+          if (audioRef.current && isFinite(audioRef.current.duration) && audioRef.current.duration > 0) {
+            setDuration(audioRef.current.duration);
+            setIsLoaded(true);
+            setLoading(false);
+            setError(null);
+          }
         }}
         onLoadedData={() => {
           console.log(' Dados do áudio carregados');

@@ -696,7 +696,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 
 
-def send_media_via_uazapi(conversation, file_url, media_type, caption):
+def send_media_via_uazapi(conversation, file_url, media_type, caption, reply_to_message_id=None):
     """
     Envia mídia via Uazapi usando a URL do arquivo ou base64
     """
@@ -843,7 +843,28 @@ def send_media_via_uazapi(conversation, file_url, media_type, caption):
                         import base64 as _b64
                         file_bytes = _b64.b64decode(file_base64)
                     numero_envio = number_clean
-                    ok = client.enviar_imagem(numero_envio, file_bytes, legenda=(caption or ''), instance_id=None)
+                    
+                    # Preparar reply_id se fornecido
+                    reply_id = None
+                    if reply_to_message_id:
+                        # Extrair apenas o ID da mensagem (remover prefixos se houver)
+                        if isinstance(reply_to_message_id, str) and ':' in reply_to_message_id:
+                            reply_id = reply_to_message_id.split(':', 1)[1]
+                        else:
+                            reply_id = str(reply_to_message_id)
+                        print(f"DEBUG: Usando reply_id para mídia: {reply_id}")
+                    
+                    # Usar método específico baseado no tipo de mídia
+                    if media_type in ['ptt', 'audio', 'myaudio']:
+                        # Para áudio, usar método específico
+                        ok = client.enviar_audio(numero_envio, file_bytes, audio_type=media_type, legenda=(caption or ''), instance_id=None, reply_id=reply_id)
+                    elif media_type == 'image':
+                        # Para imagem, usar método de imagem
+                        ok = client.enviar_imagem(numero_envio, file_bytes, legenda=(caption or ''), instance_id=None, reply_id=reply_id)
+                    else:
+                        # Para outros tipos, usar método genérico (documento)
+                        ok = client.enviar_documento(numero_envio, file_url, legenda=(caption or ''), instance_id=None)
+                    
                     success = bool(ok)
                     send_result = {'ok': ok}
                 except Exception as e:
@@ -1283,6 +1304,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         media_type = request.data.get('media_type')  # image, video, document, audio, myaudio, ptt, sticker
         file = request.FILES.get('file')
         caption = request.data.get('caption', '')
+        reply_to_message_id = request.data.get('reply_to_message_id')
         
         print(f"DEBUG: Recebido no endpoint send_media:")
         print(f"   - conversation_id: {conversation_id}")
@@ -1291,6 +1313,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         print(f"   - file.size: {file.size if file else 'None'}")
         print(f"   - file.type: {file.content_type if file else 'None'}")
         print(f"   - caption: {caption}")
+        print(f"   - reply_to_message_id: {reply_to_message_id}")
         
         if not conversation_id or not media_type or not file:
             return Response({'error': 'conversation_id, media_type e file são obrigatórios'}, status=status.HTTP_400_BAD_REQUEST)
@@ -1310,36 +1333,17 @@ class MessageViewSet(viewsets.ModelViewSet):
                 for chunk in file.chunks():
                     destination.write(chunk)
             
-            # Para áudios enviados (PTT), converter WebM para MP3 para garantir compatibilidade
+            # Para áudios enviados (PTT), manter formato original
             final_filename = file.name
             final_file_path = file_path
             
-            if media_type == 'ptt' and file.name.lower().endswith('.webm'):
-                try:
-                    import subprocess
-                    mp3_filename = file.name.replace('.webm', '.mp3')
-                    mp3_path = os.path.join(media_dir, mp3_filename)
-                    
-                    print(f"DEBUG: Convertendo WebM para MP3 para PTT")
-                    
-                    # Converter usando ffmpeg
-                    result = subprocess.run([
-                        'ffmpeg', '-i', file_path, 
-                        '-acodec', 'libmp3lame', 
-                        '-ab', '128k', 
-                        '-y', mp3_path
-                    ], capture_output=True, text=True, timeout=30)
-                    
-                    if result.returncode == 0:
-                        print(f"DEBUG: Conversão para MP3 bem-sucedida")
-                        # Usar o arquivo MP3 em vez do WebM
-                        final_filename = mp3_filename
-                        final_file_path = mp3_path
-                        print(f"DEBUG: Arquivo MP3 criado: {mp3_filename}")
-                    else:
-                        print(f"DEBUG: Erro na conversão para MP3: {result.stderr}")
-                except Exception as e:
-                    print(f"DEBUG: Erro ao converter para MP3: {e}")
+            # Log do tipo de arquivo recebido
+            print(f"DEBUG: Arquivo de áudio recebido: {file.name} ({file.content_type})")
+            
+            # Para PTT, manter o arquivo original (WebM é suportado pela Uazapi)
+            if media_type == 'ptt':
+                print(f"DEBUG: PTT detectado - mantendo formato original: {file.name}")
+                # A Uazapi suporta WebM para PTT, não precisa converter
             
             # Gerar URL pública para o arquivo
             file_url = f"/api/media/messages/{conversation_id}/{final_filename}/"
@@ -1382,7 +1386,7 @@ class MessageViewSet(viewsets.ModelViewSet):
             )
             
             # Enviar para o WhatsApp via Uazapi com a URL da mídia
-            success, whatsapp_response = send_media_via_uazapi(conversation, file_url, media_type, caption)
+            success, whatsapp_response = send_media_via_uazapi(conversation, file_url, media_type, caption, reply_to_message_id)
             
             # Emitir evento WebSocket para mensagem enviada
             channel_layer = get_channel_layer()
@@ -1451,7 +1455,7 @@ class MessageViewSet(viewsets.ModelViewSet):
                     return Response({'error': 'Sem permissão para esta mensagem'}, status=status.HTTP_403_FORBIDDEN)
             
             # Verificar se a mensagem tem ID externo (para WhatsApp)
-            external_id = message.additional_attributes.get('external_id') if message.additional_attributes else None
+            external_id = message.external_id
             if not external_id:
                 return Response({'error': 'Mensagem não possui ID externo para reação'}, status=status.HTTP_400_BAD_REQUEST)
             
@@ -1572,7 +1576,7 @@ class MessageViewSet(viewsets.ModelViewSet):
                     return Response({'error': 'Sem permissão para esta mensagem'}, status=status.HTTP_403_FORBIDDEN)
             
             # Verificar se a mensagem tem ID externo (para WhatsApp)
-            external_id = message.additional_attributes.get('external_id') if message.additional_attributes else None
+            external_id = message.external_id
             
             # Se tem external_id, tentar excluir via Uazapi
             if external_id:

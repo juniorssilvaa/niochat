@@ -2966,7 +2966,7 @@ class ChangelogView(APIView):
     def get(self, request):
         try:
             # Caminho para o arquivo CHANGELOG.json
-            changelog_path = os.path.join(settings.BASE_DIR, '..', 'frontend', 'frontend', 'public', 'CHANGELOG.json')
+            changelog_path = os.path.join(settings.BASE_DIR, '..', 'CHANGELOG.json')
             
             # Verificar se o arquivo existe
             if not os.path.exists(changelog_path):

@@ -531,12 +531,13 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
       
       // Adicionar informações de resposta se estiver respondendo a uma mensagem
       if (replyingToMessage) {
-        const replyId = replyingToMessage.additional_attributes?.external_id || replyingToMessage.id;
+        const replyId = replyingToMessage.external_id || replyingToMessage.additional_attributes?.external_id || replyingToMessage.id;
         payload.reply_to_message_id = replyId;
         payload.reply_to_content = replyingToMessage.content;
         console.log('DEBUG: Enviando resposta para mensagem:', {
           original_id: replyingToMessage.id,
-          external_id: replyingToMessage.additional_attributes?.external_id,
+          external_id: replyingToMessage.external_id,
+          additional_external_id: replyingToMessage.additional_attributes?.external_id,
           reply_id: replyId,
           content: replyingToMessage.content
         });
@@ -889,6 +890,19 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
       // Para PTT (mensagens de voz), não enviar caption
       if (formattedCaption && mediaType !== 'ptt') {
         formData.append('caption', formattedCaption);
+      }
+      
+      // Adicionar informações de resposta se estiver respondendo a uma mensagem
+      if (replyingToMessage) {
+        const replyId = replyingToMessage.external_id || replyingToMessage.additional_attributes?.external_id || replyingToMessage.id;
+        formData.append('reply_to_message_id', replyId);
+        console.log('DEBUG: Enviando mídia como resposta para mensagem:', {
+          original_id: replyingToMessage.id,
+          external_id: replyingToMessage.external_id,
+          additional_external_id: replyingToMessage.additional_attributes?.external_id,
+          reply_id: replyId,
+          content: replyingToMessage.content
+        });
       }
       
       console.log('Enviando mídia para o backend');
@@ -1540,7 +1554,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
               attachments: msg.attachments,
               content: msg.content,
               hasImage,
-              'URL construída': msg.file_url ? (msg.file_url.startsWith('http') ? msg.file_url : `http://192.168.100.55:8012${msg.file_url}`) : 'N/A'
+              'URL construída': msg.file_url ? (msg.file_url.startsWith('http') ? msg.file_url : `https://front.niochat.com.br${msg.file_url}`) : 'N/A'
             });
           }
             
@@ -1579,23 +1593,46 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                         onClick={() => openImageModal(attachment.data_url)}
                         style={{ maxHeight: '300px' }}
                     />
+                    
                   </div>
                   ))}
                   
-                  {/* Imagens via file_url (WhatsApp/Telegram etc) */}
-                  {hasImage && msg.message_type === 'image' && msg.file_url && (
+                  {/* Imagens via file_url (WhatsApp/Telegram etc) - só se não tiver attachments */}
+                  {hasImage && msg.message_type === 'image' && msg.file_url && !msg.attachments && (
                     <div className="mb-2">
                       <img
-                        src={msg.file_url.startsWith('http') ? msg.file_url : `http://192.168.100.55:8012${msg.file_url}`}
+                        src={msg.file_url.startsWith('http') ? msg.file_url : `https://front.niochat.com.br${msg.file_url}`}
                         alt="Imagem"
                         className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={() => openImageModal(msg.file_url.startsWith('http') ? msg.file_url : `http://192.168.100.55:8012${msg.file_url}`)}
+                        onClick={() => openImageModal(msg.file_url.startsWith('http') ? msg.file_url : `https://front.niochat.com.br${msg.file_url}`)}
                         style={{ maxHeight: '300px' }}
                         onError={(e) => {
                           console.error('Erro ao carregar imagem:', msg.file_url);
                           e.target.style.display = 'none';
                         }}
                       />
+                      
+                      {/* Botões de ação para imagem enviada */}
+                      {!isCustomer && (
+                        <div className="flex items-center space-x-1 mt-2">
+                          <button
+                            onClick={() => openReactionPicker(msg)}
+                            className="p-1 hover:bg-white/20 rounded-full text-xs"
+                            title="Reagir à mensagem"
+                          >
+                            😊
+                          </button>
+                          <button
+                            onClick={() => handleReplyToMessage(msg)}
+                            className="p-1 hover:bg-white/20 rounded-full text-xs"
+                            title="Responder mensagem"
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M9 17l-5-5 5-5M20 12H4"/>
+                            </svg>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                   
@@ -1610,11 +1647,12 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                         <source src={attachment.data_url} type="video/mp4" />
                         Seu navegador não suporta o elemento de vídeo.
                       </video>
+                      
                   </div>
                   ))}
                   
-                  {/* Vídeos via file_url */}
-                  {hasVideo && msg.message_type === 'video' && msg.file_url && (
+                  {/* Vídeos via file_url - só se não tiver attachments */}
+                  {hasVideo && msg.message_type === 'video' && msg.file_url && !msg.attachments && (
                     <div className="mb-2">
                       <video 
                         controls
@@ -1624,9 +1662,31 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                           console.error('Erro ao carregar vídeo:', msg.file_url);
                         }}
                       >
-                        <source src={msg.file_url.startsWith('http') ? msg.file_url : `http://192.168.100.55:8012${msg.file_url}`} type="video/mp4" />
+                        <source src={msg.file_url.startsWith('http') ? msg.file_url : `https://front.niochat.com.br${msg.file_url}`} type="video/mp4" />
                         Seu navegador não suporta o elemento de vídeo.
                       </video>
+                      
+                      {/* Botões de ação para vídeo enviado */}
+                      {!isCustomer && (
+                        <div className="flex items-center space-x-1 mt-2">
+                          <button
+                            onClick={() => openReactionPicker(msg)}
+                            className="p-1 hover:bg-white/20 rounded-full text-xs"
+                            title="Reagir à mensagem"
+                          >
+                            😊
+                          </button>
+                          <button
+                            onClick={() => handleReplyToMessage(msg)}
+                            className="p-1 hover:bg-white/20 rounded-full text-xs"
+                            title="Responder mensagem"
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M9 17l-5-5 5-5M20 12H4"/>
+                            </svg>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                   
@@ -1635,26 +1695,41 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                     <div key={index} className="mb-2">
                     <CustomAudioPlayer 
                         src={attachment.data_url} 
-                        messageId={msg.id}
-                        playingAudio={playingAudio}
-                        audioProgress={audioProgress}
-                        onPlay={() => playAudio(msg.id, attachment.data_url)}
-                        onPause={() => pauseAudio(msg.id)}
+                        isCustomer={isCustomer}
                     />
+                    
                   </div>
                   ))}
                   
-                  {/* Áudios via file_url */}
-                  {hasAudio && (msg.message_type === 'audio' || msg.message_type === 'ptt') && msg.file_url && (
+                  {/* Áudios via file_url (só se não tiver attachments) */}
+                  {hasAudio && (msg.message_type === 'audio' || msg.message_type === 'ptt') && msg.file_url && !msg.attachments && (
                     <div className="mb-2">
                       <CustomAudioPlayer 
-                        src={msg.file_url.startsWith('http') ? msg.file_url : `http://192.168.100.55:8012${msg.file_url}`} 
-                        messageId={msg.id}
-                        playingAudio={playingAudio}
-                        audioProgress={audioProgress}
-                        onPlay={() => playAudio(msg.id, msg.file_url.startsWith('http') ? msg.file_url : `http://192.168.100.55:8012${msg.file_url}`)}
-                        onPause={() => pauseAudio(msg.id)}
+                        src={msg.file_url.startsWith('http') ? msg.file_url : `https://front.niochat.com.br${msg.file_url}`} 
+                        isCustomer={isCustomer}
                       />
+                      
+                      {/* Botões de ação para áudio enviado */}
+                      {!isCustomer && (
+                        <div className="flex items-center space-x-1 mt-2">
+                          <button
+                            onClick={() => openReactionPicker(msg)}
+                            className="p-1 hover:bg-white/20 rounded-full text-xs"
+                            title="Reagir à mensagem"
+                          >
+                            😊
+                          </button>
+                          <button
+                            onClick={() => handleReplyToMessage(msg)}
+                            className="p-1 hover:bg-white/20 rounded-full text-xs"
+                            title="Responder mensagem"
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M9 17l-5-5 5-5M20 12H4"/>
+                            </svg>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                   
@@ -1670,14 +1745,15 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                         <Paperclip className="w-4 h-4" />
                         <span className="text-sm">{attachment.file_name || 'Documento'}</span>
                       </a>
+                      
                   </div>
                   ))}
                   
-                  {/* Documentos via file_url */}
-                  {hasDocument && msg.message_type === 'document' && msg.file_url && (
+                  {/* Documentos via file_url - só se não tiver attachments */}
+                  {hasDocument && msg.message_type === 'document' && msg.file_url && !msg.attachments && (
                     <div className="mb-2">
                       <a
-                        href={msg.file_url.startsWith('http') ? msg.file_url : `http://192.168.100.55:8012${msg.file_url}`}
+                        href={msg.file_url.startsWith('http') ? msg.file_url : `https://front.niochat.com.br${msg.file_url}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center space-x-2 p-2 bg-black/10 rounded-lg hover:bg-black/20 transition-colors"
@@ -1685,6 +1761,28 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                         <Paperclip className="w-4 h-4" />
                         <span className="text-sm">{msg.content || 'Documento'}</span>
                       </a>
+                      
+                      {/* Botões de ação para documento enviado */}
+                      {!isCustomer && (
+                        <div className="flex items-center space-x-1 mt-2">
+                          <button
+                            onClick={() => openReactionPicker(msg)}
+                            className="p-1 hover:bg-white/20 rounded-full text-xs"
+                            title="Reagir à mensagem"
+                          >
+                            😊
+                          </button>
+                          <button
+                            onClick={() => handleReplyToMessage(msg)}
+                            className="p-1 hover:bg-white/20 rounded-full text-xs"
+                            title="Responder mensagem"
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M9 17l-5-5 5-5M20 12H4"/>
+                            </svg>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                   
@@ -1700,7 +1798,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                       {msg.file_url && (
                         <div className="bg-white p-2 rounded border">
                           <img
-                            src={msg.file_url.startsWith('http') ? msg.file_url : `http://192.168.100.55:8012${msg.file_url}`}
+                            src={msg.file_url.startsWith('http') ? msg.file_url : `https://front.niochat.com.br${msg.file_url}`}
                             alt="QR Code PIX"
                             className="w-32 h-32 mx-auto"
                             onError={(e) => {
@@ -1832,17 +1930,17 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                 )}
               </div>
                     
-                    {/* Botões de ação (só para mensagens do cliente com external_id) */}
+                    {/* Botões de ação para mensagens do cliente */}
                     {isCustomer && msg.additional_attributes?.external_id && (
-                      <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => openReactionPicker(msg)}
+                      <div className="flex items-center space-x-1 mt-2">
+                        <button
+                          onClick={() => openReactionPicker(msg)}
                           className="p-1 hover:bg-white/20 rounded-full text-xs"
-                        title="Reagir à mensagem"
-                      >
+                          title="Reagir à mensagem"
+                        >
                           😊
-                      </button>
-                      <button
+                        </button>
+                        <button
                           onClick={() => handleReplyToMessage(msg)}
                           className="p-1 hover:bg-white/20 rounded-full text-xs"
                           title="Responder mensagem"
@@ -1850,9 +1948,31 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M9 17l-5-5 5-5M20 12H4"/>
                           </svg>
-                      </button>
-                  </div>
-                )}
+                        </button>
+                      </div>
+                    )}
+                    
+                    {/* Botões de ação para mensagens enviadas */}
+                    {!isCustomer && msg.additional_attributes?.external_id && (
+                      <div className="flex items-center space-x-1 mt-2">
+                        <button
+                          onClick={() => openReactionPicker(msg)}
+                          className="p-1 hover:bg-white/20 rounded-full text-xs"
+                          title="Reagir à mensagem"
+                        >
+                          😊
+                        </button>
+                        <button
+                          onClick={() => handleReplyToMessage(msg)}
+                          className="p-1 hover:bg-white/20 rounded-full text-xs"
+                          title="Responder mensagem"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 17l-5-5 5-5M20 12H4"/>
+                          </svg>
+                        </button>
+                      </div>
+                    )}
                     </div>
               </div>
             </div>

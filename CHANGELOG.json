@@ -1,21 +1,40 @@
 {
   "versions": [
     {
+      "version": "2.24.0",
+      "date": "2025-09-30",
+      "type": "minor",
+      "title": "Sistema de Áudio, Reações e Respostas",
+      "changes": [
+        "Correção de falhas no envio de áudios, garantindo compatibilidade e melhor usabilidade.",
+        "Adicionados botões de reação e resposta em mensagens de áudio, imagens, vídeos e documentos.",
+        "Melhorias na integração com o WhatsApp para suportar respostas e reações de forma estável.",
+        "Ajustes visuais para eliminar duplicação de botões em mensagens de mídia.",
+        "Otimizações gerais no sistema de mensagens multimídia.",
+        "Atualização da documentação com histórico detalhado das mudanças."
+      ]
+    },
+    {
+      "version": "2.23.3",
+      "date": "2025-09-30",
+      "type": "patch",
+      "title": "Correções de Reações e Respostas",
+      "changes": [
+        "Correção de falhas ao reagir a mensagens de áudio no WhatsApp.",
+        "Ajustes para que respostas de mensagens funcionem corretamente no WhatsApp.",
+        "Correção de falhas que impediam a exibição de respostas do cliente no sistema.",
+        "Melhoria na compatibilidade de reações e respostas entre diferentes formatos de mensagem.",
+        "Estabilidade do sistema reforçada com registros de monitoramento e debug."
+      ]
+    },
+    {
       "version": "2.23.2",
       "date": "2025-09-29",
       "type": "patch",
       "title": "Correções Finais e Otimizações",
       "changes": [
-        {
-          "type": "fix",
-          "title": "Otimização do Sistema de Notificações",
-          "description": "Ajustes finais no sistema de notificações para melhor performance"
-        },
-        {
-          "type": "improvement",
-          "title": "Estabilidade do Sistema",
-          "description": "Otimizações gerais para melhorar a estabilidade do sistema"
-        }
+        "Otimização do sistema de notificações para maior desempenho.",
+        "Melhorias de estabilidade em processos internos."
       ]
     },
     {
@@ -24,16 +43,8 @@
       "type": "patch",
       "title": "Correções de Estabilidade",
       "changes": [
-        {
-          "type": "fix",
-          "title": "Correção no Sistema de Áudio",
-          "description": "Correção de bugs críticos no módulo de áudio que causavam instabilidade"
-        },
-        {
-          "type": "improvement",
-          "title": "Melhoria nas Transferências",
-          "description": "Otimização no sistema de transferências realizadas pela IA"
-        }
+        "Correção de instabilidades no módulo de áudio.",
+        "Otimização do sistema de transferências realizadas pela IA."
       ]
     },
     {
@@ -42,36 +53,12 @@
       "type": "minor",
       "title": "Nova IA Multimídia e Sistema CSAT",
       "changes": [
-        {
-          "type": "feature",
-          "title": "IA com Processamento de Áudio e Imagens",
-          "description": "Nova capacidade da IA para processar e entender arquivos de áudio e imagens"
-        },
-        {
-          "type": "feature",
-          "title": "Sistema CSAT de Feedback",
-          "description": "Implementação de pesquisa de satisfação do cliente para coletar feedback dos clientes"
-        },
-        {
-          "type": "feature",
-          "title": "Biblioteca de Sons Expandida",
-          "description": "Adicionados novos efeitos sonoros ao sistema"
-        },
-        {
-          "type": "improvement",
-          "title": "Auditoria com Fotos",
-          "description": "Agora é possível visualizar a foto do contato diretamente na aba de auditoria"
-        },
-        {
-          "type": "improvement",
-          "title": "Otimização de Transferências por IA",
-          "description": "Melhoria no sistema de transferências realizadas pela IA para maior eficiência"
-        },
-        {
-          "type": "fix",
-          "title": "Correções no Sistema de Notificações",
-          "description": "Refatoração e correções no sistema de notificações"
-        }
+        "Nova capacidade da IA para processar áudios e imagens.",
+        "Implementação de pesquisa de satisfação do cliente (CSAT).",
+        "Inclusão de novos efeitos sonoros para notificações.",
+        "Exibição da foto do contato diretamente na aba de auditoria.",
+        "Otimizações no sistema de transferências por IA.",
+        "Correções no sistema de notificações para maior confiabilidade."
       ]
     },
     {
@@ -80,26 +67,10 @@
       "type": "minor",
       "title": "Sistema CSAT e Melhorias Iniciais",
       "changes": [
-        {
-          "type": "feature",
-          "title": "Sistema CSAT - Versão Inicial",
-          "description": "Implementação inicial da pesquisa de satisfação do cliente"
-        },
-        {
-          "type": "feature",
-          "title": "Processamento Multimídia Básico",
-          "description": "Primeira versão da capacidade da IA entender áudios e imagens"
-        },
-        {
-          "type": "improvement",
-          "title": "Transferências por IA",
-          "description": "Otimizações iniciais no sistema de transferências"
-        },
-        {
-          "type": "fix",
-          "title": "Correções no Sistema de Áudio",
-          "description": "Correções preliminares no módulo de áudio"
-        }
+        "Primeira versão do sistema de pesquisa de satisfação (CSAT).",
+        "Primeira versão da IA com suporte a áudios e imagens.",
+        "Otimizações iniciais nas transferências realizadas pela IA.",
+        "Correções no sistema de áudio para maior estabilidade."
       ]
     },
     {
@@ -108,16 +79,8 @@
       "type": "minor",
       "title": "Base para Novas Funcionalidades",
       "changes": [
-        {
-          "type": "feature",
-          "title": "Funcionalidades Base do Sistema",
-          "description": "Adição das funcionalidades fundamentais do sistema"
-        },
-        {
-          "type": "improvement",
-          "title": "Compatibilidade",
-          "description": "Manutenção da compatibilidade com versões anteriores"
-        }
+        "Adição de recursos fundamentais para suportar futuras funcionalidades.",
+        "Compatibilidade reforçada com versões anteriores."
       ]
     },
     {
@@ -126,11 +89,7 @@
       "type": "patch",
       "title": "Correções de Estabilidade",
       "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Estabilidade",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
+        "Ajustes e melhorias gerais para maior confiabilidade."
       ]
     },
     {
@@ -139,11 +98,7 @@
       "type": "patch",
       "title": "Correções e Melhorias",
       "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
+        "Correções de problemas menores e melhorias de estabilidade."
       ]
     },
     {
@@ -152,11 +107,7 @@
       "type": "patch",
       "title": "Correções e Melhorias",
       "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
+        "Correções de falhas pontuais e melhorias de desempenho."
       ]
     },
     {
@@ -165,11 +116,7 @@
       "type": "patch",
       "title": "Correções e Melhorias",
       "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
+        "Correções de estabilidade em processos de atendimento e notificações."
       ]
     }
   ]

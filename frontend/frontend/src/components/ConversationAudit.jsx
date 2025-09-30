@@ -722,7 +722,7 @@ export default function ConversationAudit({ provedorId }) {
                                     {hasImage && message.file_url && (
                                       <div className="mb-2">
                                         <img
-                                          src={message.file_url.startsWith('http') ? message.file_url : `http://192.168.100.55:8012${message.file_url}`}
+                                          src={message.file_url.startsWith('http') ? message.file_url : `https://front.niochat.com.br${message.file_url}`}
                                           alt="Imagem"
                                           className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                                           style={{ maxHeight: '200px' }}
@@ -738,7 +738,7 @@ export default function ConversationAudit({ provedorId }) {
                                           className="max-w-full h-auto rounded-lg"
                                           style={{ maxHeight: '200px' }}
                                         >
-                                          <source src={message.file_url.startsWith('http') ? message.file_url : `http://192.168.100.55:8012${message.file_url}`} type="video/mp4" />
+                                          <source src={message.file_url.startsWith('http') ? message.file_url : `https://front.niochat.com.br${message.file_url}`} type="video/mp4" />
                                           Seu navegador não suporta o elemento de vídeo.
                                         </video>
                                       </div>
@@ -748,7 +748,7 @@ export default function ConversationAudit({ provedorId }) {
                                     {hasDocument && message.file_url && (
                                       <div className="mb-2">
                                         <a
-                                          href={message.file_url.startsWith('http') ? message.file_url : `http://192.168.100.55:8012${message.file_url}`}
+                                          href={message.file_url.startsWith('http') ? message.file_url : `https://front.niochat.com.br${message.file_url}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           className="flex items-center space-x-2 p-2 bg-black/10 rounded-lg hover:bg-black/20 transition-colors"
@@ -773,7 +773,7 @@ export default function ConversationAudit({ provedorId }) {
                                         {message.file_url && (
                                           <div className="bg-white p-2 rounded border">
                                             <img
-                                              src={message.file_url.startsWith('http') ? message.file_url : `http://192.168.100.55:8012${message.file_url}`}
+                                              src={message.file_url.startsWith('http') ? message.file_url : `https://front.niochat.com.br${message.file_url}`}
                                               alt="QR Code PIX"
                                               className="w-24 h-24 mx-auto"
                                             />

@@ -198,7 +198,7 @@ class UazapiClient:
             print(f"[DEBUG UazapiClient] Erro ao enviar mensagem: {e}")
             return False
     
-    def enviar_imagem(self, numero: str, imagem_bytes: bytes, legenda: str = "", instance_id: str = None) -> bool:
+    def enviar_imagem(self, numero: str, imagem_bytes: bytes, legenda: str = "", instance_id: str = None, reply_id: str = None) -> bool:
         """
         Envia imagem via WhatsApp usando ev conforme documentação
         
@@ -207,6 +207,7 @@ class UazapiClient:
             imagem_bytes: Bytes da imagem
             legenda: Legenda da imagem (opcional)
             instance_id: ID da instância (opcional)
+            reply_id: ID da mensagem para responder (opcional)
             
         Returns:
             True se enviado com sucesso, False caso contrário
@@ -239,6 +240,11 @@ class UazapiClient:
             if legenda:
                 data["text"] = legenda
             
+            # Adicionar reply_id se fornecido (para responder mensagens)
+            if reply_id:
+                data["replyid"] = reply_id
+                print(f"[DEBUG UazapiClient] Respondendo à mensagem: {reply_id}")
+            
             if instance_id:
                 data["instance"] = instance_id
             
@@ -262,6 +268,87 @@ class UazapiClient:
             print(f"[DEBUG UazapiClient] Erro ao enviar imagem: {e}")
             return False
     
+    def enviar_audio(self, numero: str, audio_bytes: bytes, audio_type: str = "ptt", legenda: str = "", instance_id: str = None, reply_id: str = None) -> bool:
+        """
+        Envia áudio via WhatsApp usando /send/media conforme documentação Uazapi
+        
+        Args:
+            numero: Número do WhatsApp
+            audio_bytes: Bytes do áudio
+            audio_type: Tipo de áudio (ptt, audio, myaudio)
+            legenda: Legenda do áudio (opcional)
+            instance_id: ID da instância (opcional)
+            reply_id: ID da mensagem para responder (opcional)
+            
+        Returns:
+            True se enviado com sucesso, False caso contrário
+        """
+        try:
+            # Limpar número
+            numero_limpo = numero.replace('@s.whatsapp.net', '').replace('@c.us', '')
+            
+            # Converter para base64 conforme documentação
+            import base64
+            audio_base64 = base64.b64encode(audio_bytes).decode('utf-8')
+            
+            # Usar endpoint /send/media conforme documentação
+            url = f"{self.base_url}/send/media"
+            headers = {
+                "Accept": "application/json",
+                "Content-Type": "application/json", 
+                "token": self.token
+            }
+            
+            # Detectar MIME type baseado no conteúdo do arquivo
+            mime_type = "audio/mp3"  # Default
+            if audio_bytes.startswith(b'\x1a\x45\xdf\xa3'):  # WebM signature
+                mime_type = "audio/webm"
+            elif audio_bytes.startswith(b'ID3') or audio_bytes[1:4] == b'ID3':  # MP3
+                mime_type = "audio/mp3"
+            elif audio_bytes.startswith(b'OggS'):  # OGG
+                mime_type = "audio/ogg"
+            
+            # Formato conforme documentação /send/media para áudio
+            data = {
+                "number": numero_limpo,
+                "type": audio_type,  # ptt, audio, myaudio
+                "file": f"data:{mime_type};base64,{audio_base64}",
+                "readchat": True
+            }
+            
+            # Para PTT, não adicionar legenda (mensagem de voz)
+            if legenda and audio_type != "ptt":
+                data["text"] = legenda
+            
+            # Adicionar reply_id se fornecido (para responder mensagens)
+            if reply_id:
+                data["replyid"] = reply_id
+                print(f"[DEBUG UazapiClient] Respondendo à mensagem: {reply_id}")
+            
+            if instance_id:
+                data["instance"] = instance_id
+            
+            print(f"[DEBUG UazapiClient] Enviando áudio para: {numero_limpo}")
+            print(f"[DEBUG UazapiClient] Tipo: {audio_type}")
+            print(f"[DEBUG UazapiClient] MIME: {mime_type}")
+            print(f"[DEBUG UazapiClient] Caption: {legenda if legenda and audio_type != 'ptt' else 'SEM LEGENDA'}")
+            print(f"[DEBUG UazapiClient] Base64 size: {len(audio_base64)} chars")
+            
+            resp = requests.post(url, json=data, headers=headers, timeout=30)
+            print(f"[DEBUG UazapiClient] Status: {resp.status_code}")
+            print(f"[DEBUG UazapiClient] Response: {resp.text}")
+            
+            if resp.status_code == 200:
+                result = resp.json()
+                return bool(result.get('id'))  # Se tem ID da mensagem, foi enviada
+            else:
+                print(f"[DEBUG UazapiClient] Erro HTTP: {resp.status_code}")
+                return False
+                
+        except Exception as e:
+            print(f"[DEBUG UazapiClient] Erro ao enviar áudio: {e}")
+            return False
+
     def enviar_documento(self, numero: str, documento_url: str, nome_arquivo: str = "boleto.pdf", legenda: str = "", instance_id: str = None) -> bool:
         """
         Envia documento (PDF do boleto) via WhatsApp usando /send/media
