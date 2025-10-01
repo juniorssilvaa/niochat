@@ -419,7 +419,7 @@ const WS_BASE = `wss://${window.location.host}`;
   const getFullFileUrl = (fileUrl) => {
     if (!fileUrl) return '';
     if (fileUrl.startsWith('http')) return fileUrl;
-    return `https://front.niochat.com.br${fileUrl}`;
+    return `https://app.niochat.com.br${fileUrl}`;
   };
   
   const emojis = ['👍', '❤️', '😂', '😮', '😢', '😡', '🎉', '👏', '🔥', '💯'];

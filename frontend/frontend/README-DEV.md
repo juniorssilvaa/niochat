@@ -10,7 +10,7 @@
 ### Desenvolvimento Local
 - **Arquivo**: `vite.config.local.js` (não commitado)
 - **Uso**: Para desenvolvimento local
-- **Características**: Proxy para `https://front.niochat.com.br`
+- **Características**: Proxy para `https://app.niochat.com.br`
 
 ## Scripts Disponíveis
 

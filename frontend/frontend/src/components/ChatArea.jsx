@@ -1554,7 +1554,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
               attachments: msg.attachments,
               content: msg.content,
               hasImage,
-              'URL construída': msg.file_url ? (msg.file_url.startsWith('http') ? msg.file_url : `https://front.niochat.com.br${msg.file_url}`) : 'N/A'
+              'URL construída': msg.file_url ? (msg.file_url.startsWith('http') ? msg.file_url : `http://localhost:8010${msg.file_url}`) : 'N/A'
             });
           }
             
@@ -1601,10 +1601,10 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                   {hasImage && msg.message_type === 'image' && msg.file_url && !msg.attachments && (
                     <div className="mb-2">
                       <img
-                        src={msg.file_url.startsWith('http') ? msg.file_url : `https://front.niochat.com.br${msg.file_url}`}
+                        src={msg.file_url.startsWith('http') ? msg.file_url : `https://app.niochat.com.br${msg.file_url}`}
                         alt="Imagem"
                         className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={() => openImageModal(msg.file_url.startsWith('http') ? msg.file_url : `https://front.niochat.com.br${msg.file_url}`)}
+                        onClick={() => openImageModal(msg.file_url.startsWith('http') ? msg.file_url : `https://app.niochat.com.br${msg.file_url}`)}
                         style={{ maxHeight: '300px' }}
                         onError={(e) => {
                           console.error('Erro ao carregar imagem:', msg.file_url);
@@ -1662,7 +1662,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                           console.error('Erro ao carregar vídeo:', msg.file_url);
                         }}
                       >
-                        <source src={msg.file_url.startsWith('http') ? msg.file_url : `https://front.niochat.com.br${msg.file_url}`} type="video/mp4" />
+                        <source src={msg.file_url.startsWith('http') ? msg.file_url : `https://app.niochat.com.br${msg.file_url}`} type="video/mp4" />
                         Seu navegador não suporta o elemento de vídeo.
                       </video>
                       
@@ -1705,7 +1705,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                   {hasAudio && (msg.message_type === 'audio' || msg.message_type === 'ptt') && msg.file_url && !msg.attachments && (
                     <div className="mb-2">
                       <CustomAudioPlayer 
-                        src={msg.file_url.startsWith('http') ? msg.file_url : `https://front.niochat.com.br${msg.file_url}`} 
+                        src={msg.file_url.startsWith('http') ? msg.file_url : `https://app.niochat.com.br${msg.file_url}`} 
                         isCustomer={isCustomer}
                       />
                       
@@ -1753,7 +1753,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                   {hasDocument && msg.message_type === 'document' && msg.file_url && !msg.attachments && (
                     <div className="mb-2">
                       <a
-                        href={msg.file_url.startsWith('http') ? msg.file_url : `https://front.niochat.com.br${msg.file_url}`}
+                        href={msg.file_url.startsWith('http') ? msg.file_url : `https://app.niochat.com.br${msg.file_url}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center space-x-2 p-2 bg-black/10 rounded-lg hover:bg-black/20 transition-colors"
@@ -1798,7 +1798,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                       {msg.file_url && (
                         <div className="bg-white p-2 rounded border">
                           <img
-                            src={msg.file_url.startsWith('http') ? msg.file_url : `https://front.niochat.com.br${msg.file_url}`}
+                            src={msg.file_url.startsWith('http') ? msg.file_url : `https://app.niochat.com.br${msg.file_url}`}
                             alt="QR Code PIX"
                             className="w-32 h-32 mx-auto"
                             onError={(e) => {
