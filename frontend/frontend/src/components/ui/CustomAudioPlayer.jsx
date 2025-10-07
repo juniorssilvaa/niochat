@@ -13,7 +13,6 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
   const [loading, setLoading] = useState(true);
   const [blobUrl, setBlobUrl] = useState(null);
 
-  console.log(' CustomAudioPlayer renderizado:', { src, isCustomer });
 
   // Reset state when src changes
   useEffect(() => {
@@ -37,17 +36,27 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
         !src.includes('localhost') && 
         !src.includes('192.168.') &&
         (src.startsWith('http://') || src.startsWith('https://'))) {
-      console.log('🌐 URL externa detectada, tentando baixar via fetch:', src);
-      downloadExternalAudio(src);
+      // Verificar se a URL parece válida antes de tentar baixar
+      if (src.includes('/api/media/') && !src.includes('audio_17')) {
+        downloadExternalAudio(src);
+      } else {
+        // URL suspeita ou inválida, usar diretamente
+        setLoading(false);
+      }
     } else {
-      console.log(' URL local detectada, usando diretamente:', src);
       setLoading(false);
     }
   }, [src]);
 
   const downloadExternalAudio = async (url) => {
     try {
-      console.log(' Baixando áudio externo:', url);
+      // Verificar se a URL é válida antes de tentar baixar
+      if (!url || url.includes('audio_17') || !url.includes('/api/media/')) {
+        setError('URL de áudio inválida');
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch(url, {
         method: 'GET',
         mode: 'cors',
@@ -62,34 +71,29 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
 
       const blob = await response.blob();
       const newBlobUrl = URL.createObjectURL(blob);
-      console.log(' Áudio externo baixado com sucesso, blob URL criada:', newBlobUrl);
       
       setBlobUrl(newBlobUrl);
       setError(null);
     } catch (error) {
-      console.error(' Erro ao baixar áudio externo:', error);
       setError(`Erro ao baixar áudio: ${error.message}`);
       setLoading(false);
     }
   };
 
   const togglePlay = async () => {
-    console.log(' Tentando reproduzir áudio:', { src, audioRef: !!audioRef.current, isLoaded, loading, blobUrl });
+    // Tentando reproduzir áudio
     
     if (!audioRef.current) {
-      console.log(' Elemento de áudio não encontrado');
       setError('Elemento de áudio não encontrado');
       return;
     }
 
     if (loading) {
-      console.log(' Áudio ainda carregando...');
       setError('Aguarde o áudio carregar...');
       return;
     }
 
     if (!isLoaded) {
-      console.log(' Áudio não carregado, tentando carregar novamente...');
       // Tentar recarregar o áudio
       audioRef.current.load();
       setError('Tentando carregar áudio...');
@@ -98,10 +102,8 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
     
     try {
       if (playing) {
-        console.log(' Pausando áudio');
         audioRef.current.pause();
       } else {
-        console.log(' Reproduzindo áudio');
         await audioRef.current.play();
       }
     } catch (e) {
@@ -124,12 +126,7 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
   const handleLoadedMetadata = () => {
     if (!audioRef.current) return;
     const duration = audioRef.current.duration;
-    console.log(' Metadados carregados:', { 
-      duration, 
-      isFinite: isFinite(duration), 
-      readyState: audioRef.current.readyState,
-      networkState: audioRef.current.networkState
-    });
+    // Metadados carregados
     
     // Verificar se a duração é válida (não é Infinity, NaN ou negativa)
     if (isFinite(duration) && duration > 0 && duration !== Infinity) {
@@ -137,9 +134,9 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
       setIsLoaded(true);
       setLoading(false);
       setError(null);
-      console.log(' Áudio carregado com sucesso, duração:', duration);
+      // Áudio carregado com sucesso
     } else {
-      console.log(' Duração inválida:', duration);
+      // Duração inválida, aguardando metadados
       // Tentar aguardar um pouco mais para os metadados carregarem completamente
       setTimeout(() => {
         if (audioRef.current && isFinite(audioRef.current.duration) && audioRef.current.duration > 0) {
@@ -147,10 +144,10 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
           setIsLoaded(true);
           setLoading(false);
           setError(null);
-          console.log(' Áudio carregado após timeout, duração:', audioRef.current.duration);
+          // Áudio carregado após timeout
         } else {
           // Se ainda não carregou, tentar reproduzir mesmo assim (para áudios ao vivo/streaming)
-          console.log(' Tentando reproduzir áudio sem duração definida (streaming/ao vivo)');
+          // Tentando reproduzir áudio sem duração definida (streaming/ao vivo)
           setDuration(0); // Definir como 0 para áudios sem duração definida
           setIsLoaded(true);
           setLoading(false);
@@ -200,7 +197,7 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
   // Função para tentar recarregar o áudio
   const retryLoad = () => {
     if (audioRef.current) {
-      console.log(' Tentando recarregar áudio...');
+      // Tentando recarregar áudio
       setLoading(true);
       setError(null);
       audioRef.current.load();
@@ -211,9 +208,25 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
   const tryDifferentFormats = async () => {
     if (!src) return;
     
-    console.log(' Tentando diferentes formatos de áudio...');
+    // Primeiro, verificar se o arquivo original existe
+    try {
+      const originalResponse = await fetch(src, { 
+        method: 'HEAD',
+        signal: AbortSignal.timeout(2000)
+      });
+      if (originalResponse.ok) {
+        if (audioRef.current) {
+          audioRef.current.src = src;
+          audioRef.current.load();
+          setError(null);
+          return;
+        }
+      }
+    } catch (error) {
+      // Arquivo original não disponível, continuar com formatos alternativos
+    }
     
-    // Lista de formatos para tentar
+    // Lista de formatos para tentar (apenas se o original não existir)
     const formats = [
       { ext: '.mp3', type: 'audio/mpeg' },
       { ext: '.ogg', type: 'audio/ogg' },
@@ -225,10 +238,12 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
       try {
         // Tentar com extensão diferente
         const testUrl = src.replace(/\.[^/.]+$/, format.ext);
-        console.log(` Tentando formato: ${format.ext}`);
         
         // Verificar se o arquivo existe antes de tentar carregar
-        const response = await fetch(testUrl, { method: 'HEAD' });
+        const response = await fetch(testUrl, { 
+          method: 'HEAD',
+          signal: AbortSignal.timeout(2000) // Timeout de 2 segundos
+        });
         if (response.ok) {
           if (audioRef.current) {
             audioRef.current.src = testUrl;
@@ -238,12 +253,11 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
           }
         }
       } catch (error) {
-        console.log(` Formato ${format.ext} não disponível:`, error);
+        // Silenciar todos os erros para evitar spam no console
       }
     }
     
-    console.log(' Nenhum formato alternativo disponível');
-    setError('Formato não suportado - nenhum formato alternativo disponível');
+    setError('Áudio não disponível - arquivo não encontrado');
   };
 
   // Função para normalizar URL
@@ -326,22 +340,19 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
         src={finalSrc}
         preload="metadata"
         onLoadStart={() => {
-          console.log(' Iniciando carregamento do áudio:', finalSrc);
           setLoading(true);
           setError(null);
         }}
         onCanPlay={() => {
-          console.log(' Áudio pode ser reproduzido');
+          // Áudio pode ser reproduzido
         }}
         onCanPlayThrough={() => {
-          console.log(' Áudio pode ser reproduzido completamente');
+          // Áudio pode ser reproduzido completamente
         }}
         onLoadedMetadata={() => {
-          console.log(' Metadados do áudio carregados');
           handleLoadedMetadata();
         }}
         onDurationChange={() => {
-          console.log(' Duração do áudio mudou:', audioRef.current?.duration);
           if (audioRef.current && isFinite(audioRef.current.duration) && audioRef.current.duration > 0) {
             setDuration(audioRef.current.duration);
             setIsLoaded(true);
@@ -350,29 +361,21 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
           }
         }}
         onLoadedData={() => {
-          console.log(' Dados do áudio carregados');
+          // Dados do áudio carregados
         }}
         onPlay={() => {
-          console.log(' Áudio começou a tocar');
           setPlaying(true);
           setError(null);
         }}
         onPause={() => {
-          console.log(' Áudio pausado');
           setPlaying(false);
         }}
         onTimeUpdate={handleTimeUpdate}
         onEnded={() => {
-          console.log(' Áudio terminou');
           setPlaying(false);
         }}
         onError={(e) => {
-          console.error(' Erro no elemento de áudio:', e);
-          console.error(' Código de erro:', audioRef.current?.error?.code);
-          console.error(' Mensagem de erro:', audioRef.current?.error?.message);
-          console.error(' Network state:', audioRef.current?.networkState);
-          console.error(' Ready state:', audioRef.current?.readyState);
-          console.error(' URL tentada:', finalSrc);
+          // Erro de reprodução de áudio
           
           let errorMessage = 'Erro desconhecido';
           if (audioRef.current?.error) {
@@ -403,7 +406,7 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
           
           // Se for erro de formato não suportado, tentar outros formatos
           if (audioRef.current?.error?.code === 4 || audioRef.current?.error?.code === 3) {
-            console.log(' Formato não suportado, tentando outros formatos...');
+            // Formato não suportado, tentando outros formatos
             tryDifferentFormats();
             setError('Tentando formatos alternativos...');
             return;
@@ -414,11 +417,11 @@ export default function CustomAudioPlayer({ src, isCustomer }) {
           setIsLoaded(false);
         }}
         onAbort={() => {
-          console.log(' Carregamento do áudio abortado');
+          // Carregamento do áudio abortado
           setLoading(false);
         }}
         onSuspend={() => {
-          console.log(' Carregamento do áudio suspenso');
+          // Carregamento do áudio suspenso
         }}
         style={{ display: 'none' }}
         crossOrigin="anonymous"

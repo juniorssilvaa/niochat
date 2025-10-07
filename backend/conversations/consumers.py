@@ -84,6 +84,16 @@ class ConversationConsumer(AsyncWebsocketConsumer):
             'user': event['user'],
             'is_typing': event['is_typing']
         }))
+    
+    # Handle message updates (including reactions)
+    async def message_updated(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'message_updated',
+            'action': event.get('action'),
+            'message': event.get('message'),
+            'sender': event.get('sender'),
+            'timestamp': event.get('timestamp', timezone.now().isoformat())
+        }))
 
 
 class NotificationConsumer(AsyncWebsocketConsumer):

@@ -26,11 +26,11 @@ function UserStatusManager({ user }) {
       const token = localStorage.getItem('token');
       const wsUrl = `${wsProtocol}://${window.location.host}/ws/user/${user.id}/?token=${token}`;
       
-      console.log('Conectando WebSocket do usuário');
+      // Log removido('Conectando WebSocket do usuário');
       const ws = new WebSocket(wsUrl);
       
       ws.onopen = () => {
-        console.log('WebSocket do usuário conectado');
+        // Log removido('WebSocket do usuário conectado');
         websocketRef.current = ws;
         
         // Limpar timeout de reconexão
@@ -52,7 +52,7 @@ function UserStatusManager({ user }) {
           const data = JSON.parse(event.data);
           
           if (data.type === 'pong') {
-            console.log('Pong recebido do usuário');
+            // Pong recebido do usuário
           }
         } catch (error) {
           console.warn('Erro ao processar mensagem WebSocket do usuário:', error);
@@ -60,7 +60,7 @@ function UserStatusManager({ user }) {
       };
       
       ws.onclose = () => {
-        console.log('WebSocket do usuário desconectado');
+        // Log removido('WebSocket do usuário desconectado');
         websocketRef.current = null;
         
         // Limpar ping interval
@@ -71,7 +71,7 @@ function UserStatusManager({ user }) {
         
         // Reconectar após 5 segundos
         reconnectTimeoutRef.current = setTimeout(() => {
-          console.log('Tentando reconectar WebSocket do usuário');
+          // Log removido('Tentando reconectar WebSocket do usuário');
           connectUserWebSocket();
         }, 5000);
       };

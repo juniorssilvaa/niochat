@@ -1456,31 +1456,189 @@ class MessageViewSet(viewsets.ModelViewSet):
             
             # Verificar se a mensagem tem ID externo (para WhatsApp)
             external_id = message.external_id
+            print(f"DEBUG: External ID da mensagem: {external_id}")
+            print(f"DEBUG: Additional attributes: {message.additional_attributes}")
+            
+            # Se não tem external_id, tentar buscar nos additional_attributes
+            if not external_id and message.additional_attributes:
+                external_id = message.additional_attributes.get('external_id')
+                print(f"DEBUG: External ID dos additional_attributes: {external_id}")
+            
             if not external_id:
                 return Response({'error': 'Mensagem não possui ID externo para reação'}, status=status.HTTP_400_BAD_REQUEST)
             
-            # Buscar credenciais Uazapi
+            # IMPORTANTE: Para reações, sempre usar o ID da mensagem ORIGINAL
+            # Se a mensagem é uma reação anterior, buscar o ID da mensagem original
+            if message.message_type == 'reaction' and message.additional_attributes:
+                # Para mensagens de reação, buscar o ID da mensagem original
+                original_external_id = message.additional_attributes.get('original_message_id')
+                if original_external_id:
+                    external_id = original_external_id
+                    print(f"DEBUG: Usando ID da mensagem original para reação: {external_id}")
+                else:
+                    # Se não tem original_message_id, usar o external_id da mensagem original
+                    # que está nos additional_attributes
+                    original_external_id = message.additional_attributes.get('external_id')
+                    if original_external_id:
+                        external_id = original_external_id
+                        print(f"DEBUG: Usando external_id da mensagem original: {external_id}")
+                    else:
+                        print(f"DEBUG: Não foi possível encontrar ID da mensagem original")
+                        return Response({'error': 'Não foi possível encontrar ID da mensagem original para reação'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Se ainda não temos o ID correto, buscar a mensagem original na conversa
+            if not external_id or (message.message_type == 'reaction' and external_id == message.external_id):
+                print(f"DEBUG: Buscando mensagem original na conversa...")
+                # Buscar a mensagem original (não reação) mais recente na conversa
+                original_message = Message.objects.filter(
+                    conversation=conversation,
+                    message_type__in=['text', 'image', 'video', 'audio', 'document'],
+                    external_id__isnull=False
+                ).exclude(
+                    id=message.id
+                ).order_by('-created_at').first()
+                
+                if original_message:
+                    external_id = original_message.external_id
+                    print(f"DEBUG: Mensagem original encontrada: {original_message.id}, external_id: {external_id}")
+                else:
+                    print(f"DEBUG: Nenhuma mensagem original encontrada na conversa")
+                    return Response({'error': 'Não foi possível encontrar mensagem original para reação'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # CORREÇÃO: Se a mensagem atual é uma reação, sempre buscar a mensagem original correspondente
+            if message.message_type == 'reaction':
+                print(f"DEBUG: Mensagem atual é uma reação, buscando mensagem original...")
+                # Buscar a mensagem original mais recente que não seja reação
+                original_message = Message.objects.filter(
+                    conversation=conversation,
+                    message_type__in=['text', 'image', 'video', 'audio', 'document'],
+                    external_id__isnull=False
+                ).exclude(
+                    id=message.id
+                ).order_by('-created_at').first()
+                
+                if original_message:
+                    external_id = original_message.external_id
+                    print(f"DEBUG: Usando mensagem original para reação: {original_message.id}, external_id: {external_id}")
+                else:
+                    print(f"DEBUG: Nenhuma mensagem original encontrada para reação")
+                    return Response({'error': 'Não foi possível encontrar mensagem original para reação'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # IMPORTANTE: Para reações, sempre usar o ID da mensagem ORIGINAL
+            
+            # Debug: verificar formato do external_id
+            print(f"DEBUG: External ID original: {external_id}")
+            print(f"DEBUG: Tipo do external_id: {type(external_id)}")
+            
+            # IMPORTANTE: Para reações, sempre usar o messageid da mensagem ORIGINAL
+            # Não o ID da mensagem de reação anterior
+            if ':' in external_id:
+                # Extrair apenas o ID da mensagem (parte após ':')
+                message_id_only = external_id.split(':', 1)[1]
+                print(f"DEBUG: Usando apenas ID da mensagem ORIGINAL: {message_id_only}")
+                external_id = message_id_only
+            else:
+                print(f"DEBUG: External ID já é apenas o messageid da mensagem ORIGINAL: {external_id}")
+            
+            # IMPORTANTE: Para reações, sempre usar o messageid da mensagem ORIGINAL
+            # Independente de ser primeira reação ou atualização
+            original_message_id = external_id
+            print(f"DEBUG: Usando messageid da mensagem ORIGINAL: {original_message_id}")
+            
+            # Verificar se já existe uma reação anterior na mensagem
+            if message.additional_attributes and 'reaction' in message.additional_attributes:
+                print(f"DEBUG: Mensagem já possui reação anterior: {message.additional_attributes['reaction']}")
+                print(f"DEBUG: Atualizando reação na mensagem ORIGINAL: {original_message_id}")
+            else:
+                print(f"DEBUG: Primeira reação na mensagem ORIGINAL: {original_message_id}")
+            
+            # Buscar credenciais Uazapi (mesma lógica das outras funções)
             provedor = conversation.inbox.provedor
-            uazapi_token = provedor.integracoes_externas.get('whatsapp_token')
-            uazapi_url = provedor.integracoes_externas.get('whatsapp_url')
+            uazapi_token = None
+            uazapi_url = None
+            
+            print(f"DEBUG: Provedor: {provedor.nome if provedor else 'None'}")
+            print(f"DEBUG: Integrações externas: {provedor.integracoes_externas if provedor else 'None'}")
+            
+            # Buscar na integração WhatsApp primeiro
+            whatsapp_integration = WhatsAppIntegration.objects.filter(provedor=provedor).first()
+            if whatsapp_integration:
+                uazapi_token = whatsapp_integration.access_token
+                uazapi_url = (
+                    whatsapp_integration.settings.get('whatsapp_url')
+                    if whatsapp_integration.settings else None
+                )
+                print(f"DEBUG: WhatsApp Integration encontrada: {whatsapp_integration.id}")
+                print(f"DEBUG: Token da integração: {uazapi_token[:10] if uazapi_token else 'None'}...")
+                print(f"DEBUG: URL da integração: {uazapi_url}")
+            else:
+                print(f"DEBUG: Nenhuma integração WhatsApp encontrada")
+            
+            # Fallback para integracoes_externas
+            if not uazapi_token or uazapi_token == '':
+                integracoes = provedor.integracoes_externas or {}
+                uazapi_token = integracoes.get('whatsapp_token')
+                print(f"DEBUG: Token do fallback: {uazapi_token[:10] if uazapi_token else 'None'}...")
+            if not uazapi_url or uazapi_url == '':
+                integracoes = provedor.integracoes_externas or {}
+                uazapi_url = integracoes.get('whatsapp_url')
+                print(f"DEBUG: URL do fallback: {uazapi_url}")
             
             if not uazapi_token or not uazapi_url:
+                print(f"DEBUG: Credenciais não encontradas - Token: {uazapi_token is not None}, URL: {uazapi_url is not None}")
                 return Response({'error': 'Configuração Uazapi não encontrada'}, status=status.HTTP_400_BAD_REQUEST)
             
             # Preparar payload para Uazapi
             chat_id = conversation.contact.phone
-            if not chat_id.endswith('@s.whatsapp.net'):
-                chat_id = f"{chat_id}@s.whatsapp.net"
+            print(f"DEBUG: Phone original: {chat_id}")
             
+            # Se não tem phone, tentar buscar nos additional_attributes do contato
+            if not chat_id and conversation.contact.additional_attributes:
+                chat_id = conversation.contact.additional_attributes.get('chatid')
+                print(f"DEBUG: Chat ID dos additional_attributes: {chat_id}")
+                
+                # Se ainda não tem chatid, tentar sender_lid
+                if not chat_id:
+                    chat_id = conversation.contact.additional_attributes.get('sender_lid')
+                    print(f"DEBUG: Sender LID dos additional_attributes: {chat_id}")
+            
+            if not chat_id:
+                return Response({'error': 'Contato não possui número para reação'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Limpar o chat_id se necessário
+            if chat_id:
+                # Remover sufixos existentes
+                chat_id = chat_id.replace('@s.whatsapp.net', '').replace('@c.us', '').replace('@lid', '')
+                # Adicionar sufixo correto
+                chat_id = f"{chat_id}@s.whatsapp.net"
+            print(f"DEBUG: Chat ID final: {chat_id}")
+            
+            # Verificar se o chat_id é válido
+            if not chat_id or chat_id == '@s.whatsapp.net':
+                return Response({'error': 'Chat ID inválido para reação'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Verificar se o original_message_id é válido
+            if not original_message_id:
+                return Response({'error': 'ID da mensagem original inválido para reação'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Verificar se o emoji é válido
+            if emoji and len(emoji) > 10:
+                return Response({'error': 'Emoji inválido para reação'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # IMPORTANTE: Para reações, sempre usar o messageid da mensagem ORIGINAL
+            # Não o external_id completo
             payload = {
                 'number': chat_id,
                 'text': emoji,
-                'id': external_id
+                'id': original_message_id  # Usar o messageid da mensagem ORIGINAL
             }
             
             print(f"DEBUG: Enviando reação para Uazapi: {payload}")
             print(f"DEBUG: URL Uazapi: {uazapi_url.rstrip('/')}/message/react")
             print(f"DEBUG: Token Uazapi: {uazapi_token[:10]}...")
+            print(f"DEBUG: Chat ID: {chat_id}")
+            print(f"DEBUG: Emoji: {emoji}")
+            print(f"DEBUG: Original Message ID: {original_message_id}")
             
             # Enviar reação via Uazapi
             response = requests.post(
@@ -1495,23 +1653,49 @@ class MessageViewSet(viewsets.ModelViewSet):
             if response.status_code == 200:
                 result = response.json()
                 
-                # Atualizar reação na mensagem local
-                additional_attrs = message.additional_attributes or {}
-                if emoji:
-                    additional_attrs['reaction'] = {
-                        'emoji': emoji,
-                        'timestamp': result.get('reaction', {}).get('timestamp'),
-                        'status': result.get('reaction', {}).get('status', 'sent')
-                    }
+                # Atualizar reação na mensagem original (do cliente)
+                # IMPORTANTE: Uazapi só permite UMA reação ativa por mensagem
+                # Quando uma nova reação é enviada, ela SUBSTITUI a anterior
+                if message.is_from_customer:
+                    # Mensagem do cliente - salvar reação do agente aqui
+                    additional_attrs = message.additional_attributes or {}
+                    if emoji:
+                        # SUBSTITUIR reação anterior (não adicionar nova)
+                        additional_attrs['agent_reaction'] = {
+                            'emoji': emoji,
+                            'timestamp': result.get('reaction', {}).get('timestamp'),
+                            'status': result.get('reaction', {}).get('status', 'sent')
+                        }
+                        print(f"DEBUG: Reação do agente SUBSTITUÍDA na mensagem original: {emoji}")
+                    else:
+                        # Remover reação do agente
+                        if 'agent_reaction' in additional_attrs:
+                            del additional_attrs['agent_reaction']
+                        print(f"DEBUG: Reação do agente REMOVIDA da mensagem original")
+                    
+                    message.additional_attributes = additional_attrs
+                    message.save()
                 else:
-                    # Remover reação
-                    if 'reaction' in additional_attrs:
-                        del additional_attrs['reaction']
+                    # Mensagem do agente - salvar reação enviada aqui
+                    additional_attrs = message.additional_attributes or {}
+                    if emoji:
+                        # SUBSTITUIR reação anterior (não adicionar nova)
+                        additional_attrs['reaction'] = {
+                            'emoji': emoji,
+                            'timestamp': result.get('reaction', {}).get('timestamp'),
+                            'status': result.get('reaction', {}).get('status', 'sent')
+                        }
+                        print(f"DEBUG: Reação enviada SUBSTITUÍDA na mensagem do agente: {emoji}")
+                    else:
+                        # Remover reação
+                        if 'reaction' in additional_attrs:
+                            del additional_attrs['reaction']
+                        print(f"DEBUG: Reação REMOVIDA da mensagem do agente")
+                    
+                    message.additional_attributes = additional_attrs
+                    message.save()
                 
-                message.additional_attributes = additional_attrs
-                message.save()
-                
-                # Emitir evento WebSocket
+                # Emitir evento WebSocket para atualização de reação
                 channel_layer = get_channel_layer()
                 from conversations.serializers import MessageSerializer
                 message_data = MessageSerializer(message).data
@@ -1519,7 +1703,8 @@ class MessageViewSet(viewsets.ModelViewSet):
                 async_to_sync(channel_layer.group_send)(
                     f'conversation_{conversation.id}',
                     {
-                        'type': 'chat_message',
+                        'type': 'message_updated',
+                        'action': 'reaction_updated',
                         'message': message_data,
                         'sender': None,
                         'timestamp': message.updated_at.isoformat(),

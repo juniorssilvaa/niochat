@@ -28,7 +28,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
   const prevConversationsRef = useRef({}); // { [id]: lastMessageIdOrTime }
   const hasSoundInitRef = useRef(false);
   
-  // # Debug logging removed for security Estados para novo atendimento
+  //  Estados para novo atendimento
   const [showMenuAtendimento, setShowMenuAtendimento] = useState(false);
   const [modalNovoContato, setModalNovoContato] = useState(false);
   const [modalContatoExistente, setModalContatoExistente] = useState(false);
@@ -50,7 +50,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
   const [buscandoContato, setBuscandoContato] = useState(false);
   const [contatosEncontrados, setContatosEncontrados] = useState([]);
   
-  // # Debug logging removed for security Função para buscar contatos existentes
+  //  Função para buscar contatos existentes
   const buscarContatos = async (termo) => {
     if (!termo.trim()) {
       setContatosEncontrados([]);
@@ -77,7 +77,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
   // Removido prompt de desbloqueio (UX simplificada)
   useEffect(() => {}, [authReady, user?.sound_notifications_enabled]);
 
-  // # Debug logging removed for security Função para criar atendimento com novo contato
+  //  Função para criar atendimento com novo contato
   const handleNovoContato = async () => {
     if (!novoContato.nome || !novoContato.telefone || !novoContato.mensagem) {
       alert('Por favor, preencha todos os campos');
@@ -94,7 +94,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
     const token = localStorage.getItem('token');
 
     try {
-      // # Debug logging removed for security USAR ENDPOINT COMPLETO que faz tudo
+      //  USAR ENDPOINT COMPLETO que faz tudo
       const userResponse = await axios.get('/api/auth/me/', {
         headers: { Authorization: `Token ${token}` }
       });
@@ -167,7 +167,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
     }
   };
 
-  // # Debug logging removed for security Função para criar atendimento com contato existente
+  //  Função para criar atendimento com contato existente
   const handleContatoExistente = async () => {
     if (!contatoExistente.contato || !contatoExistente.mensagem) {
       alert('Por favor, selecione um contato e digite a mensagem');
@@ -178,7 +178,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
     const token = localStorage.getItem('token');
 
     try {
-      // # Debug logging removed for security USAR ENDPOINT COMPLETO para contato existente
+      //  USAR ENDPOINT COMPLETO para contato existente
       const userResponse = await axios.get('/api/auth/me/', {
         headers: { Authorization: `Token ${token}` }
       });
@@ -263,7 +263,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
   // Função para verificar se há sessão ativa do Django
   const checkDjangoSession = async () => {
     try {
-      console.log('# Debug logging removed for security Verificando sessão Django...');
+      // Log removido(' Verificando sessão Django...');
       const response = await axios.get('/admin/', {
         withCredentials: true,
         maxRedirects: 0,
@@ -272,7 +272,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
       
       // Se retornou HTML da página admin, provavelmente está logado
       if (response.data && typeof response.data === 'string' && response.data.includes('Logout')) {
-        console.log('# Debug logging removed for security Sessão Django ativa detectada');
+        // Log removido(' Sessão Django ativa detectada');
         return true;
       }
       
@@ -282,18 +282,18 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
         // Redirecionamento indica que não está logado
         return false;
       }
-      console.log('# Debug logging removed for security Erro ao verificar sessão Django:', error.message);
+      // Log removido(' Erro ao verificar sessão Django:', error.message);
       return false;
     }
   };
 
   // Função para verificar e fazer login automático
   const checkAuthAndLogin = async () => {
-    console.log('Verificando autenticação...');
+    // Verificando autenticação
     
     try {
       const token = localStorage.getItem('token');
-      console.log('Credenciais verificadas no localStorage');
+      // Credenciais verificadas no localStorage
       if (token) {
         const userRes = await axios.get('/api/auth/me/', {
           headers: { Authorization: `Token ${token}` }
@@ -303,21 +303,21 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
           setUser(userRes.data);
           setUserPermissions(userRes.data.permissions || []);
           setAuthReady(true);
-          console.log('Usuário autenticado com sucesso');
+          // Usuário autenticado com sucesso
           return true;
         }
       } else {
-        console.log('Nenhuma credencial encontrada no localStorage');
+        // Log removido('Nenhuma credencial encontrada no localStorage');
       }
     } catch (error) {
-      console.log('# Debug logging removed for security Token inválido ou expirado:', error.message);
-      console.log('# Debug logging removed for security Detalhes do erro:', error.response?.data);
+      // Log removido(' Token inválido ou expirado:', error.message);
+      // Log removido(' Detalhes do erro:', error.response?.data);
       localStorage.removeItem('token');
     }
     
     // Se não há token válido, verificar se há usuário logado na sessão
     try {
-      console.log('# Debug logging removed for security Verificando sessão ativa...');
+      // Log removido(' Verificando sessão ativa...');
       const userRes = await axios.get('/api/auth/me/', {
         withCredentials: true // Incluir cookies de sessão
       });
@@ -326,30 +326,30 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
         setUser(userRes.data);
         setUserPermissions(userRes.data.permissions || []);
         setAuthReady(true);
-        console.log('Usuário logado via sessão');
-        console.log('# Debug logging removed for security AuthReady definido como true via sessão');
+        // Log removido('Usuário logado via sessão');
+        // Log removido(' AuthReady definido como true via sessão');
         return true;
       }
     } catch (error) {
-      console.log('# Debug logging removed for security Nenhuma sessão ativa encontrada', error.message);
+      // Log removido(' Nenhuma sessão ativa encontrada', error.message);
       
       // Tentar verificar sessão Django como último recurso
       const hasDjangoSession = await checkDjangoSession();
       if (hasDjangoSession) {
-        console.log('# Debug logging removed for security Sessão Django detectada, tentando obter dados do usuário...');
+        // Log removido(' Sessão Django detectada, tentando obter dados do usuário...');
         // Aqui você pode implementar uma chamada para obter dados do usuário da sessão Django
         // Por enquanto, vamos marcar como autenticado
         if (isMounted.current) {
           setAuthReady(true);
           setHasInitialized(true);
-          console.log('# Debug logging removed for security AuthReady definido como true via Django session');
+          // Log removido(' AuthReady definido como true via Django session');
           return true;
         }
       }
     }
     
     // Se chegou aqui, não há autenticação válida
-    console.log('⚠️ Nenhuma autenticação válida encontrada');
+    // Log removido('⚠️ Nenhuma autenticação válida encontrada');
     if (isMounted.current) {
       setHasInitialized(true);
     }
@@ -380,11 +380,11 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
       audioRef.current.currentTime = 0;
       audioRef.current.play().catch((error) => {
         // Autoplay bloqueado: silenciar erro
-        console.log('Autoplay bloqueado pelo navegador:', error);
+        // Log removido('Autoplay bloqueado pelo navegador:', error);
       });
     } catch (e) {
       // Silenciar erros de autoplay
-      console.log('Erro ao reproduzir som:', e);
+      // Log removido('Erro ao reproduzir som:', e);
     }
   };
 
@@ -452,11 +452,10 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
   // Função para buscar conversas
   const fetchConversations = async (forceRefresh = false) => {
     if (!isMounted.current || !authReady) {
-      console.log('⚠️ Componente não montado ou auth não ready');
+      // Log removido('⚠️ Componente não montado ou auth não ready');
       return;
     }
     
-    console.log('# Debug logging removed for security Buscando conversas...', { forceRefresh, provedorId, authReady });
     
     if (forceRefresh) {
       setLoading(true);
@@ -464,9 +463,8 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
     
     try {
       const token = localStorage.getItem('token');
-      console.log('Credenciais encontradas');
       if (!token) {
-        console.error('# Debug logging removed for security Token não encontrado');
+        console.error(' Token não encontrado');
         return;
       }
 
@@ -517,7 +515,6 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
         }
       } catch (_) {}
 
-      console.log('# Debug logging removed for security Conversas ativas encontradas:', activeConversations.length);
 
       setConversations(activeConversations);
       setHasInitialized(true);
@@ -525,18 +522,18 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
       
     } catch (err) {
       if (isMounted.current) {
-        console.error('# Debug logging removed for security Erro ao carregar conversas:', err);
+        console.error(' Erro ao carregar conversas:', err);
         
         // Se o erro for de autenticação, tentar reautenticar
         if (err.response?.status === 401) {
-          console.log('# Debug logging removed for security Erro de autenticação, tentando reautenticar...');
+          // Log removido(' Erro de autenticação, tentando reautenticar...');
           setAuthReady(false);
           await checkAuthAndLogin();
         } else if (err.response?.status === 403) {
-          console.log('🚫 Acesso negado, usuário não tem permissão para ver conversas');
+          // Log removido('🚫 Acesso negado, usuário não tem permissão para ver conversas');
           setConversations([]);
         } else {
-          console.log('⚠️ Outro tipo de erro, definindo conversas vazias');
+          // Log removido('⚠️ Outro tipo de erro, definindo conversas vazias');
           setConversations([]);
         }
         
@@ -566,7 +563,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
   // Buscar conversas quando auth estiver pronto
   useEffect(() => {
     if (authReady && isMounted.current) {
-      console.log('# Debug logging removed for security Auth pronto, buscando conversas...');
+      // Auth pronto, buscando conversas
       fetchConversations(true);
     }
   }, [authReady]);
@@ -584,7 +581,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
       return;
     }
 
-    console.log('# Debug logging removed for security Conectando WebSocket para provedor:', provedorId);
+    // Conectando WebSocket para provedor
     
     const connectWebSocket = () => {
       const token = localStorage.getItem('token');
@@ -593,12 +590,11 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
       wsRef.current = ws;
       
       const wsTimeout = setTimeout(() => {
-        console.log('Timeout do WebSocket');
+        // Log removido('Timeout do WebSocket');
         setWsConnected(false);
       }, 5000);
       
       ws.onopen = () => {
-        console.log('# Debug logging removed for security WebSocket conectado');
         clearTimeout(wsTimeout);
         setWsConnected(true);
       };
@@ -606,7 +602,6 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('# Debug logging removed for security WebSocket recebeu:', data);
           
           // Processar todos os tipos de eventos relacionados a conversas
           if (data.type === 'conversation_created' || 
@@ -643,7 +638,6 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
               }
             } catch (_) {}
             
-            console.log('# Debug logging removed for security Atualização recebida via WebSocket, recarregando lista');
             setNewMessageNotification(true);
             setTimeout(() => setNewMessageNotification(false), 3000);
             
@@ -651,12 +645,12 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
             setTimeout(() => fetchConversations(true), 0);
           }
         } catch (error) {
-          console.error('# Debug logging removed for security Erro ao processar mensagem WebSocket:', error);
+          console.error(' Erro ao processar mensagem WebSocket:', error);
         }
       };
       
       ws.onclose = () => {
-        console.log('# Debug logging removed for security WebSocket desconectado');
+        // Log removido(' WebSocket desconectado');
         clearTimeout(wsTimeout);
         setWsConnected(false);
         
@@ -667,7 +661,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
       };
       
       ws.onerror = (error) => {
-        console.error('# Debug logging removed for security Erro no WebSocket:', error);
+        console.error(' Erro no WebSocket:', error);
         clearTimeout(wsTimeout);
         setWsConnected(false);
       };
@@ -713,7 +707,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
   // CORREÇÃO: Listener para atualização de permissões do usuário atual
   useEffect(() => {
     const handlePermissionsUpdate = (event) => {
-      console.log('Permissões do usuário atualizadas');
+      // Log removido('Permissões do usuário atualizadas');
       setUserPermissions(event.detail.permissions);
       
       // Recarregar conversas para aplicar as novas permissões
@@ -829,15 +823,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
         const assignedUser = c.additional_attributes?.assigned_user;
         const assignedTeam = c.additional_attributes?.assigned_team;
         
-        console.log('🔍 DEBUG Não atribuídas:', {
-          conversationId: c.id,
-          status: status,
-          assignee: c.assignee,
-          assignedUser: assignedUser,
-          assignedTeam: assignedTeam,
-          userId: user?.id,
-          userTeam: user?.team?.id
-        });
+        // Debug removido
         
         // Conversas sem assignee OU transferidas para este usuário/equipe
         if (!c.assignee || (assignedUser && user && (assignedUser.id === user.id || assignedUser.id === user.id.toString()))) {
@@ -879,7 +865,30 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
   }, [conversations, activeTab, searchTerm, user?.id, userPermissions]);
 
   return (
-    <div className="w-80 border-r border-border bg-background">
+    <div className="w-80 border-r border-border bg-background flex flex-col h-full">
+      <style>{`
+        .conversation-list::-webkit-scrollbar {
+          width: 6px;
+          background: transparent;
+        }
+        .conversation-list::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .conversation-list::-webkit-scrollbar-thumb {
+          background: #4a5568;
+          border-radius: 3px;
+          border: none;
+        }
+        .conversation-list::-webkit-scrollbar-thumb:hover {
+          background: #2d3748;
+        }
+        .conversation-list {
+          scrollbar-width: thin;
+          scrollbar-color: #4a5568 transparent;
+          overflow-y: auto !important;
+          max-height: calc(100vh - 200px) !important;
+        }
+      `}</style>
       {/* Header */}
       <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between mb-4">
@@ -924,7 +933,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  console.log('# Debug logging removed for security Clicou nos 3 pontinhos da página Atendimento');
+                  // Log removido(' Clicou nos 3 pontinhos da página Atendimento');
                   setShowMenuAtendimento(!showMenuAtendimento);
                 }}
                 className="text-muted-foreground hover:text-foreground p-1"
@@ -1008,7 +1017,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
       </div>
 
       {/* Conversation List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto conversation-list">
         {!authReady ? (
           <div className="p-3 text-center text-muted-foreground">
             {!hasInitialized ? (
@@ -1108,7 +1117,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
                     {conversation.last_message?.content || 'Nenhuma mensagem'}
                   </p>
                   
-                  {/* # Debug logging removed for security Tempo de atendimento em aberto */}
+                  {/*  Tempo de atendimento em aberto */}
                   <div className="mt-2">
                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-600 text-white">
                       <Clock size={12} className="mr-1" />
@@ -1137,7 +1146,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
         )}
       </div>
       
-      {/* # Debug logging removed for security Modal de novo contato */}
+      {/*  Modal de novo contato */}
       <Dialog open={modalNovoContato} onOpenChange={setModalNovoContato}>
         <DialogContent className="max-w-md w-full">
           <DialogHeader>
@@ -1210,7 +1219,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
         </DialogContent>
       </Dialog>
 
-      {/* # Debug logging removed for security Modal de contato existente */}
+      {/*  Modal de contato existente */}
       <Dialog open={modalContatoExistente} onOpenChange={setModalContatoExistente}>
         <DialogContent className="max-w-md w-full">
           <DialogHeader>

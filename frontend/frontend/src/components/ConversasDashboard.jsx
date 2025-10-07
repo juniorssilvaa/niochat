@@ -175,18 +175,18 @@ export default function ConversasDashboard() {
     if (modalConversa && modalConversa.id) {
       setModalLoading(true);
       const token = localStorage.getItem('token');
-      console.log(`# Debug logging removed for security Carregando mensagens da conversa ${modalConversa.id}`);
+      console.log(` Carregando mensagens da conversa ${modalConversa.id}`);
       axios.get(`/api/messages/?conversation=${modalConversa.id}&page_size=1000`, {
         headers: { Authorization: `Token ${token}` }
       })
         .then(res => {
-          console.log('# Debug logging removed for security Mensagens carregadas:', res.data);
+          console.log(' Mensagens carregadas:', res.data);
           const mensagens = res.data.results || res.data;
-          console.log('# Debug logging removed for security Total de mensagens:', mensagens.length);
+          console.log(' Total de mensagens:', mensagens.length);
           setModalMensagens(mensagens);
         })
         .catch(error => {
-          console.error('# Debug logging removed for security Erro ao carregar mensagens:', error);
+          console.error(' Erro ao carregar mensagens:', error);
           setModalMensagens([]);
         })
         .finally(() => setModalLoading(false));
@@ -216,16 +216,16 @@ export default function ConversasDashboard() {
               headers: { Authorization: `Token ${token}` }
             })
             .then(res => {
-              console.log('# Debug logging removed for security Mensagens recarregadas:', res.data);
+              console.log(' Mensagens recarregadas:', res.data);
               const mensagens = res.data.results || res.data;
               setModalMensagens(mensagens);
             })
             .catch(error => {
-              console.error('# Debug logging removed for security Erro ao recarregar mensagens:', error);
+              console.error(' Erro ao recarregar mensagens:', error);
             });
           }
         } catch (e) { 
-          console.error('# Debug logging removed for security Erro ao processar WebSocket modal:', e);
+          console.error(' Erro ao processar WebSocket modal:', e);
         }
       };
       ws.onclose = () => { wsRef.current = null; };
@@ -451,7 +451,7 @@ export default function ConversasDashboard() {
               data.type === 'conversation_event' ||
               data.event_type === 'new_message') {
             
-            console.log('# Debug logging removed for security Recarregando conversas devido a evento WebSocket');
+            console.log(' Recarregando conversas devido a evento WebSocket');
             
             // Recarregar todas as conversas para garantir dados atualizados
             setTimeout(async () => {
@@ -468,9 +468,9 @@ export default function ConversasDashboard() {
                 const atendimento = conversasData.filter(isEmAtendimento).length;
                 setCounts({ ia, fila, atendimento });
                 
-                console.log('# Debug logging removed for security Conversas atualizadas via WebSocket');
+                console.log(' Conversas atualizadas via WebSocket');
               } catch (error) {
-                console.error('# Debug logging removed for security Erro ao atualizar conversas:', error);
+                console.error(' Erro ao atualizar conversas:', error);
               }
             }, 100);
           }
@@ -751,14 +751,14 @@ export default function ConversasDashboard() {
 
   // Renderização dos balões de mensagem
   function renderMensagem(msg) {
-    // # Debug logging removed for security CORRIGIDO: Melhor detecção de tipo de mensagem
+    //  CORRIGIDO: Melhor detecção de tipo de mensagem
     const isCliente = msg.is_from_customer === true;
     const isAtendente = msg.is_from_customer === false && !msg.sender_type?.includes('bot');
     const isBot = msg.is_from_customer === false && (msg.sender_type?.includes('bot') || msg.message_type === 'outgoing');
     
     const align = isCliente ? 'justify-start' : 'justify-end';
     
-    // # Debug logging removed for security CORRIGIDO: Agente e IA ambos em verde
+    //  CORRIGIDO: Agente e IA ambos em verde
     const bg = (isBot || isAtendente) ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-800';
     const icon = (isBot || isAtendente) ? <User className="w-5 h-5 text-green-600" /> : <User className="w-5 h-5 text-gray-600" />;
     
@@ -766,7 +766,7 @@ export default function ConversasDashboard() {
       <div key={msg.id} className={`flex ${align} mb-4`}>
         {isCliente && (
           <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 overflow-hidden bg-gray-300">
-            {/* # Debug logging removed for security CORRIGIDO: Foto de perfil do cliente */}
+            {/*  CORRIGIDO: Foto de perfil do cliente */}
             {modalConversa?.contact?.avatar ? (
               <img 
                 src={modalConversa.contact.avatar} 
@@ -1139,7 +1139,7 @@ export default function ConversasDashboard() {
                       <div className="text-sm text-muted-foreground">
                         {formatPhone(modalConversa?.contact?.phone)} • {getChannelDisplayName(modalConversa?.inbox)} • {getStatusText(modalConversa?.status, modalConversa)}
                       </div>
-                      {/* # Debug logging removed for security Tempo de atendimento em aberto */}
+                      {/*  Tempo de atendimento em aberto */}
                       <div className="text-xs text-white bg-gray-600 px-2 py-1 rounded-full mt-1 inline-block">
                         Atendimento há: {modalConversa?.created_at ? (() => {
                           const agora = new Date();

@@ -35,7 +35,7 @@ export default function useOnlineUsers() {
           .filter(user => user.is_online)
           .map(user => user.id);
         setOnlineUsers(new Set(onlineUserIds));
-        console.log('Status online atualizado via API:', onlineUserIds);
+        // Status online atualizado via API
       }
     } catch (error) {
       console.warn('Erro ao buscar usuários online via API:', error);
@@ -58,11 +58,11 @@ export default function useOnlineUsers() {
       const token = localStorage.getItem('token');
       const wsUrl = `${wsProtocol}://${window.location.host}/ws/user_status/?token=${token}`;
       
-      console.log('Conectando ao WebSocket de status');
+      // Log removido('Conectando ao WebSocket de status');
       const ws = new WebSocket(wsUrl);
       
       ws.onopen = () => {
-        console.log('WebSocket de status conectado');
+        // Log removido('WebSocket de status conectado');
         setWebsocket(ws);
         
         // Buscar status inicial via API
@@ -78,14 +78,14 @@ export default function useOnlineUsers() {
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('Mensagem WebSocket status:', data);
+          // Log removido('Mensagem WebSocket status:', data);
           
           if (data.type === 'user_status_update' && data.users) {
             const onlineUserIds = data.users
               .filter(u => u.is_online)
               .map(u => u.id);
             setOnlineUsers(new Set(onlineUserIds));
-            console.log('Status online atualizado via WebSocket:', onlineUserIds);
+            // Log removido('Status online atualizado via WebSocket:', onlineUserIds);
           }
         } catch (error) {
           console.warn('Erro ao processar mensagem WebSocket:', error);
@@ -93,12 +93,12 @@ export default function useOnlineUsers() {
       };
       
       ws.onclose = () => {
-        console.log('WebSocket de status desconectado');
+        // Log removido('WebSocket de status desconectado');
         setWebsocket(null);
         
         // Reconectar após 5 segundos
         reconnectTimeoutRef.current = setTimeout(() => {
-          console.log('Tentando reconectar WebSocket...');
+          // Log removido('Tentando reconectar WebSocket...');
           connectWebSocket();
         }, 5000);
       };

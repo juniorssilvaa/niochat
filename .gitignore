@@ -300,6 +300,18 @@ logs/
 .env.local
 .env.development
 
+# Configurações de desenvolvimento (NÃO COMMITAR)
+frontend/frontend/vite.config.dev.js
+frontend/frontend/.env.development
+frontend/frontend/src/config/environment.dev.js
+frontend/frontend/scripts/switch-env.js
+frontend/frontend/ENVIRONMENT_SETUP.md
+
+# Configurações de produção (COMMITAR)
+# frontend/frontend/vite.config.js - MANTER (PRODUÇÃO)
+# frontend/frontend/vite.config.prod.js - MANTER
+# frontend/frontend/src/config/environment.js - MANTER
+
 # Arquivos de desenvolvimento local (conforme CLOUDFLARE_TUNNEL_REPORT.md)
 CLOUDFLARE_TUNNEL_REPORT.md
 cloudflare-redirect.html

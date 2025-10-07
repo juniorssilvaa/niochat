@@ -16,7 +16,7 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 8012,
     strictPort: true,
-    allowedHosts: ['app.niochat.com.br', 'localhost', '127.0.0.1'], // hosts permitidos
+    allowedHosts: ['app.niochat.com.br', 'localhost', '127.0.0.1'], // PRODUÇÃO
     cors: true,                  // habilitar CORS
     headers: {
       'Access-Control-Allow-Origin': '*',

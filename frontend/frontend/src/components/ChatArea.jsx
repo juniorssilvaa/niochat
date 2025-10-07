@@ -23,6 +23,7 @@ import telegramIcon from '../assets/telegram.png';
 import gmailIcon from '../assets/gmail.png';
 import instagramIcon from '../assets/instagram.png';
 import CustomAudioPlayer from './ui/CustomAudioPlayer';
+import { buildMediaUrl } from '../config/environment';
 
 const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) => {
   const navigate = useNavigate();
@@ -55,6 +56,8 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const messagesEndRef = useRef(null);
+  const scrollContainerRef = useRef(null);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const wsRef = useRef(null);
   const [loadingProfilePic, setLoadingProfilePic] = useState(false);
   const [showResolverDropdown, setShowResolverDropdown] = useState(false);
@@ -90,7 +93,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
   const [audioProgress, setAudioProgress] = useState({});
   const audioRefs = useRef({});
 
-  // # Debug logging removed for security ESTADO PARA CONTROLE DE MENSAGENS PENDENTES
+  //  ESTADO PARA CONTROLE DE MENSAGENS PENDENTES
   const [pendingMessages, setPendingMessages] = useState(new Set());
 
   // Função para processar conteúdo da mensagem (parsear JSON se necessário)
@@ -124,18 +127,18 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
     return content;
   };
 
-  // # Debug logging removed for security FUNÇÃO PARA LIMPAR MENSAGENS DUPLICADAS
+  //  FUNÇÃO PARA LIMPAR MENSAGENS DUPLICADAS
   const cleanDuplicateMessages = (messages) => {
     const uniqueMessages = [];
     const seenIds = new Set();
     
     messages.forEach(msg => {
-      // # Debug logging removed for security CORRIGIDO: Permitir TODAS as mensagens com ID válido
+      //  CORRIGIDO: Permitir TODAS as mensagens com ID válido
       if (msg.id && !seenIds.has(msg.id)) {
         seenIds.add(msg.id);
         uniqueMessages.push(msg);
       } 
-      // # Debug logging removed for security CORRIGIDO: Permitir mensagens temporárias SEM ID apenas
+      //  CORRIGIDO: Permitir mensagens temporárias SEM ID apenas
       else if (!msg.id && (msg.isTemporary || msg.is_sending)) {
         // Verificar duplicatas por conteúdo e timestamp apenas para temporárias
         const isDuplicate = uniqueMessages.some(existingMsg => {
@@ -150,7 +153,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
           uniqueMessages.push(msg);
         }
       }
-      // # Debug logging removed for security NOVO: Fallback para mensagens sem ID que não são temporárias (casos raros)
+      //  NOVO: Fallback para mensagens sem ID que não são temporárias (casos raros)
       else if (!msg.id && !msg.isTemporary && !msg.is_sending) {
         // Verificar se já existe uma mensagem igual por conteúdo e timestamp
         const isDuplicate = uniqueMessages.some(existingMsg => {
@@ -204,7 +207,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
       const processedMessages = messages.map(msg => {
         let processedContent = processMessageContent(msg.content, msg.is_from_customer);
         
-        // # Debug logging removed for security Remover assinatura do agente se presente
+        //  Remover assinatura do agente se presente
         if (processedContent && processedContent.match(/\*.*disse:\*\n/) && !msg.is_from_customer) {
           processedContent = processedContent.replace(/\*.*disse:\*\n/, '');
         }
@@ -261,7 +264,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
               statusUpdates[user.id] = user.is_online;
             });
             setAgentsStatus(prev => ({ ...prev, ...statusUpdates }));
-            console.log('Status dos usuários atualizado via polling:', statusUpdates);
+            // Status dos usuários atualizado via polling
           }
         } catch (error) {
           console.error('Erro ao buscar status dos usuários:', error);
@@ -282,36 +285,36 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
     };
   }, [showTransferDropdown, agents]);
 
-  // # Debug logging removed for security WebSocket CORRIGIDO - Melhor controle de duplicatas
+  //  WebSocket CORRIGIDO - Melhor controle de duplicatas
   useEffect(() => {
     if (!conversation) return;
 
     const connectWebSocket = () => {
       const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
       const wsUrl = `${wsProtocol}://${window.location.host}/ws/conversations/${conversation.id}/`;
-      console.log('# Debug logging removed for security ChatArea conectando WebSocket:', wsUrl);
+        // Conectando WebSocket
       const ws = new window.WebSocket(wsUrl);
       wsRef.current = ws;
       
       ws.onopen = () => {
-        console.log('# Debug logging removed for security ChatArea WebSocket conectado');
+        // WebSocket conectado
       };
       
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('📨 ChatArea WebSocket recebeu:', data);
+          // WebSocket recebeu dados
           
           if (data.type === 'message' || data.type === 'chat_message' || data.type === 'message_created') {
             if (data.message) {
               setMessages(currentMessages => {
-                // # Debug logging removed for security Verificação mais robusta de duplicatas
+                //  Verificação mais robusta de duplicatas
                 const messageExists = currentMessages.some(m => m.id === data.message.id);
                 
                 if (!messageExists) {
                   let processedContent = processMessageContent(data.message.content, data.message.is_from_customer);
                   
-                  // # Debug logging removed for security Remover assinatura do agente se presente (WebSocket)
+                  //  Remover assinatura do agente se presente (WebSocket)
                   if (processedContent && processedContent.match(/\*.*disse:\*\n/) && !data.message.is_from_customer) {
                     processedContent = processedContent.replace(/\*.*disse:\*\n/, '');
                   }
@@ -321,7 +324,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                     content: processedContent
                   };
                   
-                  // # Debug logging removed for security Remover das mensagens pendentes se existir
+                  //  Remover das mensagens pendentes se existir
                   setPendingMessages(prev => {
                     const newSet = new Set(prev);
                     // Remover a mensagem original (sem assinatura) das pendentes
@@ -330,7 +333,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                     return newSet;
                   });
                   
-                  // # Debug logging removed for security Remover mensagens temporárias relacionadas
+                  //  Remover mensagens temporárias relacionadas
                   const filteredMessages = currentMessages.filter(m => {
                     // Remover mensagens temporárias com conteúdo similar
                     if (m.isTemporary || m.is_sending) {
@@ -349,9 +352,16 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
               });
             }
           }
+
+          // Atualização de reação em tempo real (via webhook)
+          if (data.type === 'message_updated' && data.action === 'reaction_updated') {
+            // Quando a reação vem do cliente via webhook, recebemos apenas ids/emoji
+            // Para manter o estado consistente, recarregar a lista de mensagens
+            fetchMessages();
+          }
           
           if (data.type === 'conversation_updated') {
-            console.log('# Debug logging removed for security Conversa atualizada via WebSocket');
+            // Conversa atualizada via WebSocket
             if (onConversationUpdate) {
               onConversationUpdate(data.conversation || conversation);
             }
@@ -359,10 +369,10 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
           
           // Listener para eventos de encerramento de conversa
           if (data.type === 'conversation_event') {
-            console.log('📨 ChatArea recebeu evento de conversa:', data);
+            // Evento de conversa recebido
             
             if (data.event_type === 'conversation_closed' || data.event_type === 'conversation_ended') {
-              console.log('🔒 Conversa encerrada via WebSocket');
+              // Conversa encerrada via WebSocket
               
               // Atualizar estado da conversa
               if (onConversationUpdate) {
@@ -387,7 +397,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
             
                       // Listener para atribuição de conversa
           if (data.event_type === 'conversation_assigned') {
-            console.log('👤 Conversa atribuída via WebSocket');
+            // Conversa atribuída via WebSocket
             
             if (onConversationUpdate) {
               onConversationUpdate({
@@ -399,11 +409,11 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
           
           // Listener para mudanças de provedor (isolamento multi-tenant)
           if (data.event_type === 'provedor_changed') {
-            console.log('🏢 Mudança de provedor detectada via WebSocket');
+            // Mudança de provedor detectada via WebSocket
             
             // Verificar se a conversa atual pertence ao provedor correto
             if (data.data.provedor_id !== conversation?.contact?.provedor?.id) {
-              console.log('⚠️ Conversa não pertence ao provedor atual, redirecionando...');
+              // Conversa não pertence ao provedor atual, redirecionando
               
               // Redirecionar para lista de conversas
               if (onConversationClose) {
@@ -420,16 +430,16 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
           }
           
         } catch (error) {
-          console.error('# Debug logging removed for security Erro ao processar mensagem WebSocket ChatArea:', error);
+          console.error('Erro ao processar mensagem WebSocket:', error);
         }
       };
       
       ws.onerror = (error) => {
-        console.error('# Debug logging removed for security Erro no WebSocket ChatArea:', error);
+        console.error('Erro no WebSocket:', error);
       };
       
       ws.onclose = (event) => {
-        console.log('# Debug logging removed for security WebSocket ChatArea desconectado:', event.code, event.reason);
+        // WebSocket desconectado
         if (conversation && conversation.id) {
           setTimeout(connectWebSocket, 3000);
         }
@@ -439,7 +449,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
     connectWebSocket();
     
     return () => {
-      console.log('# Debug logging removed for security Fechando WebSocket');
+      // Fechando WebSocket
       if (wsRef.current) {
         if (wsRef.current.heartbeatInterval) {
           clearInterval(wsRef.current.heartbeatInterval);
@@ -452,7 +462,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
     };
   }, [conversation]);
 
-  // # Debug logging removed for security LIMPEZA AUTOMÁTICA DE MENSAGENS TEMPORÁRIAS
+  //  LIMPEZA AUTOMÁTICA DE MENSAGENS TEMPORÁRIAS
   useEffect(() => {
     const cleanupInterval = setInterval(() => {
       setMessages(currentMessages => {
@@ -470,13 +480,10 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
     // Sistema de refresh automático para evitar cache desatualizado
     const refreshInterval = setInterval(() => {
       if (conversation && conversation.id) {
-        console.log('Refresh automático de conversa para evitar cache desatualizado');
+        // Refresh automático de conversa para evitar cache desatualizado
         
         // Recarregar mensagens da conversa
         fetchMessages();
-        
-        // Verificar se a conversa ainda está ativa
-        checkConversationStatus();
       }
     }, 30000); // Refresh a cada 30 segundos
 
@@ -490,20 +497,31 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  const handleScrollContainer = () => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const threshold = 80; // px de tolerância para considerar "no fundo"
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    const atBottom = distanceFromBottom <= threshold;
+    setShouldAutoScroll(atBottom);
+  };
 
-  // # Debug logging removed for security handleSendMessage CORRIGIDO - SEM mensagem temporária
+  useEffect(() => {
+    if (shouldAutoScroll) {
+      scrollToBottom();
+    }
+  }, [messages, shouldAutoScroll]);
+
+  //  handleSendMessage CORRIGIDO - SEM mensagem temporária
   const handleSendMessage = async () => {
     if (!message.trim() || !conversation) return;
     setError('');
     const token = localStorage.getItem('token');
     
-    // # Debug logging removed for security Marcar mensagem como pendente para evitar duplicatas
+    //  Marcar mensagem como pendente para evitar duplicatas
     const messageKey = message.trim();
     if (pendingMessages.has(messageKey)) {
-      console.log('🚫 Mensagem já está sendo enviada, ignorando...');
+      // Mensagem já está sendo enviada, ignorando
       return;
     }
     
@@ -521,7 +539,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
       // Formatar mensagem com nome do usuário para enviar ao WhatsApp
       const formattedMessage = `*${userName} disse:*\n${message}`;
       
-      // # Debug logging removed for security NÃO adicionar mensagem temporária - deixar o WebSocket fazer isso
+      //  NÃO adicionar mensagem temporária - deixar o WebSocket fazer isso
       
       // Preparar payload para envio
       const payload = {
@@ -534,13 +552,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
         const replyId = replyingToMessage.external_id || replyingToMessage.additional_attributes?.external_id || replyingToMessage.id;
         payload.reply_to_message_id = replyId;
         payload.reply_to_content = replyingToMessage.content;
-        console.log('DEBUG: Enviando resposta para mensagem:', {
-          original_id: replyingToMessage.id,
-          external_id: replyingToMessage.external_id,
-          additional_external_id: replyingToMessage.additional_attributes?.external_id,
-          reply_id: replyId,
-          content: replyingToMessage.content
-        });
+        // Debug removido
       }
       
       // Enviar mensagem formatada para o WhatsApp
@@ -548,10 +560,10 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
         headers: { Authorization: `Token ${token}` }
       });
       
-      // # Debug logging removed for security Se o WebSocket não funcionar, adicionar mensagem do response
+      //  Se o WebSocket não funcionar, adicionar mensagem do response
       setTimeout(() => {
         if (pendingMessages.has(messageKey)) {
-          console.log('WebSocket não recebeu mensagem, adicionando do response');
+          // WebSocket não recebeu mensagem, adicionando do response
           if (response.data && response.data.id) {
             const processedMessage = {
               ...response.data,
@@ -582,10 +594,10 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
       setReplyingToMessage(null);
       
     } catch (e) {
-      console.error('# Debug logging removed for security Erro ao enviar mensagem:', e);
+      console.error(' Erro ao enviar mensagem:', e);
       setError('Erro ao enviar mensagem.');
       
-      // # Debug logging removed for security Remover das pendentes em caso de erro
+      //  Remover das pendentes em caso de erro
       setPendingMessages(prev => {
         const newSet = new Set(prev);
         newSet.delete(messageKey);
@@ -701,22 +713,18 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
     if (!audioBlob || !conversation) return;
     
     if (sendingMedia) {
-      console.log('🚫 Já está enviando áudio, ignorando...');
+      // Já está enviando áudio, ignorando
       return;
     }
     
     try {
-      console.log('🎙️ Iniciando envio de áudio PTT...');
+      // Iniciando envio de áudio PTT
       
       const audioFile = new File([audioBlob], `audio_${Date.now()}.webm`, {
         type: 'audio/webm'
       });
       
-      console.log('🎙️ Dados do áudio:', {
-        name: audioFile.name,
-        size: audioFile.size,
-        type: audioFile.type
-      });
+      // Dados do áudio
       
       const maxSize = 16 * 1024 * 1024;
       if (audioFile.size > maxSize) {
@@ -729,27 +737,27 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
         return;
       }
       
-      console.log('# Debug logging removed for security Validações passaram, enviando áudio...');
+      // Validações passaram, enviando áudio
       
       const finalMediaType = 'ptt';
-      console.log(`🎙️ Usando media_type: ${finalMediaType}`);
+      // Usando media_type
       
       if (finalMediaType !== 'ptt') {
-        console.error('# Debug logging removed for security ERRO: media_type não é PTT!');
+        console.error(' ERRO: media_type não é PTT!');
         setError('Erro interno: tipo de mídia inválido');
         return;
       }
       
       await handleSendMedia(audioFile, finalMediaType, null);
       
-      console.log('# Debug logging removed for security Áudio enviado com sucesso!');
+      // Log removido(' Áudio enviado com sucesso!');
       
       setAudioBlob(null);
       setAudioUrl(null);
       setRecordingTime(0);
       
     } catch (error) {
-      console.error('# Debug logging removed for security Erro ao enviar áudio:', error);
+      console.error(' Erro ao enviar áudio:', error);
       setError('Erro ao enviar áudio: ' + error.message);
     }
   };
@@ -761,7 +769,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
   };
 
   const playAudio = (messageId, audioUrl) => {
-    console.log('🎵 Reproduzindo áudio:', { messageId, audioUrl });
+    // Log removido('🎵 Reproduzindo áudio:', { messageId, audioUrl });
     
     if (playingAudio && playingAudio !== messageId) {
       const prevAudio = audioRefs.current[playingAudio];
@@ -826,12 +834,12 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
     };
   }, [audioUrl]);
 
-  // # Debug logging removed for security handleSendMedia CORRIGIDO - SEM mensagem temporária
+  //  handleSendMedia CORRIGIDO - SEM mensagem temporária
   const handleSendMedia = async (file, mediaType, caption = '') => {
     if (!conversation) return;
     
     if (sendingMedia) {
-      console.log('🚫 Já está enviando mídia, ignorando...');
+      // Log removido('🚫 Já está enviando mídia, ignorando...');
       return;
     }
     
@@ -839,13 +847,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
     setSendingMedia(true);
     const token = localStorage.getItem('token');
     
-    console.log('Iniciando envio de mídia:', {
-      fileName: file.name,
-      fileSize: file.size,
-      mediaType,
-      caption,
-      conversationId: conversation.id
-    });
+    // Iniciando envio de mídia
     
     const maxSize = 16 * 1024 * 1024;
     if (file.size > maxSize) {
@@ -869,7 +871,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
     }
     
     try {
-      // # Debug logging removed for security NÃO adicionar mensagem de "enviando..." - deixar o WebSocket fazer isso
+      //  NÃO adicionar mensagem de "enviando..." - deixar o WebSocket fazer isso
       
       // Buscar informações do usuário atual se houver caption (exceto para PTT)
       let formattedCaption = caption;
@@ -896,24 +898,10 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
       if (replyingToMessage) {
         const replyId = replyingToMessage.external_id || replyingToMessage.additional_attributes?.external_id || replyingToMessage.id;
         formData.append('reply_to_message_id', replyId);
-        console.log('DEBUG: Enviando mídia como resposta para mensagem:', {
-          original_id: replyingToMessage.id,
-          external_id: replyingToMessage.external_id,
-          additional_external_id: replyingToMessage.additional_attributes?.external_id,
-          reply_id: replyId,
-          content: replyingToMessage.content
-        });
+        // Enviando mídia como resposta para mensagem
       }
       
-      console.log('Enviando mídia para o backend');
-      console.log('FormData contents:');
-      for (let [key, value] of formData.entries()) {
-        if (key === 'file') {
-          console.log(`   - ${key}: File(${value.name}, ${value.size} bytes, ${value.type})`);
-        } else {
-          console.log(`   - ${key}: ${value}`);
-        }
-      }
+      // Enviando mídia para o backend
       
       // Enviar mídia com caption formatado para o WhatsApp
       const response = await axios.post('/api/messages/send_media/', formData, {
@@ -923,15 +911,15 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
         }
       });
       
-      console.log('# Debug logging removed for security Mídia enviada com sucesso:', response.data);
+      // Log removido(' Mídia enviada com sucesso:', response.data);
       
-      // # Debug logging removed for security Se o WebSocket não funcionar, adicionar mensagem do response
+      //  Se o WebSocket não funcionar, adicionar mensagem do response
       setTimeout(() => {
         if (response.data && response.data.id) {
           setMessages(currentMessages => {
             const messageExists = currentMessages.some(m => m.id === response.data.id);
             if (!messageExists) {
-              console.log('WebSocket não recebeu mídia, adicionando do response');
+              // Log removido('WebSocket não recebeu mídia, adicionando do response');
               return [...currentMessages, response.data].sort((a, b) => 
                 new Date(a.created_at) - new Date(b.created_at)
               );
@@ -942,8 +930,8 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
       }, 2000); // Aguardar 2 segundos pelo WebSocket
       
     } catch (e) {
-      console.error('# Debug logging removed for security Erro ao enviar mídia:', e);
-      console.error('# Debug logging removed for security Detalhes do erro:', e.response?.data);
+      console.error(' Erro ao enviar mídia:', e);
+      console.error(' Detalhes do erro:', e.response?.data);
       setError('Erro ao enviar mídia: ' + (e.response?.data?.detail || e.message));
     } finally {
       setSendingMedia(false);
@@ -961,7 +949,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
         headers: { Authorization: `Token ${token}` }
       });
       
-      console.log('Conversa atribuída com sucesso:', response.data);
+      // Log removido('Conversa atribuída com sucesso:', response.data);
       setShowResolverDropdown(false);
       
       // Aguardar um pouco antes de recarregar para garantir que a atualização foi processada
@@ -987,7 +975,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
         headers: { Authorization: `Token ${token}` }
       });
       
-      console.log('Conversa encerrada com sucesso:', response.data);
+      // Log removido('Conversa encerrada com sucesso:', response.data);
       setShowResolverDropdown(false);
       
       // Limpar conversa selecionada do localStorage
@@ -1029,7 +1017,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
       });
       
       const agents = response.data.users || [];
-      console.log('Agentes encontrados:', agents);
+      // Log removido('Agentes encontrados:', agents);
       setAgents(agents);
       
       // Buscar status atual dos usuários
@@ -1048,12 +1036,12 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
   const fetchUsersStatus = async (users, token) => {
     try {
       // Buscar status atual dos usuários
-      console.log('Buscando status dos usuários...');
+      // Log removido('Buscando status dos usuários...');
       const statusResponse = await axios.get('/api/users/status/', {
         headers: { Authorization: `Token ${token}` }
       });
       
-      console.log('Resposta do status:', statusResponse.data);
+      // Log removido('Resposta do status:', statusResponse.data);
       
       if (statusResponse.data && statusResponse.data.users) {
         const statusUpdates = {};
@@ -1061,7 +1049,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
           statusUpdates[user.id] = user.is_online;
         });
         setAgentsStatus(prev => ({ ...prev, ...statusUpdates }));
-        console.log('Status dos usuários atualizado:', statusUpdates);
+        // Log removido('Status dos usuários atualizado:', statusUpdates);
       }
     } catch (error) {
       console.error('Erro ao buscar status dos usuários:', error);
@@ -1095,9 +1083,9 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
     const token = localStorage.getItem('token');
     const url = `/api/conversations/${conversation.id}/transfer/`;
     
-    console.log('# Debug logging removed for security DEBUG: URL de transferência:', url);
-    console.log('# Debug logging removed for security DEBUG: Axios baseURL:', axios.defaults.baseURL);
-    console.log('# Debug logging removed for security DEBUG: URL completa:', axios.defaults.baseURL + url);
+    // Log removido(' DEBUG: URL de transferência:', url);
+    // Log removido(' DEBUG: Axios baseURL:', axios.defaults.baseURL);
+    // Log removido(' DEBUG: URL completa:', axios.defaults.baseURL + url);
     
     try {
       // Usar o mesmo endpoint do ConversasDashboard
@@ -1107,7 +1095,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
         headers: { Authorization: `Token ${token}` }
       });
       
-      console.log('Conversa transferida com sucesso!');
+      // Log removido('Conversa transferida com sucesso!');
       alert('Transferido com sucesso!');
       setShowTransferDropdown(false);
       
@@ -1126,8 +1114,8 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
       
     } catch (error) {
       console.error('Erro ao transferir conversa:', error);
-      console.error('# Debug logging removed for security DEBUG: URL que falhou:', url);
-      console.error('# Debug logging removed for security DEBUG: Axios baseURL atual:', axios.defaults.baseURL);
+      console.error(' DEBUG: URL que falhou:', url);
+      console.error(' DEBUG: Axios baseURL atual:', axios.defaults.baseURL);
       alert('Erro ao transferir atendimento.');
     }
   };
@@ -1159,8 +1147,8 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                       conversation.inbox?.name?.replace('WhatsApp ', '');
       }
       
-      console.log(`# Debug logging removed for security Buscando foto via ${integrationType}, instância: ${instanceName}`);
-      console.log(`# Debug logging removed for security Channel type: ${conversation.inbox?.channel_type}`);
+      // Log removido(` Buscando foto via ${integrationType}, instância: ${instanceName}`);
+      // Log removido(` Channel type: ${conversation.inbox?.channel_type}`);
       
       const response = await axios.post('/api/canais/get_whatsapp_profile_picture/', {
         phone: conversation.contact.phone,
@@ -1203,11 +1191,11 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
       });
       
       if (response.data.success) {
-        console.log('Reação enviada com sucesso');
+        // Log removido('Reação enviada com sucesso');
         setShowReactionPicker(false);
         setSelectedMessageForReaction(null);
         
-        console.log('# Debug logging removed for security Processando mensagem após reação...');
+        // Log removido(' Processando mensagem após reação...');
         
         // Atualizar a mensagem localmente com a resposta do backend
         const updatedMessage = response.data.updated_message;
@@ -1249,8 +1237,8 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
   const deleteMessage = async (messageId) => {
     try {
       const token = localStorage.getItem('token');
-      console.log('# Debug logging removed for security DEBUG: Tentando excluir mensagem:', messageId);
-      console.log('DEBUG: Credenciais verificadas');
+      // Log removido(' DEBUG: Tentando excluir mensagem:', messageId);
+      // Log removido('DEBUG: Credenciais verificadas');
       
       // Chamar endpoint do backend para deletar mensagem
       const response = await axios.post('/api/messages/delete_message/', {
@@ -1259,10 +1247,10 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
         headers: { Authorization: `Token ${token}` }
       });
       
-      console.log('# Debug logging removed for security DEBUG: Resposta do servidor:', response.status, response.data);
+      // Log removido(' DEBUG: Resposta do servidor:', response.status, response.data);
       
       if (response.data.success) {
-        console.log('Mensagem apagada com sucesso');
+        // Log removido('Mensagem apagada com sucesso');
         setShowDeleteConfirm(false);
         setMessageToDelete(null);
         
@@ -1285,10 +1273,10 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
         alert('Erro ao apagar mensagem: ' + (response.data.error || 'Erro desconhecido'));
       }
     } catch (error) {
-      console.error('# Debug logging removed for security DEBUG: Erro completo:', error);
-      console.error('# Debug logging removed for security DEBUG: Status:', error.response?.status);
-      console.error('# Debug logging removed for security DEBUG: Data:', error.response?.data);
-      console.error('# Debug logging removed for security DEBUG: URL:', error.config?.url);
+      console.error(' DEBUG: Erro completo:', error);
+      console.error(' DEBUG: Status:', error.response?.status);
+      console.error(' DEBUG: Data:', error.response?.data);
+      console.error(' DEBUG: URL:', error.config?.url);
       
       let errorMessage = 'Erro ao apagar mensagem';
       if (error.response?.status === 401) {
@@ -1373,7 +1361,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
     return 'order-1';
   };
 
-  // # Debug logging removed for security USAR LIMPEZA DE DUPLICATAS NO RENDER
+  //  USAR LIMPEZA DE DUPLICATAS NO RENDER
   const uniqueMessages = cleanDuplicateMessages(messages);
   
   // Limpeza de duplicatas funcionando corretamente
@@ -1514,7 +1502,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
             </div>
 
       {/* Lista de mensagens */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div ref={scrollContainerRef} onScroll={handleScrollContainer} className="flex-1 overflow-y-auto p-4 space-y-4">
         {loading && (
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -1547,15 +1535,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
 
           // Debug: logar dados da mensagem
           if (msg.message_type === 'image' || (msg.attachments && msg.attachments.some(att => att.file_type === 'image'))) {
-            console.log('🖼️ MENSAGEM COM IMAGEM:', {
-              id: msg.id,
-              message_type: msg.message_type,
-              file_url: msg.file_url,
-              attachments: msg.attachments,
-              content: msg.content,
-              hasImage,
-              'URL construída': msg.file_url ? (msg.file_url.startsWith('http') ? msg.file_url : `http://localhost:8010${msg.file_url}`) : 'N/A'
-            });
+            // Debug removido
           }
             
             return (
@@ -1601,10 +1581,10 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                   {hasImage && msg.message_type === 'image' && msg.file_url && !msg.attachments && (
                     <div className="mb-2">
                       <img
-                        src={msg.file_url.startsWith('http') ? msg.file_url : `https://app.niochat.com.br${msg.file_url}`}
+                        src={buildMediaUrl(msg.file_url)}
                         alt="Imagem"
                         className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={() => openImageModal(msg.file_url.startsWith('http') ? msg.file_url : `https://app.niochat.com.br${msg.file_url}`)}
+                        onClick={() => openImageModal(buildMediaUrl(msg.file_url))}
                         style={{ maxHeight: '300px' }}
                         onError={(e) => {
                           console.error('Erro ao carregar imagem:', msg.file_url);
@@ -1662,7 +1642,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                           console.error('Erro ao carregar vídeo:', msg.file_url);
                         }}
                       >
-                        <source src={msg.file_url.startsWith('http') ? msg.file_url : `https://app.niochat.com.br${msg.file_url}`} type="video/mp4" />
+                        <source src={buildMediaUrl(msg.file_url)} type="video/mp4" />
                         Seu navegador não suporta o elemento de vídeo.
                       </video>
                       
@@ -1705,7 +1685,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                   {hasAudio && (msg.message_type === 'audio' || msg.message_type === 'ptt') && msg.file_url && !msg.attachments && (
                     <div className="mb-2">
                       <CustomAudioPlayer 
-                        src={msg.file_url.startsWith('http') ? msg.file_url : `https://app.niochat.com.br${msg.file_url}`} 
+                        src={buildMediaUrl(msg.file_url)} 
                         isCustomer={isCustomer}
                       />
                       
@@ -1753,7 +1733,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                   {hasDocument && msg.message_type === 'document' && msg.file_url && !msg.attachments && (
                     <div className="mb-2">
                       <a
-                        href={msg.file_url.startsWith('http') ? msg.file_url : `https://app.niochat.com.br${msg.file_url}`}
+                        href={buildMediaUrl(msg.file_url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center space-x-2 p-2 bg-black/10 rounded-lg hover:bg-black/20 transition-colors"
@@ -1798,7 +1778,7 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                       {msg.file_url && (
                         <div className="bg-white p-2 rounded border">
                           <img
-                            src={msg.file_url.startsWith('http') ? msg.file_url : `https://app.niochat.com.br${msg.file_url}`}
+                            src={buildMediaUrl(msg.file_url)}
                             alt="QR Code PIX"
                             className="w-32 h-32 mx-auto"
                             onError={(e) => {
@@ -1900,20 +1880,53 @@ const ChatArea = ({ conversation, onConversationClose, onConversationUpdate }) =
                   {/* Conteúdo da mensagem - NÃO mostrar se for mídia pura */}
                   {content && !hasImage && !hasVideo && !hasAudio && !hasDocument && (
                     <div className="whitespace-pre-wrap break-words">
-                      {content}
+                      {!isCustomer && content.includes('*') && content.includes('disse:*') 
+                        ? content.split('\n').slice(1).join('\n').trim() || content
+                        : content
+                      }
                   </div>
                 )}
                 
-                  {/* Reações existentes */}
-                  {msg.additional_attributes?.reaction && (
-                    <div className="mt-2 flex items-center space-x-2">
-                      <div className="bg-white/20 rounded-full px-2 py-1 text-xs flex items-center space-x-1">
-                        <span>{msg.additional_attributes.reaction.emoji}</span>
-                        <span className="text-xs opacity-75">
-                          {msg.additional_attributes.reaction.status === 'sent' ? '✓' : '⏳'}
-                        </span>
-                      </div>
-                  </div>
+                  {/* Todas as reações em um container horizontal */}
+                  {((msg.additional_attributes?.reaction) || 
+                    (isCustomer && msg.additional_attributes?.agent_reaction) ||
+                    (!isCustomer && msg.additional_attributes?.received_reactions?.[0]?.emoji) ||
+                    (isCustomer && msg.additional_attributes?.received_reactions?.[0]?.emoji)) && (
+                    <div className="mt-2 flex items-center space-x-1 flex-wrap">
+                      {/* Reação existente */}
+                      {msg.additional_attributes?.reaction && (
+                        <div className="bg-white/20 rounded-full px-2 py-1 text-xs flex items-center space-x-1">
+                          <span>{msg.additional_attributes.reaction.emoji}</span>
+                          <span className="text-xs opacity-75">
+                            {msg.additional_attributes.reaction.status === 'sent' ? '✓' : '⏳'}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Reação do agente para mensagens do cliente */}
+                      {isCustomer && msg.additional_attributes?.agent_reaction && (
+                        <div className="bg-white/20 rounded-full px-2 py-1 text-xs flex items-center space-x-1">
+                          <span>{msg.additional_attributes.agent_reaction.emoji}</span>
+                          <span className="text-xs opacity-75">✓</span>
+                        </div>
+                      )}
+
+                      {/* Reação do cliente para mensagens do agente */}
+                      {!isCustomer && msg.additional_attributes?.received_reactions?.[0]?.emoji && (
+                        <div className="bg-white/20 rounded-full px-2 py-1 text-xs flex items-center space-x-1">
+                          <span>{msg.additional_attributes.received_reactions[0].emoji}</span>
+                          <span className="text-xs opacity-75">✓</span>
+                        </div>
+                      )}
+
+                      {/* Reação do cliente nas próprias mensagens */}
+                      {isCustomer && msg.additional_attributes?.received_reactions?.[0]?.emoji && (
+                        <div className="bg-white/20 rounded-full px-2 py-1 text-xs flex items-center space-x-1">
+                          <span>{msg.additional_attributes.received_reactions[0].emoji}</span>
+                          <span className="text-xs opacity-75">✓</span>
+                        </div>
+                      )}
+                    </div>
                   )}
 
                   {/* Timestamp e ações */}

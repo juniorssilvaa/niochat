@@ -75,7 +75,7 @@ const Dashboard = ({ provedorId }) => {
       ws = createAuthenticatedWebSocket(wsUrl);
       
       ws.onopen = () => {
-        console.log('# Debug logging removed for security WebSocket Dashboard: Conectado com sucesso');
+        console.log(' WebSocket Dashboard: Conectado com sucesso');
       };
       
       ws.onmessage = (event) => {
@@ -127,13 +127,13 @@ const Dashboard = ({ provedorId }) => {
       };
       
       ws.onclose = (event) => {
-        console.log('# Debug logging removed for security WebSocket Dashboard: Desconectado', event.code, event.reason);
+        console.log(' WebSocket Dashboard: Desconectado', event.code, event.reason);
       };
     }
 
     return () => {
       if (ws && ws.readyState === WebSocket.OPEN) {
-        console.log('# Debug logging removed for security WebSocket Dashboard: Fechando conexão');
+        console.log(' WebSocket Dashboard: Fechando conexão');
         ws.close(1000, 'Component unmounting');
       }
     };

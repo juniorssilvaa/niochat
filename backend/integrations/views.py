@@ -690,6 +690,8 @@ def evolution_webhook(request):
                 logger.warning(f"Erro ao salvar mensagem do cliente no Redis: {e}")
             
             # Emitir evento WebSocket para mensagem recebida
+            from channels.layers import get_channel_layer
+            from asgiref.sync import async_to_sync
             channel_layer = get_channel_layer()
             from conversations.serializers import MessageSerializer
             async_to_sync(channel_layer.group_send)(
@@ -1059,6 +1061,359 @@ def webhook_evolution_uazapi(request):
         
         print(f"DEBUG: Tipo de mensagem: {message_type}")
         
+        # Verificar se é uma reação
+        if message_type == 'ReactionMessage' or message_type == 'reaction':
+            print(f"DEBUG: REAÇÃO DETECTADA!")
+            # Para reações, não criar nova mensagem, apenas atualizar a mensagem original
+            reaction_emoji = content
+            
+            # Extrair o ID da mensagem original de diferentes campos
+            reaction_id = None
+            
+            # Tentar diferentes campos para encontrar o ID da mensagem original
+            if 'reaction' in msg_data:
+                reaction_id = msg_data['reaction']
+                print(f"DEBUG: Reaction ID do campo 'reaction': {reaction_id}")
+            elif 'content' in msg_data and isinstance(msg_data['content'], dict):
+                # Verificar se o content tem informações da mensagem original
+                content_data = msg_data['content']
+                if 'key' in content_data and 'ID' in content_data['key']:
+                    reaction_id = content_data['key']['ID']
+                    print(f"DEBUG: Reaction ID do content.key.ID: {reaction_id}")
+            
+            # Se ainda não encontrou, tentar buscar pela mensagem mais recente do cliente
+            if not reaction_id:
+                print(f"DEBUG: Reaction ID não encontrado, buscando mensagem mais recente do cliente")
+                try:
+                    # Buscar a mensagem mais recente do cliente na conversa
+                    recent_message = Message.objects.filter(
+                        conversation=conversation,
+                        is_from_customer=True
+                    ).order_by('-created_at').first()
+                    
+                    if recent_message:
+                        reaction_id = recent_message.external_id
+                        print(f"DEBUG: Usando mensagem mais recente como reação: {reaction_id}")
+                except Exception as e:
+                    print(f"DEBUG: Erro ao buscar mensagem recente: {e}")
+            
+            # Se ainda não encontrou, tentar buscar por mensagens de áudio recentes
+            if not reaction_id:
+                print(f"DEBUG: Tentando buscar por mensagens de áudio recentes")
+                try:
+                    # Buscar mensagens de áudio recentes do cliente
+                    audio_messages = Message.objects.filter(
+                        conversation=conversation,
+                        is_from_customer=True,
+                        message_type__in=['audio', 'ptt']
+                    ).order_by('-created_at')[:3]  # Últimas 3 mensagens de áudio
+                    
+                    for audio_msg in audio_messages:
+                        print(f"DEBUG: Verificando mensagem de áudio: {audio_msg.external_id}")
+                        # Verificar se o timestamp da reação é próximo ao da mensagem de áudio
+                        reaction_timestamp = msg_data.get('messageTimestamp', 0)
+                        message_timestamp = audio_msg.created_at.timestamp() * 1000  # Converter para milissegundos
+                        
+                        # Se a diferença for menor que 5 minutos (300000ms), usar esta mensagem
+                        if abs(reaction_timestamp - message_timestamp) < 300000:
+                            reaction_id = audio_msg.external_id
+                            print(f"DEBUG: Encontrada mensagem de áudio próxima: {reaction_id}")
+                            break
+                            
+                except Exception as e:
+                    print(f"DEBUG: Erro ao buscar mensagens de áudio: {e}")
+            
+            # Se ainda não encontrou, tentar buscar pelo ID da reação (campo 'reaction')
+            if not reaction_id:
+                print(f"DEBUG: Tentando buscar pelo ID da reação: {msg_data.get('reaction')}")
+                try:
+                    reaction_target_id = msg_data.get('reaction')
+                    if reaction_target_id:
+                        print(f"DEBUG: Buscando mensagem com external_id contendo: {reaction_target_id}")
+                        print(f"DEBUG: Conversa ID: {conversation.id}")
+                        
+                        # Buscar mensagem que contenha o ID da reação no external_id
+                        original_message = Message.objects.filter(
+                            conversation=conversation,
+                            external_id__icontains=reaction_target_id
+                        ).first()
+                        
+                        if original_message:
+                            reaction_id = original_message.external_id
+                            print(f"DEBUG: Mensagem original encontrada pelo ID da reação: {reaction_id}")
+                        else:
+                            print(f"DEBUG: Mensagem não encontrada pelo ID da reação")
+                            # Listar todas as mensagens da conversa para debug
+                            all_messages = Message.objects.filter(conversation=conversation).values('id', 'external_id', 'message_type', 'created_at')[:5]
+                            print(f"DEBUG: Últimas 5 mensagens da conversa: {list(all_messages)}")
+                            
+                            # Tentar buscar em todas as conversas
+                            print(f"DEBUG: Tentando buscar em todas as conversas...")
+                            global_message = Message.objects.filter(
+                                external_id__icontains=reaction_target_id
+                            ).first()
+                            
+                            if global_message:
+                                print(f"DEBUG: Mensagem encontrada em outra conversa: {global_message.id} - Conversa: {global_message.conversation.id}")
+                                # Se encontrou em outra conversa, usar essa conversa
+                                conversation = global_message.conversation
+                                reaction_id = global_message.external_id
+                                print(f"DEBUG: Usando conversa: {conversation.id}")
+                            
+                except Exception as e:
+                    print(f"DEBUG: Erro ao buscar pelo ID da reação: {e}")
+            
+            # Se ainda não encontrou, tentar buscar pelo messageid sem o prefixo
+            if not reaction_id:
+                print(f"DEBUG: Tentando buscar pelo messageid sem prefixo: {msg_data.get('messageid')}")
+                try:
+                    # Buscar mensagem pelo messageid sem o prefixo
+                    messageid = msg_data.get('messageid')
+                    if messageid:
+                        # Tentar buscar pelo messageid completo
+                        original_message = Message.objects.get(external_id=messageid)
+                        print(f"DEBUG: Mensagem original encontrada pelo messageid: {original_message.id}")
+                        reaction_id = messageid
+                    else:
+                        print(f"DEBUG: Messageid não encontrado")
+                except Exception as e:
+                    print(f"DEBUG: Erro ao buscar pelo messageid: {e}")
+            
+            # Se ainda não encontrou, tentar buscar pelo ID da reação
+            if not reaction_id:
+                print(f"DEBUG: Tentando buscar pelo ID da reação: {msg_data.get('id')}")
+                try:
+                    # Buscar mensagem pelo ID da reação
+                    reaction_message_id = msg_data.get('id')
+                    if reaction_message_id:
+                        # Tentar buscar pelo ID da reação
+                        original_message = Message.objects.get(external_id=reaction_message_id)
+                        print(f"DEBUG: Mensagem original encontrada pelo ID da reação: {original_message.id}")
+                        reaction_id = reaction_message_id
+                    else:
+                        print(f"DEBUG: ID da reação não encontrado")
+                except Exception as e:
+                    print(f"DEBUG: Erro ao buscar pelo ID da reação: {e}")
+            
+            # Se ainda não encontrou, tentar buscar por diferentes formatos de ID
+            if not reaction_id:
+                print(f"DEBUG: Tentando buscar por diferentes formatos de ID")
+                try:
+                    # Tentar buscar por ID sem prefixo
+                    if 'ACEC0B4C35057C2EE3C83EF5F570C42F' in str(msg_data):
+                        # Buscar por ID sem prefixo
+                        messages = Message.objects.filter(
+                            conversation=conversation,
+                            external_id__icontains='ACEC0B4C35057C2EE3C83EF5F570C42F'
+                        )
+                        if messages.exists():
+                            reaction_id = messages.first().external_id
+                            print(f"DEBUG: Encontrado por ID parcial: {reaction_id}")
+                    
+                    # Se ainda não encontrou, buscar pela mensagem mais recente de áudio
+                    if not reaction_id:
+                        audio_message = Message.objects.filter(
+                            conversation=conversation,
+                            message_type__in=['audio', 'ptt']
+                        ).order_by('-created_at').first()
+                        
+                        if audio_message:
+                            reaction_id = audio_message.external_id
+                            print(f"DEBUG: Usando mensagem de áudio mais recente: {reaction_id}")
+                            
+                except Exception as e:
+                    print(f"DEBUG: Erro ao buscar por diferentes formatos: {e}")
+            
+            # Se ainda não encontrou, tentar buscar pela mensagem mais recente
+            if not reaction_id:
+                print(f"DEBUG: Tentando buscar pela mensagem mais recente")
+                try:
+                    # Buscar a mensagem mais recente na conversa
+                    recent_message = Message.objects.filter(
+                        conversation=conversation
+                    ).order_by('-created_at').first()
+                    
+                    if recent_message:
+                        reaction_id = recent_message.external_id
+                        print(f"DEBUG: Usando mensagem mais recente como reação: {reaction_id}")
+                except Exception as e:
+                    print(f"DEBUG: Erro ao buscar mensagem recente: {e}")
+            
+            # Se ainda não encontrou, tentar buscar pelo ID da reação com prefixo
+            if not reaction_id:
+                print(f"DEBUG: Tentando buscar pelo ID da reação com prefixo")
+                try:
+                    # Buscar pelo ID da reação com prefixo
+                    reaction_id_with_prefix = f"{msg_data.get('owner')}:{msg_data.get('reaction')}"
+                    print(f"DEBUG: Tentando buscar pelo ID com prefixo: {reaction_id_with_prefix}")
+                    
+                    original_message = Message.objects.get(external_id=reaction_id_with_prefix)
+                    print(f"DEBUG: Mensagem original encontrada pelo ID com prefixo: {original_message.id}")
+                    reaction_id = reaction_id_with_prefix
+                except Exception as e:
+                    print(f"DEBUG: Erro ao buscar pelo ID com prefixo: {e}")
+            
+            # Se ainda não encontrou, tentar buscar pelo ID da reação sem prefixo
+            if not reaction_id:
+                print(f"DEBUG: Tentando buscar pelo ID da reação sem prefixo")
+                try:
+                    # Buscar pelo ID da reação sem prefixo
+                    reaction_id_without_prefix = msg_data.get('reaction')
+                    print(f"DEBUG: Tentando buscar pelo ID sem prefixo: {reaction_id_without_prefix}")
+                    
+                    # Buscar mensagem que contenha o ID da reação (mais recente primeiro)
+                    original_message = Message.objects.filter(
+                        conversation=conversation,
+                        external_id__icontains=reaction_id_without_prefix
+                    ).order_by('-created_at').first()
+                    
+                    if original_message:
+                        print(f"DEBUG: Mensagem original encontrada pelo ID sem prefixo: {original_message.id}")
+                        reaction_id = original_message.external_id
+                    else:
+                        print(f"DEBUG: Mensagem não encontrada pelo ID sem prefixo")
+                except Exception as e:
+                    print(f"DEBUG: Erro ao buscar pelo ID sem prefixo: {e}")
+            
+            if reaction_id:
+                print(f"DEBUG: Procurando mensagem original para reação: {reaction_id}")
+                try:
+                    # Buscar mensagem original pelo external_id exato
+                    original_message = Message.objects.filter(external_id=reaction_id).first()
+                    
+                    # Se não encontrou, tentar buscar por external_id que contenha o reaction_id
+                    if not original_message:
+                        print(f"DEBUG: Buscando por external_id que contenha: {reaction_id}")
+                        original_message = Message.objects.filter(
+                            external_id__icontains=reaction_id
+                        ).first()
+                    
+                    # Se ainda não encontrou, tentar buscar em todas as conversas
+                    if not original_message:
+                        print(f"DEBUG: Buscando em todas as conversas...")
+                        original_message = Message.objects.filter(
+                            external_id__icontains=reaction_id
+                        ).first()
+                    
+                    if original_message:
+                        print(f"DEBUG: Mensagem original encontrada: {original_message.id} - Conversa: {original_message.conversation.id}")
+                        # Usar a conversa da mensagem original
+                        conversation = original_message.conversation
+                        print(f"DEBUG: Usando conversa: {conversation.id}")
+                    else:
+                        print(f"DEBUG: Mensagem original não encontrada para reação: {reaction_id}")
+                        # Listar todas as mensagens para debug
+                        all_messages = Message.objects.filter(conversation=conversation).values('id', 'external_id', 'message_type', 'created_at')[:5]
+                        print(f"DEBUG: Últimas 5 mensagens da conversa: {list(all_messages)}")
+                        return
+                    
+                    # Atualizar a mensagem original com a reação
+                    if not original_message.additional_attributes:
+                        original_message.additional_attributes = {}
+                    
+                    # Adicionar reação aos atributos
+                    if 'reactions' not in original_message.additional_attributes:
+                        original_message.additional_attributes['reactions'] = []
+                    
+                    # Adicionar reações recebidas do cliente
+                    if 'received_reactions' not in original_message.additional_attributes:
+                        original_message.additional_attributes['received_reactions'] = []
+                    
+                    # Definir phone_number para reações
+                    phone_number = chatid_clean
+                    
+                    # Verificar se já existe reação do mesmo usuário
+                    user_reaction = None
+                    for reaction in original_message.additional_attributes['reactions']:
+                        if reaction.get('user_id') == phone_number:
+                            user_reaction = reaction
+                            break
+                    
+                    # Se a reação está vazia, remover a reação existente
+                    if not reaction_emoji or reaction_emoji.strip() == "":
+                        if user_reaction:
+                            original_message.additional_attributes['reactions'].remove(user_reaction)
+                            print(f"DEBUG: Reação removida do usuário: {phone_number}")
+                        else:
+                            print(f"DEBUG: Nenhuma reação encontrada para remover do usuário: {phone_number}")
+                    else:
+                        if user_reaction:
+                            # Atualizar reação existente
+                            user_reaction['emoji'] = reaction_emoji
+                            user_reaction['timestamp'] = msg_data.get('messageTimestamp', 0)
+                            print(f"DEBUG: Reação atualizada: {reaction_emoji}")
+                        else:
+                            # Adicionar nova reação
+                            original_message.additional_attributes['reactions'].append({
+                                'user_id': phone_number,
+                                'emoji': reaction_emoji,
+                                'timestamp': msg_data.get('messageTimestamp', 0)
+                            })
+                            print(f"DEBUG: Nova reação adicionada: {reaction_emoji}")
+                    
+                    # Gerenciar reações recebidas do cliente
+                    if reaction_emoji and reaction_emoji.strip() != "":
+                        # Verificar se já existe reação do cliente
+                        existing_customer_reaction = None
+                        for reaction in original_message.additional_attributes['received_reactions']:
+                            if reaction.get('from_customer', False):
+                                existing_customer_reaction = reaction
+                                break
+                        
+                        if existing_customer_reaction:
+                            # Atualizar reação existente do cliente
+                            existing_customer_reaction['emoji'] = reaction_emoji
+                            existing_customer_reaction['timestamp'] = timezone.now().isoformat()
+                        else:
+                            # Adicionar nova reação do cliente
+                            original_message.additional_attributes['received_reactions'].append({
+                                'emoji': reaction_emoji,
+                                'timestamp': timezone.now().isoformat(),
+                                'from_customer': True
+                            })
+                    else:
+                        # Se a reação está vazia, limpar todas as reações recebidas do cliente
+                        original_message.additional_attributes['received_reactions'] = [
+                            reaction for reaction in original_message.additional_attributes['received_reactions']
+                            if not reaction.get('from_customer', False)
+                        ]
+                    
+                    original_message.save()
+                    print(f"DEBUG: Reação salva na mensagem original: {reaction_emoji}")
+                    
+                    # Enviar notificação WebSocket para atualizar o frontend
+                    from channels.layers import get_channel_layer
+                    from asgiref.sync import async_to_sync
+                    
+                    channel_layer = get_channel_layer()
+                    if channel_layer:
+                        async_to_sync(channel_layer.group_send)(
+                            f'conversation_{conversation.id}',
+                            {
+                                'type': 'message_updated',
+                                'action': 'reaction_updated',
+                                'message_id': original_message.id,
+                                'reaction_emoji': reaction_emoji
+                            }
+                        )
+                        print(f"DEBUG: WebSocket enviado para conversa {conversation.id}")
+                    
+                    return JsonResponse({'status': 'reaction_processed'}, status=200)
+                    
+                except Message.DoesNotExist:
+                    print(f"DEBUG: Mensagem original não encontrada para reação: {reaction_id}")
+                    # Se não encontrar a mensagem original, ignorar a reação
+                    print(f"DEBUG: Ignorando reação sem mensagem original")
+                    return JsonResponse({'status': 'reaction_ignored'}, status=200)
+                except Exception as e:
+                    print(f"DEBUG: Erro ao processar reação: {e}")
+                    # Se houver erro, ignorar a reação
+                    print(f"DEBUG: Ignorando reação com erro")
+                    return JsonResponse({'status': 'reaction_error'}, status=200)
+            else:
+                print(f"DEBUG: Nenhum ID de reação encontrado, ignorando reação")
+                return JsonResponse({'status': 'reaction_ignored'}, status=200)
+        
         # Log específico para áudio
         if (message_type == 'audio' or message_type == 'ptt' or 
             message_type == 'AudioMessage' or media_type == 'ptt' or media_type == 'audio' or
@@ -1168,6 +1523,8 @@ def webhook_evolution_uazapi(request):
                     print(f"DEBUG: Mensagem marcada como deletada: {message.id}")
                     
                     # Emitir evento WebSocket
+                    from channels.layers import get_channel_layer
+                    from asgiref.sync import async_to_sync
                     channel_layer = get_channel_layer()
                     from conversations.serializers import MessageSerializer
                     message_data = MessageSerializer(message).data
@@ -1203,6 +1560,8 @@ def webhook_evolution_uazapi(request):
                         print(f"DEBUG: Mensagem marcada como deletada: {message.id}")
                         
                         # Emitir evento WebSocket
+                        from channels.layers import get_channel_layer
+                        from asgiref.sync import async_to_sync
                         channel_layer = get_channel_layer()
                         from conversations.serializers import MessageSerializer
                         message_data = MessageSerializer(message).data
@@ -1783,8 +2142,8 @@ def webhook_evolution_uazapi(request):
         
         if existing_message:
             content_preview = content[:30] if content else "sem conteúdo"
-            print(f"  Mensagem duplicada detectada: {content_preview}... - Mas continuando para processar IA")
-            # Não retornar aqui, continuar para processar a IA
+            print(f"  Mensagem duplicada detectada: {content_preview}... - Ignorando duplicata")
+            return JsonResponse({'status': 'ignored_duplicate'}, status=200)
         
         # Adicionar informações de resposta se for uma mensagem respondida
         print(f"DEBUG: Verificando se é mensagem respondida:")
@@ -2219,6 +2578,8 @@ def webhook_evolution_uazapi(request):
             logger.warning(f"Erro ao salvar mensagem no Redis: {e}")
         
         # Emitir evento WebSocket para a conversa específica
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
         channel_layer = get_channel_layer()
         from conversations.serializers import MessageSerializer
         message_data = MessageSerializer(msg).data

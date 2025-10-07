@@ -267,7 +267,7 @@ export default function Integrations({ provedorId }) {
       ws = new window.WebSocket(`${wsProtocol}://${window.location.host}/ws/painel/${provedorId}/`);
       
       ws.onopen = () => {
-        console.log('# Debug logging removed for security WebSocket Integrations: Conectado com sucesso');
+        console.log(' WebSocket Integrations: Conectado com sucesso');
       };
       
       ws.onmessage = (event) => {
@@ -297,11 +297,11 @@ export default function Integrations({ provedorId }) {
       };
       
       ws.onclose = (event) => {
-        console.log('# Debug logging removed for security WebSocket Integrations: Desconectado', event.code, event.reason);
+        console.log(' WebSocket Integrations: Desconectado', event.code, event.reason);
       };
       
       ws.onerror = (error) => {
-        console.error('# Debug logging removed for security WebSocket Integrations: Erro', error);
+        console.error(' WebSocket Integrations: Erro', error);
       };
       
     } catch (error) {
@@ -310,7 +310,7 @@ export default function Integrations({ provedorId }) {
     
     return () => {
       if (ws && ws.readyState === WebSocket.OPEN) {
-        console.log('# Debug logging removed for security WebSocket Integrations: Fechando conexão');
+        console.log(' WebSocket Integrations: Fechando conexão');
         ws.close(1000, 'Component unmounting');
       }
     };

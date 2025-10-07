@@ -46,7 +46,7 @@ import useSessionTimeout from './hooks/useSessionTimeout';
 
 // Forçar limpeza de qualquer baseURL em cache
 axios.defaults.baseURL = '';
-console.log('# Debug logging removed for security Axios configurado para usar URLs relativas');
+// Axios configurado para usar URLs relativas
 
 // Interceptor global do Axios para adicionar o token do usuário logado
 axios.interceptors.request.use(config => {
@@ -217,7 +217,7 @@ function App() {
           return res.data;
         })
         .then(userData => {
-          console.log('Dados do usuário recebidos');
+          // Log removido('Dados do usuário recebidos');
           setUser({ ...userData, token });
           const tipo = userData.role || userData.user_type;
           setUserRole(tipo);
@@ -225,7 +225,7 @@ function App() {
           // Definir provedorId se disponível
           if (userData.provedor_id) {
             setProvedorId(userData.provedor_id);
-            console.log('ProvedorId definido');
+            // Log removido('ProvedorId definido');
           }
           
           setAuthLoading(false);
@@ -256,13 +256,13 @@ function App() {
       transports: ['websocket'],
     });
     socket.on('connect', () => {
-      console.log('Conectado ao Evolution WebSocket');
+      // Log removido('Conectado ao Evolution WebSocket');
     });
     socket.onAny((event, data) => {
-      console.log('Evento Evolution:', event, data);
+      // Log removido('Evento Evolution:', event, data);
     });
     socket.on('disconnect', () => {
-      console.log('Desconectado do Evolution WebSocket');
+      // Log removido('Desconectado do Evolution WebSocket');
     });
     return () => {
       socket.disconnect();
@@ -285,7 +285,7 @@ function App() {
   }, [selectedConversation]);
 
   const handleLogin = (userData) => {
-    console.log('Login realizado com sucesso');
+    // Log removido('Login realizado com sucesso');
     setUser(userData);
     const tipo = userData.role || userData.user_type;
     setUserRole(tipo);
