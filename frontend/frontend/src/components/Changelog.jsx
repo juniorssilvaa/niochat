@@ -99,12 +99,22 @@ const Changelog = ({ isOpen, onClose }) => {
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    if (!dateString) return 'Data não informada';
+    // Evitar deslocamento por fuso quando vier em formato YYYY-MM-DD
+    const parts = String(dateString).split('-').map(Number);
+    if (parts.length === 3 && parts.every(n => !Number.isNaN(n))) {
+      const [year, month, day] = parts;
+      const localDate = new Date(year, month - 1, day); // Data local sem UTC
+      return localDate.toLocaleDateString('pt-BR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+    const fallback = new Date(dateString);
+    return isNaN(fallback.getTime())
+      ? String(dateString)
+      : fallback.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
   return (
