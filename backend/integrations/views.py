@@ -2625,7 +2625,35 @@ def webhook_evolution_uazapi(request):
             
             if csat_feedback:
                 print(f"📊 CSAT: Feedback processado - {csat_feedback.emoji_rating} ({csat_feedback.rating_value})")
-                # Se foi processado como CSAT, não enviar para IA
+                # Se foi processado como CSAT:
+                # - não enviar para IA
+                # - não abrir novo atendimento
+                # - apenas agradecer discretamente (opcional: enviar uma mensagem curta)
+                try:
+                    # Enviar agradecimento curto usando a integração WhatsApp do provedor
+                    from integrations.models import WhatsAppIntegration
+                    from core.uazapi_client import UazapiClient
+                    thanks_text = "Obrigado pelo seu feedback! 💙"
+
+                    whatsapp_integration = WhatsAppIntegration.objects.filter(
+                        provedor=conversation.inbox.provedor
+                    ).first()
+
+                    if whatsapp_integration and contact:
+                        base_url = whatsapp_integration.settings.get('whatsapp_url')
+                        token = whatsapp_integration.access_token
+                        instance = whatsapp_integration.instance_id
+
+                        if base_url and token and instance:
+                            client = UazapiClient(base_url, token)
+                            phone = contact.additional_attributes.get('sender_lid') or contact.phone_number
+                            if phone:
+                                try:
+                                    client.send_text_message(instance=instance, phone=phone, text=thanks_text)
+                                except Exception:
+                                    pass
+                except Exception:
+                    pass
                 return JsonResponse({'success': True, 'csat_processed': True, 'rating': csat_feedback.emoji_rating})
         
         # 2.a Se for áudio, tentar baixar/transcrever via Uazapi e anexar ao conteúdo para IA

@@ -19,6 +19,13 @@ class CSATService:
     """
     
     CSAT_EMOJIS = ['😡', '😕', '😐', '🙂', '🤩']
+    EMOJI_RATINGS = {
+        '😡': 1,
+        '😕': 2,
+        '😐': 3,
+        '🙂': 4,
+        '🤩': 5,
+    }
     DELAY_MINUTES = 3  # Tempo de espera após encerramento da conversa
     
     @classmethod
@@ -105,6 +112,9 @@ class CSATService:
             # Calcular tempo de resposta
             response_time = (timezone.now() - csat_request.sent_at).total_seconds() / 60 if csat_request.sent_at else 0
             
+            # Converter emoji para valor numérico
+            rating_value = cls.EMOJI_RATINGS.get(detected_emoji)
+            
             # Criar feedback CSAT
             with transaction.atomic():
                 csat_feedback = CSATFeedback.objects.create(
@@ -112,10 +122,12 @@ class CSATService:
                     contact=contact,
                     provedor=conversation.inbox.provedor,
                     emoji_rating=detected_emoji,
+                    rating_value=rating_value or 0,
                     channel_type=csat_request.channel_type,
                     conversation_ended_at=csat_request.conversation_ended_at,
                     response_time_minutes=int(response_time),
-                    original_message=message_content
+                    original_message=message_content,
+                    feedback_sent_at=timezone.now()
                 )
                 
                 # Atualizar status da solicitação
@@ -123,6 +135,17 @@ class CSATService:
                 csat_request.responded_at = timezone.now()
                 csat_request.csat_feedback = csat_feedback
                 csat_request.save()
+                
+                # Encerrar automaticamente a conversa após feedback
+                try:
+                    if getattr(conversation, 'status', None) != 'closed':
+                        conversation.status = 'closed'
+                        if hasattr(conversation, 'ended_at'):
+                            conversation.ended_at = timezone.now()
+                        conversation.save(update_fields=['status'] + (['ended_at'] if hasattr(conversation, 'ended_at') else []))
+                except Exception:
+                    # Não bloquear fluxo de CSAT se não conseguir encerrar
+                    pass
             
             logger.info(f"CSAT feedback processed: {detected_emoji} from contact {contact.id}")
             return csat_feedback
