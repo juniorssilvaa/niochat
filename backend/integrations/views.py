@@ -873,6 +873,10 @@ def webhook_evolution_uazapi(request):
         
         event_type = data.get('event') or data.get('EventType') or data.get('type')
         msg_data = data.get('data') or data.get('message', {})
+        # Inicializações para evitar F821 (linters) e tornar o fluxo mais explícito
+        conversation = None
+        contact = None
+        msg = None
         
         # Extrair chatid corretamente
         chatid = msg_data.get('chatid', '')
