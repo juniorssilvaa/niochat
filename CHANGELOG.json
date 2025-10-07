@@ -4,17 +4,17 @@
       "version": "2.23.3",
       "date": "2025-10-07",
       "type": "patch",
-      "title": "Correções WebSocket, Reações e IA",
+      "title": "Correções e Melhorias no Atendimento e IA",
       "changes": [
         {
           "type": "fix",
-          "title": "Mensagens em tempo real no ChatArea",
-          "description": "Correção do fluxo WebSocket no webhook Uazapi (importações locais de async_to_sync/get_channel_layer e envios group_send) garantindo entrega imediata das mensagens recebidas ao ChatArea."
+          "title": "Mensagens em tempo real no atendimento",
+          "description": "Mensagens recebidas agora aparecem imediatamente no ChatArea, sem precisar atualizar a página."
         },
         {
           "type": "improvement",
-          "title": "Reagir mensagens do cliente",
-          "description": "Atendentes podem reagir às mensagens dos clientes e receber reações de volta em mensagens de texto e mídia, com uso correto de external_id."
+          "title": "Reações em mensagens",
+          "description": "Atendentes podem reagir às mensagens dos clientes e também receber reações, inclusive em mensagens de mídia."
         },
         {
           "type": "improvement",
