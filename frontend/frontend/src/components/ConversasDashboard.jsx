@@ -111,16 +111,28 @@ export default function ConversasDashboard() {
   // Funções auxiliares para filtrar conversas (sem sobreposição)
   const isComIA = (conv) => {
     // Conversas NÃO atribuídas a um agente e SEM equipe (automatização/IA)
+    // EXCLUIR conversas fechadas
+    if (conv.status === 'closed' || conv.status === 'encerrada' || conv.status === 'resolved' || conv.status === 'finalizada') {
+      return false;
+    }
     return !conv.assignee && conv.status === 'snoozed' && !conv.additional_attributes?.assigned_team;
   };
 
   const isEmEspera = (conv) => {
     // Conversas com status 'pending' OU transferidas para equipe (sem atendente individual)
+    // EXCLUIR conversas fechadas
+    if (conv.status === 'closed' || conv.status === 'encerrada' || conv.status === 'resolved' || conv.status === 'finalizada') {
+      return false;
+    }
     return conv.status === 'pending' || (!conv.assignee && conv.additional_attributes?.assigned_team);
   };
 
   const isEmAtendimento = (conv) => {
     // Conversas com status 'open' E que têm atendente individual atribuído
+    // EXCLUIR conversas fechadas
+    if (conv.status === 'closed' || conv.status === 'encerrada' || conv.status === 'resolved' || conv.status === 'finalizada') {
+      return false;
+    }
     return conv.status === 'open' && conv.assignee && !conv.additional_attributes?.assigned_team;
   };
 

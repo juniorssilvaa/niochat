@@ -1,6 +1,29 @@
 {
   "versions": [
     {
+      "version": "2.23.5",
+      "date": "2025-10-08",
+      "type": "patch",
+      "title": "Sistema de encerramento automático aprimorado",
+      "changes": [
+        {
+          "type": "improvement",
+          "title": "Encerramento automático pela IA",
+          "description": "Melhorado o sistema de encerramento de atendimento feito pela IA de forma automática quando o cliente agradece após receber ajuda."
+        },
+        {
+          "type": "improvement",
+          "title": "Detecção inteligente de agradecimentos",
+          "description": "Sistema detecta automaticamente palavras de agradecimento como 'obrigado', 'obrigada', 'valeu' para encerrar conversas."
+        },
+        {
+          "type": "improvement",
+          "title": "Finalização após conclusão da tarefa",
+          "description": "Conversas são fechadas automaticamente quando a tarefa foi concluída com sucesso e o cliente demonstra satisfação."
+        }
+      ]
+    },
+    {
       "version": "2.23.4",
       "date": "2025-10-07",
       "type": "patch",

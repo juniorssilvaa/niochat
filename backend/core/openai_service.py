@@ -1629,6 +1629,7 @@ FLUXO: CPF → consultar → escolher → gerar
             
             # CARREGAR HISTÓRICO DA CONVERSA DO REDIS
             historico_conversa = ""
+            conversation = None
             if contexto and contexto.get('conversation'):
                 try:
                     conversation = contexto['conversation']
@@ -2000,7 +2001,9 @@ ENCERRAMENTO AUTOMÁTICO INTELIGENTE:
                 'sem internet', 'internet lenta', 'não funciona', 'problema de conexão',
                 'modem', 'roteador', 'led vermelho', 'wi-fi', 'sinal', 'caiu', 'offline',
                 'sem acesso', 'velocidade baixa', 'queda', 'instável', 'travando',
-                'ping alto', 'conexão ruim', 'fibra rompida', 'cabo', 'conector'
+                'ping alto', 'conexão ruim', 'fibra rompida', 'cabo', 'conector',
+                'loss', 'perda de pacote', 'latência', 'lag', 'delay', 'lentidão',
+                'intermitente', 'instabilidade', 'cortando', 'desconectando'
             ]
 
             # Problemas financeiros  
@@ -2023,9 +2026,16 @@ ENCERRAMENTO AUTOMÁTICO INTELIGENTE:
                 'reclamação', 'não resolveu', 'quero falar com', 'transferir'
             ]
 
-            # Verificar categoria da mensagem atual (APENAS para questões não relacionadas a faturas)
-            # Se cliente pede fatura, não transferir - resolver diretamente
-            if not any(word in mensagem_lower for word in ['pix', 'boleto', 'fatura', 'pagar', 'pagamento']):
+            # Verificar se tem CPF/CNPJ na mensagem - se sim, não transferir, usar SGP
+            import re
+            cpf_cnpj_pattern = r'\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b|\b\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2}\b|\b\d{11}\b|\b\d{14}\b'
+            cpf_cnpj_match = re.search(cpf_cnpj_pattern, mensagem)
+            tem_cpf_cnpj = cpf_cnpj_match is not None
+            # logger.info(f"🔍 DEBUG CPF/CNPJ: match={cpf_cnpj_match}, tem_cpf_cnpj={tem_cpf_cnpj}")
+            
+            # Verificar categoria da mensagem atual (APENAS para questões não relacionadas a faturas E sem CPF/CNPJ)
+            # Se cliente pede fatura OU fornece CPF/CNPJ, não transferir - resolver diretamente
+            if not any(word in mensagem_lower for word in ['pix', 'boleto', 'fatura', 'pagar', 'pagamento']) and not tem_cpf_cnpj:
                 if any(problema in mensagem_lower for problema in problemas_tecnicos):
                     transfer_necessario = True
                     equipe_sugerida = "SUPORTE TÉCNICO"
@@ -2119,8 +2129,15 @@ ENCERRAMENTO AUTOMÁTICO INTELIGENTE:
                     }
                 ])
 
-            # FORÇAR USO DE FERRAMENTAS PARA TRANSFERÊNCIA
-            force_tools = force_tools or transfer_necessario
+            # FORÇAR USO DE FERRAMENTAS PARA TRANSFERÊNCIA (removido - duplicado)
+            # force_tools = force_tools or transfer_necessario
+            
+            # FORÇAR USO DE FERRAMENTAS quando cliente fornecer CPF/CNPJ
+            if tem_cpf_cnpj:
+                force_tools = True
+                # logger.info(f"🔧 CPF/CNPJ detectado: {cpf_cnpj_match.group() if cpf_cnpj_match else 'N/A'} - FORÇANDO FERRAMENTAS SGP")
+            
+            # logger.info(f"🔧 DEBUG force_tools final: {force_tools}")
             
             response = openai.chat.completions.create(
                 model=self.model,
@@ -2286,6 +2303,56 @@ ENCERRAMENTO AUTOMÁTICO INTELIGENTE:
                     except Exception as e:
                         logger.error(f"Erro ao encerrar atendimento automaticamente: {e}")
             
+            # Verificar se deve encerrar o atendimento automaticamente
+            encerrar_atendimento = False
+            if conversation_id and resposta:
+                # Detectar se o cliente agradeceu após receber ajuda
+                mensagem_lower = mensagem.lower()
+                resposta_lower = resposta.lower()
+                
+                # Palavras de agradecimento do cliente
+                agradecimentos = ['obrigado', 'obrigada', 'valeu', 'brigado', 'brigada', 'obg', 'vlw', 'thanks', 'thank you']
+                
+                # Verificar se cliente agradeceu
+                cliente_agradeceu = any(agradecimento in mensagem_lower for agradecimento in agradecimentos)
+                
+                # Verificar se a IA está se despedindo (indica que a tarefa foi concluída)
+                ia_se_despedindo = any(despedida in resposta_lower for despedida in [
+                    'tenha um ótimo dia', 'até logo', 'até mais', 'qualquer coisa', 'precisar', 'chamar',
+                    'disponível', 'ajudar', 'te ajudar', 'posso ajudar', 'ajudar com mais'
+                ])
+                
+                # Verificar se houve sucesso em operações importantes
+                operacao_sucesso = any(sucesso in resposta_lower for sucesso in [
+                    'enviado', 'enviada', 'gerado', 'gerada', 'processado', 'processada',
+                    'concluído', 'concluída', 'finalizado', 'finalizada', 'resolvido', 'resolvida'
+                ])
+                
+                # Condições para encerrar automaticamente:
+                # 1. Cliente agradeceu E IA está se despedindo
+                # 2. Cliente agradeceu E houve sucesso em operação
+                if cliente_agradeceu and (ia_se_despedindo or operacao_sucesso):
+                    encerrar_atendimento = True
+                    logger.info("🔄 Condições para encerramento automático detectadas:")
+                    logger.info(f"   - Cliente agradeceu: {cliente_agradeceu}")
+                    logger.info(f"   - IA se despedindo: {ia_se_despedindo}")
+                    logger.info(f"   - Operação com sucesso: {operacao_sucesso}")
+            
+            # Encerrar atendimento se necessário
+            if encerrar_atendimento and conversation_id:
+                try:
+                    from conversations.models import Conversation
+                    conversation = Conversation.objects.get(id=conversation_id)
+                    
+                    # Encerrar conversa
+                    conversation.status = 'closed'
+                    conversation.save()
+                    
+                    logger.info(f"✅ Atendimento encerrado automaticamente - Conversa {conversation_id} fechada")
+                    
+                except Exception as e:
+                    logger.error(f"Erro ao encerrar atendimento automaticamente: {e}")
+
             return {
                 "success": True,
                 "resposta": resposta,
@@ -2734,11 +2801,6 @@ REGRAS FINAIS:
             
             # Adicionar instrução específica para faturas
             if force_tools:
-                # Verificar se já tem CPF/CNPJ na mensagem
-                import re
-                cpf_cnpj_pattern = r'\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b|\b\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2}\b|\b\d{11}\b|\b\d{14}\b'
-                cpf_cnpj_match = re.search(cpf_cnpj_pattern, mensagem)
-                
                 if cpf_cnpj_match:
                     cpf_cnpj = cpf_cnpj_match.group().replace('.', '').replace('-', '').replace('/', '')
                     system_prompt += f"""
@@ -2772,9 +2834,9 @@ REGRAS FINAIS:
                 # Debug removido
                 # Debug removido
                 if force_tools:
-                    # Debug removido
+                    pass  # Debug removido
                 else:
-                    # Debug removido
+                    pass  # Debug removido
                     
                 response = openai.chat.completions.create(
                     model=self.model,

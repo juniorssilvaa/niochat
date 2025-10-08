@@ -1898,8 +1898,14 @@ def webhook_evolution_uazapi(request):
         
         # Se a conversa já existia, preservar atribuição se houver agente
         if not conv_created:
-            # Se não tem agente atribuído, colocar como snoozed
-            if conversation.assignee is None:
+            # Verificar se tem assigned_team - se sim, deve ser pending
+            if conversation.additional_attributes and conversation.additional_attributes.get('assigned_team'):
+                if conversation.status != 'pending':
+                    conversation.status = 'pending'
+                    conversation.save()
+                    print(f"DEBUG: Conversa {conversation.id} corrigida para status 'pending' (tem assigned_team)")
+            # Se não tem agente atribuído e não tem assigned_team, colocar como snoozed
+            elif conversation.assignee is None:
                 conversation.status = 'snoozed'
                 conversation.save()
             # Se tem agente atribuído E a conversa não está fechada, manter como 'open'
