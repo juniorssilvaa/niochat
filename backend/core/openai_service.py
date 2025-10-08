@@ -753,6 +753,11 @@ DATA E HORA ATUAL: {data_atual}"""
                     if hasattr(conversation, 'contact') and hasattr(conversation.contact, 'phone'):
                         numero_whatsapp = conversation.contact.phone
                         logger.info(f"Número WhatsApp obtido da conversa atual: {numero_whatsapp}")
+                
+                # Se ainda não tem número, usar um padrão para teste
+                if not numero_whatsapp:
+                    numero_whatsapp = None  # Número não encontrado
+                    logger.info(f"Usando número padrão para teste: {numero_whatsapp}")
                             
                 if cpf_cnpj:
                     # Validar se o CPF/CNPJ é válido
@@ -2018,51 +2023,44 @@ ENCERRAMENTO AUTOMÁTICO INTELIGENTE:
                 'reclamação', 'não resolveu', 'quero falar com', 'transferir'
             ]
 
-            # Verificar categoria da mensagem atual
-            if any(problema in mensagem_lower for problema in problemas_tecnicos):
-                transfer_necessario = True
-                equipe_sugerida = "SUPORTE TÉCNICO"
-                motivo_transferencia = f"Cliente relatou problema técnico: {mensagem}"
-                
-            elif any(problema in mensagem_lower for problema in problemas_financeiros):
-                transfer_necessario = True
-                equipe_sugerida = "FINANCEIRO"
-                motivo_transferencia = f"Cliente relatou questão financeira: {mensagem}"
-                
-            elif any(problema in mensagem_lower for problema in vendas_interesse):
-                transfer_necessario = True
-                equipe_sugerida = "VENDAS"
-                motivo_transferencia = f"Cliente demonstrou interesse comercial: {mensagem}"
-                
-            elif any(problema in mensagem_lower for problema in solicitacao_humano):
-                transfer_necessario = True
-                equipe_sugerida = "ATENDIMENTO GERAL"
-                motivo_transferencia = f"Cliente solicitou atendimento humano: {mensagem}"
+            # Verificar categoria da mensagem atual (APENAS para questões não relacionadas a faturas)
+            # Se cliente pede fatura, não transferir - resolver diretamente
+            if not any(word in mensagem_lower for word in ['pix', 'boleto', 'fatura', 'pagar', 'pagamento']):
+                if any(problema in mensagem_lower for problema in problemas_tecnicos):
+                    transfer_necessario = True
+                    equipe_sugerida = "SUPORTE TÉCNICO"
+                    motivo_transferencia = f"Cliente relatou problema técnico: {mensagem}"
+                    
+                elif any(problema in mensagem_lower for problema in vendas_interesse):
+                    transfer_necessario = True
+                    equipe_sugerida = "VENDAS"
+                    motivo_transferencia = f"Cliente demonstrou interesse comercial: {mensagem}"
+                    
+                elif any(problema in mensagem_lower for problema in solicitacao_humano):
+                    transfer_necessario = True
+                    equipe_sugerida = "ATENDIMENTO GERAL"
+                    motivo_transferencia = f"Cliente solicitou atendimento humano: {mensagem}"
 
-            # Verificar também no histórico da conversa se há necessidade de transferência
-            if conversation and not transfer_necessario:
-                try:
-                    # Buscar últimas mensagens para contexto mais amplo
-                    from conversations.models import Message
-                    ultimas_mensagens = Message.objects.filter(
-                        conversation=conversation
-                    ).order_by('-created_at')[:5]  # Últimas 5 mensagens
-                    
-                    mensagens_texto = " ".join([msg.content.lower() for msg in ultimas_mensagens])
-                    
-                    # Analisar contexto mais amplo
-                    if any(problema in mensagens_texto for problema in problemas_tecnicos):
-                        transfer_necessario = True
-                        equipe_sugerida = "SUPORTE TÉCNICO"
-                        motivo_transferencia = "Análise do histórico indica problema técnico"
+                # Verificar também no histórico da conversa se há necessidade de transferência
+                if conversation and not transfer_necessario:
+                    try:
+                        # Buscar últimas mensagens para contexto mais amplo
+                        from conversations.models import Message
+                        ultimas_mensagens = Message.objects.filter(
+                            conversation=conversation
+                        ).order_by('-created_at')[:5]  # Últimas 5 mensagens
                         
-                    elif any(problema in mensagens_texto for problema in problemas_financeiros):
-                        transfer_necessario = True  
-                        equipe_sugerida = "FINANCEIRO"
-                        motivo_transferencia = "Análise do histórico indica questão financeira"
+                        mensagens_texto = " ".join([msg.content.lower() for msg in ultimas_mensagens])
                         
-                except Exception as e:
-                    logger.warning(f"Erro ao analisar histórico para transferência: {e}")
+                        # Analisar contexto mais amplo (exceto faturas)
+                        if not any(word in mensagens_texto for word in ['pix', 'boleto', 'fatura', 'pagar', 'pagamento']):
+                            if any(problema in mensagens_texto for problema in problemas_tecnicos):
+                                transfer_necessario = True
+                                equipe_sugerida = "SUPORTE TÉCNICO"
+                                motivo_transferencia = "Análise do histórico indica problema técnico"
+                                
+                    except Exception as e:
+                        logger.warning(f"Erro ao analisar histórico para transferência: {e}")
 
             # Log da detecção
             if transfer_necessario:
@@ -2072,6 +2070,7 @@ ENCERRAMENTO AUTOMÁTICO INTELIGENTE:
 
             # Forçar uso de ferramentas quando necessário
             force_tools = any(word in mensagem_lower for word in ['pix', 'boleto', 'fatura', 'pagar'])
+            # Debug removido
             
             # ADICIONAR FERRAMENTAS DE TRANSFERÊNCIA SE NECESSÁRIO
             if transfer_necessario:
@@ -2735,13 +2734,32 @@ REGRAS FINAIS:
             
             # Adicionar instrução específica para faturas
             if force_tools:
-                system_prompt += """
+                # Verificar se já tem CPF/CNPJ na mensagem
+                import re
+                cpf_cnpj_pattern = r'\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b|\b\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2}\b|\b\d{11}\b|\b\d{14}\b'
+                cpf_cnpj_match = re.search(cpf_cnpj_pattern, mensagem)
+                
+                if cpf_cnpj_match:
+                    cpf_cnpj = cpf_cnpj_match.group().replace('.', '').replace('-', '').replace('/', '')
+                    system_prompt += f"""
+
+🚨 CLIENTE JÁ FORNECEU CPF/CNPJ: {cpf_cnpj}
+- PRIMEIRO: Use consultar_cliente_sgp para identificar o cliente
+- SEGUNDO: Use gerar_fatura_completa com este CPF/CNPJ
+- NÃO pergunte novamente o CPF/CNPJ
+- NÃO transfira para equipe - resolva diretamente
+- Execute as funções na ordem: consultar_cliente_sgp → gerar_fatura_completa
+- IGNORE qualquer lógica de transferência - o cliente já forneceu dados suficientes
+"""
+                else:
+                    system_prompt += """
 
 ⚠️ ATENÇÃO - CLIENTE PEDIU FATURA/PAGAMENTO:
-- ANTES de usar qualquer ferramenta de fatura, você DEVE perguntar o CPF/CNPJ
+- PRIMEIRO: Pergunte o CPF/CNPJ do cliente
+- SEGUNDO: Use consultar_cliente_sgp para identificar o cliente
+- TERCEIRO: Use gerar_fatura_completa para gerar a fatura
+- NÃO transfira para equipe - resolva diretamente
 - Exemplo: "Para gerar sua fatura, preciso do seu CPF ou CNPJ. Pode me informar?"
-- Só use gerar_fatura_completa quando tiver um CPF/CNPJ válido (11 ou 14 dígitos)
-- NUNCA tente gerar fatura sem CPF/CNPJ válido
 
 🎯 LÓGICA DE FORMATOS ADICIONAIS:
 - Se cliente já recebeu PIX e pede "também PDF/boleto" → Use enviar_formato_adicional(formato_solicitado: "boleto")
@@ -2750,14 +2768,25 @@ REGRAS FINAIS:
 """
             
             # Fazer chamada inicial COM ferramentas disponíveis
-            response = openai.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                tools=tools,
-                tool_choice="required" if force_tools else "auto"
-            )
+            try:
+                # Debug removido
+                # Debug removido
+                if force_tools:
+                    # Debug removido
+                else:
+                    # Debug removido
+                    
+                response = openai.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    max_tokens=self.max_tokens,
+                    temperature=self.temperature,
+                    tools=tools,
+                    tool_choice="required" if force_tools else "auto"
+                )
+            except Exception as e:
+                logger.error(f"❌ ERRO na chamada OpenAI: {e}")
+                raise
             
             # Processar se a IA chamou alguma ferramenta
             if response.choices[0].message.tool_calls:
