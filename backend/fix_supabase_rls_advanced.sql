@@ -63,3 +63,4 @@ SELECT schemaname, tablename, policyname, permissive, roles, cmd, qual
 FROM pg_policies 
 WHERE tablename IN ('conversations', 'contacts', 'auditoria', 'csat_feedback', 'mensagens')
 ORDER BY tablename, policyname;
+

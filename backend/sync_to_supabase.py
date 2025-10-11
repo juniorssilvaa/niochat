@@ -101,3 +101,4 @@ def sync_conversation_to_supabase(conversation_id):
 if __name__ == "__main__":
     # Sincronizar conversa 49
     sync_conversation_to_supabase(49)
+

@@ -179,3 +179,4 @@ Explore nossa documentação completa para aprender sobre:
 ## 📄 Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](https://github.com/juniorssilvaa/niochat/blob/main/LICENSE) para mais detalhes.
+

@@ -331,3 +331,4 @@ tail -f logs/backend.log
 2. [:octicons-arrow-right-24: Auditoria](supabase/audit.md) - Configure a auditoria
 3. [:octicons-arrow-right-24: CSAT](supabase/csat.md) - Configure o sistema CSAT
 4. [:octicons-arrow-right-24: Uso](usage/dashboard.md) - Aprenda a usar o dashboard
+

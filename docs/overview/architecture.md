@@ -291,3 +291,4 @@ websocket_urlpatterns = [
 2. [:octicons-arrow-right-24: Configuração](configuration/environment.md) - Configure variáveis
 3. [:octicons-arrow-right-24: Integrações](configuration/integrations.md) - Configure serviços externos
 4. [:octicons-arrow-right-24: Uso](usage/interface.md) - Aprenda a usar o sistema
+

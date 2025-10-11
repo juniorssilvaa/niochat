@@ -2517,6 +2517,7 @@ ENCERRAMENTO AUTOMÁTICO INTELIGENTE:
                                 resposta = f"🤩 Maravilha, {nome_usar}! Agradecemos por sua avaliação e ficamos felizes com sua satisfação!"
                             
                             # Marcar CSAT como processado
+                            from conversations.models import CSATRequest
                             csat_request = CSATRequest.objects.filter(
                                 conversation=conversation,
                                 status='sent'

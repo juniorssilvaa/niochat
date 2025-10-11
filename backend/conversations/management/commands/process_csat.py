@@ -35,3 +35,4 @@ class Command(BaseCommand):
                     self.stdout.write(f'⏳ CSAT {csat_request.id} ainda não é hora (agendado para {scheduled_local})')
         
         self.stdout.write(self.style.SUCCESS(f'Processados {processed} CSATs'))
+

@@ -356,3 +356,4 @@ python manage.py shell -c "from core.supabase_service import supabase_service; p
 2. [:octicons-arrow-right-24: Integrações](configuration/integrations.md) - Configure WhatsApp e IA
 3. [:octicons-arrow-right-24: Supabase](configuration/supabase.md) - Configure dashboard
 4. [:octicons-arrow-right-24: Uso](usage/interface.md) - Aprenda a usar o sistema
+

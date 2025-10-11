@@ -121,3 +121,4 @@ sequenceDiagram
 2. [:octicons-arrow-right-24: Configuração](configuration/environment.md) - Configure variáveis
 3. [:octicons-arrow-right-24: Integrações](configuration/integrations.md) - Configure WhatsApp e IA
 4. [:octicons-arrow-right-24: Uso](usage/interface.md) - Aprenda a usar o sistema
+

@@ -256,3 +256,4 @@ tail -f logs/backend.log
 2. [:octicons-arrow-right-24: Dashboard](usage/dashboard.md) - Aprenda a usar o dashboard
 3. [:octicons-arrow-right-24: Admin](usage/admin.md) - Aprenda a usar o admin
 4. [:octicons-arrow-right-24: API](api/endpoints.md) - Aprenda a usar a API
+

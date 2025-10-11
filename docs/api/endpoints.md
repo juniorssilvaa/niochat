@@ -589,3 +589,4 @@ const ws = new WebSocket('ws://localhost:8010/ws/dashboard/?token=eyJ0eXAiOiJKV1
 2. [:octicons-arrow-right-24: Webhooks](api/webhooks.md) - Aprenda sobre webhooks
 3. [:octicons-arrow-right-24: Autenticação](api/authentication.md) - Aprenda sobre autenticação
 4. [:octicons-arrow-right-24: Uso](usage/interface.md) - Aprenda a usar a interface
+

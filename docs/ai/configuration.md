@@ -360,3 +360,4 @@ print(p.integracoes_externas.get('transcription_config', {}))
 2. [:octicons-arrow-right-24: SGP Integration](ai/sgp-integration.md) - Configure a integração SGP
 3. [:octicons-arrow-right-24: Transcrição](ai/transcription.md) - Configure a transcrição de áudio
 4. [:octicons-arrow-right-24: Uso](usage/chat.md) - Aprenda a usar o chat
+

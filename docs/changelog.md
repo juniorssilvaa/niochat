@@ -166,3 +166,4 @@ Esta versão estabeleceu a base sólida do NioChat com:
 ## 📄 Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](https://github.com/juniorssilvaa/niochat/blob/main/LICENSE) para mais detalhes.
+

@@ -152,8 +152,8 @@ def log_conversation_closure(request, conversation, action_type, resolution_type
                     is_from_customer=msg.is_from_customer,
                     external_id=msg.external_id,
                     file_url=msg.file_url,
-                    file_name=msg.file_name,
-                    file_size=msg.file_size,
+                    file_name=getattr(msg, 'file_name', None),
+                    file_size=getattr(msg, 'file_size', None),
                     additional_attributes=msg.additional_attributes,
                     created_at_iso=msg.created_at.isoformat()
                 )
@@ -816,8 +816,8 @@ class ConversationViewSet(viewsets.ModelViewSet):
                     is_from_customer=msg.is_from_customer,
                     external_id=msg.external_id,
                     file_url=msg.file_url,
-                    file_name=msg.file_name,
-                    file_size=msg.file_size,
+                    file_name=getattr(msg, 'file_name', None),
+                    file_size=getattr(msg, 'file_size', None),
                     additional_attributes=msg.additional_attributes,
                     created_at_iso=msg.created_at.isoformat()
                 )
@@ -1775,8 +1775,8 @@ class MessageViewSet(viewsets.ModelViewSet):
                     message_type=media_type,
                     is_from_customer=False,
                     file_url=file_url,
-                    file_name=file_name,
-                    file_size=file_size,
+                    file_name=getattr(message, 'file_name', None),
+                    file_size=getattr(message, 'file_size', None),
                     additional_attributes=additional_attrs,
                     created_at_iso=message.created_at.isoformat()
                 )
