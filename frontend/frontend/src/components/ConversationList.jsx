@@ -562,11 +562,11 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
 
   // Buscar conversas quando auth estiver pronto
   useEffect(() => {
-    if (authReady && isMounted.current) {
+    if (authReady && isMounted.current && provedorId) {
       // Auth pronto, buscando conversas
       fetchConversations(true);
     }
-  }, [authReady]);
+  }, [authReady, provedorId]);
 
   // Expor função de recarregamento
   useEffect(() => {
@@ -693,7 +693,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
 
   // Polling como backup (mais frequente para reduzir latência)
   useEffect(() => {
-    if (!authReady) return;
+    if (!authReady || !provedorId) return;
     
     const interval = setInterval(() => {
       if (isMounted.current) {
@@ -702,7 +702,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
     }, 3000); // 3 segundos para maior instantaneidade
     
     return () => clearInterval(interval);
-  }, [authReady]);
+  }, [authReady, provedorId]);
 
   // CORREÇÃO: Listener para atualização de permissões do usuário atual
   useEffect(() => {

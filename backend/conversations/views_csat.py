@@ -68,39 +68,46 @@ class CSATFeedbackViewSet(viewsets.ModelViewSet):
         """
         try:
             # Obter parâmetros
-            days = int(request.query_params.get('days', 30))
+            days = int(request.GET.get('days', 30))
+            logger.info(f"CSAT Stats: days={days}")
             
             # Buscar provedor
             user = request.user
+            logger.info(f"CSAT Stats: user={user.username}")
             provedor = None
             
             # Tentar por provedor_id primeiro
             if hasattr(user, 'provedor_id') and user.provedor_id:
                 provedor = Provedor.objects.filter(id=user.provedor_id).first()
+                logger.info(f"CSAT Stats: provedor por provedor_id={provedor}")
             
             # Se não encontrou, tentar por relacionamento direto
             if not provedor and hasattr(user, 'provedor') and user.provedor:
                 provedor = user.provedor
+                logger.info(f"CSAT Stats: provedor por relacionamento={provedor}")
             
             # Se ainda não encontrou, tentar por admins
             if not provedor:
                 provedor = Provedor.objects.filter(admins=user).first()
+                logger.info(f"CSAT Stats: provedor por admins={provedor}")
                 
             if not provedor:
+                logger.error("CSAT Stats: Provedor não encontrado")
                 return Response(
                     {'error': 'Provedor não encontrado'}, 
                     status=status.HTTP_404_NOT_FOUND
                 )
             
+            logger.info(f"CSAT Stats: Usando provedor {provedor.id}")
+            
             # Obter estatísticas
             stats = CSATService.get_csat_stats(provedor, days)
+            logger.info(f"CSAT Stats: stats retornadas={stats}")
+            logger.info(f"CSAT Stats: channel_distribution={stats.get('channel_distribution', [])}")
+            logger.info(f"CSAT Stats: recent_feedbacks={len(stats.get('recent_feedbacks', []))}")
             
-            # Serializar recent_feedbacks separadamente
-            if 'recent_feedbacks' in stats and stats['recent_feedbacks']:
-                recent_feedbacks_serializer = CSATFeedbackSerializer(stats['recent_feedbacks'], many=True)
-                stats['recent_feedbacks'] = recent_feedbacks_serializer.data
-            else:
-                stats['recent_feedbacks'] = []
+            # Manter recent_feedbacks (problema com UUIDs resolvido)
+            # stats['recent_feedbacks'] = []
             
             return Response(stats)
             

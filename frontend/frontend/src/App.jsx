@@ -174,7 +174,13 @@ function App() {
   const navigate = useNavigate();
   
   // Hook para timeout da sessão
-  const { startTimeout } = useSessionTimeout();
+  let startTimeout = () => {};
+  try {
+    const sessionTimeout = useSessionTimeout();
+    startTimeout = sessionTimeout.startTimeout || (() => {});
+  } catch (error) {
+    console.warn('Erro ao inicializar useSessionTimeout:', error);
+  }
 
   // Debug: Log do estado do usuário
   useEffect(() => {

@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db import transaction
 from django.conf import settings
-from celery import shared_task
+
 
 from core.models import Provedor
 from .models import Conversation, Contact, CSATFeedback, CSATRequest
@@ -45,9 +45,15 @@ class CSATService:
                 logger.info(f"CSAT request already exists for conversation {conversation_id}")
                 return existing_request
             
+            # Obter o timezone de São Paulo
+            import pytz
+            sao_paulo_tz = pytz.timezone('America/Sao_Paulo')
+            
             # Calcular horário de envio (3 minutos após encerramento)
-            ended_at = timezone.now()
-            scheduled_send_at = ended_at + timedelta(minutes=cls.DELAY_MINUTES)
+            ended_at = timezone.now()  # UTC
+            # Converter para o timezone local e adicionar o delay
+            ended_at_sp = ended_at.astimezone(sao_paulo_tz)
+            scheduled_send_at = ended_at_sp + timedelta(minutes=cls.DELAY_MINUTES)
             
             # Determinar canal
             channel_type = 'whatsapp'  # Default
@@ -59,16 +65,26 @@ class CSATService:
                 conversation=conversation,
                 contact=conversation.contact,
                 provedor=conversation.inbox.provedor,
-                conversation_ended_at=ended_at,
-                scheduled_send_at=scheduled_send_at,
+                conversation_ended_at=ended_at,  # UTC
+                scheduled_send_at=scheduled_send_at,  # Horário localizado
                 channel_type=channel_type,
                 status='pending'
             )
             
-            # Agendar tarefa Celery para envio
+            # Converter o horário agendado para UTC para o agendamento do Celery
+            if scheduled_send_at.tzinfo is not None:
+                # Se o horário já tem timezone, converter para UTC
+                eta_utc = scheduled_send_at.astimezone(pytz.UTC)
+            else:
+                # Se não tem timezone, assumir que é local e converter para UTC
+                scheduled_time_aware = sao_paulo_tz.localize(scheduled_send_at)
+                eta_utc = scheduled_time_aware.astimezone(pytz.UTC)
+            
+            # Importar e agendar tarefa do Celery
+            from .tasks import send_csat_message
             send_csat_message.apply_async(
                 args=[csat_request.id],
-                eta=scheduled_send_at
+                eta=eta_utc
             )
             
             logger.info(f"CSAT request scheduled for conversation {conversation_id} at {scheduled_send_at}")
@@ -223,10 +239,15 @@ class CSATService:
                     })
                 current_date += timedelta(days=1)
             
-            # Últimos feedbacks
-            recent_feedbacks = list(feedbacks.select_related(
+            # Últimos feedbacks - usar serializer para obter dados completos incluindo foto
+            recent_feedbacks_queryset = feedbacks.select_related(
                 'contact', 'conversation', 'provedor'
-            ).order_by('-feedback_sent_at')[:10])
+            ).order_by('-feedback_sent_at')[:10]
+            
+            # Usar o serializer para obter dados completos incluindo foto da Uazapi
+            from .serializers import CSATFeedbackSerializer
+            serializer = CSATFeedbackSerializer(recent_feedbacks_queryset, many=True)
+            recent_feedbacks = serializer.data
             
             return {
                 'total_feedbacks': total_feedbacks,
@@ -243,109 +264,4 @@ class CSATService:
             return {}
 
 
-@shared_task
-def send_csat_message(csat_request_id: int):
-    """
-    Tarefa Celery para enviar mensagem de solicitação CSAT
-    """
-    try:
-        csat_request = CSATRequest.objects.get(id=csat_request_id)
-        
-        if csat_request.status != 'pending':
-            logger.info(f"CSAT request {csat_request_id} is not pending, skipping")
-            return
-        
-        # Montar mensagem de feedback
-        provedor = csat_request.provedor
-        contact = csat_request.contact
-        
-        csat_message = f"""Olá! Como foi seu atendimento conosco?
 
-Por favor, responda com um emoji:
-😡 - Muito insatisfeito
-😕 - Insatisfeito  
-😐 - Neutro
-🙂 - Satisfeito
-🤩 - Muito satisfeito
-
-Sua opinião é muito importante para nós! 💙"""
-        
-        # Enviar mensagem baseado no canal
-        success = False
-        if csat_request.channel_type == 'whatsapp':
-            success = _send_whatsapp_csat(csat_request, csat_message)
-        elif csat_request.channel_type == 'telegram':
-            success = _send_telegram_csat(csat_request, csat_message)
-        # Adicionar outros canais conforme necessário
-        
-        if success:
-            csat_request.status = 'sent'
-            csat_request.sent_at = timezone.now()
-            csat_request.save()
-            logger.info(f"CSAT message sent successfully for request {csat_request_id}")
-        else:
-            logger.error(f"Failed to send CSAT message for request {csat_request_id}")
-            
-    except CSATRequest.DoesNotExist:
-        logger.error(f"CSAT request {csat_request_id} not found")
-    except Exception as e:
-        logger.error(f"Error sending CSAT message: {str(e)}")
-
-
-def _send_whatsapp_csat(csat_request: CSATRequest, message: str) -> bool:
-    """
-    Enviar mensagem CSAT via WhatsApp
-    """
-    try:
-        from core.uazapi_client import UazapiClient
-        from integrations.models import WhatsAppIntegration
-        
-        # Buscar integração WhatsApp do provedor
-        whatsapp_integration = WhatsAppIntegration.objects.filter(
-            provedor=csat_request.provedor
-        ).first()
-        
-        if not whatsapp_integration:
-            logger.error(f"No WhatsApp integration found for provider {csat_request.provedor.id}")
-            return False
-        
-        # Obter dados de contato
-        contact = csat_request.contact
-        phone_number = contact.additional_attributes.get('sender_lid') or contact.phone_number
-        
-        if not phone_number:
-            logger.error(f"No phone number found for contact {contact.id}")
-            return False
-        
-        # Enviar via Uazapi
-        client = UazapiClient(
-            base_url=whatsapp_integration.settings.get('whatsapp_url'),
-            token=whatsapp_integration.access_token
-        )
-        
-        result = client.send_text_message(
-            instance=whatsapp_integration.instance_id,
-            phone=phone_number,
-            text=message
-        )
-        
-        return result.get('success', False)
-        
-    except Exception as e:
-        logger.error(f"Error sending WhatsApp CSAT: {str(e)}")
-        return False
-
-
-def _send_telegram_csat(csat_request: CSATRequest, message: str) -> bool:
-    """
-    Enviar mensagem CSAT via Telegram
-    """
-    try:
-        # Implementar envio via Telegram
-        # Similar ao WhatsApp, usando a integração Telegram
-        logger.info("Telegram CSAT sending not implemented yet")
-        return False
-        
-    except Exception as e:
-        logger.error(f"Error sending Telegram CSAT: {str(e)}")
-        return False

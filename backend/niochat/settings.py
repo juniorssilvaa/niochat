@@ -129,7 +129,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'pt-br'
 
-TIME_ZONE = 'America/Sao_Paulo'
+TIME_ZONE = 'America/Belem'
 
 USE_I18N = True
 
@@ -219,12 +219,15 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Sao_Paulo'
-CELERY_ENABLE_UTC = True
+CELERY_ENABLE_UTC = False
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutos
 CELERY_TASK_SOFT_TIME_LIMIT = 25 * 60  # 25 minutos
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_WORKER_MAX_TASKS_PER_CHILD = 1000
+
+# Celery configuration
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 # Redis configuration for AI and memory
 REDIS_URL = config('REDIS_URL', default='redis://niochat:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6379/0')
@@ -255,4 +258,11 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 APPEND_SLASH = False
+
+# Configurações do Supabase
+SUPABASE_URL = config('SUPABASE_URL', default='https://uousrmdefljusigvncrb.supabase.co')
+SUPABASE_ANON_KEY = config('SUPABASE_ANON_KEY', default='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvdXNybWRlZmxqdXNpZ3ZuY3JiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5ODQyODgsImV4cCI6MjA3NTU2MDI4OH0._DLHRiae-1eVA31SpPl-M36D12HH5G7jmylIRLKyZ_I')
+SUPABASE_AUDIT_TABLE = config('SUPABASE_AUDIT_TABLE', default='auditoria')
+SUPABASE_MESSAGES_TABLE = config('SUPABASE_MESSAGES_TABLE', default='mensagens')
+SUPABASE_CSAT_TABLE = config('SUPABASE_CSAT_TABLE', default='csat_feedback')
 

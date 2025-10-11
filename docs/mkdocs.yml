@@ -1,0 +1,115 @@
+site_name: NioChat - Sistema de Atendimento WhatsApp
+site_description: Sistema completo de atendimento via WhatsApp com IA, SGP e Supabase
+site_author: Junior Silva
+site_url: https://niochat.com.br
+
+docs_dir: .
+
+repo_name: juniorssilvaa/niochat
+repo_url: https://github.com/juniorssilvaa/niochat
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.superfences
+  - pymdownx.arithmatex
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Início: index.md
+  - Visão Geral:
+    - Introdução: overview/introduction.md
+    - Arquitetura: overview/architecture.md
+    - Funcionalidades: overview/features.md
+  - Instalação:
+    - Pré-requisitos: installation/prerequisites.md
+    - Desenvolvimento: installation/development.md
+    - Produção: installation/production.md
+    - Docker: installation/docker.md
+  - Configuração:
+    - Variáveis de Ambiente: configuration/environment.md
+    - Banco de Dados: configuration/database.md
+    - Integrações: configuration/integrations.md
+    - Supabase: configuration/supabase.md
+  - Uso:
+    - Interface: usage/interface.md
+    - Chat: usage/chat.md
+    - Dashboard: usage/dashboard.md
+    - Administração: usage/admin.md
+  - API:
+    - Autenticação: api/authentication.md
+    - Endpoints: api/endpoints.md
+    - WebSocket: api/websocket.md
+    - Webhooks: api/webhooks.md
+  - IA e SGP:
+    - Configuração IA: ai/configuration.md
+    - Function Calls: ai/function-calls.md
+    - SGP Integration: ai/sgp-integration.md
+    - Transcrição: ai/transcription.md
+  - Supabase:
+    - Integração: supabase/integration.md
+    - Dashboard: supabase/dashboard.md
+    - Auditoria: supabase/audit.md
+    - CSAT: supabase/csat.md
+  - Desenvolvimento:
+    - Estrutura: development/structure.md
+    - Contribuição: development/contributing.md
+    - Troubleshooting: development/troubleshooting.md
+  - Changelog: changelog.md

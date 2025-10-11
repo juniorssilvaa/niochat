@@ -32,7 +32,15 @@ const InternalChatButton = () => {
   const [currentUser, setCurrentUser] = useState(null);
   
   // Hook para usuários online
-  const { isUserOnline, getOnlineCount } = useOnlineUsers();
+  let isUserOnline = () => false;
+  let getOnlineCount = () => 0;
+  try {
+    const onlineUsersHook = useOnlineUsers();
+    isUserOnline = onlineUsersHook.isUserOnline || (() => false);
+    getOnlineCount = onlineUsersHook.getOnlineCount || (() => 0);
+  } catch (error) {
+    console.warn('Erro ao inicializar useOnlineUsers:', error);
+  }
   
   // Hook para notificações - usar contexto diretamente
   const notificationContext = useContext(NotificationContext);

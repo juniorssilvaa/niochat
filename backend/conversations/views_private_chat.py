@@ -425,8 +425,10 @@ class DashboardStatsView(APIView):
         
         # Satisfação média - usar dados reais do CSAT
         try:
-            from .csat_service import CSATService
-            csat_stats = CSATService.get_csat_stats(provedor, 30)
+            from .csat_automation import CSATAutomationService
+            # Usar função local para obter stats CSAT
+            from .views_csat import get_csat_stats
+            csat_stats = get_csat_stats(provedor, 30)
             satisfacao_media = f"{csat_stats.get('average_rating', 0.0):.1f}"
         except Exception as e:
             # Fallback para cálculo simulado se CSAT não estiver disponível

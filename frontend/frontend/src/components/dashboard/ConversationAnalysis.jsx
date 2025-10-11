@@ -144,8 +144,7 @@ export default function ConversationAnalysis() {
                 <div className="flex items-start gap-4">
                   {/* Gráfico de Pizza Pequeno */}
                   <div className="flex-shrink-0">
-                    <ResponsiveContainer width={120} height={120}>
-                      <PieChart>
+                    <PieChart width={120} height={120}>
                         <Pie
                           data={data.channels}
                           dataKey="count"
@@ -173,7 +172,6 @@ export default function ConversationAnalysis() {
                           ]}
                         />
                       </PieChart>
-                    </ResponsiveContainer>
                   </div>
 
                   {/* Lista de Canais */}

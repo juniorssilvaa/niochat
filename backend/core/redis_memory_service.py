@@ -353,6 +353,30 @@ class RedisMemoryService:
         except Exception as e:
             logger.error(f"Erro ao recuperar memória da conversa (síncrono): {e}")
             return None
+    
+    def clear_conversation_memory(self, conversation_id: int) -> bool:
+        """Versão síncrona para limpar memória de uma conversa específica"""
+        try:
+            redis_conn = self.get_redis_sync()
+            if not redis_conn:
+                return False
+            
+            # Buscar todas as chaves que correspondem a esta conversa
+            pattern = f"conversation:*:{conversation_id}"
+            keys = redis_conn.keys(pattern)
+            
+            if keys:
+                redis_conn.delete(*keys)
+                logger.info(f"🧹 Memória da conversa {conversation_id} limpa do Redis (síncrono)")
+                logger.info(f"🧹 Chaves removidas: {keys}")
+                return True
+            else:
+                logger.info(f"ℹ️ Nenhuma memória encontrada para conversa {conversation_id}")
+                return True
+                
+        except Exception as e:
+            logger.error(f"Erro ao limpar memória da conversa (síncrono): {e}")
+            return False
 
 # Instância global do serviço
 redis_memory_service = RedisMemoryService()

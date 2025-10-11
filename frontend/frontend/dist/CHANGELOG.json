@@ -1,392 +1,136 @@
 {
+  "current_version": "2.23.2",
   "versions": [
     {
-      "version": "2.8.1",
-      "date": "2025-09-11",
+      "version": "2.23.2",
+      "date": "2025-09-29",
       "type": "patch",
-      "title": "Correções e Melhorias",
+      "title": "Correções Finais e Otimizações",
       "changes": [
         {
           "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
+          "title": "Otimização do Sistema de Notificações",
+          "description": "Ajustes finais no sistema de notificações para melhor performance"
+        },
+        {
+          "type": "improvement",
+          "title": "Estabilidade do Sistema",
+          "description": "Otimizações gerais para melhorar a estabilidade do sistema"
         }
       ]
     },
     {
-      "version": "2.8.0",
-      "date": "2025-09-10",
+      "version": "2.23.1",
+      "date": "2025-09-29",
+      "type": "patch",
+      "title": "Correções de Estabilidade",
+      "changes": [
+        {
+          "type": "fix",
+          "title": "Correção no Sistema de Áudio",
+          "description": "Correção de bugs críticos no módulo de áudio que causavam instabilidade"
+        },
+        {
+          "type": "improvement",
+          "title": "Melhoria nas Transferências",
+          "description": "Otimização no sistema de transferências realizadas pela IA"
+        }
+      ]
+    },
+    {
+      "version": "2.23.0",
+      "date": "2025-09-27",
       "type": "minor",
-      "title": "Novas Funcionalidades",
+      "title": "Nova IA Multimídia e Sistema CSAT",
       "changes": [
         {
           "type": "feature",
-          "title": "Novas Funcionalidades",
-          "description": "Adição de novas funcionalidades mantendo compatibilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.7.9",
-      "date": "2025-09-10",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
+          "title": "IA com Processamento de Áudio e Imagens",
+          "description": "Nova capacidade da IA para processar e entender arquivos de áudio e imagens"
+        },
+        {
+          "type": "feature",
+          "title": "Sistema CSAT de Feedback",
+          "description": "Implementação de pesquisa de satisfação do cliente para coletar feedback dos clientes"
+        },
+        {
+          "type": "feature",
+          "title": "Biblioteca de Sons Expandida",
+          "description": "Adicionados novos efeitos sonoros ao sistema"
+        },
+        {
+          "type": "improvement",
+          "title": "Auditoria com Fotos",
+          "description": "Agora é possível visualizar a foto do contato diretamente na aba de auditoria"
+        },
+        {
+          "type": "improvement",
+          "title": "Otimização de Transferências por IA",
+          "description": "Melhoria no sistema de transferências realizadas pela IA para maior eficiência"
+        },
         {
           "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
+          "title": "Correções no Sistema de Notificações",
+          "description": "Refatoração e correções no sistema de notificações"
         }
       ]
     },
     {
-      "version": "2.7.8",
-      "date": "2025-09-10",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.7.7",
-      "date": "2025-09-10",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.7.6",
-      "date": "2025-09-10",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.7.5",
-      "date": "2025-09-10",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.7.4",
-      "date": "2025-09-10",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.7.3",
-      "date": "2025-09-10",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.7.2",
-      "date": "2025-09-10",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.7.1",
-      "date": "2025-09-10",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.7.0",
-      "date": "2025-09-09",
+      "version": "2.22.0",
+      "date": "2025-09-26",
       "type": "minor",
-      "title": "Novas Funcionalidades",
+      "title": "Sistema CSAT e Melhorias Iniciais",
       "changes": [
         {
           "type": "feature",
-          "title": "Novas Funcionalidades",
-          "description": "Adição de novas funcionalidades mantendo compatibilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.6.1",
-      "date": "2025-09-09",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
+          "title": "Sistema CSAT - Versão Inicial",
+          "description": "Implementação inicial da pesquisa de satisfação do cliente"
+        },
+        {
+          "type": "feature",
+          "title": "Processamento Multimídia Básico",
+          "description": "Primeira versão da capacidade da IA entender áudios e imagens"
+        },
+        {
+          "type": "improvement",
+          "title": "Transferências por IA",
+          "description": "Otimizações iniciais no sistema de transferências"
+        },
         {
           "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
+          "title": "Correções no Sistema de Áudio",
+          "description": "Correções preliminares no módulo de áudio"
         }
       ]
     },
     {
-      "version": "2.6.0",
-      "date": "2025-09-09",
+      "version": "2.21.0",
+      "date": "2025-09-26",
       "type": "minor",
-      "title": "Novas Funcionalidades",
+      "title": "Base para Novas Funcionalidades",
       "changes": [
         {
           "type": "feature",
-          "title": "Novas Funcionalidades",
-          "description": "Adição de novas funcionalidades mantendo compatibilidade"
+          "title": "Funcionalidades Base do Sistema",
+          "description": "Adição das funcionalidades fundamentais do sistema"
+        },
+        {
+          "type": "improvement",
+          "title": "Compatibilidade",
+          "description": "Manutenção da compatibilidade com versões anteriores"
         }
       ]
     },
     {
-      "version": "2.5.12",
-      "date": "2025-09-09",
+      "version": "2.20.13",
+      "date": "2025-09-26",
       "type": "patch",
-      "title": "Correções e Melhorias",
+      "title": "Correções de Estabilidade",
       "changes": [
         {
           "type": "fix",
-          "title": "Correções de Bugs",
+          "title": "Correções de Estabilidade",
           "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.5.11",
-      "date": "2025-09-09",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.5.10",
-      "date": "2025-09-09",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.5.9",
-      "date": "2025-09-08",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.5.8",
-      "date": "2025-09-08",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.5.7",
-      "date": "2025-09-08",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.5.6",
-      "date": "2025-09-08",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.5.5",
-      "date": "2025-09-08",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.5.4",
-      "date": "2025-09-08",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.5.3",
-      "date": "2025-09-08",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.5.2",
-      "date": "2025-09-08",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.5.1",
-      "date": "2025-09-08",
-      "type": "patch",
-      "title": "Correções e Melhorias",
-      "changes": [
-        {
-          "type": "fix",
-          "title": "Correções de Bugs",
-          "description": "Correções de problemas e melhorias de estabilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.5.0",
-      "date": "2025-09-08",
-      "type": "minor",
-      "title": "Novas Funcionalidades",
-      "changes": [
-        {
-          "type": "feature",
-          "title": "Novas Funcionalidades",
-          "description": "Adição de novas funcionalidades mantendo compatibilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.4.0",
-      "date": "2025-09-08",
-      "type": "minor",
-      "title": "Novas Funcionalidades",
-      "changes": [
-        {
-          "type": "feature",
-          "title": "Novas Funcionalidades",
-          "description": "Adição de novas funcionalidades mantendo compatibilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.3.0",
-      "date": "2025-09-08",
-      "type": "minor",
-      "title": "Novas Funcionalidades",
-      "changes": [
-        {
-          "type": "feature",
-          "title": "Novas Funcionalidades",
-          "description": "Adição de novas funcionalidades mantendo compatibilidade"
-        }
-      ]
-    },
-    {
-      "version": "2.2.0",
-      "date": "2025-09-08",
-      "type": "minor",
-      "title": "Novas Funcionalidades",
-      "changes": [
-        {
-          "type": "feature",
-          "title": "Novas Funcionalidades",
-          "description": "Adição de novas funcionalidades mantendo compatibilidade"
         }
       ]
     }

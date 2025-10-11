@@ -1,6 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 
 export default function useOnlineUsers() {
+  // Verificar se estamos em um ambiente React válido
+  if (typeof window === 'undefined') {
+    return {
+      isUserOnline: () => false,
+      getOnlineCount: () => 0,
+      onlineUsers: []
+    };
+  }
+
   const [onlineUsers, setOnlineUsers] = useState(new Set());
   const [websocket, setWebsocket] = useState(null);
   const reconnectTimeoutRef = useRef(null);

@@ -17,6 +17,7 @@ import ConversationAnalysis from './dashboard/ConversationAnalysis';
 
 import AgentPerformanceTable from './dashboard/AgentPerformanceTable';
 import RecentActivity from './dashboard/RecentActivity';
+import { getAverageSatisfaction, getResolutionRate, subscribeToCSAT, subscribeToAudit } from '../lib/supabase';
 
 const DashboardPrincipal = ({ provedorId }) => {
   const [loading, setLoading] = useState(true);
@@ -40,6 +41,12 @@ const DashboardPrincipal = ({ provedorId }) => {
   const [canais, setCanais] = useState([]);
   const [responseTimeData, setResponseTimeData] = useState([]);
   const [ws, setWs] = useState(null);
+  
+  // Estados para dados do Supabase (apenas para os 2 cards específicos)
+  const [supabaseStats, setSupabaseStats] = useState({
+    satisfacao_media: '0.0',
+    taxa_resolucao: '0%'
+  });
 
 
   useEffect(() => {
@@ -177,6 +184,46 @@ const DashboardPrincipal = ({ provedorId }) => {
     return () => clearInterval(interval);
   }, [provedorId]);
 
+  // useEffect para inicializar dados do Supabase (apenas para os 2 cards)
+  useEffect(() => {
+    if (provedorId) {
+      fetchSupabaseStats();
+      setupRealtimeSubscriptions();
+    }
+  }, [provedorId]);
+
+  // Função para buscar dados do Supabase
+  const fetchSupabaseStats = async () => {
+    try {
+      const [satisfacao, resolucao] = await Promise.all([
+        getAverageSatisfaction(provedorId),
+        getResolutionRate(provedorId)
+      ]);
+      
+      setSupabaseStats({
+        satisfacao_media: satisfacao.toString(),
+        taxa_resolucao: `${resolucao}%`
+      });
+    } catch (error) {
+      console.error('Erro ao buscar dados do Supabase:', error);
+    }
+  };
+
+  // Configurar Realtime subscriptions (apenas para os 2 cards)
+  const setupRealtimeSubscriptions = () => {
+    // Subscription para CSAT (Satisfação Média)
+    subscribeToCSAT(provedorId, (payload) => {
+      console.log('Nova avaliação CSAT recebida:', payload);
+      fetchSupabaseStats();
+    });
+    
+    // Subscription para Auditoria (Taxa de Resolução)
+    subscribeToAudit(provedorId, (payload) => {
+      console.log('Nova auditoria recebida:', payload);
+      fetchSupabaseStats();
+    });
+  };
+
   // Função para traduzir tipos de canal
   const getChannelDisplayName = (channelType) => {
     const channelNames = {
@@ -206,17 +253,17 @@ const DashboardPrincipal = ({ provedorId }) => {
         trend: 'neutral'
       },
       satisfacao: {
-        value: stats.satisfacao_media || '0.0',
-        change: parseFloat(stats.satisfacao_media || '0.0') > 0 ? '-1%' : '0%',
-        trend: parseFloat(stats.satisfacao_media || '0.0') > 0 ? 'down' : 'neutral'
+        value: supabaseStats.satisfacao_media || '0.0',
+        change: parseFloat(supabaseStats.satisfacao_media || '0.0') > 0 ? '-1%' : '0%',
+        trend: parseFloat(supabaseStats.satisfacao_media || '0.0') > 0 ? 'down' : 'neutral'
       },
       taxaResolucao: {
-        value: stats.taxa_resolucao || '0%',
+        value: supabaseStats.taxa_resolucao || '0%',
         change: '0%',
         trend: 'neutral'
       }
     };
-  }, [stats]);
+  }, [stats, supabaseStats]);
 
   if (loading) {
     return (

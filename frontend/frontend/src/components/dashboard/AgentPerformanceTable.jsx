@@ -37,9 +37,9 @@ export default function AgentPerformanceTable() {
 
   const performanceData = useMemo(() => {
     // Usar dados reais da API do dashboard
-    return agents.map((agent) => {
+    return agents.map((agent, index) => {
       return {
-        id: agent.id,
+        id: agent.id || `agent-${index}`, // Garantir ID único
         name: agent.name || 'Agente',
         email: agent.email || '',
         conversations: agent.conversations || 0,

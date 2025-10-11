@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Eye, LogIn, LogOut, Edit, Trash2, PlusCircle, User, Filter, Download, BarChart3, Calendar, Search, RefreshCw, X, MessageSquare, Clock, Hash, Bot } from 'lucide-react';
 import axios from 'axios';
+import { getAuditLogs, subscribeToAudit } from '../lib/supabase';
 
 export default function AuditLog({ provedorId }) {
   const [logs, setLogs] = useState([]);
@@ -27,8 +28,33 @@ export default function AuditLog({ provedorId }) {
     if (provedorId) {
       fetchLogs();
       fetchStats();
+      setupRealtimeSubscription();
     }
+    
+    return () => {
+      // Cleanup subscription
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
   }, [provedorId, filters, pagination.current]);
+
+  const [subscription, setSubscription] = useState(null);
+
+  const setupRealtimeSubscription = () => {
+    if (subscription) {
+      subscription.unsubscribe();
+    }
+
+    const newSubscription = subscribeToAudit(provedorId, (payload) => {
+      console.log('Nova auditoria recebida via Supabase:', payload);
+      // Recarregar dados quando houver mudanças
+      fetchLogs();
+      fetchStats();
+    });
+
+    setSubscription(newSubscription);
+  };
 
   async function fetchLogs() {
     setLoading(true);
@@ -43,10 +69,41 @@ export default function AuditLog({ provedorId }) {
         ...filters
       };
       
-      const res = await axios.get('/api/audit-logs/', {
-        headers: { Authorization: `Token ${token}` },
-        params
+      // Tentar Supabase primeiro
+      const auditData = await getAuditLogs(provedorId, {
+        conversation_closed: true,
+        date_from: filters.date_from,
+        date_to: filters.date_to
       });
+
+      let res;
+      
+      if (auditData && auditData.length > 0) {
+        // Usar dados do Supabase
+        const processedLogs = auditData.map(audit => ({
+          id: audit.id,
+          user: audit.user_id ? { id: audit.user_id, username: 'Usuário' } : null,
+          action: audit.action,
+          ip_address: 'N/A',
+          details: audit.details,
+          provedor: { id: audit.provedor_id },
+          conversation_id: audit.conversation_id,
+          contact_name: audit.details?.contact_name || 'Cliente',
+          channel_type: audit.details?.channel_type || 'whatsapp',
+          timestamp: audit.created_at,
+          ended_at: audit.ended_at
+        }));
+
+        res = { data: { results: processedLogs, count: processedLogs.length } };
+      } else {
+        // Fallback para API local se Supabase estiver vazio
+        console.log('Supabase vazio, usando API local como fallback');
+        const response = await axios.get('/api/audit-logs/', {
+          headers: { Authorization: `Token ${token}` },
+          params
+        });
+        res = response.data;
+      }
       
       if (res.data && Array.isArray(res.data.results)) {
         setLogs(res.data.results);
@@ -87,15 +144,27 @@ export default function AuditLog({ provedorId }) {
   async function fetchConversationDetails(conversationId) {
     setLoadingConversation(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`/api/audit-logs/conversation_audit/?conversation_id=${conversationId}&provedor_id=${provedorId}`, {
-        headers: { Authorization: `Token ${token}` }
+      // Usar Supabase para buscar detalhes da conversa
+      const auditData = await getAuditLogs(provedorId, {
+        conversation_closed: true
       });
       
-      if (res.data && res.data.results && res.data.results.length > 0) {
-        setConversationDetails(res.data.results[0]);
-      } else if (res.data && Array.isArray(res.data) && res.data.length > 0) {
-        setConversationDetails(res.data[0]);
+      const conversationAudit = auditData.find(audit => audit.conversation_id === conversationId);
+      
+      if (conversationAudit) {
+        setConversationDetails({
+          id: conversationId,
+          contact_name: conversationAudit.details?.contact_name || 'Cliente',
+          channel_type: conversationAudit.details?.channel_type || 'whatsapp',
+          status: 'closed',
+          created_at: conversationAudit.created_at,
+          ended_at: conversationAudit.ended_at,
+          duration: conversationAudit.details?.duration || 'N/A',
+          message_count: conversationAudit.details?.message_count || 0,
+          resolution_type: conversationAudit.details?.resolution_type || 'manual',
+          user: conversationAudit.details?.user || 'Sistema',
+          action: conversationAudit.action
+        });
       }
     } catch (e) {
       console.error('Erro ao buscar detalhes da conversa:', e);

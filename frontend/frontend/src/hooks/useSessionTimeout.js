@@ -2,6 +2,11 @@ import { useEffect, useRef } from 'react';
 import axios from 'axios';
 
 const useSessionTimeout = () => {
+  // Verificar se estamos em um ambiente React válido
+  if (typeof window === 'undefined') {
+    return { startTimeout: () => {}, updateTimeout: () => {} };
+  }
+
   const timeoutRef = useRef(null);
   const warningTimeoutRef = useRef(null);
   const sessionTimeoutRef = useRef(30); // valor padrão de 30 minutos

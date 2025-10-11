@@ -195,6 +195,111 @@ class OpenAIService:
             'despedida_detectada': despedida_detectada
         }
 
+    def _detectar_resposta_csat(self, mensagem: str, contexto: Dict[str, Any] = None) -> Dict[str, Any]:
+        """
+        Detecta se o cliente está respondendo a uma pesquisa de satisfação (CSAT)
+        Usa IA para interpretar a resposta, não emojis ou frases fixas
+        """
+        try:
+            # Verificar se há CSAT pendente no contexto
+            if not contexto or not contexto.get('conversation'):
+                return {'is_csat_response': False, 'rating': None, 'feedback': None}
+            
+            conversation = contexto['conversation']
+            
+            # Verificar se há CSAT pendente para esta conversa
+            from conversations.models import CSATRequest
+            csat_request = CSATRequest.objects.filter(
+                conversation=conversation,
+                status='sent'
+            ).first()
+            
+            if not csat_request:
+                return {'is_csat_response': False, 'rating': None, 'feedback': None}
+            
+            # Usar IA para interpretar a resposta do CSAT
+            if not self.api_key:
+                self.api_key = self._get_api_key()
+                if self.api_key:
+                    openai.api_key = self.api_key
+            
+            if not self.api_key:
+                return {'is_csat_response': False, 'rating': None, 'feedback': None}
+            
+            # Prompt para IA interpretar resposta CSAT
+            csat_prompt = f"""
+Você é um assistente que interpreta respostas de pesquisa de satisfação.
+
+O cliente respondeu: "{mensagem}"
+
+Analise se esta resposta é sobre avaliação do atendimento e determine:
+1. Se é uma resposta à pesquisa de satisfação (sim/não)
+2. Qual a nota/avaliação (1-5, onde 1=ruim/péssimo, 5=excelente)
+3. Se há feedback adicional
+
+Responda APENAS em JSON no formato:
+{{
+    "is_csat_response": true/false,
+    "rating": 1-5 ou null,
+    "feedback": "texto do feedback ou null"
+}}
+
+Exemplos de respostas CSAT:
+- "Ruim" = rating: 1
+- "Péssimo" = rating: 1  
+- "Regular" = rating: 3
+- "Bom" = rating: 4
+- "Excelente" = rating: 5
+- "😡" = rating: 1
+- "😕" = rating: 2
+- "😐" = rating: 3
+- "🙂" = rating: 4
+- "🤩" = rating: 5
+- "Muito bom atendimento" = rating: 4, feedback: "Muito bom atendimento"
+- "Atendimento excelente, muito rápido" = rating: 5, feedback: "Atendimento excelente, muito rápido"
+"""
+
+            from openai import OpenAI
+            client = OpenAI(api_key=self.api_key)
+            
+            response = client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": "Você é um especialista em análise de feedback de clientes."},
+                    {"role": "user", "content": csat_prompt}
+                ],
+                max_tokens=200,
+                temperature=0.1
+            )
+            
+            # Processar resposta da IA
+            ai_response = response.choices[0].message.content.strip()
+            logger.info(f"IA CSAT Response: {ai_response}")
+            
+            try:
+                # Tentar extrair JSON da resposta
+                import json
+                csat_data = json.loads(ai_response)
+                
+                if csat_data.get('is_csat_response'):
+                    logger.info(f"✅ CSAT detectado pela IA: Rating {csat_data.get('rating')}, Feedback: {csat_data.get('feedback')}")
+                    return {
+                        'is_csat_response': True,
+                        'rating': csat_data.get('rating'),
+                        'feedback': csat_data.get('feedback'),
+                        'raw_response': mensagem
+                    }
+                else:
+                    return {'is_csat_response': False, 'rating': None, 'feedback': None}
+                    
+            except json.JSONDecodeError:
+                logger.warning(f"Erro ao decodificar JSON da IA: {ai_response}")
+                return {'is_csat_response': False, 'rating': None, 'feedback': None}
+                
+        except Exception as e:
+            logger.error(f"Erro ao detectar resposta CSAT: {e}")
+            return {'is_csat_response': False, 'rating': None, 'feedback': None}
+
     def _get_greeting_time(self) -> str:
         """Retorna saudação baseada no horário atual"""
         from datetime import datetime
@@ -653,72 +758,131 @@ DATA E HORA ATUAL: {data_atual}"""
                 try:
                     motivo = function_args.get('motivo', 'nao_especificado')
                     
-                    # Limpar memória Redis da conversa se disponível
+                    # NÃO limpar Redis aqui - será limpo DEPOIS de enviar a mensagem
                     conversation_id = None
                     if contexto and contexto.get('conversation'):
                         conversation_id = contexto['conversation'].id
                         
-                        try:
-                            # Limpar memória Redis
-                            from .redis_memory_service import redis_memory_service
-                            redis_client = redis_memory_service.get_redis_sync()
-                            if redis_client and conversation_id:
-                                chave_conversa = f'conversation:{provedor.id}:{conversation_id}'
-                                redis_client.delete(chave_conversa)
-                                logger.info(f"Memória Redis limpa para conversa {conversation_id}")
-                        except Exception as e:
-                            logger.warning(f"Erro ao limpar memória Redis: {e}")
-                    
                     # ENCERRAR CONVERSA E REGISTRAR AUDITORIA
                     if contexto and contexto.get('conversation'):
                         conversation = contexto['conversation']
                         
                         # Fechar a conversa
                         conversation.status = 'closed'
-                        conversation.ended_at = timezone.now()
                         conversation.save()
                         
-                        # Registrar auditoria de encerramento
+                        # NÃO limpar Redis aqui - será limpo DEPOIS de enviar a mensagem
+                        
+                        # Enviar auditoria APENAS para Supabase (não salvar localmente)
                         try:
-                            from core.models import AuditLog
                             from conversations.csat_automation import CSATAutomationService
+                            from core.supabase_service import supabase_service
                             
                             # Calcular duração da conversa
                             duracao = None
-                            if conversation.created_at and conversation.ended_at:
-                                duracao = conversation.ended_at - conversation.created_at
+                            if conversation.created_at:
+                                duracao = timezone.now() - conversation.created_at
                             
                             # Contar mensagens
                             message_count = conversation.messages.count()
                             
-                            # Registrar auditoria
-                            audit_log = AuditLog.objects.create(
+                            # Enviar auditoria APENAS para Supabase
+                            supabase_success = supabase_service.save_audit(
+                                provedor_id=provedor.id,
+                                conversation_id=conversation.id,
                                 action='conversation_closed_ai',
-                                user=None,  # Encerrado pela IA
-                                provedor=provedor,
-                                conversation_id=str(conversation.id),
-                                details=json.dumps({
+                                details={
                                     'motivo': motivo,
                                     'encerrado_por': 'ai',
                                     'duracao_minutos': round(duracao.total_seconds() / 60, 2) if duracao else None,
                                     'quantidade_mensagens': message_count,
                                     'satisfacao_cliente': 'confirmada' if motivo in ['cliente_satisfeito', 'atendimento_concluido'] else 'nao_avaliada'
-                                }),
-                                ip_address='127.0.0.1',  # IA
-                                timestamp=timezone.now()
+                                },
+                                user_id=None,
+                                ended_at_iso=timezone.now().isoformat()
                             )
                             
-                            logger.info(f"Auditoria de encerramento registrada: {audit_log.id}")
-                            
-                            # CRIAR SOLICITAÇÃO DE CSAT AUTOMÁTICA
+                            # Enviar dados da conversa para Supabase
                             try:
-                                csat_request = CSATAutomationService.create_csat_request(conversation)
-                                if csat_request:
-                                    logger.info(f"CSAT request criada automaticamente: {csat_request.id}")
-                                else:
-                                    logger.warning("Não foi possível criar CSAT request automático")
-                            except Exception as csat_error:
-                                logger.error(f"Erro ao criar CSAT request automático: {csat_error}")
+                                supabase_service.save_conversation(
+                                    provedor_id=provedor.id,
+                                    conversation_id=conversation.id,
+                                    contact_id=conversation.contact_id,
+                                    inbox_id=conversation.inbox_id,
+                                    status=conversation.status,
+                                    assignee_id=conversation.assignee_id,
+                                    created_at_iso=conversation.created_at.isoformat(),
+                                    updated_at_iso=conversation.updated_at.isoformat(),
+                                    ended_at_iso=timezone.now().isoformat(),
+                                    additional_attributes=conversation.additional_attributes
+                                )
+                                logger.info(f"✅ Conversa enviada para Supabase: {conversation.id}")
+                            except Exception as _conv_err:
+                                logger.warning(f"Falha ao enviar conversa para Supabase: {_conv_err}")
+                            
+                            # Enviar dados do contato para Supabase
+                            try:
+                                contact = conversation.contact
+                                supabase_service.save_contact(
+                                    provedor_id=provedor.id,
+                                    contact_id=contact.id,
+                                    name=contact.name,
+                                    phone=getattr(contact, 'phone', None),
+                                    email=getattr(contact, 'email', None),
+                                    avatar=getattr(contact, 'avatar', None),
+                                    created_at_iso=contact.created_at.isoformat(),
+                                    updated_at_iso=contact.updated_at.isoformat(),
+                                    additional_attributes=contact.additional_attributes
+                                )
+                                logger.info(f"✅ Contato enviado para Supabase: {contact.id}")
+                            except Exception as _contact_err:
+                                logger.warning(f"Falha ao enviar contato para Supabase: {_contact_err}")
+                            
+                            # Enviar todas as mensagens da conversa para Supabase
+                            try:
+                                from conversations.models import Message
+                                messages = Message.objects.filter(conversation=conversation).order_by('created_at')
+                                messages_sent = 0
+                                
+                                for msg in messages:
+                                    success = supabase_service.save_message(
+                                        provedor_id=provedor.id,
+                                        conversation_id=conversation.id,
+                                        contact_id=contact.id,
+                                        content=msg.content,
+                                        message_type=msg.message_type,
+                                        is_from_customer=msg.is_from_customer,
+                                        external_id=msg.external_id,
+                                        file_url=msg.file_url,
+                                        file_name=msg.file_name,
+                                        file_size=msg.file_size,
+                                        additional_attributes=msg.additional_attributes,
+                                        created_at_iso=msg.created_at.isoformat()
+                                    )
+                                    if success:
+                                        messages_sent += 1
+                                
+                                logger.info(f"✅ {messages_sent}/{messages.count()} mensagens enviadas para Supabase")
+                            except Exception as _msg_err:
+                                logger.warning(f"Falha ao enviar mensagens para Supabase: {_msg_err}")
+                            
+                            if supabase_success:
+                                logger.info(f"✅ Auditoria enviada para Supabase: conversa {conversation.id}")
+                            else:
+                                logger.warning(f"❌ Falha ao enviar auditoria para Supabase: conversa {conversation.id}")
+                                
+                        except Exception as _sup_err:
+                            logger.error(f"Erro ao enviar auditoria para Supabase: {_sup_err}")
+                        
+                        # CRIAR SOLICITAÇÃO DE CSAT AUTOMÁTICA
+                        try:
+                            csat_request = CSATAutomationService.create_csat_request(conversation)
+                            if csat_request:
+                                logger.info(f"CSAT request criada automaticamente: {csat_request.id}")
+                            else:
+                                logger.warning("Não foi possível criar CSAT request automático")
+                        except Exception as csat_error:
+                            logger.error(f"Erro ao criar CSAT request automático: {csat_error}")
                             
                         except Exception as audit_error:
                             logger.error(f"Erro ao registrar auditoria de encerramento: {audit_error}")
@@ -1765,19 +1929,20 @@ TRANSFERÊNCIA INTELIGENTE:
 - Conversa fica em "Em Espera" até atendente pegar o atendimento
 
 MEMÓRIA DE CONTEXTO (REDIS):
-- USE A MEMÓRIA REDIS PARA LEMBRAR DO QUE JÁ FOI CONVERSADO
-- SE JÁ CONSULTOU O CLIENTE, NÃO PEÇA CPF/CNPJ NOVAMENTE
-- SE CLIENTE JÁ ESCOLHEU PIX/BOLETO, USE gerar_fatura_completa IMEDIATAMENTE
-- QUANDO CLIENTE PEDIR "PAGA FATURA" E JÁ TEM CPF, EXECUTE gerar_fatura_completa
-- NUNCA REPITA PERGUNTAS JÁ FEITAS
-- LEMBRE-SE DO QUE JÁ FOI CONVERSADO
+- USE A MEMÓRIA REDIS APENAS PARA A CONVERSА ATUAL
+- SE JÁ CONSULTOU O CLIENTE NESTA CONVERSА, NÃO PEÇA CPF/CNPJ NOVAMENTE
+- SE CLIENTE JÁ ESCOLHEU PIX/BOLETO NESTA CONVERSА, USE gerar_fatura_completa IMEDIATAMENTE
+- QUANDO CLIENTE PEDIR "PAGA FATURA" E JÁ TEM CPF NESTA CONVERSА, EXECUTE gerar_fatura_completa
+- NUNCA REPITA PERGUNTAS JÁ FEITAS NESTA CONVERSА
+- LEMBRE-SE DO QUE JÁ FOI CONVERSADO NESTA CONVERSА
 
 FLUXO FATURA SIMPLIFICADO:
 1. Cliente pede fatura/PIX/boleto
-2. Use gerar_fatura_completa com CPF/CNPJ do cliente (da memória Redis) e número do WhatsApp
-3. A função faz TUDO automaticamente: SGP + QR Code + WhatsApp + Botões + Mensagem de confirmação
-4. NÃO mostre dados da fatura manualmente - a função já faz isso
-5. NÃO confirme novamente - a função já confirma
+2. Se JÁ TEM CPF/CNPJ nesta conversa: Use gerar_fatura_completa IMEDIATAMENTE
+3. Se NÃO TEM CPF/CNPJ nesta conversa: Peça o CPF/CNPJ primeiro
+4. A função faz TUDO automaticamente: SGP + QR Code + WhatsApp + Botões + Mensagem de confirmação
+5. NÃO mostre dados da fatura manualmente - a função já faz isso
+6. NÃO confirme novamente - a função já confirma
 """
 
             # Recuperar memória Redis da conversa
@@ -1961,7 +2126,8 @@ FLUXO FATURA SIMPLIFICADO:
 
 CLIENTE PEDIU FATURA/PAGAMENTO:
 - IMPORTANTE: Antes de usar gerar_fatura_completa, você DEVE perguntar o CPF/CNPJ do cliente
-- Se já tem CPF/CNPJ na memória Redis, use gerar_fatura_completa IMEDIATAMENTE
+- Se já tem CPF/CNPJ nesta conversa, use gerar_fatura_completa IMEDIATAMENTE
+- NUNCA use dados de conversas anteriores - sempre pergunte o CPF/CNPJ se não tiver nesta conversa
 - A função gerar_fatura_completa faz TUDO automaticamente:
   * Formata o CPF/CNPJ (adiciona pontos e traços)
   * Busca a fatura no SGP usando o CPF/CNPJ formatado
@@ -2077,7 +2243,7 @@ ENCERRAMENTO AUTOMÁTICO INTELIGENTE:
                 logger.info(f"TRANSFERÊNCIA DETECTADA: {equipe_sugerida} - {motivo_transferencia}")
             else:
                 logger.info("Nenhuma transferência detectada")
-
+            
             # Forçar uso de ferramentas quando necessário
             force_tools = any(word in mensagem_lower for word in ['pix', 'boleto', 'fatura', 'pagar'])
             # Debug removido
@@ -2173,6 +2339,36 @@ ENCERRAMENTO AUTOMÁTICO INTELIGENTE:
                         if function_name == "consultar_cliente_sgp":
                             if function_result.get('nome'):
                                 memory_updates['nome_cliente'] = function_result['nome']
+                                
+                                # Atualizar nome do contato no banco local
+                                try:
+                                    contact = conversation.contact
+                                    if contact and contact.name != function_result['nome']:
+                                        contact.name = function_result['nome']
+                                        contact.save()
+                                        logger.info(f"✅ Nome do contato atualizado: {contact.name}")
+                                        
+                                        # Enviar contato atualizado para Supabase
+                                        try:
+                                            from core.supabase_service import supabase_service
+                                            supabase_service.save_contact(
+                                                provedor_id=conversation.inbox.provedor_id,
+                                                contact_id=contact.id,
+                                                name=contact.name,
+                                                phone=getattr(contact, 'phone', None),
+                                                email=getattr(contact, 'email', None),
+                                                avatar=getattr(contact, 'avatar', None),
+                                                created_at_iso=contact.created_at.isoformat(),
+                                                updated_at_iso=contact.updated_at.isoformat(),
+                                                additional_attributes=contact.additional_attributes
+                                            )
+                                            logger.info(f"✅ Contato atualizado enviado para Supabase: {contact.name}")
+                                        except Exception as supabase_err:
+                                            logger.warning(f"Falha ao enviar contato atualizado para Supabase: {supabase_err}")
+                                            
+                                except Exception as contact_err:
+                                    logger.warning(f"Falha ao atualizar contato: {contact_err}")
+                                    
                             if function_result.get('contrato_id'):
                                 memory_updates['contrato_id'] = function_result['contrato_id']
                             if function_args.get('cpf_cnpj'):
@@ -2275,33 +2471,93 @@ ENCERRAMENTO AUTOMÁTICO INTELIGENTE:
                     resposta = "Erro interno: Preciso consultar o sistema primeiro. Me informe seu CPF/CNPJ para buscar seus dados reais."
                     break
             
-            # DETECÇÃO AUTOMÁTICA DE SATISFAÇÃO DO CLIENTE
+            # DETECÇÃO AUTOMÁTICA DE SATISFAÇÃO DO CLIENTE E RESPOSTA CSAT
             satisfacao_detectada = False
+            csat_response_detected = False
+            
             if contexto and contexto.get('conversation'):
-                # Detectar se o cliente está satisfeito
-                resultado_deteccao = self._detectar_satisfacao_cliente(mensagem)
+                # PRIMEIRO: Verificar se é resposta CSAT
+                csat_result = self._detectar_resposta_csat(mensagem, contexto)
                 
-                if resultado_deteccao['satisfeito'] and resultado_deteccao['confianca'] >= 0.6:
-                    logger.info(f"Cliente satisfeito detectado: {resultado_deteccao}")
+                if csat_result.get('is_csat_response'):
+                    logger.info(f"✅ Resposta CSAT detectada pela IA: Rating {csat_result.get('rating')}, Feedback: {csat_result.get('feedback')}")
+                    csat_response_detected = True
                     
-                    # Encerrar atendimento automaticamente
+                    # Processar resposta CSAT
                     try:
-                        encerramento_result = self._execute_sgp_function(
-                            provedor=provedor,
-                            function_name="encerrar_atendimento",
-                            function_args={'motivo': resultado_deteccao['motivo']},
-                            contexto=contexto
+                        from conversations.csat_automation import CSATAutomationService
+                        conversation = contexto['conversation']
+                        contact = conversation.contact
+                        
+                        # Criar feedback CSAT usando dados da IA
+                        csat_feedback = CSATAutomationService.create_csat_feedback_from_ai_response(
+                            conversation=conversation,
+                            contact=contact,
+                            rating=csat_result.get('rating'),
+                            feedback_text=csat_result.get('feedback'),
+                            raw_response=csat_result.get('raw_response')
                         )
                         
-                        if encerramento_result.get('success'):
-                            satisfacao_detectada = True
-                            # Usar mensagem de encerramento da função
-                            resposta = encerramento_result.get('mensagem', resposta)
-                            logger.info("Atendimento encerrado automaticamente com sucesso")
+                        if csat_feedback:
+                            logger.info(f"✅ CSAT feedback criado: {csat_feedback.id} - Rating: {csat_feedback.rating_value}")
+                            
+                            # Resposta de agradecimento personalizada baseada na avaliação
+                            nome_usar = self._get_nome_para_csat(conversation)
+                            rating = csat_result.get('rating', 3)
+                            
+                            if rating == 1:
+                                resposta = f"😔 Sinto muito que seu atendimento não foi bom, {nome_usar}! Estamos sempre melhorando e esperamos te atender melhor na próxima vez."
+                            elif rating == 2:
+                                resposta = f"😕 Poxa, {nome_usar}, sentimos que não tenha gostado. Sua opinião é importante para melhorarmos!"
+                            elif rating == 3:
+                                resposta = f"🙂 Obrigado pelo seu feedback, {nome_usar}! Vamos trabalhar para te surpreender da próxima vez."
+                            elif rating == 4:
+                                resposta = f"😄 Que bom saber disso, {nome_usar}! Ficamos felizes que seu atendimento foi bom!"
+                            else:  # rating == 5
+                                resposta = f"🤩 Maravilha, {nome_usar}! Agradecemos por sua avaliação e ficamos felizes com sua satisfação!"
+                            
+                            # Marcar CSAT como processado
+                            csat_request = CSATRequest.objects.filter(
+                                conversation=conversation,
+                                status='sent'
+                            ).first()
+                            if csat_request:
+                                csat_request.status = 'completed'
+                                csat_request.save()
+                                logger.info(f"CSAT request {csat_request.id} marcado como completed")
                         else:
-                            logger.warning(f"Falha ao encerrar atendimento automaticamente: {encerramento_result.get('erro')}")
+                            logger.warning("Falha ao criar CSAT feedback")
+                            resposta = "Obrigado pelo seu feedback! Se precisar de mais alguma coisa, estaremos aqui!"
+                            
                     except Exception as e:
-                        logger.error(f"Erro ao encerrar atendimento automaticamente: {e}")
+                        logger.error(f"Erro ao processar resposta CSAT: {e}")
+                        resposta = "Obrigado pelo seu feedback! Se precisar de mais alguma coisa, estaremos aqui!"
+                
+                # SEGUNDO: Se não é CSAT, verificar se o cliente está satisfeito
+                elif not csat_response_detected:
+                    resultado_deteccao = self._detectar_satisfacao_cliente(mensagem)
+                    
+                    if resultado_deteccao['satisfeito'] and resultado_deteccao['confianca'] >= 0.6:
+                        logger.info(f"Cliente satisfeito detectado: {resultado_deteccao}")
+                        
+                        # Encerrar atendimento automaticamente
+                        try:
+                            encerramento_result = self._execute_sgp_function(
+                                provedor=provedor,
+                                function_name="encerrar_atendimento",
+                                function_args={'motivo': resultado_deteccao['motivo']},
+                                contexto=contexto
+                            )
+                            
+                            if encerramento_result.get('success'):
+                                satisfacao_detectada = True
+                                # Usar mensagem de encerramento da função
+                                resposta = encerramento_result.get('mensagem', resposta)
+                                logger.info("Atendimento encerrado automaticamente com sucesso")
+                            else:
+                                logger.warning(f"Falha ao encerrar atendimento automaticamente: {encerramento_result.get('erro')}")
+                        except Exception as e:
+                            logger.error(f"Erro ao encerrar atendimento automaticamente: {e}")
             
             # Verificar se deve encerrar o atendimento automaticamente
             encerrar_atendimento = False
@@ -2348,11 +2604,99 @@ ENCERRAMENTO AUTOMÁTICO INTELIGENTE:
                     conversation.status = 'closed'
                     conversation.save()
                     
+                    # Enviar auditoria para Supabase
+                    try:
+                        from core.supabase_service import supabase_service
+                        supabase_service.save_audit(
+                            provedor_id=conversation.inbox.provedor_id,
+                            conversation_id=conversation.id,
+                            action='conversation_closed_ai_auto',
+                            details={'resolution_type': 'ai_auto_closure', 'reason': 'automatic_closure'},
+                            user_id=None,
+                            ended_at_iso=timezone.now().isoformat()
+                        )
+                        logger.info(f"✅ Auditoria enviada para Supabase: conversa {conversation_id}")
+                        
+                        # Enviar dados da conversa para Supabase
+                        try:
+                            supabase_service.save_conversation(
+                                provedor_id=conversation.inbox.provedor_id,
+                                conversation_id=conversation.id,
+                                contact_id=conversation.contact_id,
+                                inbox_id=conversation.inbox_id,
+                                status=conversation.status,
+                                assignee_id=conversation.assignee_id,
+                                created_at_iso=conversation.created_at.isoformat(),
+                                updated_at_iso=conversation.updated_at.isoformat(),
+                                ended_at_iso=timezone.now().isoformat(),
+                                additional_attributes=conversation.additional_attributes
+                            )
+                            logger.info(f"✅ Conversa enviada para Supabase: {conversation.id}")
+                        except Exception as _conv_err:
+                            logger.warning(f"Falha ao enviar conversa para Supabase: {_conv_err}")
+                        
+                        # Enviar dados do contato para Supabase
+                        try:
+                            contact = conversation.contact
+                            supabase_service.save_contact(
+                                provedor_id=conversation.inbox.provedor_id,
+                                contact_id=contact.id,
+                                name=contact.name,
+                                phone=getattr(contact, 'phone', None),
+                                email=getattr(contact, 'email', None),
+                                avatar=getattr(contact, 'avatar', None),
+                                created_at_iso=contact.created_at.isoformat(),
+                                updated_at_iso=contact.updated_at.isoformat(),
+                                additional_attributes=contact.additional_attributes
+                            )
+                            logger.info(f"✅ Contato enviado para Supabase: {contact.id}")
+                        except Exception as _contact_err:
+                            logger.warning(f"Falha ao enviar contato para Supabase: {_contact_err}")
+                        
+                        # Enviar todas as mensagens da conversa para Supabase
+                        try:
+                            from conversations.models import Message
+                            messages = Message.objects.filter(conversation=conversation).order_by('created_at')
+                            messages_sent = 0
+                            
+                            for msg in messages:
+                                success = supabase_service.save_message(
+                                    provedor_id=conversation.inbox.provedor_id,
+                                    conversation_id=conversation.id,
+                                    contact_id=contact.id,
+                                    content=msg.content,
+                                    message_type=msg.message_type,
+                                    is_from_customer=msg.is_from_customer,
+                                    external_id=msg.external_id,
+                                    file_url=msg.file_url,
+                                    file_name=msg.file_name,
+                                    file_size=msg.file_size,
+                                    additional_attributes=msg.additional_attributes,
+                                    created_at_iso=msg.created_at.isoformat()
+                                )
+                                if success:
+                                    messages_sent += 1
+                            
+                            logger.info(f"✅ {messages_sent}/{messages.count()} mensagens enviadas para Supabase")
+                        except Exception as _msg_err:
+                            logger.warning(f"Falha ao enviar mensagens para Supabase: {_msg_err}")
+                            
+                    except Exception as _sup_err:
+                        logger.warning(f"Falha ao enviar auditoria para Supabase: {_sup_err}")
+                    
+                    # Limpar memória Redis da conversa encerrada
+                    try:
+                        from .redis_memory_service import redis_memory_service
+                        redis_memory_service.clear_conversation_memory(conversation_id)
+                        logger.info(f"🧹 Memória Redis limpa para conversa {conversation_id}")
+                    except Exception as e:
+                        logger.warning(f"Erro ao limpar memória Redis da conversa {conversation_id}: {e}")
+                    
                     logger.info(f"✅ Atendimento encerrado automaticamente - Conversa {conversation_id} fechada")
                     
                 except Exception as e:
                     logger.error(f"Erro ao encerrar atendimento automaticamente: {e}")
-
+            
             return {
                 "success": True,
                 "resposta": resposta,
@@ -3062,7 +3406,7 @@ CLIENTE: "Preciso falar com um atendente humano"
 
             # ADICIONAR INSTRUÇÃO ESPECÍFICA SE DETECTOU NECESSIDADE DE TRANSFERÊNCIA
             if transfer_necessario:
-                system_prompt += f"""
+                        system_prompt += f"""
 
 TRANSFERÊNCIA IDENTIFICADA - EXECUTE AGORA!
 
@@ -3151,6 +3495,24 @@ LEMBRE-SE: A transferência só acontece se você USAR as duas funções!
                         message_type='text'
                     )
                     logger.info(f"✅ Resposta da IA salva no Redis: {resposta[:50]}...")
+                    
+                    # VERIFICAR SE É MENSAGEM DE ENCERRAMENTO E LIMPAR REDIS
+                    if conversation.status == 'closed':
+                        try:
+                            # Limpar memória Redis da conversa encerrada
+                            redis_memory_service.clear_conversation_memory(conversation.id)
+                            logger.info(f"🧹 Memória Redis limpa para conversa {conversation.id} após encerramento")
+                            
+                            # Limpar também mensagens do banco de dados (manter apenas auditoria)
+                            from conversations.models import Message
+                            messages_to_delete = Message.objects.filter(conversation=conversation)
+                            messages_count = messages_to_delete.count()
+                            messages_to_delete.delete()
+                            logger.info(f"🗑️ {messages_count} mensagens removidas do banco para conversa {conversation.id}")
+                            
+                        except Exception as e:
+                            logger.warning(f"Erro ao limpar memória Redis da conversa {conversation.id}: {e}")
+                            
                 except Exception as e:
                     logger.warning(f"Erro ao salvar resposta da IA no Redis: {e}")
             
@@ -3497,5 +3859,29 @@ LEMBRE-SE: A transferência só acontece se você USAR as duas funções!
                 'success': False,
                 'erro': f'Erro ao processar PDF: {str(e)}'
             }
+    
+    def _get_nome_para_csat(self, conversation):
+        """
+        Obtém o nome para usar no CSAT, priorizando o nome do SGP se disponível,
+        senão usa o nome do WhatsApp
+        """
+        try:
+            # Primeiro, tentar obter o nome do SGP (se a IA já identificou o cliente)
+            from core.redis_memory_service import RedisMemoryService
+            redis_memory = RedisMemoryService()
+            memory = redis_memory.get_conversation_memory_sync(conversation.inbox.provedor.id, conversation.id)
+            if memory and memory.get('nome_cliente'):
+                return memory['nome_cliente']
+            
+            # Se não tiver nome do SGP, usar o nome do contato
+            if conversation.contact and conversation.contact.name:
+                return conversation.contact.name
+            
+            # Fallback para nome genérico
+            return "Cliente"
+            
+        except Exception as e:
+            logger.error(f"Erro ao obter nome para CSAT: {e}")
+            return "Cliente"
 
 openai_service = OpenAIService() 

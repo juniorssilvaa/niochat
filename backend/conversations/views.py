@@ -80,16 +80,106 @@ def log_conversation_closure(request, conversation, action_type, resolution_type
         print(f"✅ DEBUG: Action: {audit_log.action}")
         print(f"✅ DEBUG: User: {audit_log.user}")
         
-        # Criar solicitação de CSAT após encerramento
-        from .csat_automation import CSATAutomationService
+        # Enviar auditoria para Supabase
+        print(f"🔍 DEBUG: Enviando auditoria para Supabase...")
         try:
+            from core.supabase_service import supabase_service
+            supabase_success = supabase_service.save_audit(
+                provedor_id=conversation.inbox.provedor_id,
+                conversation_id=conversation.id,
+                action=action_type,
+                details={'resolution_type': resolution_type or 'manual', 'details': details},
+                user_id=(user.id if user and user.is_authenticated else None),
+                ended_at_iso=(conversation.updated_at.isoformat() if conversation.updated_at else None)
+            )
+            if supabase_success:
+                print(f"✅ DEBUG: Auditoria enviada para Supabase: conversa {conversation.id}")
+            else:
+                print(f"❌ DEBUG: Falha ao enviar auditoria para Supabase: conversa {conversation.id}")
+        except Exception as _sup_err:
+            print(f"⚠️ DEBUG: Erro ao enviar auditoria para Supabase: {_sup_err}")
+        
+        # Enviar dados da conversa para Supabase
+        try:
+            from core.supabase_service import supabase_service
+            supabase_service.save_conversation(
+                provedor_id=conversation.inbox.provedor_id,
+                conversation_id=conversation.id,
+                contact_id=conversation.contact_id,
+                inbox_id=conversation.inbox_id,
+                status=conversation.status,
+                assignee_id=conversation.assignee_id,
+                created_at_iso=conversation.created_at.isoformat(),
+                updated_at_iso=conversation.updated_at.isoformat(),
+                ended_at_iso=conversation.updated_at.isoformat(),
+                additional_attributes=conversation.additional_attributes
+            )
+            print(f"✅ DEBUG: Conversa enviada para Supabase: {conversation.id}")
+        except Exception as _conv_err:
+            print(f"⚠️ DEBUG: Falha ao enviar conversa para Supabase: {_conv_err}")
+        
+        # Enviar dados do contato para Supabase
+        try:
+            contact = conversation.contact
+            supabase_service.save_contact(
+                provedor_id=conversation.inbox.provedor_id,
+                contact_id=contact.id,
+                name=contact.name,
+                phone=getattr(contact, 'phone', None),
+                email=getattr(contact, 'email', None),
+                avatar=getattr(contact, 'avatar', None),
+                created_at_iso=contact.created_at.isoformat(),
+                updated_at_iso=contact.updated_at.isoformat(),
+                additional_attributes=contact.additional_attributes
+            )
+            print(f"✅ DEBUG: Contato enviado para Supabase: {contact.id}")
+        except Exception as _contact_err:
+            print(f"⚠️ DEBUG: Falha ao enviar contato para Supabase: {_contact_err}")
+        
+        # Enviar todas as mensagens da conversa para Supabase
+        try:
+            from conversations.models import Message
+            messages = Message.objects.filter(conversation=conversation).order_by('created_at')
+            messages_sent = 0
+            
+            for msg in messages:
+                success = supabase_service.save_message(
+                    provedor_id=conversation.inbox.provedor_id,
+                    conversation_id=conversation.id,
+                    contact_id=contact.id,
+                    content=msg.content,
+                    message_type=msg.message_type,
+                    is_from_customer=msg.is_from_customer,
+                    external_id=msg.external_id,
+                    file_url=msg.file_url,
+                    file_name=msg.file_name,
+                    file_size=msg.file_size,
+                    additional_attributes=msg.additional_attributes,
+                    created_at_iso=msg.created_at.isoformat()
+                )
+                if success:
+                    messages_sent += 1
+            
+            print(f"✅ DEBUG: {messages_sent}/{messages.count()} mensagens enviadas para Supabase")
+        except Exception as _msg_err:
+            print(f"⚠️ DEBUG: Falha ao enviar mensagens para Supabase: {_msg_err}")
+        
+        # Criar solicitação de CSAT após encerramento
+        try:
+            from .csat_automation import CSATAutomationService
             csat_request = CSATAutomationService.create_csat_request(conversation)
             if csat_request:
                 print(f"✅ DEBUG: CSAT request criada: {csat_request.id}")
             else:
                 print(f"⚠️ DEBUG: Não foi possível criar CSAT request")
+        except ImportError as import_error:
+            print(f"❌ DEBUG: Erro de importação CSAT: {import_error}")
+            import traceback
+            traceback.print_exc()
         except Exception as csat_error:
             print(f"❌ DEBUG: Erro ao criar CSAT request: {csat_error}")
+            import traceback
+            traceback.print_exc()
         
     except Exception as e:
         print(f"❌ ERRO ao registrar auditoria de conversa: {e}")
@@ -172,14 +262,107 @@ class ConversationViewSet(viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
     permission_classes = [permissions.IsAuthenticated]
     
+    def retrieve(self, request, *args, **kwargs):
+        """Buscar detalhes da conversa do Supabase"""
+        try:
+            import requests
+            from django.conf import settings
+            
+            conversation_id = kwargs.get('pk')
+            
+            # Buscar dados da conversa no Supabase
+            url = f'{settings.SUPABASE_URL}/rest/v1/conversations'
+            headers = {
+                'apikey': settings.SUPABASE_ANON_KEY,
+                'Authorization': f'Bearer {settings.SUPABASE_ANON_KEY}',
+                'Content-Type': 'application/json'
+            }
+            
+            # Filtrar por ID da conversa
+            params = {'id': f'eq.{conversation_id}'}
+            response = requests.get(url, headers=headers, params=params)
+            
+            if response.status_code == 200:
+                conversations = response.json()
+                if conversations:
+                    conv_data = conversations[0]
+                    
+                    # Buscar dados do contato
+                    contact_url = f'{settings.SUPABASE_URL}/rest/v1/contacts'
+                    contact_params = {'id': f'eq.{conv_data.get("contact_id")}'}
+                    contact_response = requests.get(contact_url, headers=headers, params=contact_params)
+                    
+                    contact_data = {}
+                    if contact_response.status_code == 200:
+                        contacts = contact_response.json()
+                        if contacts:
+                            contact_data = contacts[0]
+                    
+                    # Buscar CSAT feedback
+                    csat_url = f'{settings.SUPABASE_URL}/rest/v1/csat_feedback'
+                    csat_params = {'conversation_id': f'eq.{conversation_id}'}
+                    csat_response = requests.get(csat_url, headers=headers, params=csat_params)
+                    
+                    csat_data = {}
+                    if csat_response.status_code == 200:
+                        csats = csat_response.json()
+                        if csats:
+                            csat_data = csats[0]
+                    
+                    # Buscar mensagens
+                    messages_url = f'{settings.SUPABASE_URL}/rest/v1/mensagens'
+                    messages_params = {'conversation_id': f'eq.{conversation_id}'}
+                    messages_response = requests.get(messages_url, headers=headers, params=messages_params)
+                    
+                    messages_data = []
+                    if messages_response.status_code == 200:
+                        messages_data = messages_response.json()
+                    
+                    # Montar resposta no formato esperado pelo frontend
+                    result = {
+                        'id': conv_data.get('id'),
+                        'status': conv_data.get('status'),
+                        'created_at': conv_data.get('created_at'),
+                        'updated_at': conv_data.get('updated_at'),
+                        'ended_at': conv_data.get('ended_at'),
+                        'assignee_id': conv_data.get('assignee_id'),
+                        'contact': {
+                            'id': contact_data.get('id'),
+                            'name': contact_data.get('name'),
+                            'phone': contact_data.get('phone'),
+                            'email': contact_data.get('email'),
+                            'avatar': contact_data.get('avatar')
+                        },
+                        'csat': {
+                            'rating_value': csat_data.get('rating_value'),
+                            'emoji_rating': csat_data.get('emoji_rating'),
+                            'feedback_sent_at': csat_data.get('feedback_sent_at')
+                        },
+                        'messages': messages_data,
+                        'message_count': len(messages_data)
+                    }
+                    
+                    return Response(result)
+                else:
+                    return Response({'error': 'Conversa não encontrada no Supabase'}, status=404)
+            else:
+                return Response({'error': 'Erro ao buscar conversa no Supabase'}, status=500)
+                
+        except Exception as e:
+            # Fallback para dados locais se Supabase falhar
+            return super().retrieve(request, *args, **kwargs)
+    
     def get_queryset(self):
         user = self.request.user
         
-        # Superadmin vê todas as conversas
-        if user.user_type == 'superadmin':
-            return Conversation.objects.all()
+        # Filtrar conversas fechadas por padrão
+        base_queryset = Conversation.objects.exclude(status='closed')
         
-        # Admin vê todas as conversas do seu provedor
+        # Superadmin vê todas as conversas (exceto fechadas)
+        if user.user_type == 'superadmin':
+            return base_queryset
+        
+        # Admin vê todas as conversas do seu provedor (exceto fechadas)
         elif user.user_type == 'admin':
             provedores = Provedor.objects.filter(admins=user)
             if provedores.exists():
@@ -188,7 +371,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
                     if not provedor.is_active:
                         from rest_framework.exceptions import PermissionDenied
                         raise PermissionDenied('Seu provedor está temporariamente suspenso. Entre em contato com o suporte.')
-                return Conversation.objects.filter(inbox__provedor__in=provedores)
+                return base_queryset.filter(inbox__provedor__in=provedores)
             return Conversation.objects.none()
         
         # Agent (atendente) - implementar permissões baseadas em equipes e permissões específicas
@@ -197,13 +380,13 @@ class ConversationViewSet(viewsets.ModelViewSet):
             user_teams = TeamMember.objects.filter(user=user).values_list('team_id', flat=True)
             
             if not user_teams.exists():
-                # Se não está em nenhuma equipe, só vê conversas atribuídas a ele
+                # Se não está em nenhuma equipe, só vê conversas atribuídas a ele (exceto fechadas)
                 provedores = user.provedores_admin.all()
                 if provedores.exists():
                     provedor = provedores.first()
-                    return Conversation.objects.filter(assignee=user, inbox__provedor=provedor)
+                    return base_queryset.filter(assignee=user, inbox__provedor=provedor)
                 else:
-                    return Conversation.objects.filter(assignee=user)
+                    return base_queryset.filter(assignee=user)
             
             # Buscar provedores das equipes do usuário
             provedores_equipes = Team.objects.filter(id__in=user_teams).values_list('provedor_id', flat=True)
@@ -211,23 +394,23 @@ class ConversationViewSet(viewsets.ModelViewSet):
             # Verificar permissões específicas do usuário
             user_permissions = getattr(user, 'permissions', [])
             
-            # Base: conversas do provedor das equipes do usuário
-            base_queryset = Conversation.objects.filter(inbox__provedor_id__in=provedores_equipes)
+            # Base: conversas do provedor das equipes do usuário (exceto fechadas)
+            team_queryset = base_queryset.filter(inbox__provedor_id__in=provedores_equipes)
             
             # Filtrar baseado nas permissões
             if 'view_ai_conversations' in user_permissions:
                 # Pode ver conversas com IA (status snoozed)
-                ai_conversations = base_queryset.filter(status='snoozed')
+                ai_conversations = team_queryset.filter(status='snoozed')
             else:
                 # Não pode ver conversas com IA
                 ai_conversations = Conversation.objects.none()
             
             # SEMPRE incluir conversas atribuídas ao usuário (para aba "Minhas")
-            assigned_conversations = base_queryset.filter(assignee=user)
+            assigned_conversations = team_queryset.filter(assignee=user)
             
             if 'view_team_unassigned' in user_permissions:
                 # Pode ver conversas não atribuídas da equipe dele
-                team_unassigned = base_queryset.filter(assignee__isnull=True)
+                team_unassigned = team_queryset.filter(assignee__isnull=True)
             else:
                 team_unassigned = Conversation.objects.none()
             
@@ -236,7 +419,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
             
             # Se não tem nenhuma permissão específica, só vê conversas atribuídas a ele
             if not user_permissions and not user.is_superuser and not user.is_staff:
-                final_queryset = base_queryset.filter(assignee=user)
+                final_queryset = team_queryset.filter(assignee=user)
             
             return final_queryset.distinct()
     
@@ -551,18 +734,99 @@ class ConversationViewSet(viewsets.ModelViewSet):
         conversation.updated_at = timezone.now()
         conversation.save()
         
+        # Limpar memória Redis da conversa encerrada
+        try:
+            from core.redis_memory_service import redis_memory_service
+            redis_memory_service.clear_conversation_memory(conversation.id)
+            print(f"🧹 DEBUG: Memória Redis limpa para conversa {conversation.id}")
+        except Exception as e:
+            print(f"⚠️ DEBUG: Erro ao limpar memória Redis da conversa {conversation.id}: {e}")
+        
         print(f"✅ DEBUG: Status da conversa atualizado para 'closed'")
         
-        # Registrar auditoria
-        print(f"🔍 DEBUG: Chamando log_conversation_closure...")
-        log_conversation_closure(
-            request=request,
-            conversation=conversation,
-            action_type='conversation_closed_agent',
-            resolution_type=resolution_type,
-            user=user
-        )
-        print(f"✅ DEBUG: log_conversation_closure executado")
+        # Enviar auditoria APENAS para Supabase (não salvar localmente)
+        print(f"🔍 DEBUG: Enviando auditoria para Supabase...")
+        try:
+            from core.supabase_service import supabase_service
+            supabase_success = supabase_service.save_audit(
+                provedor_id=conversation.inbox.provedor_id,
+                conversation_id=conversation.id,
+                action='conversation_closed_manual',
+                details={'resolution_type': resolution_type or 'manual'},
+                user_id=(request.user.id if getattr(request, 'user', None) and request.user.is_authenticated else None),
+                ended_at_iso=(conversation.updated_at.isoformat() if conversation.updated_at else None)
+            )
+            if supabase_success:
+                print(f"✅ DEBUG: Auditoria enviada para Supabase: conversa {conversation.id}")
+            else:
+                print(f"❌ DEBUG: Falha ao enviar auditoria para Supabase: conversa {conversation.id}")
+        except Exception as _sup_err:
+            print(f"⚠️ DEBUG: Erro ao enviar auditoria para Supabase: {_sup_err}")
+        
+        # Enviar dados da conversa para Supabase
+        try:
+            from core.supabase_service import supabase_service
+            supabase_service.save_conversation(
+                provedor_id=conversation.inbox.provedor_id,
+                conversation_id=conversation.id,
+                contact_id=conversation.contact_id,
+                inbox_id=conversation.inbox_id,
+                status=conversation.status,
+                assignee_id=conversation.assignee_id,
+                created_at_iso=conversation.created_at.isoformat(),
+                updated_at_iso=conversation.updated_at.isoformat(),
+                ended_at_iso=conversation.updated_at.isoformat(),
+                additional_attributes=conversation.additional_attributes
+            )
+            print(f"✅ DEBUG: Conversa enviada para Supabase: {conversation.id}")
+        except Exception as _conv_err:
+            print(f"⚠️ DEBUG: Falha ao enviar conversa para Supabase: {_conv_err}")
+        
+        # Enviar dados do contato para Supabase
+        try:
+            contact = conversation.contact
+            supabase_service.save_contact(
+                provedor_id=conversation.inbox.provedor_id,
+                contact_id=contact.id,
+                name=contact.name,
+                phone=getattr(contact, 'phone', None),
+                email=getattr(contact, 'email', None),
+                avatar=getattr(contact, 'avatar', None),
+                created_at_iso=contact.created_at.isoformat(),
+                updated_at_iso=contact.updated_at.isoformat(),
+                additional_attributes=contact.additional_attributes
+            )
+            print(f"✅ DEBUG: Contato enviado para Supabase: {contact.id}")
+        except Exception as _contact_err:
+            print(f"⚠️ DEBUG: Falha ao enviar contato para Supabase: {_contact_err}")
+        
+        # Enviar todas as mensagens da conversa para Supabase
+        try:
+            from conversations.models import Message
+            messages = Message.objects.filter(conversation=conversation).order_by('created_at')
+            messages_sent = 0
+            
+            for msg in messages:
+                success = supabase_service.save_message(
+                    provedor_id=conversation.inbox.provedor_id,
+                    conversation_id=conversation.id,
+                    contact_id=contact.id,
+                    content=msg.content,
+                    message_type=msg.message_type,
+                    is_from_customer=msg.is_from_customer,
+                    external_id=msg.external_id,
+                    file_url=msg.file_url,
+                    file_name=msg.file_name,
+                    file_size=msg.file_size,
+                    additional_attributes=msg.additional_attributes,
+                    created_at_iso=msg.created_at.isoformat()
+                )
+                if success:
+                    messages_sent += 1
+            
+            print(f"✅ DEBUG: {messages_sent}/{messages.count()} mensagens enviadas para Supabase")
+        except Exception as _msg_err:
+            print(f"⚠️ DEBUG: Falha ao enviar mensagens para Supabase: {_msg_err}")
         
         # Adicionar mensagem de sistema sobre o encerramento
         Message.objects.create(
@@ -612,6 +876,96 @@ class ConversationViewSet(viewsets.ModelViewSet):
             'resolution_type': resolution_type
         })
     
+    @action(detail=True, methods=['get'])
+    def details_from_supabase(self, request, pk=None):
+        """Buscar detalhes da conversa do Supabase"""
+        try:
+            import requests
+            from django.conf import settings
+            
+            # Buscar dados da conversa no Supabase
+            url = f'{settings.SUPABASE_URL}/rest/v1/conversations'
+            headers = {
+                'apikey': settings.SUPABASE_ANON_KEY,
+                'Authorization': f'Bearer {settings.SUPABASE_ANON_KEY}',
+                'Content-Type': 'application/json'
+            }
+            
+            # Filtrar por ID da conversa
+            params = {'id': f'eq.{pk}'}
+            response = requests.get(url, headers=headers, params=params)
+            
+            if response.status_code == 200:
+                conversations = response.json()
+                if conversations:
+                    conv_data = conversations[0]
+                    
+                    # Buscar dados do contato
+                    contact_url = f'{settings.SUPABASE_URL}/rest/v1/contacts'
+                    contact_params = {'id': f'eq.{conv_data.get("contact_id")}'}
+                    contact_response = requests.get(contact_url, headers=headers, params=contact_params)
+                    
+                    contact_data = {}
+                    if contact_response.status_code == 200:
+                        contacts = contact_response.json()
+                        if contacts:
+                            contact_data = contacts[0]
+                    
+                    # Buscar CSAT feedback
+                    csat_url = f'{settings.SUPABASE_URL}/rest/v1/csat_feedback'
+                    csat_params = {'conversation_id': f'eq.{pk}'}
+                    csat_response = requests.get(csat_url, headers=headers, params=csat_params)
+                    
+                    csat_data = {}
+                    if csat_response.status_code == 200:
+                        csats = csat_response.json()
+                        if csats:
+                            csat_data = csats[0]
+                    
+                    # Buscar mensagens
+                    messages_url = f'{settings.SUPABASE_URL}/rest/v1/mensagens'
+                    messages_params = {'conversation_id': f'eq.{pk}'}
+                    messages_response = requests.get(messages_url, headers=headers, params=messages_params)
+                    
+                    messages_data = []
+                    if messages_response.status_code == 200:
+                        messages_data = messages_response.json()
+                    
+                    # Montar resposta
+                    result = {
+                        'conversation': {
+                            'id': conv_data.get('id'),
+                            'status': conv_data.get('status'),
+                            'created_at': conv_data.get('created_at'),
+                            'updated_at': conv_data.get('updated_at'),
+                            'ended_at': conv_data.get('ended_at'),
+                            'assignee_id': conv_data.get('assignee_id')
+                        },
+                        'contact': {
+                            'id': contact_data.get('id'),
+                            'name': contact_data.get('name'),
+                            'phone': contact_data.get('phone'),
+                            'email': contact_data.get('email'),
+                            'avatar': contact_data.get('avatar')
+                        },
+                        'csat': {
+                            'rating_value': csat_data.get('rating_value'),
+                            'emoji_rating': csat_data.get('emoji_rating'),
+                            'feedback_sent_at': csat_data.get('feedback_sent_at')
+                        },
+                        'messages': messages_data,
+                        'message_count': len(messages_data)
+                    }
+                    
+                    return Response(result)
+                else:
+                    return Response({'error': 'Conversa não encontrada no Supabase'}, status=404)
+            else:
+                return Response({'error': 'Erro ao buscar conversa no Supabase'}, status=500)
+                
+        except Exception as e:
+            return Response({'error': f'Erro interno: {str(e)}'}, status=500)
+
     @action(detail=True, methods=['post'])
     def close_conversation_ai(self, request, pk=None):
         """Encerrar conversa por IA"""
@@ -635,6 +989,14 @@ class ConversationViewSet(viewsets.ModelViewSet):
         conversation.status = 'closed'
         conversation.updated_at = timezone.now()
         conversation.save()
+        
+        # Limpar memória Redis da conversa encerrada
+        try:
+            from core.redis_memory_service import redis_memory_service
+            redis_memory_service.clear_conversation_memory(conversation.id)
+            print(f"🧹 DEBUG: Memória Redis limpa para conversa {conversation.id}")
+        except Exception as e:
+            print(f"⚠️ DEBUG: Erro ao limpar memória Redis da conversa {conversation.id}: {e}")
         
         # Registrar auditoria
         log_conversation_closure(
@@ -1217,6 +1579,23 @@ class MessageViewSet(viewsets.ModelViewSet):
                 additional_attributes=additional_attrs
             )
             
+            # Enviar mensagem para Supabase
+            try:
+                from core.supabase_service import supabase_service
+                supabase_service.save_message(
+                    provedor_id=conversation.inbox.provedor_id,
+                    conversation_id=conversation.id,
+                    contact_id=conversation.contact.id,
+                    content=content,
+                    message_type='text',
+                    is_from_customer=False,
+                    additional_attributes=additional_attrs,
+                    created_at_iso=message.created_at.isoformat()
+                )
+                print(f"✅ DEBUG: Mensagem de texto enviada para Supabase: {message.id}")
+            except Exception as _sup_err:
+                print(f"⚠️ DEBUG: Erro ao enviar mensagem de texto para Supabase: {_sup_err}")
+            
             # Enviar para o WhatsApp
             success, whatsapp_response = send_via_uazapi(conversation, content, 'text', None, reply_to_message_id)
             
@@ -1384,6 +1763,26 @@ class MessageViewSet(viewsets.ModelViewSet):
                 additional_attributes=additional_attrs,
                 is_from_customer=False
             )
+            
+            # Enviar mensagem para Supabase
+            try:
+                from core.supabase_service import supabase_service
+                supabase_service.save_message(
+                    provedor_id=conversation.inbox.provedor_id,
+                    conversation_id=conversation.id,
+                    contact_id=conversation.contact.id,
+                    content=content_to_save,
+                    message_type=media_type,
+                    is_from_customer=False,
+                    file_url=file_url,
+                    file_name=file_name,
+                    file_size=file_size,
+                    additional_attributes=additional_attrs,
+                    created_at_iso=message.created_at.isoformat()
+                )
+                print(f"✅ DEBUG: Mensagem de mídia enviada para Supabase: {message.id}")
+            except Exception as _sup_err:
+                print(f"⚠️ DEBUG: Erro ao enviar mensagem de mídia para Supabase: {_sup_err}")
             
             # Enviar para o WhatsApp via Uazapi com a URL da mídia
             success, whatsapp_response = send_media_via_uazapi(conversation, file_url, media_type, caption, reply_to_message_id)
@@ -2171,8 +2570,10 @@ class DashboardStatsView(APIView):
         
         # Satisfação média - usar dados reais do CSAT
         try:
-            from .csat_service import CSATService
-            csat_stats = CSATService.get_csat_stats(provedor, 30)
+            from .csat_automation import CSATAutomationService
+            # Usar função local para obter stats CSAT
+            from .views_csat import get_csat_stats
+            csat_stats = get_csat_stats(provedor, 30)
             satisfacao_media = f"{csat_stats.get('average_rating', 0.0):.1f}"
         except Exception as e:
             # Fallback para cálculo simulado se CSAT não estiver disponível

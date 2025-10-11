@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Eye, Search, Filter, Calendar, X, MessageSquare, Clock, Hash, Bot, User } from 'lucide-react';
 import axios from 'axios';
 import { buildMediaUrl } from '../config/environment';
+import { getMessages } from '../lib/supabase';
 
 // Importar ícones dos canais
 import whatsappIcon from '../assets/whatsapp.png';
@@ -55,12 +56,16 @@ export default function ConversationAudit({ provedorId }) {
       // Enriquecer dados com informações adicionais
       const enrichedData = await Promise.all(data.map(async (conv) => {
         try {
-          // Buscar detalhes da conversa
-          const conversationResponse = await axios.get(`/api/conversations/${conv.conversation_id}/`, {
-            headers: { Authorization: `Token ${token}` }
-          });
+          // Buscar mensagens do Supabase em vez da API Django
+          const messages = await getMessages(conv.conversation_id, provedorId);
           
-          const conversationData = conversationResponse.data;
+          // Simular dados da conversa baseado na auditoria
+          const conversationData = {
+            created_at: conv.created_at,
+            ended_at: conv.ended_at,
+            message_count: messages.length,
+            status: 'closed'
+          };
           
           // Calcular duração
           let duration = 'N/A';
@@ -163,11 +168,12 @@ export default function ConversationAudit({ provedorId }) {
     try {
       const token = localStorage.getItem('token');
       
-      // Buscar detalhes da conversa
-      const detailsResponse = await axios.get(`/api/conversations/${conversationId}/`, {
+      // Buscar dados completos da conversa do endpoint que busca do Supabase
+      const response = await axios.get(`/api/conversations/${conversationId}/`, {
         headers: { Authorization: `Token ${token}` }
       });
-      let conversationData = detailsResponse.data;
+      
+      const conversationData = response.data;
       
       // Calcular duração da conversa
       if (conversationData.created_at && conversationData.ended_at) {
@@ -198,54 +204,15 @@ export default function ConversationAudit({ provedorId }) {
         conversationData.duration = 'N/A';
       }
       
-      // Buscar CSAT rating do AuditLog
-      try {
-        const auditResponse = await axios.get(`/api/audit-logs/?conversation_closed=true&provedor_id=${provedorId}&page_size=100`, {
-          headers: { Authorization: `Token ${token}` }
-        });
-        
-        const auditLogs = auditResponse.data.results || auditResponse.data || [];
-        
-        // Buscar por conversation_id específico
-        const conversationAudit = auditLogs.find(log => 
-          log.conversation_id === conversationId && log.csat_rating !== null && log.csat_rating !== undefined
-        );
-        
-        // Adicionar CSAT rating aos dados da conversa
-        if (conversationAudit) {
-          conversationData.csat_rating = conversationAudit.csat_rating;
-        } else {
-          // Tentar buscar CSAT rating de outras fontes
-          try {
-            const csatResponse = await axios.get(`/api/csat/feedbacks/?conversation=${conversationId}`, {
-              headers: { Authorization: `Token ${token}` }
-            });
-            
-            const csatData = csatResponse.data.results || csatResponse.data || [];
-            
-            if (csatData.length > 0) {
-              conversationData.csat_rating = csatData[0].rating_value;
-            }
-          } catch (csatError) {
-            console.log('ConversationAudit: CSAT não encontrado:', csatError);
-          }
-        }
-      } catch (auditError) {
-        console.log('ConversationAudit: Erro ao buscar audit logs:', auditError);
+      // Mapear dados do CSAT corretamente
+      if (conversationData.csat && conversationData.csat.rating_value) {
+        conversationData.csat_rating = conversationData.csat.rating_value;
       }
       
       setConversationDetails(conversationData);
       
-      // Buscar mensagens da conversa
-      try {
-        const messagesResponse = await axios.get(`/api/messages/?conversation=${conversationId}`, {
-          headers: { Authorization: `Token ${token}` }
-        });
-        setConversationMessages(messagesResponse.data.results || messagesResponse.data || []);
-      } catch (messagesError) {
-        console.log('Erro ao buscar mensagens:', messagesError);
-        setConversationMessages([]);
-      }
+      // Usar mensagens do Supabase que já vêm no response
+      setConversationMessages(conversationData.messages || []);
       
     } catch (err) {
       console.error('Erro ao buscar detalhes da conversa:', err);

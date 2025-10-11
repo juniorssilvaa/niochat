@@ -563,20 +563,75 @@ def evolution_webhook(request):
             if inbox_created:
                 print(f"Nova inbox criada: {inbox.name} para provedor {provedor.nome}")
             
-            # 4. Buscar ou criar conversa - CORREÇÃO: evitar duplicação por canal
+            # 4. Buscar conversa ativa primeiro, depois qualquer conversa
+            # Primeiro, buscar conversa ativa (não fechada)
             existing_conversation = Conversation.objects.filter(
                 contact=contact,
-                inbox__channel_type='whatsapp'  # Buscar por canal, não por inbox específica
+                inbox__channel_type='whatsapp',
+                status__in=['open', 'snoozed', 'pending']  # Apenas conversas ativas
             ).first()
             
+            # Se não encontrou conversa ativa, buscar qualquer conversa (incluindo fechadas)
+            if not existing_conversation:
+                existing_conversation = Conversation.objects.filter(
+                    contact=contact,
+                    inbox__channel_type='whatsapp'
+                ).first()
+            
             if existing_conversation:
-                # Usar conversa existente, mas atualizar inbox se necessário
-                conversation = existing_conversation
-                if conversation.inbox != inbox:
-                    conversation.inbox = inbox
-                    conversation.save()
-                    print(f"Conversa {conversation.id} atualizada para inbox {inbox.name}")
-                conv_created = False
+                # Verificar se a conversa está ativa
+                if existing_conversation.status in ['open', 'snoozed', 'pending']:
+                    # Conversa está ativa - continuar usando a mesma
+                    conversation = existing_conversation
+                    print(f"DEBUG: Continuando conversa ativa {conversation.id} (status: {conversation.status})")
+                    # Atualizar inbox se necessário
+                    if conversation.inbox != inbox:
+                        conversation.inbox = inbox
+                        conversation.save()
+                        print(f"DEBUG: Inbox atualizada para conversa {conversation.id}")
+                    conv_created = False
+                else:
+                    # Conversa estava fechada - verificar se há CSAT pendente primeiro
+                    print(f"DEBUG: Conversa anterior {existing_conversation.id} estava fechada (status: {existing_conversation.status})")
+                    
+                    # Verificar se há CSAT pendente para esta conversa
+                    from conversations.models import CSATRequest
+                    csat_request = CSATRequest.objects.filter(
+                        conversation=existing_conversation,
+                        status='sent'
+                    ).first()
+                    
+                    if csat_request:
+                        print(f"🔍 DEBUG: CSAT pendente encontrado para conversa {existing_conversation.id} - reabrindo para IA processar")
+                        # Reabrir conversa para IA processar CSAT
+                        existing_conversation.status = 'snoozed'
+                        existing_conversation.save()
+                        conversation = existing_conversation
+                        print(f"DEBUG: Conversa {conversation.id} reaberta para IA processar CSAT")
+                    else:
+                        print(f"DEBUG: Nenhum CSAT pendente - criando nova conversa")
+                        
+                        # Limpar memória Redis da conversa anterior
+                        try:
+                            from core.redis_memory_service import redis_memory_service
+                            redis_memory_service.clear_conversation_memory(existing_conversation.id)
+                            print(f"🧹 DEBUG: Memória Redis limpa para conversa anterior {existing_conversation.id}")
+                        except Exception as e:
+                            print(f"⚠️ DEBUG: Erro ao limpar memória Redis da conversa anterior {existing_conversation.id}: {e}")
+                        
+                        # Criar nova conversa para novo atendimento
+                        conversation = Conversation.objects.create(
+                            contact=contact,
+                            inbox=inbox,
+                            status='snoozed',  # Nova conversa começa com IA
+                        assignee=None,
+                        additional_attributes={
+                            'evolution_instance': instance,
+                            'evolution_event': event
+                        }
+                    )
+                    conv_created = True
+                    print(f"DEBUG: Nova conversa {conversation.id} criada para novo atendimento (cliente retornou)")
             else:
                 # Criar nova conversa
                 conversation = Conversation.objects.create(
@@ -657,20 +712,27 @@ def evolution_webhook(request):
                 created_at=timezone.now()
             )
             
+            # Enviar mensagem para Supabase
+            try:
+                from core.supabase_service import supabase_service
+                supabase_service.save_message(
+                    provedor_id=provedor.id,
+                    conversation_id=conversation.id,
+                    contact_id=contact.id,
+                    content=content or '',
+                    message_type='incoming',
+                    is_from_customer=True,
+                    external_id=external_id,
+                    additional_attributes=additional_attrs,
+                    created_at_iso=msg.created_at.isoformat()
+                )
+                print(f"✅ DEBUG: Mensagem enviada para Supabase: {msg.id}")
+            except Exception as _sup_err:
+                print(f"⚠️ DEBUG: Erro ao enviar mensagem para Supabase: {_sup_err}")
+            
             print(f"DEBUG: Nova mensagem salva: {msg.id} - {content[:30]}...")
             
-            # Processar possível resposta CSAT
-            from conversations.csat_automation import CSATAutomationService
-            try:
-                csat_feedback = CSATAutomationService.process_csat_response(
-                    content or '', conversation, contact
-                )
-                if csat_feedback:
-                    print(f"DEBUG: CSAT feedback processado: {csat_feedback.id} - Rating: {csat_feedback.rating_value}")
-                    # Se processou CSAT, não enviar para IA
-                    return JsonResponse({'status': 'csat_processed'}, status=200)
-            except Exception as csat_error:
-                print(f"DEBUG: Erro ao processar CSAT: {csat_error}")
+            # CSAT já foi processado anteriormente se necessário
             
             # Determinar o tipo de mensagem para salvar no banco
             message_type = msg_data.get('messageType') or msg_data.get('type', 'text')
@@ -808,6 +870,24 @@ def evolution_webhook(request):
                             created_at=django.utils.timezone.now()
                         )
                         
+                        # Enviar mensagem da IA para Supabase
+                        try:
+                            from core.supabase_service import supabase_service
+                            supabase_service.save_message(
+                                provedor_id=provedor.id,
+                                conversation_id=conversation.id,
+                                contact_id=contact.id,
+                                content=resposta_ia,
+                                message_type='text',
+                                is_from_customer=False,
+                                external_id=ia_external_id,
+                                additional_attributes=ia_additional_attrs,
+                                created_at_iso=msg_out.created_at.isoformat()
+                            )
+                            print(f"✅ DEBUG: Mensagem da IA enviada para Supabase: {msg_out.id}")
+                        except Exception as _sup_err:
+                            print(f"⚠️ DEBUG: Erro ao enviar mensagem da IA para Supabase: {_sup_err}")
+                        
                         print(f"DEBUG: Mensagem da IA criada com ID: {msg_out.id}, is_from_customer: {msg_out.is_from_customer}")
                         resposta_preview = resposta_ia[:30] if resposta_ia else "sem resposta"
                         resposta_preview = str(resposta_ia)[:30] if resposta_ia else "sem resposta"
@@ -887,8 +967,7 @@ def webhook_evolution_uazapi(request):
         clean_instance = instance.replace('@s.whatsapp.net', '').replace('@c.us', '') if instance else ''
         clean_chatid = chatid.replace('@s.whatsapp.net', '').replace('@c.us', '') if chatid else ''
         
-        print(f"DEBUG: clean_instance: {clean_instance}")
-        print(f"DEBUG: clean_chatid: {clean_chatid}")
+        # Debug removido para limpeza
         
         if clean_chatid == clean_instance:
             print(f"DEBUG: Ignorando mensagem do próprio número conectado: {chatid}")
@@ -897,7 +976,7 @@ def webhook_evolution_uazapi(request):
         # Buscar provedor e credenciais ANTES da verificação de números
         from core.models import Provedor
         
-        print(f"DEBUG: Buscando provedor para instance: {instance}")
+        # Debug removido para limpeza
         
         # Buscar provedor CORRETO baseado na instance/owner
         # A instance/owner deve corresponder ao número conectado do provedor
@@ -908,16 +987,16 @@ def webhook_evolution_uazapi(request):
             integracoes_externas__whatsapp_token__isnull=False
         )
         
-        print(f"DEBUG: Provedores encontrados com credenciais: {[p.nome for p in provedores]}")
+        # Debug removido para limpeza
         
         # Buscar o provedor correto baseado na instance
         for p in provedores:
             # Verificar se a instance corresponde ao número conectado do provedor
             provedor_instance = p.integracoes_externas.get('whatsapp_instance')
-            print(f"DEBUG: Comparando instance {clean_instance} com provedor {p.nome} (instance: {provedor_instance})")
+            # Debug removido para limpeza
             if provedor_instance and clean_instance == provedor_instance.replace('@s.whatsapp.net', '').replace('@c.us', ''):
                 provedor = p
-                print(f"DEBUG: Provedor CORRETO encontrado: {provedor.nome} (instance: {provedor_instance})")
+                # Debug removido para limpeza
                 break
         
         # Se não encontrar por instance, tentar por token
@@ -926,13 +1005,13 @@ def webhook_evolution_uazapi(request):
                 uazapi_token = p.integracoes_externas.get('whatsapp_token')
                 if uazapi_token and uazapi_token in str(data):
                     provedor = p
-                    print(f"DEBUG: Provedor encontrado por token: {provedor.nome}")
+                    # Debug removido para limpeza
                     break
         
         # Se ainda não encontrar, usar o primeiro (fallback)
         if not provedor:
             provedor = provedores.first()
-            print(f"DEBUG: Usando provedor fallback: {provedor.nome}")
+            # Debug removido para limpeza
         
         if not provedor:
             print("DEBUG: Nenhum provedor com credenciais da Uazapi encontrado")
@@ -940,7 +1019,7 @@ def webhook_evolution_uazapi(request):
         
         # Verificação de status removida - campo não existe mais
         
-        print(f"DEBUG: Provedor final selecionado: {provedor.nome}")
+        # Debug removido para limpeza
         
         # Buscar token e url da UazAPI do provedor
         uazapi_token = provedor.integracoes_externas.get('whatsapp_token')
@@ -1637,9 +1716,19 @@ def webhook_evolution_uazapi(request):
         chatid = msg_data.get('chatid', '')
         sender_lid = msg_data.get('sender_lid', '')
         
-        # Extrair nome e avatar
-        nome_evo = msg_data.get('senderName') or msg_data.get('pushName') or msg_data.get('senderName')
-        avatar_evo = msg_data.get('avatar')
+        # Extrair nome e avatar do webhook
+        # Prioridade: senderName, name, wa_contactName (conforme solicitado)
+        nome_evo = (
+            msg_data.get('senderName') or 
+            data.get('chat', {}).get('name') or 
+            data.get('chat', {}).get('wa_contactName')
+        )
+        # Avatar: procurar em msg_data.avatar, chat.image, chat.imagePreview
+        avatar_evo = (
+            msg_data.get('avatar') or 
+            data.get('chat', {}).get('image') or
+            data.get('chat', {}).get('imagePreview')
+        )
         
         print(f"DEBUG: Nome extraído: {nome_evo}")
         print(f"DEBUG: Avatar extraído: {avatar_evo}")
@@ -1866,22 +1955,74 @@ def webhook_evolution_uazapi(request):
             }
         )
         
-        # Buscar ou criar conversa - CORREÇÃO: evitar duplicação por canal
+        # Buscar conversa ativa primeiro, depois qualquer conversa
         print(f"DEBUG: Buscando conversa existente para contato {contact.id} ({contact.name})")
+        
+        # Primeiro, buscar conversa ativa (não fechada)
         existing_conversation = Conversation.objects.filter(
             contact=contact,
-            inbox__channel_type='whatsapp'  # Buscar por canal, não por inbox específica
+            inbox__channel_type='whatsapp',
+            status__in=['open', 'snoozed', 'pending']  # Apenas conversas ativas
         ).first()
         
+        # Se não encontrou conversa ativa, buscar qualquer conversa (incluindo fechadas)
+        if not existing_conversation:
+            existing_conversation = Conversation.objects.filter(
+                contact=contact,
+                inbox__channel_type='whatsapp'
+            ).first()
+        
         if existing_conversation:
-            # Usar conversa existente, mas atualizar inbox se necessário
-            conversation = existing_conversation
-            print(f"DEBUG: Conversa existente encontrada - ID: {conversation.id}")
-            if conversation.inbox != inbox:
-                conversation.inbox = inbox
-                conversation.save()
-                print(f"Conversa {conversation.id} atualizada para inbox {inbox.name}")
-            conv_created = False
+            # Verificar se a conversa está ativa
+            if existing_conversation.status in ['open', 'snoozed', 'pending']:
+                # Conversa está ativa - continuar usando a mesma
+                conversation = existing_conversation
+                print(f"DEBUG: Continuando conversa ativa {conversation.id} (status: {conversation.status})")
+                if conversation.inbox != inbox:
+                    conversation.inbox = inbox
+                    conversation.save()
+                    print(f"Conversa {conversation.id} atualizada para inbox {inbox.name}")
+                conv_created = False
+            else:
+                # Conversa estava fechada - verificar se há CSAT pendente primeiro
+                print(f"DEBUG: Conversa anterior {existing_conversation.id} estava fechada (status: {existing_conversation.status})")
+                
+                # Verificar se há CSAT pendente para esta conversa
+                from conversations.models import CSATRequest
+                csat_request = CSATRequest.objects.filter(
+                    conversation=existing_conversation,
+                    status='sent'
+                ).first()
+                
+                if csat_request:
+                    print(f"🔍 DEBUG: CSAT pendente encontrado para conversa {existing_conversation.id} - processando resposta")
+                    # Processar CSAT sem reabrir conversa
+                    conversation = existing_conversation
+                    print(f"DEBUG: Processando CSAT para conversa {conversation.id} sem reabrir")
+                else:
+                    print(f"DEBUG: Nenhum CSAT pendente - criando nova conversa")
+                    
+                    # Limpar memória Redis da conversa anterior
+                    try:
+                        from core.redis_memory_service import redis_memory_service
+                        redis_memory_service.clear_conversation_memory(existing_conversation.id)
+                        print(f"🧹 DEBUG: Memória Redis limpa para conversa anterior {existing_conversation.id}")
+                    except Exception as e:
+                        print(f"⚠️ DEBUG: Erro ao limpar memória Redis da conversa anterior {existing_conversation.id}: {e}")
+                    
+                    # Criar nova conversa para novo atendimento
+                    conversation = Conversation.objects.create(
+                        contact=contact,
+                        inbox=inbox,
+                        status='snoozed',  # Nova conversa começa com IA
+                    assignee=None,
+                    additional_attributes={
+                        'instance': instance,
+                        'event': event_type
+                    }
+                )
+                conv_created = True
+                print(f"DEBUG: Nova conversa {conversation.id} criada para novo atendimento (cliente retornou)")
         else:
             # Criar nova conversa
             conversation = Conversation.objects.create(
@@ -1896,29 +2037,6 @@ def webhook_evolution_uazapi(request):
             conv_created = True
             print(f"DEBUG: Nova conversa criada: {conversation.id} para contato {contact.name} (ID: {contact.id})")
         
-        # Se a conversa já existia, preservar atribuição se houver agente
-        if not conv_created:
-            # Verificar se tem assigned_team - se sim, deve ser pending
-            if conversation.additional_attributes and conversation.additional_attributes.get('assigned_team'):
-                if conversation.status != 'pending':
-                    conversation.status = 'pending'
-                    conversation.save()
-                    print(f"DEBUG: Conversa {conversation.id} corrigida para status 'pending' (tem assigned_team)")
-            # Se não tem agente atribuído e não tem assigned_team, colocar como snoozed
-            elif conversation.assignee is None:
-                conversation.status = 'snoozed'
-                conversation.save()
-            # Se tem agente atribuído E a conversa não está fechada, manter como 'open'
-            elif conversation.status != 'open' and conversation.status != 'closed':
-                conversation.status = 'open'
-                conversation.save()
-                print(f"DEBUG: Conversa mantida atribuída ao agente {conversation.assignee.username}")
-            # Se a conversa está fechada, colocar como 'snoozed' para IA responder
-            elif conversation.status == 'closed':
-                conversation.status = 'snoozed'
-                conversation.assignee = None  # Remover agente para IA responder
-                conversation.save()
-                print(f"DEBUG: Conversa {conversation.id} reaberta como 'snoozed' para IA responder")
         
         # 4. Extrair external_id da mensagem
         external_id = msg_data.get('id') or msg_data.get('key', {}).get('id') or msg_data.get('messageid')
@@ -2142,6 +2260,7 @@ def webhook_evolution_uazapi(request):
         
         # 5. Salvar mensagem recebida - VERIFICAR DUPLICATA
         # Verificar se já existe uma mensagem com o mesmo conteúdo nos últimos 30 segundos
+        # Primeiro verificar na mesma conversa
         recent_time = timezone.now() - timedelta(seconds=30)
         existing_message = Message.objects.filter(
             conversation=conversation,
@@ -2152,7 +2271,20 @@ def webhook_evolution_uazapi(request):
         
         if existing_message:
             content_preview = content[:30] if content else "sem conteúdo"
-            print(f"  Mensagem duplicada detectada: {content_preview}... - Ignorando duplicata")
+            print(f"  Mensagem duplicada detectada na mesma conversa: {content_preview}... - Ignorando duplicata")
+            return JsonResponse({'status': 'ignored_duplicate'}, status=200)
+        
+        # Verificar também em outras conversas do mesmo contato (evitar spam)
+        existing_message_other_conv = Message.objects.filter(
+            conversation__contact=contact,
+            content=content,
+            created_at__gte=recent_time,
+            is_from_customer=True
+        ).exclude(conversation=conversation).first()
+        
+        if existing_message_other_conv:
+            content_preview = content[:30] if content else "sem conteúdo"
+            print(f"  Mensagem duplicada detectada em outra conversa do mesmo contato: {content_preview}... - Ignorando duplicata")
             return JsonResponse({'status': 'ignored_duplicate'}, status=200)
         
         # Adicionar informações de resposta se for uma mensagem respondida
@@ -2617,50 +2749,117 @@ def webhook_evolution_uazapi(request):
             }
         )
         
-        # 1. Verificar se é resposta CSAT (emoji de feedback)
-        from conversations.csat_service import CSATService
+        # 1. Verificar se é resposta CSAT (só se há CSAT pendente)
+        from conversations.csat_automation import CSATAutomationService
+        from conversations.models import CSATRequest
         
         csat_feedback = None
-        if content and str(content).strip():
-            # Tentar processar como feedback CSAT primeiro
-            csat_feedback = CSATService.process_csat_response(
-                message_content=str(content),
-                contact=contact,
-                conversation=conversation
+        # Só processar como CSAT se há CSAT pendente para esta conversa
+        csat_pendente = CSATRequest.objects.filter(
+            conversation=conversation,
+            status='sent'
+        ).first()
+        
+        if csat_pendente and content and str(content).strip():
+            # Tentar processar como feedback CSAT
+            csat_feedback = CSATAutomationService.process_csat_response(
+                message_text=str(content),
+                conversation=conversation,
+                contact=contact
             )
             
             if csat_feedback:
                 print(f"📊 CSAT: Feedback processado - {csat_feedback.emoji_rating} ({csat_feedback.rating_value})")
+                # Marcar CSAT como processado
+                csat_pendente.status = 'completed'
+                csat_pendente.save()
+                print(f"✅ CSAT {csat_pendente.id} marcado como completed")
+                
+                # Garantir que conversa permaneça fechada após CSAT
+                conversation.status = 'closed'
+                conversation.save()
+                print(f"🔒 Conversa {conversation.id} mantida fechada após CSAT")
+                
                 # Se foi processado como CSAT:
-                # - não enviar para IA
-                # - não abrir novo atendimento
-                # - apenas agradecer discretamente (opcional: enviar uma mensagem curta)
+                # - O process_csat_response já gerou e enviou a resposta de agradecimento
+                # - Não processar como mensagem normal
+                print(f"✅ CSAT processado com sucesso - não processando como mensagem normal")
+                return JsonResponse({'status': 'csat_processed'})
+                
+                # CÓDIGO REMOVIDO - estava causando mensagem duplicada
+                """
                 try:
-                    # Enviar agradecimento curto usando a integração WhatsApp do provedor
+                    # Gerar resposta personalizada com a IA
+                    from core.openai_service import openai_service
+                    
+                    ia_result = openai_service.generate_response_sync(
+                        mensagem=str(content),
+                        provedor=provedor,
+                        contexto={'conversation': conversation}
+                    )
+                    
+                    if ia_result.get('success'):
+                        thanks_text = ia_result.get('resposta')
+                        print(f"✅ IA gerou resposta de agradecimento: {thanks_text[:50]}...")
+                    else:
+                        # Fallback: usar agradecimento padrão
+                        thanks_text = "Obrigado pelo seu feedback! 💙"
+                        print(f"⚠️ IA falhou, usando agradecimento padrão")
+                    
+                    # Enviar agradecimento usando a integração WhatsApp do provedor
                     from integrations.models import WhatsAppIntegration
                     from core.uazapi_client import UazapiClient
-                    thanks_text = "Obrigado pelo seu feedback! 💙"
 
                     whatsapp_integration = WhatsAppIntegration.objects.filter(
                         provedor=conversation.inbox.provedor
                     ).first()
 
                     if whatsapp_integration and contact:
-                        base_url = whatsapp_integration.settings.get('whatsapp_url')
+                        base_url = whatsapp_integration.settings.get('whatsapp_url') or whatsapp_integration.webhook_url
                         token = whatsapp_integration.access_token
-                        instance = whatsapp_integration.instance_id
+                        instance = whatsapp_integration.instance_name
 
                         if base_url and token and instance:
+                            print(f"📱 Configurações WhatsApp: base_url={base_url}, token={token[:10]}..., instance={instance}")
                             client = UazapiClient(base_url, token)
-                            phone = contact.additional_attributes.get('sender_lid') or contact.phone_number
+                            # Usar o número do contato diretamente
+                            phone = contact.phone
+                            print(f"📱 Número do contato: {phone}")
                             if phone:
                                 try:
-                                    client.send_text_message(instance=instance, phone=phone, text=thanks_text)
-                                except Exception:
-                                    pass
+                                    # Limpar o número (remover @s.whatsapp.net se presente)
+                                    clean_phone = phone.replace('@s.whatsapp.net', '').replace('@c.us', '')
+                                    print(f"📱 Enviando agradecimento CSAT para: {clean_phone}")
+                                    print(f"📱 Mensagem: {thanks_text[:100]}...")
+                                    
+                                    # Usar método correto do UazapiClient
+                                    result = client.enviar_mensagem(
+                                        numero=clean_phone, 
+                                        texto=thanks_text,
+                                        instance_id=instance
+                                    )
+                                    print(f"📱 Resultado do envio: {result}")
+                                    
+                                    if result:
+                                        print(f"✅ Agradecimento CSAT enviado com sucesso!")
+                                    else:
+                                        print(f"❌ Falha ao enviar agradecimento CSAT")
+                                except Exception as e:
+                                    print(f"❌ Erro ao enviar agradecimento CSAT: {e}")
+                                    import traceback
+                                    traceback.print_exc()
+                            else:
+                                print(f"❌ Número do contato não encontrado: {phone}")
+                        else:
+                            print(f"❌ Configurações WhatsApp incompletas: base_url={base_url}, token={bool(token)}, instance={instance}")
                 except Exception:
                     pass
                 return JsonResponse({'success': True, 'csat_processed': True, 'rating': csat_feedback.emoji_rating})
+                """
+        
+        # Se não foi processado como CSAT, continuar fluxo normal da IA
+        if not csat_feedback:
+            print("🤖 Continuando fluxo normal da IA (não é CSAT)")
         
         # 2.a Se for áudio, tentar baixar/transcrever via Uazapi e anexar ao conteúdo para IA
         try:
