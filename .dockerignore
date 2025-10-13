@@ -86,7 +86,7 @@ staticfiles/
 
 # Documentation
 *.md
-docs/
+# docs/ - Removido para permitir build da documentação
 
 # Docker
 Dockerfile*
