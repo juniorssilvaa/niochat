@@ -10,7 +10,7 @@ RUN apk add --no-cache \
 WORKDIR /app
 
 # Copiar arquivos de documentação
-COPY docs/ ./docs/
+COPY docs/ /app/docs/
 
 # Instalar MkDocs e dependências
 RUN pip install --no-cache-dir mkdocs mkdocs-material
