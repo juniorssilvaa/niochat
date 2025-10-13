@@ -13,7 +13,7 @@ WORKDIR /app
 COPY docs/ /app/docs/
 
 # Instalar MkDocs e dependências
-RUN pip install --no-cache-dir mkdocs mkdocs-material
+RUN pip install --no-cache-dir mkdocs mkdocs-material mkdocs-minify-plugin mkdocs-git-revision-date-localized-plugin
 
 # Gerar documentação
 WORKDIR /app/docs
