@@ -86,6 +86,12 @@ jobs:
       run: |
         cd docs
         pip install mkdocs mkdocs-material mkdocs-minify-plugin mkdocs-git-revision-date-localized-plugin
+        # Garantir mkdocs.yml mínimo para não falhar em repositórios sem config
+        if [ ! -f mkdocs.yml ]; then
+          echo "site_name: NioChat\nsite_description: Documentação gerada automaticamente no CI quando ausente\ndocs_dir: docs_content\n\ntheme:\n  name: material\n  language: pt-BR\nplugins:\n  - search\n" > mkdocs.yml
+          mkdir -p docs_content
+          echo "# Documentação\n\nEsta documentação foi gerada automaticamente pelo CI por ausência de configuração local (mkdocs.yml)." > docs_content/index.md
+        fi
         mkdocs build
 
     - name: Lint Python code
