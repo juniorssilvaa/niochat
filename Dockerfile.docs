@@ -1,10 +1,8 @@
 # Dockerfile para documentação MkDocs
-FROM python:3.12-alpine
+FROM python:3.12-alpine as builder
 
 # Instalar dependências do sistema
-RUN apk add --no-cache \
-    git \
-    curl
+RUN apk add --no-cache git curl
 
 # Definir diretório de trabalho
 WORKDIR /app
@@ -12,8 +10,8 @@ WORKDIR /app
 # Copiar arquivos de documentação
 COPY docs/ /app/docs/
 
-# Gerar mkdocs.yml dentro do build (não depender do arquivo no repositório)
-RUN printf "%b" "site_name: NioChat\nsite_description: Sistema completo de atendimento via WhatsApp com IA\nsite_author: Junior Silva\nsite_url: https://docs.niochat.com.br\n\nrepo_name: juniorssilvaa/niochat\nrepo_url: https://github.com/juniorssilvaa/niochat\nedit_uri: edit/main/docs/\n\ndocs_dir: docs_content\n\ntheme:\n  name: material\n  language: pt-BR\n  logo: assets/mkdocs.png\n  favicon: assets/favicon.ico\n  features:\n    - navigation.instant\n    - navigation.tabs\n    - navigation.sections\n\nmarkdown_extensions:\n  - admonition\n  - codehilite\n  - footnotes\n  - abbr\n  - md_in_html\n\nplugins:\n  - search\n" > /app/docs/mkdocs.yml
+# Gerar mkdocs.yml dinamicamente
+RUN printf "%b" "site_name: NioChat\nsite_description: Documentação NioChat\ndocs_dir: docs_content\n\ntheme:\n  name: material\n  language: pt-BR\nplugins:\n  - search\n" > /app/docs/mkdocs.yml
 
 # Instalar MkDocs e dependências
 RUN pip install --no-cache-dir mkdocs mkdocs-material
@@ -22,29 +20,14 @@ RUN pip install --no-cache-dir mkdocs mkdocs-material
 WORKDIR /app/docs
 RUN mkdocs build
 
-# Usar Nginx para servir a documentação
+# Stage 1: Servir a documentação com Nginx
 FROM nginx:alpine
 
-# Copiar arquivos gerados da documentação
-COPY --from=0 /app/docs/site /usr/share/nginx/html
+# Copiar a documentação gerada do estágio anterior
+COPY --from=builder /app/docs/site /usr/share/nginx/html
 
-# Configurar Nginx para SPA
-RUN echo 'server { \
-    listen 80; \
-    server_name _; \
-    root /usr/share/nginx/html; \
-    index index.html; \
-    location / { \
-        try_files $uri $uri/ /index.html; \
-    } \
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ { \
-        expires 1y; \
-        add_header Cache-Control "public, immutable"; \
-    } \
-}' > /etc/nginx/conf.d/default.conf
-
-# Expor porta 80
+# Expor porta padrão do Nginx
 EXPOSE 80
 
-# Comando para iniciar Nginx
+# Comando para iniciar o Nginx
 CMD ["nginx", "-g", "daemon off;"]

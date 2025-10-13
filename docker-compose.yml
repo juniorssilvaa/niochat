@@ -164,9 +164,9 @@ services:
       retries: 3
       start_period: 40s
 
-  # Documentação MkDocs - Buildada pelo GitHub Actions
+  # Documentação MkDocs - Buildada localmente
   niochat-docs:
-    image: ghcr.io/juniorssilvaa/niochat-docs:latest
+    image: niochat-docs:local
     networks:
       - nioNet
     restart: unless-stopped
