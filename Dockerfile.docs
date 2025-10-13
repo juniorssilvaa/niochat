@@ -11,7 +11,7 @@ WORKDIR /app
 COPY docs/ /app/docs/
 
 # Gerar mkdocs.yml dinamicamente
-RUN printf "%b" "site_name: NioChat\nsite_description: Documentação NioChat\ndocs_dir: docs_content\n\ntheme:\n  name: slate\nplugins:\n  - search\n" > /app/docs/mkdocs.yml
+RUN printf "%b" "site_name: NioChat\nsite_description: Documentação NioChat\ndocs_dir: docs_content\n\ntheme:\n  name: darkly\nplugins:\n  - search\n" > /app/docs/mkdocs.yml
 
 # Instalar MkDocs e dependências
 RUN pip install --no-cache-dir mkdocs mkdocs-material mkdocs-bootswatch

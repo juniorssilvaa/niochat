@@ -3,6 +3,6 @@ site_description: Documentação NioChat
 docs_dir: docs_content
 
 theme:
-  name: slate
+  name: darkly
 plugins:
   - search
