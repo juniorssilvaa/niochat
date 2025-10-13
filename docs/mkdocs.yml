@@ -3,7 +3,6 @@ site_description: Documentação NioChat
 docs_dir: docs_content
 
 theme:
-  name: material
-  language: pt-BR
+  name: slate
 plugins:
   - search
