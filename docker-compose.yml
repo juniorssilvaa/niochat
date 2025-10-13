@@ -164,11 +164,9 @@ services:
       retries: 3
       start_period: 40s
 
-  # Documentação MkDocs - PORTA 8013
+  # Documentação MkDocs - Buildada pelo GitHub Actions
   niochat-docs:
-    image: nginx:alpine
-    volumes:
-      - niochat-docs:/usr/share/nginx/html
+    image: ghcr.io/juniorssilvaa/niochat-docs:latest
     networks:
       - nioNet
     restart: unless-stopped
@@ -197,6 +195,3 @@ volumes:
   niochat-postgres:
     external: true
     name: niochat-postgres
-  niochat-docs:
-    external: true
-    name: niochat-docs

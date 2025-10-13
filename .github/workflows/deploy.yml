@@ -82,6 +82,12 @@ jobs:
         cd frontend/frontend
         npm run build
 
+    - name: Build documentation
+      run: |
+        cd docs
+        pip install mkdocs mkdocs-material
+        mkdocs build
+
     - name: Lint Python code
       run: |
         pip install flake8
@@ -140,6 +146,16 @@ jobs:
         tags: |
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-celery:latest
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-celery:${{ github.sha }}
+
+    - name: Build and push docs image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.docs
+        push: true
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-docs:latest
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-docs:${{ github.sha }}
 
     - name: Cleanup dangling images
       run: docker image prune -f
@@ -246,8 +262,10 @@ jobs:
           echo "⚠️ Frontend health check failed (may be normal if index.html not served at root)"
         fi
 
+
     - name: Notify deployment
       run: |
         echo "🚀 NioChat deployed successfully!"
         echo "Frontend: https://app.niochat.com.br  "
         echo "API: https://api.niochat.com.br  "
+        echo "Documentation: https://docs.niochat.com.br"
