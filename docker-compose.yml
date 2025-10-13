@@ -141,9 +141,11 @@ services:
       - DEBUG=True
       - ALLOWED_HOSTS=*
       - DATABASE_URL=postgresql://niochat_user:E0sJT3wAYFuahovmHkxgy@postgres:5432/niochat
-      - REDIS_URL=redis://niochat:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6379/0
-      - CELERY_BROKER_URL=redis://niochat:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6379/0
-      - CELERY_RESULT_BACKEND=redis://niochat:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6379/0
+      - REDIS_URL=redis://:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6380/0
+      - CELERY_BROKER_URL=amqp://admin:72e7d90895d04af7a4667efa5152b302@154.38.176.17:5672
+      - CELERY_RESULT_BACKEND=redis://:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6380/0
+      - CELERY_RESULT_EXPIRES=300
+      - CELERY_TASK_IGNORE_RESULT=False
       - CELERY_WORKER_PREFETCH_MULTIPLIER=1
       - CELERY_TASK_ACKS_LATE=True
       - CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP=True
@@ -162,6 +164,24 @@ services:
       retries: 3
       start_period: 40s
 
+  # Documentação MkDocs - PORTA 8013
+  niochat-docs:
+    image: nginx:alpine
+    volumes:
+      - niochat-docs:/usr/share/nginx/html
+    networks:
+      - nioNet
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      # Regra para documentação - PRIORIDADE ALTA
+      - "traefik.http.routers.niochat-docs.rule=Host(`docs.niochat.com.br`)"
+      - "traefik.http.routers.niochat-docs.entrypoints=websecure"
+      - "traefik.http.routers.niochat-docs.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.niochat-docs.priority=200"
+      - "traefik.http.routers.niochat-docs.service=niochat-docs-service"
+      - "traefik.http.services.niochat-docs-service.loadbalancer.server.port=80"
+
 networks:
   nioNet:
     external: true
@@ -177,3 +197,6 @@ volumes:
   niochat-postgres:
     external: true
     name: niochat-postgres
+  niochat-docs:
+    external: true
+    name: niochat-docs

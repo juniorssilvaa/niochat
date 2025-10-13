@@ -13,11 +13,12 @@ logger = logging.getLogger(__name__)
 
 class RedisMemoryService:
     def __init__(self):
-        # Usar configurações específicas da VPS
-        self.redis_url = 'redis://niochat:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6379/0'
+        # Usar configurações da nova stack Redis (porta 6380)
         self.redis_host = '154.38.176.17'
-        self.redis_port = 6379
+        self.redis_port = 6380
+        self.redis_password = 'E0sJT3wAYFuahovmHkxgy'
         self.redis_db = 0
+        self.redis_url = f'redis://:{self.redis_password}@{self.redis_host}:{self.redis_port}/{self.redis_db}'
         self.redis = None
         self.default_ttl = 2 * 60 * 60 + 20 * 60  # 2 horas e 20 minutos = 8400 segundos
         
@@ -29,10 +30,9 @@ class RedisMemoryService:
         """Obtém conexão Redis assíncrona"""
         if not self.redis:
             try:
-                # Usar configurações específicas da VPS
-                redis_url = f"redis://{self.redis_host}:{self.redis_port}/{self.redis_db}"
+                # Usar configurações da nova stack Redis
                 self.redis = aioredis.from_url(
-                    redis_url,
+                    self.redis_url,
                     encoding="utf-8",
                     decode_responses=True,
                     socket_timeout=10,
@@ -41,7 +41,7 @@ class RedisMemoryService:
                     health_check_interval=30
                 )
                 await self.redis.ping()
-                logger.info(f"Conexão Redis estabelecida com sucesso para {redis_url}")
+                logger.info(f"Conexão Redis estabelecida com sucesso para {self.redis_url}")
             except Exception as e:
                 logger.error(f"Erro ao conectar com Redis {self.redis_url}: {e}")
                 return None
@@ -50,13 +50,12 @@ class RedisMemoryService:
     def get_redis_sync(self):
         """Obtém conexão Redis síncrona para uso em funções não-assíncronas"""
         try:
-            # Usar configurações específicas da VPS com autenticação
+            # Usar configurações da nova stack Redis
             return redis.Redis(
                 host=self.redis_host,
                 port=self.redis_port,
                 db=self.redis_db,
-                username='niochat',
-                password='E0sJT3wAYFuahovmHkxgy',
+                password=self.redis_password,
                 encoding="utf-8",
                 decode_responses=True,
                 socket_timeout=10,

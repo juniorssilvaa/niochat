@@ -1,0 +1,2153 @@
+
+<!doctype html>
+<html lang="pt" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Sistema completo de atendimento via WhatsApp com IA">
+      
+      
+        <meta name="author" content="Junior Silva">
+      
+      
+        <link rel="canonical" href="https://niochat.com.br/usage/interface/">
+      
+      
+        <link rel="prev" href="../../configuration/supabase/">
+      
+      
+        <link rel="next" href="../../api/authentication/">
+      
+      
+      <link rel="icon" href="../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+    
+    
+      
+        <title>Interface - NioChat</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#interface-do-usuario" class="md-skip">
+          Pular para conteúdo
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabeçalho">
+    <a href="../.." title="NioChat" class="md-header__button md-logo" aria-label="NioChat" data-md-component="logo">
+      
+  <img src="../../assets/mkdocs.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NioChat
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Interface
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="blue"  aria-label="Modo escuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Modo escuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="cyan"  aria-label="Modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Buscar" placeholder="Buscar" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Pesquisar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpar" aria-label="Limpar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando busca
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/juniorssilvaa/niochat" title="Ir para repositório" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    juniorssilvaa/niochat
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Abas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Início
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../overview/introduction/" class="md-tabs__link">
+          
+  
+  
+  Visão Geral
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../installation/development/" class="md-tabs__link">
+          
+  
+  
+  Instalação
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../configuration/supabase/" class="md-tabs__link">
+          
+  
+  
+  Configuração
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Uso
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/authentication/" class="md-tabs__link">
+          
+  
+  
+  API
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../ai/configuration/" class="md-tabs__link">
+          
+  
+  
+  IA e SGP
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../supabase/integration/" class="md-tabs__link">
+          
+  
+  
+  Supabase
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../development/troubleshooting/" class="md-tabs__link">
+          
+  
+  
+  Desenvolvimento
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../changelog/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Changelog
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navegação" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="NioChat" class="md-nav__button md-logo" aria-label="NioChat" data-md-component="logo">
+      
+  <img src="../../assets/mkdocs.png" alt="logo">
+
+    </a>
+    NioChat
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/juniorssilvaa/niochat" title="Ir para repositório" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    juniorssilvaa/niochat
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Início
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Visão Geral
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Visão Geral
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introdução
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Arquitetura
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Funcionalidades
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Instalação
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Instalação
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Desenvolvimento
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/production/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Produção
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Configuração
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Configuração
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/supabase/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Supabase
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Uso
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Uso
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Interface
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Interface
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#acesso-ao-sistema" class="md-nav__link">
+    <span class="md-ellipsis">
+      Acesso ao Sistema
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Acesso ao Sistema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Login
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-primeiro-acesso" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Primeiro Acesso
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dashboard-principal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dashboard Principal
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dashboard Principal">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-visao-geral" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Visão Geral
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-graficos-interativos" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Gráficos Interativos
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-filtros" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Filtros
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gerenciamento-de-conversas" class="md-nav__link">
+    <span class="md-ellipsis">
+      Gerenciamento de Conversas
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Gerenciamento de Conversas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-lista-de-conversas" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Lista de Conversas
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-acoes-disponiveis" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Ações Disponíveis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-busca-e-filtros" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Busca e Filtros
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chat-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Chat Interface
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Chat Interface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-area-de-mensagens" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Área de Mensagens
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-envio-de-mensagens" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Envio de Mensagens
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-funcionalidades-avancadas" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Funcionalidades Avançadas
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sistema-csat" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sistema CSAT
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sistema CSAT">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-configuracao" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Configuração
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-dashboard-csat" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Dashboard CSAT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-ultimos-feedbacks" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Últimos Feedbacks
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#administracao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Administração
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Administração">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-usuarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Usuários
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-provedores" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Provedores
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-configuracoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Configurações
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chat-interno" class="md-nav__link">
+    <span class="md-ellipsis">
+      Chat Interno
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Chat Interno">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-salas-de-chat" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Salas de Chat
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-chat-privado" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Chat Privado
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#auditoria" class="md-nav__link">
+    <span class="md-ellipsis">
+      Auditoria
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Auditoria">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-logs-de-auditoria" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Logs de Auditoria
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-filtros-de-auditoria" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Filtros de Auditoria
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-exportacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Exportação
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#atalhos-de-teclado" class="md-nav__link">
+    <span class="md-ellipsis">
+      Atalhos de Teclado
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Atalhos de Teclado">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-navegacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Navegação
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-chat" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Chat
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-sistema" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Sistema
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notificacoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notificações
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Notificações">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-tipos-de-notificacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Tipos de Notificação
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-configuracoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Configurações
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-gerenciamento" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Gerenciamento
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-problemas-comuns" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Problemas Comuns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-solucoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Soluções
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Logs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#proximos-passos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Próximos Passos
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Autenticação
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Endpoints
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/postman-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Guia do Postman
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/websocket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    WebSocket
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/webhooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Webhooks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    IA e SGP
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            IA e SGP
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuração IA
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Supabase
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Supabase
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../supabase/integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Integração
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Desenvolvimento
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            Desenvolvimento
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Changelog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/juniorssilvaa/niochat/edit/main/docs/usage/interface.md" title="Editar esta página" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+    
+      
+    
+    <a href="https://github.com/juniorssilvaa/niochat/raw/main/docs/usage/interface.md" title="Exibir fonte desta página" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
+    </a>
+  
+
+
+<h1 id="interface-do-usuario">Interface do Usuário<a class="headerlink" href="#interface-do-usuario" title="Permanent link">&para;</a></h1>
+<p>Este guia explica como usar a interface do NioChat para gerenciar conversas, visualizar métricas e administrar o sistema.</p>
+<h2 id="acesso-ao-sistema">Acesso ao Sistema<a class="headerlink" href="#acesso-ao-sistema" title="Permanent link">&para;</a></h2>
+<h3 id="1-login">1. Login<a class="headerlink" href="#1-login" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Acesse a URL do sistema: <code>http://localhost:5173</code></li>
+<li>Digite seu usuário e senha</li>
+<li>Clique em "Entrar"</li>
+</ol>
+<h3 id="2-primeiro-acesso">2. Primeiro Acesso<a class="headerlink" href="#2-primeiro-acesso" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Usuário</strong>: admin</li>
+<li><strong>Senha</strong>: A senha definida durante a instalação</li>
+<li><strong>Alterar Senha</strong>: Recomendado no primeiro acesso</li>
+</ul>
+<h2 id="dashboard-principal">Dashboard Principal<a class="headerlink" href="#dashboard-principal" title="Permanent link">&para;</a></h2>
+<h3 id="1-visao-geral">1. Visão Geral<a class="headerlink" href="#1-visao-geral" title="Permanent link">&para;</a></h3>
+<p>O dashboard principal exibe:
+- <strong>Total de Conversas</strong>: Número total de conversas
+- <strong>Conversas Abertas</strong>: Conversas em andamento
+- <strong>Taxa de Resolução</strong>: Percentual de conversas resolvidas
+- <strong>Satisfação Média</strong>: Média das avaliações CSAT
+- <strong>Tempo de Resposta</strong>: Tempo médio de resposta</p>
+<h3 id="2-graficos-interativos">2. Gráficos Interativos<a class="headerlink" href="#2-graficos-interativos" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Evolução Temporal</strong>: Gráfico de linha mostrando conversas ao longo do tempo</li>
+<li><strong>Distribuição por Status</strong>: Gráfico de pizza com status das conversas</li>
+<li><strong>Performance por Agente</strong>: Gráfico de barras com métricas individuais</li>
+<li><strong>Tendências CSAT</strong>: Evolução da satisfação do cliente</li>
+</ul>
+<h3 id="3-filtros">3. Filtros<a class="headerlink" href="#3-filtros" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Por Data</strong>: Selecione período específico</li>
+<li><strong>Por Agente</strong>: Filtre por agente responsável</li>
+<li><strong>Por Equipe</strong>: Filtre por equipe</li>
+<li><strong>Por Status</strong>: Apenas conversas abertas, fechadas, etc.</li>
+</ul>
+<h2 id="gerenciamento-de-conversas">Gerenciamento de Conversas<a class="headerlink" href="#gerenciamento-de-conversas" title="Permanent link">&para;</a></h2>
+<h3 id="1-lista-de-conversas">1. Lista de Conversas<a class="headerlink" href="#1-lista-de-conversas" title="Permanent link">&para;</a></h3>
+<p>A lista de conversas mostra:
+- <strong>Cliente</strong>: Nome e foto do contato
+- <strong>Última Mensagem</strong>: Preview da última mensagem
+- <strong>Status</strong>: Aberta, fechada, pendente
+- <strong>Agente</strong>: Quem está atendendo
+- <strong>Tempo</strong>: Há quanto tempo a conversa está ativa
+- <strong>Prioridade</strong>: Indicador visual de urgência</p>
+<h3 id="2-acoes-disponiveis">2. Ações Disponíveis<a class="headerlink" href="#2-acoes-disponiveis" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Abrir Conversa</strong>: Clique para abrir o chat</li>
+<li><strong>Atribuir</strong>: Transferir para outro agente</li>
+<li><strong>Fechar</strong>: Encerrar conversa</li>
+<li><strong>Marcar como Pendente</strong>: Pausar atendimento</li>
+<li><strong>Transferir para Equipe</strong>: Enviar para equipe específica</li>
+</ul>
+<h3 id="3-busca-e-filtros">3. Busca e Filtros<a class="headerlink" href="#3-busca-e-filtros" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Busca por Texto</strong>: Digite para buscar em mensagens</li>
+<li><strong>Filtro por Status</strong>: Dropdown com opções</li>
+<li><strong>Filtro por Agente</strong>: Selecione agente específico</li>
+<li><strong>Ordenação</strong>: Por data, prioridade, status</li>
+</ul>
+<h2 id="chat-interface">Chat Interface<a class="headerlink" href="#chat-interface" title="Permanent link">&para;</a></h2>
+<h3 id="1-area-de-mensagens">1. Área de Mensagens<a class="headerlink" href="#1-area-de-mensagens" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Histórico</strong>: Todas as mensagens da conversa</li>
+<li><strong>Tipos de Mídia</strong>: Imagens, vídeos, áudios, documentos</li>
+<li><strong>Reações</strong>: Emojis e reações personalizadas</li>
+<li><strong>Status de Entrega</strong>: Confirmação de recebimento</li>
+<li><strong>Timestamp</strong>: Hora de cada mensagem</li>
+</ul>
+<h3 id="2-envio-de-mensagens">2. Envio de Mensagens<a class="headerlink" href="#2-envio-de-mensagens" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Texto</strong>: Digite e pressione Enter</li>
+<li><strong>Mídia</strong>: Clique no ícone de anexo</li>
+<li><strong>Respostas Rápidas</strong>: Templates pré-definidos</li>
+<li><strong>Emojis</strong>: Seletor de emojis</li>
+<li><strong>Formatação</strong>: Negrito, itálico, código</li>
+</ul>
+<h3 id="3-funcionalidades-avancadas">3. Funcionalidades Avançadas<a class="headerlink" href="#3-funcionalidades-avancadas" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>IA Assistente</strong>: Sugestões automáticas</li>
+<li><strong>Consulta SGP</strong>: Botão para consultar dados do cliente</li>
+<li><strong>Histórico</strong>: Ver conversas anteriores do cliente</li>
+<li><strong>Notas</strong>: Adicionar notas internas</li>
+<li><strong>Tags</strong>: Marcar conversa com tags</li>
+</ul>
+<h2 id="sistema-csat">Sistema CSAT<a class="headerlink" href="#sistema-csat" title="Permanent link">&para;</a></h2>
+<h3 id="1-configuracao">1. Configuração<a class="headerlink" href="#1-configuracao" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Tempo de Envio</strong>: 1.5 minutos após fechamento</li>
+<li><strong>Mensagem Personalizada</strong>: Texto customizado por provedor</li>
+<li><strong>Canais</strong>: WhatsApp, SMS, Email</li>
+<li><strong>Agendamento</strong>: Horários específicos</li>
+</ul>
+<h3 id="2-dashboard-csat">2. Dashboard CSAT<a class="headerlink" href="#2-dashboard-csat" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Métricas Visuais</strong>: Gráficos de satisfação</li>
+<li><strong>Distribuição de Ratings</strong>: 1 a 5 estrelas</li>
+<li><strong>Evolução Temporal</strong>: Tendências ao longo do tempo</li>
+<li><strong>Comparação</strong>: Períodos diferentes</li>
+</ul>
+<h3 id="3-ultimos-feedbacks">3. Últimos Feedbacks<a class="headerlink" href="#3-ultimos-feedbacks" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Avatar do Cliente</strong>: Foto de perfil</li>
+<li><strong>Rating Visual</strong>: Emoji correspondente</li>
+<li><strong>Mensagem Original</strong>: Feedback textual do cliente</li>
+<li><strong>Data/Hora</strong>: Quando foi enviado</li>
+<li><strong>Análise IA</strong>: Interpretação automática</li>
+</ul>
+<h2 id="administracao">Administração<a class="headerlink" href="#administracao" title="Permanent link">&para;</a></h2>
+<h3 id="1-usuarios">1. Usuários<a class="headerlink" href="#1-usuarios" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Listar Usuários</strong>: Todos os usuários do sistema</li>
+<li><strong>Criar Usuário</strong>: Adicionar novo usuário</li>
+<li><strong>Editar Perfil</strong>: Modificar dados do usuário</li>
+<li><strong>Permissões</strong>: Definir níveis de acesso</li>
+<li><strong>Equipes</strong>: Organizar usuários em equipes</li>
+</ul>
+<h3 id="2-provedores">2. Provedores<a class="headerlink" href="#2-provedores" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Configurações</strong>: Dados do provedor</li>
+<li><strong>Integrações</strong>: WhatsApp, SGP, Supabase</li>
+<li><strong>Limites</strong>: Controles de uso</li>
+<li><strong>Billing</strong>: Informações de cobrança</li>
+</ul>
+<h3 id="3-configuracoes">3. Configurações<a class="headerlink" href="#3-configuracoes" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Sistema</strong>: Configurações gerais</li>
+<li><strong>IA</strong>: Parâmetros da inteligência artificial</li>
+<li><strong>Notificações</strong>: Alertas e lembretes</li>
+<li><strong>Backup</strong>: Configurações de backup</li>
+<li><strong>Logs</strong>: Visualização de logs</li>
+</ul>
+<h2 id="chat-interno">Chat Interno<a class="headerlink" href="#chat-interno" title="Permanent link">&para;</a></h2>
+<h3 id="1-salas-de-chat">1. Salas de Chat<a class="headerlink" href="#1-salas-de-chat" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Criar Sala</strong>: Nova sala para equipe</li>
+<li><strong>Participantes</strong>: Adicionar/remover membros</li>
+<li><strong>Histórico</strong>: Mensagens salvas</li>
+<li><strong>Notificações</strong>: Alertas de mensagens</li>
+</ul>
+<h3 id="2-chat-privado">2. Chat Privado<a class="headerlink" href="#2-chat-privado" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Mensagens Diretas</strong>: Entre usuários</li>
+<li><strong>Status Online</strong>: Quem está conectado</li>
+<li><strong>Notificações</strong>: Alertas de mensagens</li>
+<li><strong>Histórico</strong>: Mensagens salvas</li>
+</ul>
+<h2 id="auditoria">Auditoria<a class="headerlink" href="#auditoria" title="Permanent link">&para;</a></h2>
+<h3 id="1-logs-de-auditoria">1. Logs de Auditoria<a class="headerlink" href="#1-logs-de-auditoria" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Ações</strong>: Todas as ações do sistema</li>
+<li><strong>Usuários</strong>: Quem fez o quê</li>
+<li><strong>Timestamps</strong>: Quando aconteceu</li>
+<li><strong>Detalhes</strong>: Informações completas</li>
+</ul>
+<h3 id="2-filtros-de-auditoria">2. Filtros de Auditoria<a class="headerlink" href="#2-filtros-de-auditoria" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Por Ação</strong>: Tipo de ação</li>
+<li><strong>Por Usuário</strong>: Ações de usuário específico</li>
+<li><strong>Por Data</strong>: Período específico</li>
+<li><strong>Por Provedor</strong>: Isolamento de dados</li>
+</ul>
+<h3 id="3-exportacao">3. Exportação<a class="headerlink" href="#3-exportacao" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>PDF</strong>: Relatórios em PDF</li>
+<li><strong>Excel</strong>: Dados em planilha</li>
+<li><strong>CSV</strong>: Dados estruturados</li>
+<li><strong>JSON</strong>: Dados brutos</li>
+</ul>
+<h2 id="atalhos-de-teclado">Atalhos de Teclado<a class="headerlink" href="#atalhos-de-teclado" title="Permanent link">&para;</a></h2>
+<h3 id="1-navegacao">1. Navegação<a class="headerlink" href="#1-navegacao" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Ctrl + K</strong>: Busca global</li>
+<li><strong>Ctrl + N</strong>: Nova conversa</li>
+<li><strong>Ctrl + F</strong>: Busca na conversa</li>
+<li><strong>Esc</strong>: Fechar modais</li>
+</ul>
+<h3 id="2-chat">2. Chat<a class="headerlink" href="#2-chat" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Enter</strong>: Enviar mensagem</li>
+<li><strong>Shift + Enter</strong>: Nova linha</li>
+<li><strong>Ctrl + A</strong>: Selecionar tudo</li>
+<li><strong>Ctrl + Z</strong>: Desfazer</li>
+</ul>
+<h3 id="3-sistema">3. Sistema<a class="headerlink" href="#3-sistema" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Ctrl + S</strong>: Salvar</li>
+<li><strong>Ctrl + R</strong>: Atualizar</li>
+<li><strong>F5</strong>: Recarregar página</li>
+<li><strong>Ctrl + Shift + R</strong>: Recarregar forçado</li>
+</ul>
+<h2 id="notificacoes">Notificações<a class="headerlink" href="#notificacoes" title="Permanent link">&para;</a></h2>
+<h3 id="1-tipos-de-notificacao">1. Tipos de Notificação<a class="headerlink" href="#1-tipos-de-notificacao" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Nova Mensagem</strong>: Cliente enviou mensagem</li>
+<li><strong>Conversa Atribuída</strong>: Nova conversa para você</li>
+<li><strong>CSAT Recebido</strong>: Feedback de satisfação</li>
+<li><strong>Sistema</strong>: Alertas do sistema</li>
+</ul>
+<h3 id="2-configuracoes">2. Configurações<a class="headerlink" href="#2-configuracoes" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Som</strong>: Ativar/desativar sons</li>
+<li><strong>Desktop</strong>: Notificações do sistema</li>
+<li><strong>Email</strong>: Notificações por email</li>
+<li><strong>Push</strong>: Notificações push</li>
+</ul>
+<h3 id="3-gerenciamento">3. Gerenciamento<a class="headerlink" href="#3-gerenciamento" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Marcar como Lida</strong>: Marcar notificação</li>
+<li><strong>Arquivar</strong>: Remover da lista</li>
+<li><strong>Configurar</strong>: Personalizar alertas</li>
+<li><strong>Histórico</strong>: Ver notificações antigas</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="1-problemas-comuns">1. Problemas Comuns<a class="headerlink" href="#1-problemas-comuns" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Página não carrega</strong>: Verificar conexão</li>
+<li><strong>Mensagens não aparecem</strong>: Recarregar página</li>
+<li><strong>Erro de permissão</strong>: Verificar usuário</li>
+<li><strong>Lentidão</strong>: Verificar conexão</li>
+</ul>
+<h3 id="2-solucoes">2. Soluções<a class="headerlink" href="#2-solucoes" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Recarregar</strong>: F5 ou Ctrl + R</li>
+<li><strong>Limpar Cache</strong>: Ctrl + Shift + R</li>
+<li><strong>Logout/Login</strong>: Sair e entrar novamente</li>
+<li><strong>Suporte</strong>: Contatar administrador</li>
+</ul>
+<h3 id="3-logs">3. Logs<a class="headerlink" href="#3-logs" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Console</strong>: F12 para ver erros</li>
+<li><strong>Network</strong>: Verificar requisições</li>
+<li><strong>Application</strong>: Verificar storage</li>
+<li><strong>Security</strong>: Verificar certificados</li>
+</ul>
+<h2 id="proximos-passos">Próximos Passos<a class="headerlink" href="#proximos-passos" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="api/endpoints.md">API</a> - Explore a API</li>
+<li><a href="development/troubleshooting.md">Troubleshooting</a> - Resolva problemas</li>
+<li><a href="configuration/supabase.md">Configuração</a> - Configure integrações</li>
+</ol>
+
+
+
+
+
+
+
+  
+    
+  
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Última atualização">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="12 de outubro de 2025 23:44:23 UTC">12 de outubro de 2025</span>
+  </span>
+
+    
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/juniorssilvaa/niochat" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://app.niochat.com.br" target="_blank" rel="noopener" title="app.niochat.com.br" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157m-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1s56.2 81.2 56.1 130.5c0 101.8-84.9 184.6-186.6 184.6m101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8s-14.3 18-17.6 21.8c-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7s-12.5-30.1-17.1-41.2c-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2s-9.7 1.4-14.8 6.9c-5.1 5.6-19.4 19-19.4 46.3s19.9 53.7 22.6 57.4c2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4s4.6-24.1 3.2-26.4c-1.3-2.5-5-3.9-10.5-6.6"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://linkedin.com/in/juniorssilvaa" target="_blank" rel="noopener" title="linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tabs", "navigation.sections", "navigation.expand", "toc.integrate", "search.suggest", "search.highlight", "content.code.copy", "content.action.edit", "content.action.view"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>

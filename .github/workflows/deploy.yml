@@ -36,7 +36,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         ports:
-          - 6379:6379
+          - 6380:6380
 
     steps:
     - name: Checkout code
@@ -69,9 +69,9 @@ jobs:
         SECRET_KEY: test-secret-key
         DEBUG: True
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/niochat_test
-        REDIS_URL: redis://localhost:6379
-        CELERY_BROKER_URL: redis://localhost:6379/0
-        CELERY_RESULT_BACKEND: redis://localhost:6379/0
+        REDIS_URL: redis://localhost:6380
+        CELERY_BROKER_URL: amqp://admin:test_password@localhost:5672
+        CELERY_RESULT_BACKEND: redis://localhost:6380/0
       run: |
         cd backend
         python manage.py migrate

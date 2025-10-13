@@ -180,19 +180,9 @@ Pode deixar sua opinião em uma única mensagem:
                 scheduled_send_at=scheduled_time  # Horário agendado em timezone local
             )
             
-            # Importar e agendar tarefa do Celery
+            # Executar task imediatamente com delay interno
             from .tasks import send_csat_message
-            # Converter o timezone para UTC para o agendamento do Celery
-            if scheduled_time.tzinfo is not None:
-                # Se o horário já tem timezone, converter para UTC
-                eta_utc = scheduled_time.astimezone(pytz.UTC)
-            else:
-                # Se não tem timezone, assumir que é local e converter para UTC
-                scheduled_time_aware = sao_paulo_tz.localize(scheduled_time)
-                eta_utc = scheduled_time_aware.astimezone(pytz.UTC)
-            
-            # Agendar a tarefa com o horário em UTC
-            send_csat_message.apply_async(args=[csat_request.id], eta=eta_utc)
+            send_csat_message.apply_async(args=[csat_request.id], countdown=90)
             return csat_request
             
         except Exception as e:
