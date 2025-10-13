@@ -85,7 +85,7 @@ jobs:
     - name: Build documentation
       run: |
         cd docs
-        pip install mkdocs mkdocs-material
+        pip install mkdocs mkdocs-material mkdocs-minify-plugin
         mkdocs build
 
     - name: Lint Python code
