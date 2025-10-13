@@ -63,9 +63,6 @@ markdown_extensions:
 
 plugins:
   - search
-  - minify
-  - git-revision-date-localized:
-      locale: pt_BR
 
 nav:
   - Início: index.md
