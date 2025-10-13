@@ -30,7 +30,7 @@ function UserStatusManager({ user }) {
       const ws = new WebSocket(wsUrl);
       
       ws.onopen = () => {
-        // Log removido('WebSocket do usuário conectado');
+        // Log removido para não expor dados sensíveis
         websocketRef.current = ws;
         
         // Limpar timeout de reconexão
@@ -77,11 +77,11 @@ function UserStatusManager({ user }) {
       };
       
       ws.onerror = (error) => {
-        console.error('Erro WebSocket do usuário:', error);
+        console.error('Erro WebSocket: Conexão falhou');
       };
       
     } catch (error) {
-      console.error('Erro ao conectar WebSocket do usuário:', error);
+      console.error('Erro ao conectar WebSocket');
     }
   };
 

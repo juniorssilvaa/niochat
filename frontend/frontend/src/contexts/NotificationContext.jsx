@@ -214,11 +214,11 @@ export const NotificationProvider = ({ children }) => {
       };
       
       internalChatWsRef.current.onerror = (error) => {
-        console.error('Erro no WebSocket do chat interno:', error);
+        console.error('Erro WebSocket: Conexão falhou');
       };
       
     } catch (error) {
-      console.error('Erro ao criar WebSocket do chat interno:', error);
+      console.error('Erro ao criar WebSocket do chat interno');
     }
   };
 
@@ -306,12 +306,12 @@ export const NotificationProvider = ({ children }) => {
       };
       
       websocketRef.current.onerror = (error) => {
-        console.error('Erro WebSocket global:', error);
+        console.error('Erro WebSocket: Conexão falhou');
         setIsConnected(false);
       };
       
     } catch (error) {
-      console.error('Erro ao criar WebSocket global:', error);
+      console.error('Erro ao criar WebSocket global');
     }
   };
 

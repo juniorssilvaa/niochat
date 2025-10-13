@@ -645,7 +645,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
             setTimeout(() => fetchConversations(true), 0);
           }
         } catch (error) {
-          console.error(' Erro ao processar mensagem WebSocket:', error);
+          console.error('Erro ao processar mensagem WebSocket');
         }
       };
       
@@ -661,7 +661,7 @@ const ConversationList = ({ onConversationSelect, selectedConversation, provedor
       };
       
       ws.onerror = (error) => {
-        console.error(' Erro no WebSocket:', error);
+        console.error('Erro WebSocket: Conexão falhou');
         clearTimeout(wsTimeout);
         setWsConnected(false);
       };

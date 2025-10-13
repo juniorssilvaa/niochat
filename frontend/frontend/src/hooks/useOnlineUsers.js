@@ -113,11 +113,11 @@ export default function useOnlineUsers() {
       };
       
       ws.onerror = (error) => {
-        console.error('Erro WebSocket status:', error);
+        console.error('Erro WebSocket: Conexão falhou');
       };
       
     } catch (error) {
-      console.error('Erro ao conectar WebSocket:', error);
+      console.error('Erro ao conectar WebSocket');
       // Fallback para API REST
       fetchOnlineUsers();
     }

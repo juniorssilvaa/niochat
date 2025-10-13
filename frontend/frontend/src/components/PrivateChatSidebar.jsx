@@ -204,21 +204,20 @@ const WS_BASE = `wss://${window.location.host}`;
     };
     
     websocket.onerror = (error) => {
-      console.error('[DEBUG WebSocket] Erro no WebSocket:', error);
+      console.error('Erro WebSocket: Conexão falhou');
     };
   };
   
   const handleWebSocketMessage = (data) => {
-    console.log('[DEBUG] WebSocket message received:', data);
+    // Log removido para não expor dados sensíveis
     
     switch (data.type) {
       case 'new_private_message':
-        console.log('[DEBUG] Nova mensagem privada recebida:', data.message);
+        // Log removido para não expor dados sensíveis
         // Adicionar nova mensagem ao chat
         setMessages(prev => {
-          console.log('[DEBUG] Estado anterior das mensagens:', prev.length);
+          // Log removido para não expor dados sensíveis
           const newState = [...prev, data.message];
-          console.log('[DEBUG] Novo estado das mensagens:', newState.length);
           return newState;
         });
         

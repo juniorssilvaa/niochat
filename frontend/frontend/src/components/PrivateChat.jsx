@@ -134,7 +134,7 @@ const PrivateChat = () => {
       const websocket = new WebSocket(wsUrl);
       
       websocket.onopen = () => {
-        console.log('WebSocket chat privado conectado');
+        // Log removido para não expor dados sensíveis
         setWs(websocket);
       };
       
@@ -153,12 +153,12 @@ const PrivateChat = () => {
       };
       
       websocket.onclose = () => {
-        console.log('WebSocket chat privado desconectado');
+        // Log removido para não expor dados sensíveis
         setWs(null);
       };
       
       websocket.onerror = (error) => {
-        console.error('Erro WebSocket chat privado:', error);
+        console.error('Erro WebSocket: Conexão falhou');
         setWs(null);
       };
     } catch (error) {
