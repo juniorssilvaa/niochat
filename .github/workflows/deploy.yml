@@ -176,11 +176,13 @@ jobs:
         BACKEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
         FRONTEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
         CELERY_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-celery:latest
+        DOCS_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-docs:latest
       run: |
         echo "Deploying to Portainer..."
         echo "Backend image: $BACKEND_IMAGE"
         echo "Frontend image: $FRONTEND_IMAGE"
         echo "Celery image: $CELERY_IMAGE"
+        echo "Docs image: $DOCS_IMAGE"
         
         # Pegar ID da stack
         STACK_ID=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
@@ -199,7 +201,11 @@ jobs:
 
                  # ⚡️ ATUALIZAÇÃO CHAVE: Enviar o arquivo docker-compose.yml completo
                  # Ler o arquivo docker-compose.yml e substituir as imagens
-                 COMPOSE_CONTENT=$(cat docker-compose.yml | sed "s|ghcr.io/juniorssilvaa/niochat-backend:latest|$BACKEND_IMAGE|g" | sed "s|ghcr.io/juniorssilvaa/niochat-frontend:latest|$FRONTEND_IMAGE|g" | sed "s|ghcr.io/juniorssilvaa/niochat-celery:latest|$CELERY_IMAGE|g")
+                COMPOSE_CONTENT=$(cat docker-compose.yml \
+                  | sed "s|ghcr.io/juniorssilvaa/niochat-backend:latest|$BACKEND_IMAGE|g" \
+                  | sed "s|ghcr.io/juniorssilvaa/niochat-frontend:latest|$FRONTEND_IMAGE|g" \
+                  | sed "s|ghcr.io/juniorssilvaa/niochat-celery:latest|$CELERY_IMAGE|g" \
+                  | sed "s|ghcr.io/juniorssilvaa/niochat-docs:latest|$DOCS_IMAGE|g")
                  
                  # Escapar aspas e quebras de linha para JSON
                  COMPOSE_CONTENT_ESCAPED=$(echo "$COMPOSE_CONTENT" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')

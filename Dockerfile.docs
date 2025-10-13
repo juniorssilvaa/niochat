@@ -12,6 +12,9 @@ WORKDIR /app
 # Copiar arquivos de documentação
 COPY docs/ /app/docs/
 
+# Gerar mkdocs.yml dentro do build (não depender do arquivo no repositório)
+RUN printf "site_name: NioChat\nsite_description: Sistema completo de atendimento via WhatsApp com IA\nsite_author: Junior Silva\nsite_url: https://docs.niochat.com.br\n\nrepo_name: juniorssilvaa/niochat\nrepo_url: https://github.com/juniorssilvaa/niochat\nedit_uri: edit/main/docs/\n\ndocs_dir: docs_content\n\ntheme:\n  name: material\n  language: pt-BR\n  logo: assets/mkdocs.png\n  favicon: assets/favicon.ico\n  features:\n    - navigation.instant\n    - navigation.tabs\n    - navigation.sections\n\nmarkdown_extensions:\n  - admonition\n  - codehilite\n  - footnotes\n  - abbr\n  - md_in_html\n\nplugins:\n  - search\n" > /app/docs/mkdocs.yml
+
 # Instalar MkDocs e dependências
 RUN pip install --no-cache-dir mkdocs mkdocs-material
 
