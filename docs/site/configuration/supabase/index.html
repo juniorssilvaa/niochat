@@ -1,0 +1,2196 @@
+
+<!doctype html>
+<html lang="pt" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentação NioChat">
+      
+      
+      
+      
+        <link rel="prev" href="../../api/websocket/">
+      
+      
+        <link rel="next" href="../../development/contributing/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+    
+    
+      
+        <title>Configuração do Supabase - NioChat</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#configuracao-do-supabase" class="md-skip">
+          Pular para conteúdo
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabeçalho">
+    <a href="../.." title="NioChat" class="md-header__button md-logo" aria-label="NioChat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NioChat
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Configuração do Supabase
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Buscar" placeholder="Buscar" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Pesquisar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpar" aria-label="Limpar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando busca
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navegação" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="NioChat" class="md-nav__button md-logo" aria-label="NioChat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    NioChat
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    NioChat - Sistema de Atendimento WhatsApp
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Changelog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Ai
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Ai
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuração da IA
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Api
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Api
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Autenticação
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Endpoints da API
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/postman-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Guia de Uso do Postman com NioChat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/webhooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Webhooks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/websocket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    WebSocket
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Configuration
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Configuração do Supabase
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuração do Supabase
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#criar-projeto-no-supabase" class="md-nav__link">
+    <span class="md-ellipsis">
+      Criar Projeto no Supabase
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Criar Projeto no Supabase">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-acessar-supabase" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Acessar Supabase
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-configurar-projeto" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Configurar Projeto
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-obter-credenciais" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Obter Credenciais
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configurar-banco-de-dados" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configurar Banco de Dados
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configurar Banco de Dados">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-executar-sql-no-supabase" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Executar SQL no Supabase
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-configurar-rls-row-level-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Configurar RLS (Row Level Security)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-criar-indices-para-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Criar Índices para Performance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configurar-variaveis-de-ambiente" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configurar Variáveis de Ambiente
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configurar Variáveis de Ambiente">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-arquivo-env" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Arquivo .env
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-configuracao-no-django" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Configuração no Django
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configurar-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configurar Dashboard
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configurar Dashboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-criar-views-no-supabase" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Criar Views no Supabase
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-configurar-real-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Configurar Real-time
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configurar-autenticacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configurar Autenticação
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configurar Autenticação">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-configurar-jwt" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Configurar JWT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-middleware-jwt" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Middleware JWT
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configurar-webhooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configurar Webhooks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configurar Webhooks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-webhook-para-atualizacoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Webhook para Atualizações
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-funcao-edge-para-webhook" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Função Edge para Webhook
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoramento" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoramento
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoramento">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-configurar-alertas" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Configurar Alertas
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-metricas-de-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Métricas de Performance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#problemas-comuns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Problemas Comuns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Problemas Comuns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#erro-de-conexao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Erro de Conexão
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erro-de-rls" class="md-nav__link">
+    <span class="md-ellipsis">
+      Erro de RLS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erro-de-real-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      Erro de Real-time
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comandos-uteis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comandos Úteis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Comandos Úteis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#verificar-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verificar Status
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#limpar-dados" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limpar Dados
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#proximos-passos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Próximos Passos
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Development
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Development
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contribuindo para o NioChat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Estrutura do Projeto
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Installation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Instalação em Desenvolvimento
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/production/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Instalação em Produção
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Overview
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Arquitetura do Sistema
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Funcionalidades
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introdução ao NioChat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Supabase
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            Supabase
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../supabase/integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Integração com Supabase
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Usage
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            Usage
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/interface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Interface do Usuário
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#criar-projeto-no-supabase" class="md-nav__link">
+    <span class="md-ellipsis">
+      Criar Projeto no Supabase
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Criar Projeto no Supabase">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-acessar-supabase" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Acessar Supabase
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-configurar-projeto" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Configurar Projeto
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-obter-credenciais" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Obter Credenciais
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configurar-banco-de-dados" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configurar Banco de Dados
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configurar Banco de Dados">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-executar-sql-no-supabase" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Executar SQL no Supabase
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-configurar-rls-row-level-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Configurar RLS (Row Level Security)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-criar-indices-para-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Criar Índices para Performance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configurar-variaveis-de-ambiente" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configurar Variáveis de Ambiente
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configurar Variáveis de Ambiente">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-arquivo-env" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Arquivo .env
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-configuracao-no-django" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Configuração no Django
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configurar-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configurar Dashboard
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configurar Dashboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-criar-views-no-supabase" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Criar Views no Supabase
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-configurar-real-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Configurar Real-time
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configurar-autenticacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configurar Autenticação
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configurar Autenticação">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-configurar-jwt" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Configurar JWT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-middleware-jwt" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Middleware JWT
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configurar-webhooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configurar Webhooks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configurar Webhooks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-webhook-para-atualizacoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Webhook para Atualizações
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-funcao-edge-para-webhook" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Função Edge para Webhook
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoramento" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoramento
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoramento">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-configurar-alertas" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Configurar Alertas
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-metricas-de-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Métricas de Performance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#problemas-comuns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Problemas Comuns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Problemas Comuns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#erro-de-conexao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Erro de Conexão
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erro-de-rls" class="md-nav__link">
+    <span class="md-ellipsis">
+      Erro de RLS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erro-de-real-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      Erro de Real-time
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comandos-uteis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comandos Úteis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Comandos Úteis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#verificar-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verificar Status
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#limpar-dados" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limpar Dados
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#proximos-passos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Próximos Passos
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="configuracao-do-supabase">Configuração do Supabase</h1>
+<p>O NioChat utiliza Supabase para dashboard em tempo real, auditoria e sistema CSAT. Este guia explica como configurar a integração.</p>
+<h2 id="criar-projeto-no-supabase">Criar Projeto no Supabase</h2>
+<h3 id="1-acessar-supabase">1. Acessar Supabase</h3>
+<ol>
+<li>Acesse <a href="https://supabase.com">supabase.com</a></li>
+<li>Faça login ou crie uma conta</li>
+<li>Clique em "New Project"</li>
+</ol>
+<h3 id="2-configurar-projeto">2. Configurar Projeto</h3>
+<ul>
+<li><strong>Nome</strong>: NioChat</li>
+<li><strong>Database Password</strong>: Senha segura</li>
+<li><strong>Region</strong>: Escolha a região mais próxima</li>
+<li><strong>Pricing Plan</strong>: Free (para desenvolvimento)</li>
+</ul>
+<h3 id="3-obter-credenciais">3. Obter Credenciais</h3>
+<p>Após criar o projeto, você encontrará:
+- <strong>Project URL</strong>: <code>https://seu-projeto.supabase.co</code>
+- <strong>Anon Key</strong>: Chave pública para autenticação
+- <strong>Service Role Key</strong>: Chave privada para operações administrativas</p>
+<h2 id="configurar-banco-de-dados">Configurar Banco de Dados</h2>
+<h3 id="1-executar-sql-no-supabase">1. Executar SQL no Supabase</h3>
+<p>Acesse o SQL Editor no Supabase e execute:</p>
+<pre><code class="language-sql">-- Criar tabela de conversas
+CREATE TABLE conversations (
+    id BIGINT PRIMARY KEY,
+    provedor_id BIGINT NOT NULL,
+    contact_id BIGINT NOT NULL,
+    inbox_id BIGINT,
+    status TEXT DEFAULT 'open',
+    assignee_id BIGINT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    ended_at TIMESTAMPTZ,
+    additional_attributes JSONB
+);
+
+-- Criar tabela de contatos
+CREATE TABLE contacts (
+    id BIGINT PRIMARY KEY,
+    provedor_id BIGINT NOT NULL,
+    name TEXT NOT NULL,
+    phone TEXT,
+    email TEXT,
+    avatar TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    additional_attributes JSONB
+);
+
+-- Criar tabela de mensagens
+CREATE TABLE messages (
+    id BIGINT PRIMARY KEY,
+    conversation_id BIGINT NOT NULL,
+    contact_id BIGINT NOT NULL,
+    provedor_id BIGINT NOT NULL,
+    content TEXT,
+    message_type TEXT DEFAULT 'text',
+    is_from_customer BOOLEAN DEFAULT true,
+    file_url TEXT,
+    file_name TEXT,
+    file_size BIGINT,
+    external_id TEXT,
+    additional_attributes JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Criar tabela de feedback CSAT
+CREATE TABLE csat_feedback (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    provedor_id BIGINT NOT NULL,
+    conversation_id BIGINT NOT NULL,
+    contact_id BIGINT NOT NULL,
+    emoji_rating TEXT,
+    rating_value INTEGER NOT NULL,
+    original_message TEXT,
+    contact_avatar TEXT,
+    feedback_sent_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Criar tabela de auditoria
+CREATE TABLE audit_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    provedor_id BIGINT NOT NULL,
+    user_id BIGINT,
+    action TEXT NOT NULL,
+    details JSONB,
+    timestamp TIMESTAMPTZ DEFAULT NOW()
+);
+</code></pre>
+<h3 id="2-configurar-rls-row-level-security">2. Configurar RLS (Row Level Security)</h3>
+<pre><code class="language-sql">-- Habilitar RLS
+ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contacts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE csat_feedback ENABLE ROW LEVEL SECURITY;
+ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
+
+-- Políticas RLS para isolamento por provedor
+CREATE POLICY &quot;Isolate by provedor_id&quot; ON conversations
+    FOR ALL USING (provedor_id = current_setting('request.jwt.claims', true)::json-&gt;&gt;'provedor_id'::bigint);
+
+CREATE POLICY &quot;Isolate by provedor_id&quot; ON contacts
+    FOR ALL USING (provedor_id = current_setting('request.jwt.claims', true)::json-&gt;&gt;'provedor_id'::bigint);
+
+CREATE POLICY &quot;Isolate by provedor_id&quot; ON messages
+    FOR ALL USING (provedor_id = current_setting('request.jwt.claims', true)::json-&gt;&gt;'provedor_id'::bigint);
+
+CREATE POLICY &quot;Isolate by provedor_id&quot; ON csat_feedback
+    FOR ALL USING (provedor_id = current_setting('request.jwt.claims', true)::json-&gt;&gt;'provedor_id'::bigint);
+
+CREATE POLICY &quot;Isolate by provedor_id&quot; ON audit_logs
+    FOR ALL USING (provedor_id = current_setting('request.jwt.claims', true)::json-&gt;&gt;'provedor_id'::bigint);
+</code></pre>
+<h3 id="3-criar-indices-para-performance">3. Criar Índices para Performance</h3>
+<pre><code class="language-sql">-- Índices para conversas
+CREATE INDEX idx_conversations_provedor_id ON conversations(provedor_id);
+CREATE INDEX idx_conversations_status ON conversations(status);
+CREATE INDEX idx_conversations_assignee_id ON conversations(assignee_id);
+CREATE INDEX idx_conversations_created_at ON conversations(created_at);
+
+-- Índices para contatos
+CREATE INDEX idx_contacts_provedor_id ON contacts(provedor_id);
+CREATE INDEX idx_contacts_phone ON contacts(phone);
+
+-- Índices para mensagens
+CREATE INDEX idx_messages_conversation_id ON messages(conversation_id);
+CREATE INDEX idx_messages_provedor_id ON messages(provedor_id);
+CREATE INDEX idx_messages_created_at ON messages(created_at);
+
+-- Índices para CSAT
+CREATE INDEX idx_csat_provedor_id ON csat_feedback(provedor_id);
+CREATE INDEX idx_csat_rating_value ON csat_feedback(rating_value);
+CREATE INDEX idx_csat_feedback_sent_at ON csat_feedback(feedback_sent_at);
+
+-- Índices para auditoria
+CREATE INDEX idx_audit_provedor_id ON audit_logs(provedor_id);
+CREATE INDEX idx_audit_user_id ON audit_logs(user_id);
+CREATE INDEX idx_audit_action ON audit_logs(action);
+CREATE INDEX idx_audit_timestamp ON audit_logs(timestamp);
+</code></pre>
+<h2 id="configurar-variaveis-de-ambiente">Configurar Variáveis de Ambiente</h2>
+<h3 id="1-arquivo-env">1. Arquivo .env</h3>
+<pre><code class="language-env"># Supabase
+SUPABASE_URL=https://seu-projeto.supabase.co
+SUPABASE_ANON_KEY=sua_chave_anon_aqui
+SUPABASE_SERVICE_ROLE_KEY=sua_chave_service_role_aqui
+</code></pre>
+<h3 id="2-configuracao-no-django">2. Configuração no Django</h3>
+<pre><code class="language-python"># settings.py
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_ANON_KEY = os.getenv('SUPABASE_ANON_KEY')
+SUPABASE_SERVICE_ROLE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+</code></pre>
+<h2 id="configurar-dashboard">Configurar Dashboard</h2>
+<h3 id="1-criar-views-no-supabase">1. Criar Views no Supabase</h3>
+<pre><code class="language-sql">-- View para métricas de conversas
+CREATE VIEW conversation_metrics AS
+SELECT 
+    provedor_id,
+    COUNT(*) as total_conversations,
+    COUNT(CASE WHEN status = 'open' THEN 1 END) as open_conversations,
+    COUNT(CASE WHEN status = 'closed' THEN 1 END) as closed_conversations,
+    AVG(CASE WHEN status = 'closed' THEN 
+        EXTRACT(EPOCH FROM (ended_at - created_at))/3600 
+    END) as avg_resolution_time_hours
+FROM conversations
+GROUP BY provedor_id;
+
+-- View para métricas CSAT
+CREATE VIEW csat_metrics AS
+SELECT 
+    provedor_id,
+    COUNT(*) as total_feedbacks,
+    AVG(rating_value) as average_rating,
+    COUNT(CASE WHEN rating_value = 5 THEN 1 END) as excellent_count,
+    COUNT(CASE WHEN rating_value &gt;= 4 THEN 1 END) as satisfied_count,
+    COUNT(CASE WHEN rating_value &lt;= 2 THEN 1 END) as unsatisfied_count
+FROM csat_feedback
+GROUP BY provedor_id;
+</code></pre>
+<h3 id="2-configurar-real-time">2. Configurar Real-time</h3>
+<pre><code class="language-sql">-- Habilitar real-time para tabelas
+ALTER PUBLICATION supabase_realtime ADD TABLE conversations;
+ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+ALTER PUBLICATION supabase_realtime ADD TABLE csat_feedback;
+ALTER PUBLICATION supabase_realtime ADD TABLE audit_logs;
+</code></pre>
+<h2 id="configurar-autenticacao">Configurar Autenticação</h2>
+<h3 id="1-configurar-jwt">1. Configurar JWT</h3>
+<pre><code class="language-python"># settings.py
+SUPABASE_JWT_SECRET = os.getenv('SUPABASE_JWT_SECRET')
+
+# Middleware para JWT
+MIDDLEWARE = [
+    'core.middleware.SupabaseJWTMiddleware',
+    # ... outros middlewares
+]
+</code></pre>
+<h3 id="2-middleware-jwt">2. Middleware JWT</h3>
+<pre><code class="language-python"># core/middleware.py
+import jwt
+from django.conf import settings
+
+class SupabaseJWTMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Processar JWT do Supabase
+        auth_header = request.META.get('HTTP_AUTHORIZATION')
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
+            try:
+                payload = jwt.decode(
+                    token, 
+                    settings.SUPABASE_JWT_SECRET, 
+                    algorithms=['HS256']
+                )
+                request.supabase_user = payload
+            except jwt.InvalidTokenError:
+                pass
+
+        response = self.get_response(request)
+        return response
+</code></pre>
+<h2 id="configurar-webhooks">Configurar Webhooks</h2>
+<h3 id="1-webhook-para-atualizacoes">1. Webhook para Atualizações</h3>
+<pre><code class="language-python"># core/supabase_service.py
+import requests
+from django.conf import settings
+
+class SupabaseService:
+    def __init__(self):
+        self.url = settings.SUPABASE_URL
+        self.headers = {
+            'apikey': settings.SUPABASE_ANON_KEY,
+            'Authorization': f'Bearer {settings.SUPABASE_ANON_KEY}',
+            'Content-Type': 'application/json'
+        }
+
+    def send_webhook(self, event_type, data):
+        &quot;&quot;&quot;Enviar webhook para atualizar dashboard&quot;&quot;&quot;
+        webhook_url = f&quot;{self.url}/functions/v1/dashboard-update&quot;
+
+        payload = {
+            'event': event_type,
+            'data': data,
+            'timestamp': timezone.now().isoformat()
+        }
+
+        response = requests.post(
+            webhook_url,
+            json=payload,
+            headers=self.headers
+        )
+
+        return response.status_code == 200
+</code></pre>
+<h3 id="2-funcao-edge-para-webhook">2. Função Edge para Webhook</h3>
+<pre><code class="language-typescript">// supabase/functions/dashboard-update/index.ts
+import { serve } from &quot;https://deno.land/std@0.168.0/http/server.ts&quot;
+
+serve(async (req) =&gt; {
+  const { event, data, timestamp } = await req.json()
+
+  // Processar evento
+  switch (event) {
+    case 'conversation_created':
+      // Atualizar dashboard
+      break
+    case 'message_sent':
+      // Atualizar chat
+      break
+    case 'csat_received':
+      // Atualizar métricas CSAT
+      break
+  }
+
+  return new Response(JSON.stringify({ success: true }), {
+    headers: { &quot;Content-Type&quot;: &quot;application/json&quot; },
+  })
+})
+</code></pre>
+<h2 id="monitoramento">Monitoramento</h2>
+<h3 id="1-configurar-alertas">1. Configurar Alertas</h3>
+<pre><code class="language-sql">-- Função para alertas
+CREATE OR REPLACE FUNCTION check_conversation_alerts()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Alertar se conversa aberta há mais de 1 hora
+    IF NEW.status = 'open' AND 
+       EXTRACT(EPOCH FROM (NOW() - NEW.created_at))/3600 &gt; 1 THEN
+        -- Enviar notificação
+        PERFORM pg_notify('conversation_alert', 
+            json_build_object(
+                'conversation_id', NEW.id,
+                'provedor_id', NEW.provedor_id,
+                'alert_type', 'long_open_conversation'
+            )::text
+        );
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger para alertas
+CREATE TRIGGER conversation_alert_trigger
+    AFTER UPDATE ON conversations
+    FOR EACH ROW
+    EXECUTE FUNCTION check_conversation_alerts();
+</code></pre>
+<h3 id="2-metricas-de-performance">2. Métricas de Performance</h3>
+<pre><code class="language-sql">-- View para performance
+CREATE VIEW performance_metrics AS
+SELECT 
+    provedor_id,
+    DATE_TRUNC('hour', created_at) as hour,
+    COUNT(*) as conversations_per_hour,
+    AVG(EXTRACT(EPOCH FROM (ended_at - created_at))/60) as avg_resolution_minutes,
+    COUNT(CASE WHEN status = 'closed' THEN 1 END) as resolved_conversations
+FROM conversations
+WHERE created_at &gt;= NOW() - INTERVAL '24 hours'
+GROUP BY provedor_id, DATE_TRUNC('hour', created_at)
+ORDER BY hour DESC;
+</code></pre>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="problemas-comuns">Problemas Comuns</h3>
+<h4 id="erro-de-conexao">Erro de Conexão</h4>
+<pre><code class="language-bash"># Verificar URL
+curl -I https://seu-projeto.supabase.co
+
+# Verificar chave
+curl -H &quot;apikey: sua_chave&quot; https://seu-projeto.supabase.co/rest/v1/
+</code></pre>
+<h4 id="erro-de-rls">Erro de RLS</h4>
+<pre><code class="language-sql">-- Verificar políticas
+SELECT * FROM pg_policies WHERE tablename = 'conversations';
+
+-- Testar acesso
+SELECT * FROM conversations WHERE provedor_id = 1;
+</code></pre>
+<h4 id="erro-de-real-time">Erro de Real-time</h4>
+<pre><code class="language-sql">-- Verificar publicação
+SELECT * FROM pg_publication_tables WHERE pubname = 'supabase_realtime';
+
+-- Habilitar tabela
+ALTER PUBLICATION supabase_realtime ADD TABLE conversations;
+</code></pre>
+<h3 id="comandos-uteis">Comandos Úteis</h3>
+<h4 id="verificar-status">Verificar Status</h4>
+<pre><code class="language-python"># Testar conexão
+from core.supabase_service import SupabaseService
+supabase = SupabaseService()
+print(supabase.test_connection())
+</code></pre>
+<h4 id="limpar-dados">Limpar Dados</h4>
+<pre><code class="language-sql">-- Limpar dados de teste
+DELETE FROM audit_logs WHERE provedor_id = 999;
+DELETE FROM csat_feedback WHERE provedor_id = 999;
+DELETE FROM messages WHERE provedor_id = 999;
+DELETE FROM conversations WHERE provedor_id = 999;
+DELETE FROM contacts WHERE provedor_id = 999;
+</code></pre>
+<h2 id="proximos-passos">Próximos Passos</h2>
+<ol>
+<li><a href="usage/interface.md">Uso</a> - Aprenda a usar o sistema</li>
+<li><a href="api/endpoints.md">API</a> - Explore a API</li>
+<li><a href="development/troubleshooting.md">Troubleshooting</a> - Resolva problemas</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2460 @@
+
+<!doctype html>
+<html lang="pt" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentação NioChat">
+      
+      
+      
+      
+        <link rel="prev" href="../webhooks/">
+      
+      
+        <link rel="next" href="../../configuration/supabase/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+    
+    
+      
+        <title>WebSocket - NioChat</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#websocket" class="md-skip">
+          Pular para conteúdo
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabeçalho">
+    <a href="../.." title="NioChat" class="md-header__button md-logo" aria-label="NioChat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NioChat
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              WebSocket
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Buscar" placeholder="Buscar" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Pesquisar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpar" aria-label="Limpar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando busca
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navegação" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="NioChat" class="md-nav__button md-logo" aria-label="NioChat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    NioChat
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    NioChat - Sistema de Atendimento WhatsApp
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Changelog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Ai
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Ai
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuração da IA
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Api
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Api
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Autenticação
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Endpoints da API
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../postman-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Guia de Uso do Postman com NioChat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../webhooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Webhooks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    WebSocket
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    WebSocket
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#conexao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conexão
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Conexão">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#url-de-conexao" class="md-nav__link">
+    <span class="md-ellipsis">
+      URL de Conexão
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#com-autenticacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Com Autenticação
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementacao-javascript" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementação JavaScript
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementação JavaScript">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#classe-websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classe WebSocket
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eventos-disponiveis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Eventos Disponíveis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Eventos Disponíveis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chat" class="md-nav__link">
+    <span class="md-ellipsis">
+      Chat
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Chat">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nova-mensagem" class="md-nav__link">
+    <span class="md-ellipsis">
+      Nova Mensagem
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reacao-a-mensagem" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reação a Mensagem
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mensagem-deletada" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mensagem Deletada
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dashboard
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dashboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metricas-atualizadas" class="md-nav__link">
+    <span class="md-ellipsis">
+      Métricas Atualizadas
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#csat-atualizado" class="md-nav__link">
+    <span class="md-ellipsis">
+      CSAT Atualizado
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-de-auditoria" class="md-nav__link">
+    <span class="md-ellipsis">
+      Log de Auditoria
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status-do-usuario" class="md-nav__link">
+    <span class="md-ellipsis">
+      Status do Usuário
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Status do Usuário">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usuario-onlineoffline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usuário Online/Offline
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementacao-react" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementação React
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementação React">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hook-usewebsocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hook useWebSocket
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#componente-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      Componente Dashboard
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementacao-vuejs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementação Vue.js
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementação Vue.js">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#plugin-websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      Plugin WebSocket
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#componente-vue" class="md-nav__link">
+    <span class="md-ellipsis">
+      Componente Vue
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementacao-angular" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementação Angular
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementação Angular">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#servico-websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      Serviço WebSocket
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#componente-angular" class="md-nav__link">
+    <span class="md-ellipsis">
+      Componente Angular
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tratamento-de-erros" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tratamento de Erros
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tratamento de Erros">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reconexao-automatica" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reconexão Automática
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#proximos-passos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Próximos Passos
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Configuration
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/supabase/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuração do Supabase
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Development
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Development
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contribuindo para o NioChat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Estrutura do Projeto
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Installation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Instalação em Desenvolvimento
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/production/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Instalação em Produção
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Overview
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Arquitetura do Sistema
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Funcionalidades
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introdução ao NioChat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Supabase
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            Supabase
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../supabase/integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Integração com Supabase
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Usage
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            Usage
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/interface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Interface do Usuário
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#conexao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conexão
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Conexão">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#url-de-conexao" class="md-nav__link">
+    <span class="md-ellipsis">
+      URL de Conexão
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#com-autenticacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Com Autenticação
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementacao-javascript" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementação JavaScript
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementação JavaScript">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#classe-websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classe WebSocket
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eventos-disponiveis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Eventos Disponíveis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Eventos Disponíveis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chat" class="md-nav__link">
+    <span class="md-ellipsis">
+      Chat
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Chat">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nova-mensagem" class="md-nav__link">
+    <span class="md-ellipsis">
+      Nova Mensagem
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reacao-a-mensagem" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reação a Mensagem
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mensagem-deletada" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mensagem Deletada
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dashboard
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dashboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metricas-atualizadas" class="md-nav__link">
+    <span class="md-ellipsis">
+      Métricas Atualizadas
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#csat-atualizado" class="md-nav__link">
+    <span class="md-ellipsis">
+      CSAT Atualizado
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-de-auditoria" class="md-nav__link">
+    <span class="md-ellipsis">
+      Log de Auditoria
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status-do-usuario" class="md-nav__link">
+    <span class="md-ellipsis">
+      Status do Usuário
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Status do Usuário">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usuario-onlineoffline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usuário Online/Offline
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementacao-react" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementação React
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementação React">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hook-usewebsocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hook useWebSocket
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#componente-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      Componente Dashboard
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementacao-vuejs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementação Vue.js
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementação Vue.js">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#plugin-websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      Plugin WebSocket
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#componente-vue" class="md-nav__link">
+    <span class="md-ellipsis">
+      Componente Vue
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementacao-angular" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementação Angular
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementação Angular">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#servico-websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      Serviço WebSocket
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#componente-angular" class="md-nav__link">
+    <span class="md-ellipsis">
+      Componente Angular
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tratamento-de-erros" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tratamento de Erros
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tratamento de Erros">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reconexao-automatica" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reconexão Automática
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#proximos-passos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Próximos Passos
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="websocket">WebSocket</h1>
+<p>O NioChat utiliza WebSocket para comunicação em tempo real entre o frontend e backend. Este documento explica como implementar e usar WebSocket.</p>
+<h2 id="conexao">Conexão</h2>
+<h3 id="url-de-conexao">URL de Conexão</h3>
+<pre><code class="language-javascript">const ws = new WebSocket('ws://localhost:8010/ws/dashboard/');
+</code></pre>
+<h3 id="com-autenticacao">Com Autenticação</h3>
+<pre><code class="language-javascript">const token = 'seu_token_aqui';
+const ws = new WebSocket(`ws://localhost:8010/ws/dashboard/?token=${token}`);
+</code></pre>
+<h2 id="implementacao-javascript">Implementação JavaScript</h2>
+<h3 id="classe-websocket">Classe WebSocket</h3>
+<pre><code class="language-javascript">class NioChatWebSocket {
+  constructor(token) {
+    this.token = token;
+    this.ws = null;
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = 5;
+    this.reconnectInterval = 5000;
+    this.listeners = {};
+  }
+
+  connect() {
+    const url = `ws://localhost:8010/ws/dashboard/?token=${this.token}`;
+
+    this.ws = new WebSocket(url);
+
+    this.ws.onopen = (event) =&gt; {
+      console.log('WebSocket conectado');
+      this.reconnectAttempts = 0;
+      this.emit('connected', event);
+    };
+
+    this.ws.onmessage = (event) =&gt; {
+      try {
+        const data = JSON.parse(event.data);
+        this.handleMessage(data);
+      } catch (error) {
+        console.error('Erro ao processar mensagem:', error);
+      }
+    };
+
+    this.ws.onclose = (event) =&gt; {
+      console.log('WebSocket desconectado:', event.code, event.reason);
+      this.emit('disconnected', event);
+      this.attemptReconnect();
+    };
+
+    this.ws.onerror = (error) =&gt; {
+      console.error('Erro no WebSocket:', error);
+      this.emit('error', error);
+    };
+  }
+
+  handleMessage(data) {
+    const { type, data: messageData } = data;
+
+    switch (type) {
+      case 'chat_message':
+        this.emit('chat_message', messageData);
+        break;
+      case 'message_reaction':
+        this.emit('message_reaction', messageData);
+        break;
+      case 'message_deleted':
+        this.emit('message_deleted', messageData);
+        break;
+      case 'dashboard_metrics':
+        this.emit('dashboard_metrics', messageData);
+        break;
+      case 'csat_update':
+        this.emit('csat_update', messageData);
+        break;
+      case 'audit_log':
+        this.emit('audit_log', messageData);
+        break;
+      case 'user_status':
+        this.emit('user_status', messageData);
+        break;
+      default:
+        console.log('Tipo de mensagem desconhecido:', type);
+    }
+  }
+
+  attemptReconnect() {
+    if (this.reconnectAttempts &lt; this.maxReconnectAttempts) {
+      this.reconnectAttempts++;
+      console.log(`Tentativa de reconexão ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
+
+      setTimeout(() =&gt; {
+        this.connect();
+      }, this.reconnectInterval);
+    } else {
+      console.error('Máximo de tentativas de reconexão atingido');
+      this.emit('reconnect_failed');
+    }
+  }
+
+  send(data) {
+    if (this.ws &amp;&amp; this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(data));
+    } else {
+      console.error('WebSocket não está conectado');
+    }
+  }
+
+  on(event, callback) {
+    if (!this.listeners[event]) {
+      this.listeners[event] = [];
+    }
+    this.listeners[event].push(callback);
+  }
+
+  off(event, callback) {
+    if (this.listeners[event]) {
+      this.listeners[event] = this.listeners[event].filter(cb =&gt; cb !== callback);
+    }
+  }
+
+  emit(event, data) {
+    if (this.listeners[event]) {
+      this.listeners[event].forEach(callback =&gt; callback(data));
+    }
+  }
+
+  disconnect() {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+}
+
+// Uso
+const ws = new NioChatWebSocket('seu_token_aqui');
+
+// Conectar
+ws.connect();
+
+// Escutar eventos
+ws.on('chat_message', (data) =&gt; {
+  console.log('Nova mensagem:', data);
+});
+
+ws.on('dashboard_metrics', (data) =&gt; {
+  console.log('Métricas atualizadas:', data);
+});
+
+ws.on('csat_update', (data) =&gt; {
+  console.log('CSAT atualizado:', data);
+});
+
+ws.on('connected', () =&gt; {
+  console.log('Conectado ao WebSocket');
+});
+
+ws.on('disconnected', () =&gt; {
+  console.log('Desconectado do WebSocket');
+});
+
+ws.on('error', (error) =&gt; {
+  console.error('Erro no WebSocket:', error);
+});
+</code></pre>
+<h2 id="eventos-disponiveis">Eventos Disponíveis</h2>
+<h3 id="chat">Chat</h3>
+<h4 id="nova-mensagem">Nova Mensagem</h4>
+<pre><code class="language-javascript">{
+  &quot;type&quot;: &quot;chat_message&quot;,
+  &quot;data&quot;: {
+    &quot;conversation_id&quot;: 1,
+    &quot;message&quot;: {
+      &quot;id&quot;: 1,
+      &quot;content&quot;: &quot;Nova mensagem&quot;,
+      &quot;sender&quot;: &quot;customer&quot;,
+      &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;,
+      &quot;message_type&quot;: &quot;text&quot;
+    }
+  }
+}
+</code></pre>
+<h4 id="reacao-a-mensagem">Reação a Mensagem</h4>
+<pre><code class="language-javascript">{
+  &quot;type&quot;: &quot;message_reaction&quot;,
+  &quot;data&quot;: {
+    &quot;message_id&quot;: 1,
+    &quot;reaction&quot;: &quot;👍&quot;,
+    &quot;user_id&quot;: 1
+  }
+}
+</code></pre>
+<h4 id="mensagem-deletada">Mensagem Deletada</h4>
+<pre><code class="language-javascript">{
+  &quot;type&quot;: &quot;message_deleted&quot;,
+  &quot;data&quot;: {
+    &quot;message_id&quot;: 1,
+    &quot;deleted_by&quot;: 1
+  }
+}
+</code></pre>
+<h3 id="dashboard">Dashboard</h3>
+<h4 id="metricas-atualizadas">Métricas Atualizadas</h4>
+<pre><code class="language-javascript">{
+  &quot;type&quot;: &quot;dashboard_metrics&quot;,
+  &quot;data&quot;: {
+    &quot;total_conversations&quot;: 100,
+    &quot;open_conversations&quot;: 25,
+    &quot;closed_conversations&quot;: 75,
+    &quot;average_satisfaction&quot;: 4.2,
+    &quot;resolution_rate&quot;: 0.85,
+    &quot;response_time&quot;: 120
+  }
+}
+</code></pre>
+<h4 id="csat-atualizado">CSAT Atualizado</h4>
+<pre><code class="language-javascript">{
+  &quot;type&quot;: &quot;csat_update&quot;,
+  &quot;data&quot;: {
+    &quot;conversation_id&quot;: 1,
+    &quot;rating&quot;: 5,
+    &quot;feedback&quot;: &quot;Excelente atendimento!&quot;,
+    &quot;contact_name&quot;: &quot;João Silva&quot;,
+    &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;
+  }
+}
+</code></pre>
+<h4 id="log-de-auditoria">Log de Auditoria</h4>
+<pre><code class="language-javascript">{
+  &quot;type&quot;: &quot;audit_log&quot;,
+  &quot;data&quot;: {
+    &quot;id&quot;: 1,
+    &quot;action&quot;: &quot;conversation_created&quot;,
+    &quot;details&quot;: {
+      &quot;conversation_id&quot;: 1,
+      &quot;contact_name&quot;: &quot;João Silva&quot;
+    },
+    &quot;user&quot;: {
+      &quot;id&quot;: 1,
+      &quot;username&quot;: &quot;agente1&quot;
+    },
+    &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;
+  }
+}
+</code></pre>
+<h3 id="status-do-usuario">Status do Usuário</h3>
+<h4 id="usuario-onlineoffline">Usuário Online/Offline</h4>
+<pre><code class="language-javascript">{
+  &quot;type&quot;: &quot;user_status&quot;,
+  &quot;data&quot;: {
+    &quot;user_id&quot;: 1,
+    &quot;status&quot;: &quot;online&quot;,
+    &quot;last_seen&quot;: &quot;2024-01-01T10:00:00Z&quot;
+  }
+}
+</code></pre>
+<h2 id="implementacao-react">Implementação React</h2>
+<h3 id="hook-usewebsocket">Hook useWebSocket</h3>
+<pre><code class="language-javascript">import { useState, useEffect, useCallback } from 'react';
+
+export const useWebSocket = (token) =&gt; {
+  const [ws, setWs] = useState(null);
+  const [connected, setConnected] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [metrics, setMetrics] = useState(null);
+  const [csatUpdates, setCsatUpdates] = useState([]);
+
+  const connect = useCallback(() =&gt; {
+    if (!token) return;
+
+    const websocket = new WebSocket(`ws://localhost:8010/ws/dashboard/?token=${token}`);
+
+    websocket.onopen = () =&gt; {
+      setConnected(true);
+      setWs(websocket);
+    };
+
+    websocket.onmessage = (event) =&gt; {
+      const data = JSON.parse(event.data);
+
+      switch (data.type) {
+        case 'chat_message':
+          setMessages(prev =&gt; [...prev, data.data]);
+          break;
+        case 'dashboard_metrics':
+          setMetrics(data.data);
+          break;
+        case 'csat_update':
+          setCsatUpdates(prev =&gt; [...prev, data.data]);
+          break;
+        default:
+          console.log('Evento desconhecido:', data.type);
+      }
+    };
+
+    websocket.onclose = () =&gt; {
+      setConnected(false);
+      setWs(null);
+    };
+
+    websocket.onerror = (error) =&gt; {
+      console.error('Erro no WebSocket:', error);
+    };
+
+    return websocket;
+  }, [token]);
+
+  useEffect(() =&gt; {
+    const websocket = connect();
+
+    return () =&gt; {
+      if (websocket) {
+        websocket.close();
+      }
+    };
+  }, [connect]);
+
+  const sendMessage = useCallback((data) =&gt; {
+    if (ws &amp;&amp; ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(data));
+    }
+  }, [ws]);
+
+  return {
+    connected,
+    messages,
+    metrics,
+    csatUpdates,
+    sendMessage
+  };
+};
+</code></pre>
+<h3 id="componente-dashboard">Componente Dashboard</h3>
+<pre><code class="language-javascript">import React from 'react';
+import { useWebSocket } from './hooks/useWebSocket';
+
+const Dashboard = ({ token }) =&gt; {
+  const { connected, metrics, csatUpdates } = useWebSocket(token);
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;Dashboard&lt;/h1&gt;
+      &lt;p&gt;Status: {connected ? 'Conectado' : 'Desconectado'}&lt;/p&gt;
+
+      {metrics &amp;&amp; (
+        &lt;div&gt;
+          &lt;h2&gt;Métricas&lt;/h2&gt;
+          &lt;p&gt;Total de Conversas: {metrics.total_conversations}&lt;/p&gt;
+          &lt;p&gt;Conversas Abertas: {metrics.open_conversations}&lt;/p&gt;
+          &lt;p&gt;Satisfação Média: {metrics.average_satisfaction}&lt;/p&gt;
+        &lt;/div&gt;
+      )}
+
+      {csatUpdates.length &gt; 0 &amp;&amp; (
+        &lt;div&gt;
+          &lt;h2&gt;Últimos CSATs&lt;/h2&gt;
+          {csatUpdates.map((csat, index) =&gt; (
+            &lt;div key={index}&gt;
+              &lt;p&gt;{csat.contact_name}: {csat.rating} - {csat.feedback}&lt;/p&gt;
+            &lt;/div&gt;
+          ))}
+        &lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  );
+};
+
+export default Dashboard;
+</code></pre>
+<h2 id="implementacao-vuejs">Implementação Vue.js</h2>
+<h3 id="plugin-websocket">Plugin WebSocket</h3>
+<pre><code class="language-javascript">// websocket.js
+export default {
+  install(Vue) {
+    Vue.prototype.$websocket = {
+      ws: null,
+      connected: false,
+      listeners: {},
+
+      connect(token) {
+        this.ws = new WebSocket(`ws://localhost:8010/ws/dashboard/?token=${token}`);
+
+        this.ws.onopen = () =&gt; {
+          this.connected = true;
+          this.emit('connected');
+        };
+
+        this.ws.onmessage = (event) =&gt; {
+          const data = JSON.parse(event.data);
+          this.emit(data.type, data.data);
+        };
+
+        this.ws.onclose = () =&gt; {
+          this.connected = false;
+          this.emit('disconnected');
+        };
+
+        this.ws.onerror = (error) =&gt; {
+          this.emit('error', error);
+        };
+      },
+
+      send(data) {
+        if (this.ws &amp;&amp; this.ws.readyState === WebSocket.OPEN) {
+          this.ws.send(JSON.stringify(data));
+        }
+      },
+
+      on(event, callback) {
+        if (!this.listeners[event]) {
+          this.listeners[event] = [];
+        }
+        this.listeners[event].push(callback);
+      },
+
+      off(event, callback) {
+        if (this.listeners[event]) {
+          this.listeners[event] = this.listeners[event].filter(cb =&gt; cb !== callback);
+        }
+      },
+
+      emit(event, data) {
+        if (this.listeners[event]) {
+          this.listeners[event].forEach(callback =&gt; callback(data));
+        }
+      },
+
+      disconnect() {
+        if (this.ws) {
+          this.ws.close();
+          this.ws = null;
+        }
+      }
+    };
+  }
+};
+</code></pre>
+<h3 id="componente-vue">Componente Vue</h3>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;div&gt;
+    &lt;h1&gt;Dashboard&lt;/h1&gt;
+    &lt;p&gt;Status: {{ connected ? 'Conectado' : 'Desconectado' }}&lt;/p&gt;
+
+    &lt;div v-if=&quot;metrics&quot;&gt;
+      &lt;h2&gt;Métricas&lt;/h2&gt;
+      &lt;p&gt;Total de Conversas: {{ metrics.total_conversations }}&lt;/p&gt;
+      &lt;p&gt;Conversas Abertas: {{ metrics.open_conversations }}&lt;/p&gt;
+      &lt;p&gt;Satisfação Média: {{ metrics.average_satisfaction }}&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;div v-if=&quot;csatUpdates.length &gt; 0&quot;&gt;
+      &lt;h2&gt;Últimos CSATs&lt;/h2&gt;
+      &lt;div v-for=&quot;(csat, index) in csatUpdates&quot; :key=&quot;index&quot;&gt;
+        &lt;p&gt;{{ csat.contact_name }}: {{ csat.rating }} - {{ csat.feedback }}&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  data() {
+    return {
+      connected: false,
+      metrics: null,
+      csatUpdates: []
+    };
+  },
+
+  mounted() {
+    const token = localStorage.getItem('niochat_token');
+    if (token) {
+      this.$websocket.connect(token);
+
+      this.$websocket.on('connected', () =&gt; {
+        this.connected = true;
+      });
+
+      this.$websocket.on('disconnected', () =&gt; {
+        this.connected = false;
+      });
+
+      this.$websocket.on('dashboard_metrics', (data) =&gt; {
+        this.metrics = data;
+      });
+
+      this.$websocket.on('csat_update', (data) =&gt; {
+        this.csatUpdates.push(data);
+      });
+    }
+  },
+
+  beforeDestroy() {
+    this.$websocket.disconnect();
+  }
+};
+&lt;/script&gt;
+</code></pre>
+<h2 id="implementacao-angular">Implementação Angular</h2>
+<h3 id="servico-websocket">Serviço WebSocket</h3>
+<pre><code class="language-typescript">import { Injectable } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class WebSocketService {
+  private ws: WebSocket;
+  private connected = false;
+  private messageSubject = new Subject&lt;any&gt;();
+
+  connect(token: string): void {
+    this.ws = new WebSocket(`ws://localhost:8010/ws/dashboard/?token=${token}`);
+
+    this.ws.onopen = () =&gt; {
+      this.connected = true;
+      this.messageSubject.next({ type: 'connected' });
+    };
+
+    this.ws.onmessage = (event) =&gt; {
+      const data = JSON.parse(event.data);
+      this.messageSubject.next(data);
+    };
+
+    this.ws.onclose = () =&gt; {
+      this.connected = false;
+      this.messageSubject.next({ type: 'disconnected' });
+    };
+
+    this.ws.onerror = (error) =&gt; {
+      this.messageSubject.next({ type: 'error', data: error });
+    };
+  }
+
+  send(data: any): void {
+    if (this.ws &amp;&amp; this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(data));
+    }
+  }
+
+  getMessages(): Observable&lt;any&gt; {
+    return this.messageSubject.asObservable();
+  }
+
+  isConnected(): boolean {
+    return this.connected;
+  }
+
+  disconnect(): void {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+}
+</code></pre>
+<h3 id="componente-angular">Componente Angular</h3>
+<pre><code class="language-typescript">import { Component, OnInit, OnDestroy } from '@angular/core';
+import { WebSocketService } from './websocket.service';
+import { Subscription } from 'rxjs';
+
+@Component({
+  selector: 'app-dashboard',
+  template: `
+    &lt;div&gt;
+      &lt;h1&gt;Dashboard&lt;/h1&gt;
+      &lt;p&gt;Status: {{ connected ? 'Conectado' : 'Desconectado' }}&lt;/p&gt;
+
+      &lt;div *ngIf=&quot;metrics&quot;&gt;
+        &lt;h2&gt;Métricas&lt;/h2&gt;
+        &lt;p&gt;Total de Conversas: {{ metrics.total_conversations }}&lt;/p&gt;
+        &lt;p&gt;Conversas Abertas: {{ metrics.open_conversations }}&lt;/p&gt;
+        &lt;p&gt;Satisfação Média: {{ metrics.average_satisfaction }}&lt;/p&gt;
+      &lt;/div&gt;
+
+      &lt;div *ngIf=&quot;csatUpdates.length &gt; 0&quot;&gt;
+        &lt;h2&gt;Últimos CSATs&lt;/h2&gt;
+        &lt;div *ngFor=&quot;let csat of csatUpdates; let i = index&quot;&gt;
+          &lt;p&gt;{{ csat.contact_name }}: {{ csat.rating }} - {{ csat.feedback }}&lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  `
+})
+export class DashboardComponent implements OnInit, OnDestroy {
+  connected = false;
+  metrics: any = null;
+  csatUpdates: any[] = [];
+  private subscription: Subscription;
+
+  constructor(private websocketService: WebSocketService) {}
+
+  ngOnInit() {
+    const token = localStorage.getItem('niochat_token');
+    if (token) {
+      this.websocketService.connect(token);
+
+      this.subscription = this.websocketService.getMessages().subscribe(message =&gt; {
+        switch (message.type) {
+          case 'connected':
+            this.connected = true;
+            break;
+          case 'disconnected':
+            this.connected = false;
+            break;
+          case 'dashboard_metrics':
+            this.metrics = message.data;
+            break;
+          case 'csat_update':
+            this.csatUpdates.push(message.data);
+            break;
+        }
+      });
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+    this.websocketService.disconnect();
+  }
+}
+</code></pre>
+<h2 id="tratamento-de-erros">Tratamento de Erros</h2>
+<h3 id="reconexao-automatica">Reconexão Automática</h3>
+<pre><code class="language-javascript">class WebSocketWithReconnect {
+  constructor(url, options = {}) {
+    this.url = url;
+    this.options = {
+      maxReconnectAttempts: 5,
+      reconnectInterval: 5000,
+      ...options
+    };
+    this.reconnectAttempts = 0;
+    this.listeners = {};
+  }
+
+  connect() {
+    this.ws = new WebSocket(this.url);
+
+    this.ws.onopen = () =&gt; {
+      this.reconnectAttempts = 0;
+      this.emit('connected');
+    };
+
+    this.ws.onclose = (event) =&gt; {
+      this.emit('disconnected', event);
+      this.attemptReconnect();
+    };
+
+    this.ws.onerror = (error) =&gt; {
+      this.emit('error', error);
+    };
+
+    this.ws.onmessage = (event) =&gt; {
+      const data = JSON.parse(event.data);
+      this.emit(data.type, data.data);
+    };
+  }
+
+  attemptReconnect() {
+    if (this.reconnectAttempts &lt; this.options.maxReconnectAttempts) {
+      this.reconnectAttempts++;
+      console.log(`Tentativa de reconexão ${this.reconnectAttempts}/${this.options.maxReconnectAttempts}`);
+
+      setTimeout(() =&gt; {
+        this.connect();
+      }, this.options.reconnectInterval);
+    } else {
+      this.emit('reconnect_failed');
+    }
+  }
+
+  send(data) {
+    if (this.ws &amp;&amp; this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(data));
+    } else {
+      console.error('WebSocket não está conectado');
+    }
+  }
+
+  on(event, callback) {
+    if (!this.listeners[event]) {
+      this.listeners[event] = [];
+    }
+    this.listeners[event].push(callback);
+  }
+
+  emit(event, data) {
+    if (this.listeners[event]) {
+      this.listeners[event].forEach(callback =&gt; callback(data));
+    }
+  }
+
+  disconnect() {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+}
+</code></pre>
+<h2 id="proximos-passos">Próximos Passos</h2>
+<ol>
+<li><a href="../endpoints/">Endpoints</a> - Explore todos os endpoints da API</li>
+<li><a href="../authentication/">Autenticação</a> - Aprenda sobre autenticação</li>
+<li><a href="../webhooks/">Webhooks</a> - Aprenda sobre webhooks</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2310 @@
+
+<!doctype html>
+<html lang="pt" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentação NioChat">
+      
+      
+      
+      
+        <link rel="prev" href="../contributing/">
+      
+      
+        <link rel="next" href="../troubleshooting/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+    
+    
+      
+        <title>Estrutura do Projeto - NioChat</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#estrutura-do-projeto" class="md-skip">
+          Pular para conteúdo
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabeçalho">
+    <a href="../.." title="NioChat" class="md-header__button md-logo" aria-label="NioChat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NioChat
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Estrutura do Projeto
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Buscar" placeholder="Buscar" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Pesquisar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpar" aria-label="Limpar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando busca
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navegação" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="NioChat" class="md-nav__button md-logo" aria-label="NioChat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    NioChat
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    NioChat - Sistema de Atendimento WhatsApp
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Changelog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Ai
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Ai
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuração da IA
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Api
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Api
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Autenticação
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Endpoints da API
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/postman-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Guia de Uso do Postman com NioChat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/webhooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Webhooks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/websocket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    WebSocket
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Configuration
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/supabase/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuração do Supabase
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Development
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Development
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contribuindo para o NioChat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Estrutura do Projeto
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Estrutura do Projeto
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#estrutura-geral" class="md-nav__link">
+    <span class="md-ellipsis">
+      Estrutura Geral
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backend-django" class="md-nav__link">
+    <span class="md-ellipsis">
+      Backend (Django)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Backend (Django)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#estrutura-do-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      Estrutura do Backend
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aplicacoes-django" class="md-nav__link">
+    <span class="md-ellipsis">
+      Aplicações Django
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Aplicações Django">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-core-aplicacao-principal" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Core (Aplicação Principal)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-conversations-sistema-de-conversas" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Conversations (Sistema de Conversas)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-integrations-integracoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Integrations (Integrações)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#frontend-react" class="md-nav__link">
+    <span class="md-ellipsis">
+      Frontend (React)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Frontend (React)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#estrutura-do-frontend" class="md-nav__link">
+    <span class="md-ellipsis">
+      Estrutura do Frontend
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#componentes-principais" class="md-nav__link">
+    <span class="md-ellipsis">
+      Componentes Principais
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Componentes Principais">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Dashboard
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-chat" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Chat
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. UI
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuracoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configurações
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configurações">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-django-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Django Settings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-urls-principais" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. URLs Principais
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-configuracao-celery" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Configuração Celery
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modelos-de-dados" class="md-nav__link">
+    <span class="md-ellipsis">
+      Modelos de Dados
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Modelos de Dados">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-core-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Core Models
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-conversation-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Conversation Models
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#apis-e-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      APIs e Endpoints
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="APIs e Endpoints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-core-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Core API
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-conversations-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Conversations API
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#servicos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Serviços
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Serviços">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-openai-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. OpenAI Service
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-supabase-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Supabase Service
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tarefas-celery" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tarefas Celery
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tarefas Celery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-csat-automation" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. CSAT Automation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-background-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Background Tasks
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      WebSocket
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WebSocket">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-consumers" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Consumers
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Routing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-testes-unitarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Testes Unitários
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-testes-de-integracao" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Testes de Integração
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deploy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deploy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deploy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Docker
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-systemd" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Systemd
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#proximos-passos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Próximos Passos
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Installation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Instalação em Desenvolvimento
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/production/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Instalação em Produção
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Overview
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Arquitetura do Sistema
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Funcionalidades
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introdução ao NioChat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Supabase
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            Supabase
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../supabase/integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Integração com Supabase
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Usage
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            Usage
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/interface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Interface do Usuário
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#estrutura-geral" class="md-nav__link">
+    <span class="md-ellipsis">
+      Estrutura Geral
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backend-django" class="md-nav__link">
+    <span class="md-ellipsis">
+      Backend (Django)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Backend (Django)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#estrutura-do-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      Estrutura do Backend
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aplicacoes-django" class="md-nav__link">
+    <span class="md-ellipsis">
+      Aplicações Django
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Aplicações Django">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-core-aplicacao-principal" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Core (Aplicação Principal)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-conversations-sistema-de-conversas" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Conversations (Sistema de Conversas)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-integrations-integracoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Integrations (Integrações)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#frontend-react" class="md-nav__link">
+    <span class="md-ellipsis">
+      Frontend (React)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Frontend (React)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#estrutura-do-frontend" class="md-nav__link">
+    <span class="md-ellipsis">
+      Estrutura do Frontend
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#componentes-principais" class="md-nav__link">
+    <span class="md-ellipsis">
+      Componentes Principais
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Componentes Principais">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Dashboard
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-chat" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Chat
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. UI
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuracoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configurações
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configurações">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-django-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Django Settings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-urls-principais" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. URLs Principais
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-configuracao-celery" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Configuração Celery
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modelos-de-dados" class="md-nav__link">
+    <span class="md-ellipsis">
+      Modelos de Dados
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Modelos de Dados">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-core-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Core Models
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-conversation-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Conversation Models
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#apis-e-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      APIs e Endpoints
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="APIs e Endpoints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-core-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Core API
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-conversations-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Conversations API
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#servicos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Serviços
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Serviços">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-openai-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. OpenAI Service
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-supabase-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Supabase Service
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tarefas-celery" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tarefas Celery
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tarefas Celery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-csat-automation" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. CSAT Automation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-background-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Background Tasks
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      WebSocket
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WebSocket">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-consumers" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Consumers
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Routing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-testes-unitarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Testes Unitários
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-testes-de-integracao" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Testes de Integração
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deploy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deploy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deploy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Docker
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-systemd" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Systemd
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#proximos-passos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Próximos Passos
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="estrutura-do-projeto">Estrutura do Projeto</h1>
+<p>Este documento explica a estrutura do projeto NioChat e como navegar pelo código.</p>
+<h2 id="estrutura-geral">Estrutura Geral</h2>
+<pre><code>niochat/
+├── backend/                 # Django Backend
+│   ├── niochat/           # Configurações Django
+│   ├── core/              # Aplicação principal
+│   ├── conversations/      # Sistema de conversas
+│   ├── integrations/       # Integrações externas
+│   └── requirements.txt    # Dependências Python
+├── frontend/               # React Frontend
+│   └── frontend/           # Aplicação React
+│       ├── src/           # Código fonte
+│       ├── public/        # Arquivos públicos
+│       └── package.json   # Dependências Node.js
+├── docs/                   # Documentação
+├── nginx/                  # Configurações Nginx
+├── systemd/                # Serviços Systemd
+└── scripts/                # Scripts utilitários
+</code></pre>
+<h2 id="backend-django">Backend (Django)</h2>
+<h3 id="estrutura-do-backend">Estrutura do Backend</h3>
+<pre><code>backend/
+├── niochat/                # Configurações Django
+│   ├── __init__.py
+│   ├── settings.py         # Configurações
+│   ├── urls.py            # URLs principais
+│   ├── wsgi.py            # WSGI
+│   ├── asgi.py            # ASGI
+│   └── celery.py          # Configuração Celery
+├── core/                   # Aplicação principal
+│   ├── models.py          # Modelos principais
+│   ├── views.py           # Views principais
+│   ├── serializers.py     # Serializers
+│   ├── urls.py            # URLs da API
+│   ├── openai_service.py  # Serviço OpenAI
+│   ├── supabase_service.py # Serviço Supabase
+│   ├── sgp_client.py      # Cliente SGP
+│   └── uazapi_client.py   # Cliente Uazapi
+├── conversations/          # Sistema de conversas
+│   ├── models.py          # Modelos de conversa
+│   ├── views.py           # Views de conversa
+│   ├── serializers.py     # Serializers
+│   ├── urls.py            # URLs
+│   ├── csat_automation.py # Automação CSAT
+│   ├── csat_service.py    # Serviço CSAT
+│   ├── tasks.py           # Tarefas Celery
+│   └── signals.py         # Signals Django
+├── integrations/           # Integrações
+│   ├── models.py          # Modelos de integração
+│   ├── views.py           # Views de integração
+│   ├── urls.py            # URLs
+│   └── utils.py           # Utilitários
+├── manage.py              # Script de gerenciamento
+└── requirements.txt       # Dependências
+</code></pre>
+<h3 id="aplicacoes-django">Aplicações Django</h3>
+<h4 id="1-core-aplicacao-principal">1. Core (Aplicação Principal)</h4>
+<ul>
+<li><strong>Responsabilidade</strong>: Funcionalidades centrais</li>
+<li><strong>Modelos</strong>: User, Provedor, Canal, Company</li>
+<li><strong>Views</strong>: Autenticação, dashboard, configurações</li>
+<li><strong>Serviços</strong>: OpenAI, Supabase, SGP, Uazapi</li>
+</ul>
+<h4 id="2-conversations-sistema-de-conversas">2. Conversations (Sistema de Conversas)</h4>
+<ul>
+<li><strong>Responsabilidade</strong>: Gerenciamento de conversas</li>
+<li><strong>Modelos</strong>: Conversation, Message, Contact, Inbox</li>
+<li><strong>Views</strong>: CRUD de conversas, mensagens</li>
+<li><strong>Features</strong>: CSAT, transferência, atribuição</li>
+</ul>
+<h4 id="3-integrations-integracoes">3. Integrations (Integrações)</h4>
+<ul>
+<li><strong>Responsabilidade</strong>: Integrações externas</li>
+<li><strong>Modelos</strong>: Integration, Webhook</li>
+<li><strong>Views</strong>: Webhooks, configurações</li>
+<li><strong>Features</strong>: WhatsApp, Telegram, Email</li>
+</ul>
+<h2 id="frontend-react">Frontend (React)</h2>
+<h3 id="estrutura-do-frontend">Estrutura do Frontend</h3>
+<pre><code>frontend/frontend/
+├── src/                    # Código fonte
+│   ├── components/         # Componentes React
+│   │   ├── dashboard/     # Componentes do dashboard
+│   │   ├── chat/          # Componentes de chat
+│   │   ├── ui/            # Componentes UI
+│   │   └── layout/        # Componentes de layout
+│   ├── hooks/             # Custom hooks
+│   ├── services/          # Serviços API
+│   ├── utils/             # Utilitários
+│   ├── context/           # Context API
+│   ├── types/             # TypeScript types
+│   └── App.jsx            # Componente principal
+├── public/                 # Arquivos públicos
+├── package.json           # Dependências
+└── vite.config.js         # Configuração Vite
+</code></pre>
+<h3 id="componentes-principais">Componentes Principais</h3>
+<h4 id="1-dashboard">1. Dashboard</h4>
+<ul>
+<li><strong>DashboardPrincipal</strong>: Dashboard principal</li>
+<li><strong>ConversationAnalysis</strong>: Análise de conversas</li>
+<li><strong>AgentPerformanceTable</strong>: Performance dos agentes</li>
+<li><strong>CSATDashboard</strong>: Dashboard CSAT</li>
+</ul>
+<h4 id="2-chat">2. Chat</h4>
+<ul>
+<li><strong>ConversationList</strong>: Lista de conversas</li>
+<li><strong>ChatInterface</strong>: Interface de chat</li>
+<li><strong>MessageList</strong>: Lista de mensagens</li>
+<li><strong>MessageInput</strong>: Input de mensagem</li>
+</ul>
+<h4 id="3-ui">3. UI</h4>
+<ul>
+<li><strong>Button</strong>: Botão reutilizável</li>
+<li><strong>Modal</strong>: Modal reutilizável</li>
+<li><strong>Table</strong>: Tabela reutilizável</li>
+<li><strong>Form</strong>: Formulário reutilizável</li>
+</ul>
+<h2 id="configuracoes">Configurações</h2>
+<h3 id="1-django-settings">1. Django Settings</h3>
+<pre><code class="language-python"># settings.py
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'rest_framework',
+    'channels',
+    'core',
+    'conversations',
+    'integrations',
+]
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+</code></pre>
+<h3 id="2-urls-principais">2. URLs Principais</h3>
+<pre><code class="language-python"># niochat/urls.py
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/', include('core.urls')),
+    path('api/', include('conversations.urls')),
+    path('api/', include('integrations.urls')),
+    path('webhook/evolution-uazapi/', webhook_evolution_uazapi),
+]
+</code></pre>
+<h3 id="3-configuracao-celery">3. Configuração Celery</h3>
+<pre><code class="language-python"># niochat/celery.py
+from celery import Celery
+from django.conf import settings
+
+app = Celery('niochat')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks()
+</code></pre>
+<h2 id="modelos-de-dados">Modelos de Dados</h2>
+<h3 id="1-core-models">1. Core Models</h3>
+<pre><code class="language-python"># core/models.py
+class Provedor(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class User(AbstractUser):
+    provedor = models.ForeignKey(Provedor, on_delete=models.CASCADE)
+    is_agent = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)
+</code></pre>
+<h3 id="2-conversation-models">2. Conversation Models</h3>
+<pre><code class="language-python"># conversations/models.py
+class Conversation(models.Model):
+    contact = models.ForeignKey(Contact, on_delete=models.CASCADE)
+    provedor = models.ForeignKey(Provedor, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, default='open')
+    assignee = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class Message(models.Model):
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE)
+    content = models.TextField()
+    message_type = models.CharField(max_length=20, default='text')
+    is_from_customer = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+</code></pre>
+<h2 id="apis-e-endpoints">APIs e Endpoints</h2>
+<h3 id="1-core-api">1. Core API</h3>
+<pre><code class="language-python"># core/urls.py
+urlpatterns = [
+    path('auth/login/', CustomAuthToken.as_view()),
+    path('auth/me/', UserMeView.as_view()),
+    path('dashboard/stats/', DashboardStatsView.as_view()),
+    path('atendimento/ia/', AtendimentoIAView.as_view()),
+]
+</code></pre>
+<h3 id="2-conversations-api">2. Conversations API</h3>
+<pre><code class="language-python"># conversations/urls.py
+urlpatterns = [
+    path('conversations/', ConversationViewSet.as_view()),
+    path('messages/', MessageViewSet.as_view()),
+    path('csat/feedbacks/', CSATFeedbackViewSet.as_view()),
+]
+</code></pre>
+<h2 id="servicos">Serviços</h2>
+<h3 id="1-openai-service">1. OpenAI Service</h3>
+<pre><code class="language-python"># core/openai_service.py
+class OpenAIService:
+    def generate_response(self, message, context):
+        # Gerar resposta da IA
+        pass
+
+    def transcribe_audio(self, audio_file):
+        # Transcrever áudio
+        pass
+
+    def analyze_sentiment(self, text):
+        # Analisar sentimento
+        pass
+</code></pre>
+<h3 id="2-supabase-service">2. Supabase Service</h3>
+<pre><code class="language-python"># core/supabase_service.py
+class SupabaseService:
+    def save_conversation(self, data):
+        # Salvar conversa
+        pass
+
+    def save_message(self, data):
+        # Salvar mensagem
+        pass
+
+    def save_csat(self, data):
+        # Salvar CSAT
+        pass
+</code></pre>
+<h2 id="tarefas-celery">Tarefas Celery</h2>
+<h3 id="1-csat-automation">1. CSAT Automation</h3>
+<pre><code class="language-python"># conversations/tasks.py
+@shared_task
+def send_csat_message(csat_request_id):
+    # Enviar mensagem CSAT
+    pass
+
+@shared_task
+def process_csat_response(message_text, conversation_id):
+    # Processar resposta CSAT
+    pass
+</code></pre>
+<h3 id="2-background-tasks">2. Background Tasks</h3>
+<pre><code class="language-python"># conversations/tasks.py
+@shared_task
+def sync_to_supabase():
+    # Sincronizar com Supabase
+    pass
+
+@shared_task
+def cleanup_old_data():
+    # Limpar dados antigos
+    pass
+</code></pre>
+<h2 id="websocket">WebSocket</h2>
+<h3 id="1-consumers">1. Consumers</h3>
+<pre><code class="language-python"># conversations/consumers.py
+class DashboardConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        # Conectar ao WebSocket
+        pass
+
+    async def disconnect(self, close_code):
+        # Desconectar
+        pass
+
+    async def receive(self, text_data):
+        # Receber mensagem
+        pass
+</code></pre>
+<h3 id="2-routing">2. Routing</h3>
+<pre><code class="language-python"># conversations/routing.py
+websocket_urlpatterns = [
+    path('ws/dashboard/', DashboardConsumer.as_asgi()),
+    path('ws/chat/', ChatConsumer.as_asgi()),
+]
+</code></pre>
+<h2 id="testes">Testes</h2>
+<h3 id="1-testes-unitarios">1. Testes Unitários</h3>
+<pre><code class="language-python"># tests/test_models.py
+class ConversationModelTest(TestCase):
+    def test_create_conversation(self):
+        # Testar criação de conversa
+        pass
+</code></pre>
+<h3 id="2-testes-de-integracao">2. Testes de Integração</h3>
+<pre><code class="language-python"># tests/test_api.py
+class ConversationAPITest(APITestCase):
+    def test_list_conversations(self):
+        # Testar API de conversas
+        pass
+</code></pre>
+<h2 id="deploy">Deploy</h2>
+<h3 id="1-docker">1. Docker</h3>
+<pre><code class="language-dockerfile"># Dockerfile.backend
+FROM python:3.12
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+CMD [&quot;python&quot;, &quot;manage.py&quot;, &quot;runserver&quot;, &quot;0.0.0.0:8010&quot;]
+</code></pre>
+<h3 id="2-systemd">2. Systemd</h3>
+<pre><code class="language-ini"># systemd/niochat-backend.service
+[Unit]
+Description=NioChat Backend
+After=network.target
+
+[Service]
+Type=exec
+User=www-data
+WorkingDirectory=/opt/niochat/backend
+ExecStart=/opt/niochat/backend/venv/bin/python manage.py runserver 0.0.0.0:8010
+Restart=always
+</code></pre>
+<h2 id="proximos-passos">Próximos Passos</h2>
+<ol>
+<li><a href="../contributing/">Contribuição</a> - Como contribuir</li>
+<li><a href="../troubleshooting/">Troubleshooting</a> - Resolver problemas</li>
+<li><a href="../../api/endpoints/">API</a> - Explore a API</li>
+<li><a href="../../configuration/supabase/">Configuração</a> - Configure integrações</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>

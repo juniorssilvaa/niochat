@@ -1,0 +1,2710 @@
+
+<!doctype html>
+<html lang="pt" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentação NioChat">
+      
+      
+      
+      
+        <link rel="prev" href="../development/">
+      
+      
+        <link rel="next" href="../../overview/architecture/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+    
+    
+      
+        <title>Instalação em Produção - NioChat</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#instalacao-em-producao" class="md-skip">
+          Pular para conteúdo
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabeçalho">
+    <a href="../.." title="NioChat" class="md-header__button md-logo" aria-label="NioChat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NioChat
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Instalação em Produção
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Buscar" placeholder="Buscar" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Pesquisar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpar" aria-label="Limpar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando busca
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navegação" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="NioChat" class="md-nav__button md-logo" aria-label="NioChat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    NioChat
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    NioChat - Sistema de Atendimento WhatsApp
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Changelog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Ai
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Ai
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuração da IA
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Api
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Api
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Autenticação
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Endpoints da API
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/postman-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Guia de Uso do Postman com NioChat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/webhooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Webhooks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/websocket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    WebSocket
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Configuration
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/supabase/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuração do Supabase
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Development
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Development
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contribuindo para o NioChat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Estrutura do Projeto
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Installation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Instalação em Desenvolvimento
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Instalação em Produção
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Instalação em Produção
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pre-requisitos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pré-requisitos
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pré-requisitos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#servidor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Servidor
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#software" class="md-nav__link">
+    <span class="md-ellipsis">
+      Software
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instalacao-do-sistema" class="md-nav__link">
+    <span class="md-ellipsis">
+      Instalação do Sistema
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Instalação do Sistema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-atualizar-sistema" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Atualizar Sistema
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-instalar-dependencias" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Instalar Dependências
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-configurar-postgresql" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Configurar PostgreSQL
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-configurar-redis-porta-6380" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Configurar Redis (Porta 6380)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-configurar-rabbitmq" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Configurar RabbitMQ
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instalacao-do-niochat" class="md-nav__link">
+    <span class="md-ellipsis">
+      Instalação do NioChat
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Instalação do NioChat">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-clone-do-repositorio" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Clone do Repositório
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-configurar-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Configurar Backend
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-configurar-frontend" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Configurar Frontend
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-configurar-variaveis-de-ambiente" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Configurar Variáveis de Ambiente
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-configurar-django" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Configurar Django
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuracao-do-nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuração do Nginx
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuração do Nginx">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-criar-configuracao" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Criar Configuração
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-ativar-site" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Ativar Site
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuracao-do-ssl" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuração do SSL
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuração do SSL">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-instalar-certbot" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Instalar Certbot
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-obter-certificado" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Obter Certificado
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-renovacao-automatica" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Renovação Automática
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuracao-do-systemd" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuração do Systemd
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuração do Systemd">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-servico-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Serviço Backend
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-servico-celery" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Serviço Celery
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-servico-celery-beat" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Serviço Celery Beat
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-ativar-servicos" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Ativar Serviços
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuracao-do-firewall" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuração do Firewall
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuração do Firewall">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ufw" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. UFW
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-verificar-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Verificar Status
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoramento" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoramento
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoramento">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-logs-do-sistema" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Logs do Sistema
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-logs-do-nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Logs do Nginx
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-logs-da-aplicacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Logs da Aplicação
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Backup
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Backup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-script-de-backup" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Script de Backup
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-tornar-executavel" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Tornar Executável
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-agendar-backup" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Agendar Backup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#atualizacoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Atualizações
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Atualizações">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-script-de-atualizacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Script de Atualização
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-tornar-executavel_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Tornar Executável
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verificacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verificação
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verificação">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-status-dos-servicos" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Status dos Serviços
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-teste-de-conectividade" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Teste de Conectividade
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-teste-de-websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Teste de WebSocket
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#problemas-comuns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Problemas Comuns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Problemas Comuns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-servico-nao-inicia" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Serviço não inicia
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-erro-de-permissao" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Erro de permissão
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-erro-de-banco-de-dados" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Erro de banco de dados
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-erro-de-redis" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Erro de Redis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-erro-de-rabbitmq" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Erro de RabbitMQ
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-erro-de-nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Erro de Nginx
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logs-importantes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logs Importantes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#proximos-passos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Próximos Passos
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Overview
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Arquitetura do Sistema
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Funcionalidades
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introdução ao NioChat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Supabase
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            Supabase
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../supabase/integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Integração com Supabase
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Usage
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            Usage
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/interface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Interface do Usuário
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pre-requisitos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pré-requisitos
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pré-requisitos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#servidor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Servidor
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#software" class="md-nav__link">
+    <span class="md-ellipsis">
+      Software
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instalacao-do-sistema" class="md-nav__link">
+    <span class="md-ellipsis">
+      Instalação do Sistema
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Instalação do Sistema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-atualizar-sistema" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Atualizar Sistema
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-instalar-dependencias" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Instalar Dependências
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-configurar-postgresql" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Configurar PostgreSQL
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-configurar-redis-porta-6380" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Configurar Redis (Porta 6380)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-configurar-rabbitmq" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Configurar RabbitMQ
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instalacao-do-niochat" class="md-nav__link">
+    <span class="md-ellipsis">
+      Instalação do NioChat
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Instalação do NioChat">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-clone-do-repositorio" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Clone do Repositório
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-configurar-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Configurar Backend
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-configurar-frontend" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Configurar Frontend
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-configurar-variaveis-de-ambiente" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Configurar Variáveis de Ambiente
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-configurar-django" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Configurar Django
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuracao-do-nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuração do Nginx
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuração do Nginx">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-criar-configuracao" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Criar Configuração
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-ativar-site" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Ativar Site
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuracao-do-ssl" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuração do SSL
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuração do SSL">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-instalar-certbot" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Instalar Certbot
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-obter-certificado" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Obter Certificado
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-renovacao-automatica" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Renovação Automática
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuracao-do-systemd" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuração do Systemd
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuração do Systemd">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-servico-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Serviço Backend
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-servico-celery" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Serviço Celery
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-servico-celery-beat" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Serviço Celery Beat
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-ativar-servicos" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Ativar Serviços
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuracao-do-firewall" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuração do Firewall
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuração do Firewall">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ufw" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. UFW
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-verificar-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Verificar Status
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoramento" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoramento
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoramento">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-logs-do-sistema" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Logs do Sistema
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-logs-do-nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Logs do Nginx
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-logs-da-aplicacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Logs da Aplicação
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Backup
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Backup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-script-de-backup" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Script de Backup
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-tornar-executavel" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Tornar Executável
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-agendar-backup" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Agendar Backup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#atualizacoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Atualizações
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Atualizações">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-script-de-atualizacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Script de Atualização
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-tornar-executavel_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Tornar Executável
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verificacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verificação
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verificação">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-status-dos-servicos" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Status dos Serviços
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-teste-de-conectividade" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Teste de Conectividade
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-teste-de-websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Teste de WebSocket
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#problemas-comuns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Problemas Comuns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Problemas Comuns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-servico-nao-inicia" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Serviço não inicia
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-erro-de-permissao" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Erro de permissão
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-erro-de-banco-de-dados" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Erro de banco de dados
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-erro-de-redis" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Erro de Redis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-erro-de-rabbitmq" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Erro de RabbitMQ
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-erro-de-nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Erro de Nginx
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logs-importantes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logs Importantes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#proximos-passos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Próximos Passos
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="instalacao-em-producao">Instalação em Produção</h1>
+<p>Este guia explica como instalar e configurar o NioChat em um ambiente de produção.</p>
+<h2 id="pre-requisitos">Pré-requisitos</h2>
+<h3 id="servidor">Servidor</h3>
+<ul>
+<li><strong>Sistema Operacional</strong>: Ubuntu 20.04+ ou CentOS 8+</li>
+<li><strong>RAM</strong>: Mínimo 4GB, recomendado 8GB+</li>
+<li><strong>CPU</strong>: Mínimo 2 cores, recomendado 4 cores+</li>
+<li><strong>Disco</strong>: Mínimo 50GB, recomendado 100GB+</li>
+<li><strong>Rede</strong>: Conexão estável com internet</li>
+</ul>
+<h3 id="software">Software</h3>
+<ul>
+<li><strong>Python</strong>: 3.8+</li>
+<li><strong>Node.js</strong>: 16+</li>
+<li><strong>PostgreSQL</strong>: 12+</li>
+<li><strong>Redis</strong>: 6+</li>
+<li><strong>Nginx</strong>: 1.18+</li>
+<li><strong>Docker</strong>: 20+ (opcional)</li>
+</ul>
+<h2 id="instalacao-do-sistema">Instalação do Sistema</h2>
+<h3 id="1-atualizar-sistema">1. Atualizar Sistema</h3>
+<pre><code class="language-bash">sudo apt update &amp;&amp; sudo apt upgrade -y
+</code></pre>
+<h3 id="2-instalar-dependencias">2. Instalar Dependências</h3>
+<pre><code class="language-bash">sudo apt install -y python3 python3-pip python3-venv nodejs npm postgresql redis-server nginx git
+</code></pre>
+<h3 id="3-configurar-postgresql">3. Configurar PostgreSQL</h3>
+<pre><code class="language-bash">sudo -u postgres psql
+</code></pre>
+<pre><code class="language-sql">CREATE DATABASE niochat;
+CREATE USER niochat WITH PASSWORD 'senha_segura';
+GRANT ALL PRIVILEGES ON DATABASE niochat TO niochat;
+\q
+</code></pre>
+<h3 id="4-configurar-redis-porta-6380">4. Configurar Redis (Porta 6380)</h3>
+<pre><code class="language-bash">sudo systemctl enable redis-server
+sudo systemctl start redis-server
+
+# Configurar porta 6380 e senha
+sudo nano /etc/redis/redis.conf
+# Adicionar:
+# port 6380
+# requirepass SUA_SENHA_REDIS
+# bind 0.0.0.0
+
+sudo systemctl restart redis-server
+</code></pre>
+<h3 id="5-configurar-rabbitmq">5. Configurar RabbitMQ</h3>
+<pre><code class="language-bash">sudo apt install rabbitmq-server
+sudo systemctl enable rabbitmq-server
+sudo systemctl start rabbitmq-server
+
+# Configurar usuário e senha
+sudo rabbitmqctl add_user admin SUA_SENHA_RABBITMQ
+sudo rabbitmqctl set_user_tags admin administrator
+sudo rabbitmqctl set_permissions -p / admin &quot;.*&quot; &quot;.*&quot; &quot;.*&quot;
+</code></pre>
+<h2 id="instalacao-do-niochat">Instalação do NioChat</h2>
+<h3 id="1-clone-do-repositorio">1. Clone do Repositório</h3>
+<pre><code class="language-bash">cd /opt
+sudo git clone https://github.com/juniorssilvaa/niochat.git
+sudo chown -R $USER:$USER niochat
+cd niochat
+</code></pre>
+<h3 id="2-configurar-backend">2. Configurar Backend</h3>
+<pre><code class="language-bash">cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+</code></pre>
+<h3 id="3-configurar-frontend">3. Configurar Frontend</h3>
+<pre><code class="language-bash">cd frontend/frontend
+npm install
+npm run build
+</code></pre>
+<h3 id="4-configurar-variaveis-de-ambiente">4. Configurar Variáveis de Ambiente</h3>
+<pre><code class="language-bash">sudo nano /opt/niochat/backend/.env
+</code></pre>
+<pre><code class="language-env"># Django
+DEBUG=False
+SECRET_KEY=sua_chave_secreta_aqui
+ALLOWED_HOSTS=seu-dominio.com,www.seu-dominio.com
+
+# Banco de Dados
+DATABASE_URL=postgresql://niochat:senha_segura@localhost:5432/niochat
+
+# Redis (porta 6380)
+REDIS_URL=redis://:SUA_SENHA_REDIS@154.38.176.17:6380/0
+REDIS_HOST=154.38.176.17
+REDIS_PORT=6380
+REDIS_PASSWORD=SUA_SENHA_REDIS
+
+# RabbitMQ (para Celery broker)
+CELERY_BROKER_URL=amqp://admin:SUA_SENHA_RABBITMQ@154.38.176.17:5672
+CELERY_RESULT_BACKEND=redis://:SUA_SENHA_REDIS@154.38.176.17:6380/0
+CELERY_RESULT_EXPIRES=300
+CELERY_TASK_IGNORE_RESULT=False
+
+# OpenAI
+OPENAI_API_KEY=sua_chave_openai
+
+# Supabase
+SUPABASE_URL=sua_url_supabase
+SUPABASE_ANON_KEY=sua_chave_supabase
+
+# Uazapi
+UAZAPI_URL=https://seu-provedor.uazapi.com
+UAZAPI_TOKEN=seu_token_uazapi
+
+# Email
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=seu-email@gmail.com
+EMAIL_HOST_PASSWORD=sua_senha_app
+
+# Webhook
+WEBHOOK_SECRET=seu_secret_webhook
+</code></pre>
+<h3 id="5-configurar-django">5. Configurar Django</h3>
+<pre><code class="language-bash">cd /opt/niochat/backend
+source venv/bin/activate
+python manage.py migrate
+python manage.py collectstatic --noinput
+python manage.py createsuperuser
+</code></pre>
+<h2 id="configuracao-do-nginx">Configuração do Nginx</h2>
+<h3 id="1-criar-configuracao">1. Criar Configuração</h3>
+<pre><code class="language-bash">sudo nano /etc/nginx/sites-available/niochat
+</code></pre>
+<pre><code class="language-nginx">server {
+    listen 80;
+    server_name seu-dominio.com www.seu-dominio.com;
+
+    # Redirecionar para HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name seu-dominio.com www.seu-dominio.com;
+
+    # SSL
+    ssl_certificate /etc/letsencrypt/live/seu-dominio.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/seu-dominio.com/privkey.pem;
+
+    # Frontend
+    location / {
+        root /opt/niochat/frontend/frontend/dist;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Backend API
+    location /api/ {
+        proxy_pass http://127.0.0.1:8010;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # WebSocket
+    location /ws/ {
+        proxy_pass http://127.0.0.1:8010;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection &quot;upgrade&quot;;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Webhooks
+    location /webhook/ {
+        proxy_pass http://127.0.0.1:8010;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Admin
+    location /admin/ {
+        proxy_pass http://127.0.0.1:8010;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+</code></pre>
+<h3 id="2-ativar-site">2. Ativar Site</h3>
+<pre><code class="language-bash">sudo ln -s /etc/nginx/sites-available/niochat /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+</code></pre>
+<h2 id="configuracao-do-ssl">Configuração do SSL</h2>
+<h3 id="1-instalar-certbot">1. Instalar Certbot</h3>
+<pre><code class="language-bash">sudo apt install certbot python3-certbot-nginx
+</code></pre>
+<h3 id="2-obter-certificado">2. Obter Certificado</h3>
+<pre><code class="language-bash">sudo certbot --nginx -d seu-dominio.com -d www.seu-dominio.com
+</code></pre>
+<h3 id="3-renovacao-automatica">3. Renovação Automática</h3>
+<pre><code class="language-bash">sudo crontab -e
+</code></pre>
+<pre><code class="language-cron">0 12 * * * /usr/bin/certbot renew --quiet
+</code></pre>
+<h2 id="configuracao-do-systemd">Configuração do Systemd</h2>
+<h3 id="1-servico-backend">1. Serviço Backend</h3>
+<pre><code class="language-bash">sudo nano /etc/systemd/system/niochat-backend.service
+</code></pre>
+<pre><code class="language-ini">[Unit]
+Description=NioChat Backend
+After=network.target
+
+[Service]
+Type=exec
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/niochat/backend
+Environment=PATH=/opt/niochat/backend/venv/bin
+ExecStart=/opt/niochat/backend/venv/bin/python manage.py runserver 0.0.0.0:8010
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<h3 id="2-servico-celery">2. Serviço Celery</h3>
+<pre><code class="language-bash">sudo nano /etc/systemd/system/niochat-celery.service
+</code></pre>
+<pre><code class="language-ini">[Unit]
+Description=NioChat Celery Worker
+After=network.target
+
+[Service]
+Type=exec
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/niochat/backend
+Environment=PATH=/opt/niochat/backend/venv/bin
+ExecStart=/opt/niochat/backend/venv/bin/celery -A niochat worker -l info
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<h3 id="3-servico-celery-beat">3. Serviço Celery Beat</h3>
+<pre><code class="language-bash">sudo nano /etc/systemd/system/niochat-celery-beat.service
+</code></pre>
+<pre><code class="language-ini">[Unit]
+Description=NioChat Celery Beat
+After=network.target
+
+[Service]
+Type=exec
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/niochat/backend
+Environment=PATH=/opt/niochat/backend/venv/bin
+ExecStart=/opt/niochat/backend/venv/bin/celery -A niochat beat -l info
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<h3 id="4-ativar-servicos">4. Ativar Serviços</h3>
+<pre><code class="language-bash">sudo systemctl daemon-reload
+sudo systemctl enable niochat-backend
+sudo systemctl enable niochat-celery
+sudo systemctl enable niochat-celery-beat
+sudo systemctl start niochat-backend
+sudo systemctl start niochat-celery
+sudo systemctl start niochat-celery-beat
+</code></pre>
+<h2 id="configuracao-do-firewall">Configuração do Firewall</h2>
+<h3 id="1-ufw">1. UFW</h3>
+<pre><code class="language-bash">sudo ufw allow 22
+sudo ufw allow 80
+sudo ufw allow 443
+sudo ufw enable
+</code></pre>
+<h3 id="2-verificar-status">2. Verificar Status</h3>
+<pre><code class="language-bash">sudo ufw status
+</code></pre>
+<h2 id="monitoramento">Monitoramento</h2>
+<h3 id="1-logs-do-sistema">1. Logs do Sistema</h3>
+<pre><code class="language-bash">sudo journalctl -u niochat-backend -f
+sudo journalctl -u niochat-celery -f
+sudo journalctl -u niochat-celery-beat -f
+</code></pre>
+<h3 id="2-logs-do-nginx">2. Logs do Nginx</h3>
+<pre><code class="language-bash">sudo tail -f /var/log/nginx/access.log
+sudo tail -f /var/log/nginx/error.log
+</code></pre>
+<h3 id="3-logs-da-aplicacao">3. Logs da Aplicação</h3>
+<pre><code class="language-bash">sudo tail -f /opt/niochat/backend/logs/django.log
+sudo tail -f /opt/niochat/backend/logs/celery.log
+</code></pre>
+<h2 id="backup">Backup</h2>
+<h3 id="1-script-de-backup">1. Script de Backup</h3>
+<pre><code class="language-bash">sudo nano /opt/niochat/backup.sh
+</code></pre>
+<pre><code class="language-bash">#!/bin/bash
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_DIR=&quot;/opt/backups&quot;
+DB_NAME=&quot;niochat&quot;
+DB_USER=&quot;niochat&quot;
+DB_PASS=&quot;senha_segura&quot;
+
+# Criar diretório de backup
+mkdir -p $BACKUP_DIR
+
+# Backup do banco de dados
+pg_dump -h localhost -U $DB_USER -d $DB_NAME &gt; $BACKUP_DIR/db_$DATE.sql
+
+# Backup dos arquivos
+tar -czf $BACKUP_DIR/files_$DATE.tar.gz /opt/niochat
+
+# Remover backups antigos (manter 7 dias)
+find $BACKUP_DIR -name &quot;*.sql&quot; -mtime +7 -delete
+find $BACKUP_DIR -name &quot;*.tar.gz&quot; -mtime +7 -delete
+
+echo &quot;Backup concluído: $DATE&quot;
+</code></pre>
+<h3 id="2-tornar-executavel">2. Tornar Executável</h3>
+<pre><code class="language-bash">sudo chmod +x /opt/niochat/backup.sh
+</code></pre>
+<h3 id="3-agendar-backup">3. Agendar Backup</h3>
+<pre><code class="language-bash">sudo crontab -e
+</code></pre>
+<pre><code class="language-cron">0 2 * * * /opt/niochat/backup.sh
+</code></pre>
+<h2 id="atualizacoes">Atualizações</h2>
+<h3 id="1-script-de-atualizacao">1. Script de Atualização</h3>
+<pre><code class="language-bash">sudo nano /opt/niochat/update.sh
+</code></pre>
+<pre><code class="language-bash">#!/bin/bash
+cd /opt/niochat
+
+# Backup antes da atualização
+./backup.sh
+
+# Parar serviços
+sudo systemctl stop niochat-backend
+sudo systemctl stop niochat-celery
+sudo systemctl stop niochat-celery-beat
+
+# Atualizar código
+git pull origin main
+
+# Atualizar dependências
+cd backend
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Migrações
+python manage.py migrate
+python manage.py collectstatic --noinput
+
+# Rebuild frontend
+cd ../frontend/frontend
+npm install
+npm run build
+
+# Reiniciar serviços
+sudo systemctl start niochat-backend
+sudo systemctl start niochat-celery
+sudo systemctl start niochat-celery-beat
+
+echo &quot;Atualização concluída&quot;
+</code></pre>
+<h3 id="2-tornar-executavel_1">2. Tornar Executável</h3>
+<pre><code class="language-bash">sudo chmod +x /opt/niochat/update.sh
+</code></pre>
+<h2 id="verificacao">Verificação</h2>
+<h3 id="1-status-dos-servicos">1. Status dos Serviços</h3>
+<pre><code class="language-bash">sudo systemctl status niochat-backend
+sudo systemctl status niochat-celery
+sudo systemctl status niochat-celery-beat
+</code></pre>
+<h3 id="2-teste-de-conectividade">2. Teste de Conectividade</h3>
+<pre><code class="language-bash">curl -I https://seu-dominio.com
+curl -I https://seu-dominio.com/api/health/
+</code></pre>
+<h3 id="3-teste-de-websocket">3. Teste de WebSocket</h3>
+<pre><code class="language-javascript">const ws = new WebSocket('wss://seu-dominio.com/ws/dashboard/');
+ws.onopen = () =&gt; console.log('WebSocket conectado');
+</code></pre>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="problemas-comuns">Problemas Comuns</h3>
+<h4 id="1-servico-nao-inicia">1. Serviço não inicia</h4>
+<pre><code class="language-bash">sudo journalctl -u niochat-backend --no-pager
+</code></pre>
+<h4 id="2-erro-de-permissao">2. Erro de permissão</h4>
+<pre><code class="language-bash">sudo chown -R www-data:www-data /opt/niochat
+</code></pre>
+<h4 id="3-erro-de-banco-de-dados">3. Erro de banco de dados</h4>
+<pre><code class="language-bash">sudo -u postgres psql -d niochat -c &quot;SELECT * FROM django_migrations;&quot;
+</code></pre>
+<h4 id="4-erro-de-redis">4. Erro de Redis</h4>
+<pre><code class="language-bash">redis-cli -h 154.38.176.17 -p 6380 -a SUA_SENHA_REDIS ping
+</code></pre>
+<h4 id="5-erro-de-rabbitmq">5. Erro de RabbitMQ</h4>
+<pre><code class="language-bash">sudo systemctl status rabbitmq-server
+rabbitmqctl status
+</code></pre>
+<h4 id="6-erro-de-nginx">6. Erro de Nginx</h4>
+<pre><code class="language-bash">sudo nginx -t
+sudo systemctl reload nginx
+</code></pre>
+<h3 id="logs-importantes">Logs Importantes</h3>
+<pre><code class="language-bash"># Django
+tail -f /opt/niochat/backend/logs/django.log
+
+# Celery
+tail -f /opt/niochat/backend/logs/celery.log
+
+# Nginx
+tail -f /var/log/nginx/error.log
+
+# Sistema
+journalctl -u niochat-backend -f
+</code></pre>
+<h2 id="proximos-passos">Próximos Passos</h2>
+<ol>
+<li><a href="configuration/supabase.md">Configuração</a> - Configure integrações</li>
+<li><a href="usage/interface.md">Uso</a> - Aprenda a usar o sistema</li>
+<li><a href="api/endpoints.md">API</a> - Explore a API</li>
+<li><a href="development/troubleshooting.md">Troubleshooting</a> - Resolva problemas</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>

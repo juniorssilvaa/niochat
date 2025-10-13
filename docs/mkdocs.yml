@@ -1,0 +1,9 @@
+site_name: NioChat
+site_description: Documentação NioChat
+docs_dir: docs_content
+
+theme:
+  name: material
+  language: pt-BR
+plugins:
+  - search
