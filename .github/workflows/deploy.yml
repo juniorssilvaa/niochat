@@ -85,7 +85,7 @@ jobs:
     - name: Build documentation
       run: |
         cd docs
-        pip install mkdocs mkdocs-material mkdocs-minify-plugin mkdocs-git-revision-date-localized-plugin
+        pip install mkdocs mkdocs-material mkdocs-bootswatch mkdocs-minify-plugin mkdocs-git-revision-date-localized-plugin
         # Garantir mkdocs.yml mínimo para não falhar em repositórios sem config
         if [ ! -f mkdocs.yml ]; then
           printf "%b" "site_name: NioChat\nsite_description: Documentação gerada automaticamente no CI quando ausente\ndocs_dir: docs_content\n\ntheme:\n  name: material\n  language: pt-BR\nplugins:\n  - search\n" > mkdocs.yml
