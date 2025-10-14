@@ -5,6 +5,48 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [2.4.0] - 2025-10-14
+
+### Corrigido
+- **Frontend**: Mapeamento de dados entre backend e frontend no Recuperador de Conversas
+- **API**: Conversão correta de `provedorId` string para número na requisição
+- **Dashboard**: Cards agora exibem dados corretos (tentativas, recuperadas, pendentes, taxa de conversão)
+- **Termômetro**: Animação funciona corretamente com dados reais do backend
+- **Mapeamento de Campos**: Backend `total_attempts` → Frontend `totalAttempts`
+- **Mapeamento de Campos**: Backend `successful_recoveries` → Frontend `successfulRecoveries`
+- **Mapeamento de Campos**: Backend `pending_recoveries` → Frontend `pendingRecoveries`
+- **Mapeamento de Campos**: Backend `conversion_rate` → Frontend `conversionRate`
+
+### Melhorado
+- **Frontend**: Remoção de logs de debug desnecessários
+- **Código**: Limpeza e organização do código do componente ConversationRecovery
+- **Documentação**: Atualização completa da documentação MkDocs com endpoints de recuperação
+- **README**: Seção detalhada sobre o Recuperador de Conversas com configurações e funcionalidades
+
+## [2.3.0] - 2025-10-13
+
+### Adicionado
+- **🔄 Recuperador de Conversas**: Nova funcionalidade para recuperação automática de vendas
+- **🤖 Análise Inteligente**: IA analisa conversas encerradas para identificar clientes interessados
+- **📊 Dashboard Visual**: Termômetro animado de vendas recuperadas com porcentagem central
+- **⚙️ Configurações Flexíveis**: Delay, tentativas máximas e critérios de análise personalizáveis
+- **🔒 Isolamento por Provedor**: Cada provedor vê apenas seus dados de recuperação
+- **📱 Mensagens Personalizadas**: IA gera mensagens de recuperação baseadas na análise da conversa
+- **📈 Métricas Detalhadas**: Estatísticas de tentativas, recuperações e taxa de conversão
+- **🎯 Processamento em Lote**: Análise e envio automático para múltiplos clientes
+- **📋 API Completa**: Endpoints para estatísticas, análise, campanhas e configurações
+- **🛠️ Comando Django**: `python manage.py run_recovery_analysis` para execução manual
+
+### Melhorado
+- **Frontend**: Interface responsiva com animações suaves no termômetro
+- **Backend**: Sistema robusto de recuperação com verificações de segurança
+- **Documentação**: README e API docs atualizados com nova funcionalidade
+
+### Corrigido
+- **Frontend**: Erro `TypeError: Cannot read properties of undefined` no dashboard
+- **Verificações de Segurança**: Todos os acessos a objetos usam optional chaining (`?.`)
+- **Renderização**: Verificações de existência antes de renderizar componentes
+
 ## [2.2.0] - 2025-10-11
 
 ### Adicionado

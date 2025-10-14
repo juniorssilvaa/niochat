@@ -512,20 +512,161 @@ Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
 
 ### Estatísticas de Recuperação
 ```http
-GET /api/recovery/stats/
-Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+GET /api/recovery/stats/?provedor_id=1
+Authorization: Token 4e071cf2d18dc4e7e1f170610e4253cb651b1ec8
+Content-Type: application/json
+```
+
+**Resposta:**
+```json
+{
+  "stats": {
+    "total_attempts": 1,
+    "successful_recoveries": 0,
+    "pending_recoveries": 1,
+    "conversion_rate": 0.0,
+    "recent_activities": [
+      {
+        "id": 1,
+        "contact_name": "Junior",
+        "phone": "556392484773",
+        "status": "sent",
+        "message_sent": true,
+        "sent_at": "2025-10-13T20:20:41.083560+00:00",
+        "recovery_reason": "Cliente demonstrou interesse nos planos",
+        "attempt_number": 1
+      }
+    ]
+  },
+  "conversations": [
+    {
+      "id": 1,
+      "contact_name": "Junior",
+      "phone": "556392484773",
+      "status": "sent",
+      "message_sent": true,
+      "sent_at": "2025-10-13T20:20:41.083560+00:00",
+      "recovery_reason": "Cliente demonstrou interesse nos planos",
+      "attempt_number": 1
+    }
+  ]
+}
+```
+
+### Analisar Conversas para Recuperação
+```http
+POST /api/recovery/analyze/
+Authorization: Token 4e071cf2d18dc4e7e1f170610e4253cb651b1ec8
+Content-Type: application/json
+
+{
+  "days_back": 7
+}
+```
+
+**Resposta:**
+```json
+[
+  {
+    "conversation_id": 85,
+    "contact_phone": "556392484773",
+    "contact_name": "Junior",
+    "last_message_date": "2025-10-13T20:20:41.083560+00:00",
+    "analysis": {
+      "has_potential": true,
+      "interest_level": "medio",
+      "barriers": [],
+      "reason": "Cliente demonstrou interesse nos planos",
+      "suggested_approach": "Abordar com simulação personalizada"
+    },
+    "recovery_reason": "Cliente demonstrou interesse nos planos",
+    "provider_id": 1
+  }
+]
+```
+
+### Enviar Campanha de Recuperação
+```http
+POST /api/recovery/campaign/
+Authorization: Token 4e071cf2d18dc4e7e1f170610e4253cb651b1ec8
+Content-Type: application/json
+
+{
+  "days_back": 7
+}
+```
+
+**Resposta:**
+```json
+{
+  "total_analyzed": 1,
+  "messages_sent": 1,
+  "successful_sends": 1,
+  "failed_sends": 0,
+  "details": [
+    {
+      "contact": "Junior",
+      "phone": "556392484773",
+      "message_sent": true,
+      "recovery_reason": "Cliente demonstrou interesse nos planos",
+      "attempt_id": 1
+    }
+  ]
+}
 ```
 
 ### Configurações de Recuperação
 ```http
-POST /api/recovery/settings/{provedor_id}/
-Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+GET /api/recovery/settings/
+Authorization: Token 4e071cf2d18dc4e7e1f170610e4253cb651b1ec8
+```
+
+**Resposta:**
+```json
+{
+  "recovery_enabled": true,
+  "max_attempts": 3,
+  "delay_minutes": 30,
+  "auto_analyze": true,
+  "analysis_days": 7,
+  "working_hours": {
+    "start": "08:00",
+    "end": "18:00"
+  },
+  "analysis_criteria": {
+    "interest_keywords": ["plano", "internet", "velocidade", "preço"],
+    "negative_keywords": ["não quero", "não preciso", "cancelar"],
+    "min_conversation_length": 3
+  }
+}
+```
+
+### Atualizar Configurações de Recuperação
+```http
+PUT /api/recovery/settings/update/
+Authorization: Token 4e071cf2d18dc4e7e1f170610e4253cb651b1ec8
 Content-Type: application/json
 
 {
-  "enabled": true,
-  "auto_recovery": true,
-  "recovery_interval": 30
+  "recovery_enabled": true,
+  "max_attempts": 3,
+  "delay_minutes": 30,
+  "auto_analyze": true,
+  "analysis_days": 7
+}
+```
+
+**Resposta:**
+```json
+{
+  "message": "Configurações atualizadas com sucesso",
+  "settings": {
+    "recovery_enabled": true,
+    "max_attempts": 3,
+    "delay_minutes": 30,
+    "auto_analyze": true,
+    "analysis_days": 7
+  }
 }
 ```
 
@@ -1062,6 +1203,168 @@ A IA executa automaticamente as seguintes funções:
     "cpf_cnpj": "123.456.789-00",
     "motivo": "Sem internet",
     "sintomas": "LED vermelho piscando"
+  }
+}
+```
+
+## Recuperador de Vendas
+
+### Estatísticas de Recuperação
+```http
+GET /api/recovery/stats/?provedor_id=1
+Authorization: Token 4e071cf2d18dc4e7e1f170610e4253cb651b1ec8
+Content-Type: application/json
+```
+
+**Resposta:**
+```json
+{
+  "stats": {
+    "total_attempts": 2,
+    "successful_recoveries": 1,
+    "pending_recoveries": 1,
+    "conversion_rate": 50.0,
+    "recent_activities": [
+      {
+        "id": 2,
+        "contact_name": "Junior",
+        "phone": "556392484773",
+        "status": "recovered",
+        "message_sent": true,
+        "sent_at": "2025-10-14T02:53:26.802611+00:00",
+        "recovery_reason": "Cliente demonstrou interesse nos planos",
+        "attempt_number": 2
+      }
+    ]
+  },
+  "conversations": [
+    {
+      "id": 2,
+      "contact_name": "Junior",
+      "phone": "556392484773",
+      "status": "recovered",
+      "message_sent": true,
+      "sent_at": "2025-10-14T02:53:26.802611+00:00",
+      "recovery_reason": "Cliente demonstrou interesse nos planos",
+      "attempt_number": 2
+    }
+  ]
+}
+```
+
+### Analisar Conversas para Recuperação
+```http
+POST /api/recovery/analyze/
+Authorization: Token 4e071cf2d18dc4e7e1f170610e4253cb651b1ec8
+Content-Type: application/json
+
+{
+  "days_back": 7
+}
+```
+
+**Resposta:**
+```json
+[
+  {
+    "conversation_id": 85,
+    "contact_phone": "556392484773",
+    "contact_name": "Junior",
+    "last_message_date": "2025-10-13T20:20:41.083560+00:00",
+    "analysis": {
+      "has_potential": true,
+      "interest_level": "medio",
+      "barriers": [],
+      "reason": "Cliente demonstrou interesse nos planos",
+      "suggested_approach": "Abordar com simulação personalizada"
+    },
+    "recovery_reason": "Cliente demonstrou interesse nos planos",
+    "provider_id": 1
+  }
+]
+```
+
+### Enviar Campanha de Recuperação
+```http
+POST /api/recovery/campaign/
+Authorization: Token 4e071cf2d18dc4e7e1f170610e4253cb651b1ec8
+Content-Type: application/json
+
+{
+  "days_back": 7
+}
+```
+
+**Resposta:**
+```json
+{
+  "total_analyzed": 1,
+  "messages_sent": 1,
+  "successful_sends": 1,
+  "failed_sends": 0,
+  "details": [
+    {
+      "contact": "Junior",
+      "phone": "556392484773",
+      "message_sent": true,
+      "recovery_reason": "Cliente demonstrou interesse nos planos",
+      "attempt_id": 1
+    }
+  ]
+}
+```
+
+### Configurações de Recuperação
+```http
+GET /api/recovery/settings/
+Authorization: Token 4e071cf2d18dc4e7e1f170610e4253cb651b1ec8
+```
+
+**Resposta:**
+```json
+{
+  "recovery_enabled": true,
+  "max_attempts": 3,
+  "delay_minutes": 30,
+  "auto_analyze": true,
+  "analysis_days": 7,
+  "working_hours": {
+    "start": "08:00",
+    "end": "18:00"
+  },
+  "analysis_criteria": {
+    "interest_keywords": ["plano", "internet", "velocidade", "preço"],
+    "negative_keywords": ["não quero", "não preciso", "cancelar"],
+    "min_conversation_length": 3
+  }
+}
+```
+
+### Atualizar Configurações de Recuperação
+```http
+PUT /api/recovery/settings/update/
+Authorization: Token 4e071cf2d18dc4e7e1f170610e4253cb651b1ec8
+Content-Type: application/json
+
+{
+  "recovery_enabled": true,
+  "max_attempts": 3,
+  "delay_minutes": 30,
+  "auto_analyze": true,
+  "analysis_days": 7
+}
+```
+
+**Resposta:**
+```json
+{
+  "message": "Configurações atualizadas com sucesso",
+  "settings": {
+    "recovery_enabled": true,
+    "max_attempts": 3,
+    "delay_minutes": 30,
+    "auto_analyze": true,
+    "analysis_days": 7
   }
 }
 ```

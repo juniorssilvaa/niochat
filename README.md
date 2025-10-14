@@ -10,6 +10,7 @@ Sistema completo de atendimento via WhatsApp com IA inteligente, integração SG
 - **Transcrição de Áudio**: Conversão automática de voz para texto
 - **Function Calls**: Execução automática de ações no SGP
 - **Personalização**: IA única para cada provedor
+- **Recuperação de Vendas**: IA analisa conversas e reativa clientes interessados
 
 ### 📱 WhatsApp Completo
 - **Uazapi/Evolution API**: Integração nativa
@@ -29,6 +30,19 @@ Sistema completo de atendimento via WhatsApp com IA inteligente, integração SG
 - **Equipes**: Organização por equipes
 - **Transferência Inteligente**: Entre agentes e equipes
 
+### 🔄 Recuperador de Conversas (NOVO!)
+- **🤖 Análise Inteligente**: IA analisa conversas encerradas para identificar clientes interessados em planos
+- **📱 Reativação Automática**: Envia mensagens personalizadas via WhatsApp para recuperar vendas perdidas
+- **📊 Dashboard Visual**: Termômetro animado com taxa de conversão e estatísticas em tempo real
+- **🔒 Isolamento por Provedor**: Cada provedor vê apenas seus dados de recuperação
+- **⚙️ Configurações Flexíveis**: 
+  - Delay configurável (minutos de inatividade)
+  - Número máximo de tentativas
+  - Palavras-chave de interesse personalizáveis
+  - Horários de funcionamento
+- **📈 Métricas Detalhadas**: Tentativas, recuperações, taxa de conversão e atividades recentes
+- **🎯 Processamento Inteligente**: Só ativa quando cliente menciona planos e conversa não está atribuída
+
 ## 🏗️ Arquitetura
 
 ```
@@ -47,6 +61,28 @@ Auditoria ←→ Celery ←→ SGP System
 3. **Dados salvos** → Supabase (conversas, contatos, mensagens, CSAT)
 4. **Dashboard atualiza** → Frontend via API REST
 5. **CSAT automático** → 1.5min após fechamento → IA interpreta feedback
+6. **🔄 Recuperador de Vendas** → IA analisa conversas → Identifica interesse → Envia mensagem personalizada
+
+## 🔄 Recuperador de Conversas - Nova Funcionalidade
+
+### Como Funciona
+1. **Análise Automática**: IA analisa conversas encerradas em busca de clientes que demonstraram interesse em planos
+2. **Identificação Inteligente**: Detecta palavras-chave como "plano", "internet", "velocidade", "preço"
+3. **Reativação Personalizada**: Envia mensagem personalizada via WhatsApp para recuperar a venda
+4. **Acompanhamento**: Dashboard mostra estatísticas de tentativas, recuperações e taxa de conversão
+
+### Configurações Disponíveis
+- **Delay**: Tempo de inatividade antes de ativar (padrão: 30 minutos)
+- **Tentativas**: Número máximo de tentativas por cliente (padrão: 3)
+- **Palavras-chave**: Lista personalizável de termos de interesse
+- **Horários**: Ativação apenas em horários comerciais
+- **Isolamento**: Cada provedor vê apenas seus dados
+
+### Dashboard Visual
+- **Termômetro Animado**: Taxa de conversão com animação suave
+- **Cards de Estatísticas**: Tentativas, recuperadas, pendentes, taxa de conversão
+- **Atividades Recentes**: Histórico de tentativas e resultados
+- **Configurações**: Interface para ajustar parâmetros do sistema
 
 ## 🚀 Início Rápido
 

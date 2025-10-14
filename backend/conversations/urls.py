@@ -22,6 +22,13 @@ from .views_csat import (
     CSATRequestViewSet,
     process_csat_webhook
 )
+from .recovery_views import (
+    get_recovery_stats,
+    analyze_conversations,
+    send_recovery_campaign,
+    get_recovery_settings,
+    update_recovery_settings
+)
 
 
 router = DefaultRouter()
@@ -46,9 +53,7 @@ router.register(r'csat/requests', CSATRequestViewSet, basename='csat-requests')
 
 urlpatterns = [
     path('', include(router.urls)),
-    # URLs específicas para recuperador de conversas
-    path('recovery/stats/', ConversationViewSet.as_view({'get': 'recovery_stats'}), name='recovery-stats'),
-    path('recovery/settings/<int:provedor_id>/', ConversationViewSet.as_view({'post': 'recovery_settings'}), name='recovery-settings'),
+    # URLs específicas para recuperador de conversas (removidas - usando views separadas)
     # URL para servir arquivos de mídia
     path('media/messages/<int:conversation_id>/<str:filename>/', serve_media_file, name='serve-media-file'),
 
@@ -65,6 +70,12 @@ urlpatterns = [
     # CSAT webhook
     path('csat/webhook/', process_csat_webhook, name='csat-webhook'),
     
+    # Recuperação de conversas
+    path('recovery/stats/', get_recovery_stats, name='recovery-stats'),
+    path('recovery/analyze/', analyze_conversations, name='recovery-analyze'),
+    path('recovery/campaign/', send_recovery_campaign, name='recovery-campaign'),
+    path('recovery/settings/', get_recovery_settings, name='recovery-settings'),
+    path('recovery/settings/update/', update_recovery_settings, name='recovery-settings-update'),
 
 ]
 

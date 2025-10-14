@@ -807,6 +807,12 @@ def evolution_webhook(request):
                     provedor=provedor,
                     contexto={'conversation': conversation}
                 )
+                
+                # Verificar se a IA detectou interesse comercial e atualizar status de recuperação
+                if ia_result.get('success') and 'TRANSFERÊNCIA DETECTADA: VENDAS' in str(ia_result):
+                    from conversations.recovery_service import ConversationRecoveryService
+                    recovery_service = ConversationRecoveryService()
+                    recovery_service.update_recovery_status_from_conversation(conversation.id, content)
             else:
                 print(f"🤖 IA: Não acionada - Conversa atribuída ao agente {conversation.assignee.username if conversation.assignee else 'N/A'} ou em espera ou fechada")
                 ia_result = {'success': False, 'motivo': 'Conversa atribuída, em espera ou fechada'}
@@ -2990,6 +2996,13 @@ def webhook_evolution_uazapi(request):
                         provedor=provedor,
                         contexto={'conversation': conversation}
                     )
+                    
+                    # Verificar se a IA detectou interesse comercial e atualizar status de recuperação
+                    if ia_result.get('success') and 'TRANSFERÊNCIA DETECTADA: VENDAS' in str(ia_result):
+                        from conversations.recovery_service import ConversationRecoveryService
+                        recovery_service = ConversationRecoveryService()
+                        recovery_service.update_recovery_status_from_conversation(conversation.id, str(content))
+                        
                 except Exception as e:
                     print(f"🤖 IA: Erro ao gerar resposta: {str(e)}")
                     ia_result = {'success': False, 'erro': str(e)}
