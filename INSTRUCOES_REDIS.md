@@ -24,8 +24,8 @@ docker stack deploy -c redis-stack-corrected.yml redis-stack
 # Verificar se o serviço está rodando
 docker service ls | grep redis
 
-# Testar conexão na porta 6380
-telnet 154.38.176.17 6380
+# Testar conexão na porta 6379
+telnet 49.12.9.11 6379
 ```
 
 ### 4. Configuração do Traefik

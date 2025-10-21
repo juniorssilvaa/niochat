@@ -43,15 +43,15 @@ GRANT ALL PRIVILEGES ON DATABASE niochat TO niochat;
 \q
 ```
 
-### 4. Configurar Redis (Porta 6380)
+### 4. Configurar Redis (Porta 6379)
 ```bash
 sudo systemctl enable redis-server
 sudo systemctl start redis-server
 
-# Configurar porta 6380 e senha
+# Configurar porta 6379 e senha
 sudo nano /etc/redis/redis.conf
 # Adicionar:
-# port 6380
+# port 6379
 # requirepass SUA_SENHA_REDIS
 # bind 0.0.0.0
 
@@ -65,9 +65,9 @@ sudo systemctl enable rabbitmq-server
 sudo systemctl start rabbitmq-server
 
 # Configurar usuário e senha
-sudo rabbitmqctl add_user admin SUA_SENHA_RABBITMQ
-sudo rabbitmqctl set_user_tags admin administrator
-sudo rabbitmqctl set_permissions -p / admin ".*" ".*" ".*"
+sudo rabbitmqctl add_user niochat ccf9e819f70a54bb790487f2438da6ee
+sudo rabbitmqctl set_user_tags niochat administrator
+sudo rabbitmqctl set_permissions -p / niochat ".*" ".*" ".*"
 ```
 
 ## Instalação do NioChat

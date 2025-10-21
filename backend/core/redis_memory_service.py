@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 
 class RedisMemoryService:
     def __init__(self):
-        # Usar configurações da nova stack Redis (porta 6380)
-        self.redis_host = '154.38.176.17'
-        self.redis_port = 6380
+        # Usar configurações da nova stack Redis (porta 6379)
+        self.redis_host = '49.12.9.11'
+        self.redis_port = 6379
         self.redis_password = 'E0sJT3wAYFuahovmHkxgy'
         self.redis_db = 0
         self.redis_url = f'redis://:{self.redis_password}@{self.redis_host}:{self.redis_port}/{self.redis_db}'

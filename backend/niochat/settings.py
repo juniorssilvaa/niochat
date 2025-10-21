@@ -213,7 +213,7 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 
 # Celery configuration
-CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='amqp://admin:72e7d90895d04af7a4667efa5152b302@154.38.176.17:5672')
+CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@rabbitmq:5672')
 CELERY_RESULT_BACKEND = config('REDIS_URL', default='redis://:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6380/0')
 CELERY_RESULT_EXPIRES = 300  # Resultados expiram em 5 minutos
 CELERY_TASK_IGNORE_RESULT = False  # Manter resultados por pouco tempo
@@ -232,9 +232,9 @@ CELERY_WORKER_MAX_TASKS_PER_CHILD = 1000
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 # Redis configuration for AI and memory
-REDIS_URL = config('REDIS_URL', default='redis://:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6380/0')
-REDIS_HOST = config('REDIS_HOST', default='154.38.176.17')
-REDIS_PORT = config('REDIS_PORT', default=6380, cast=int)
+REDIS_URL = config('REDIS_URL', default='redis://:E0sJT3wAYFuahovmHkxgy@49.12.9.11:6379/0')
+REDIS_HOST = config('REDIS_HOST', default='49.12.9.11')
+REDIS_PORT = config('REDIS_PORT', default=6379, cast=int)
 REDIS_DB = config('REDIS_DB', default=0, cast=int)
 REDIS_USERNAME = config('REDIS_USERNAME', default='niochat')
 REDIS_PASSWORD = config('REDIS_PASSWORD', default='E0sJT3wAYFuahovmHkxgy')
