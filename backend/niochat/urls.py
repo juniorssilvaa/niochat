@@ -34,7 +34,6 @@ urlpatterns = [
     path('api/', include('conversations.urls')),
     path('api/', include('integrations.urls')),
     path('api-token-auth/', custom_auth_token, name='api_token_auth'),
-    path('test-auth/', TestAuthView.as_view(), name='test_auth'),
     path('api-auth/', include('rest_framework.urls')),
     path('webhook/evolution-uazapi/', webhook_evolution_uazapi, name='webhook_evolution_uazapi'),
     path('webhook/evolution-uazapi', webhook_evolution_uazapi, name='webhook_evolution_uazapi_no_slash'),

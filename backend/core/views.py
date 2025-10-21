@@ -1679,35 +1679,6 @@ class CustomAuthToken(APIView):
 
 custom_auth_token = CustomAuthToken.as_view()
 
-@method_decorator(csrf_exempt, name='dispatch')
-class TestAuthView(APIView):
-    permission_classes = []
-    
-    def post(self, request, *args, **kwargs):
-        from core.models import User
-        from django.contrib.auth import authenticate
-        
-        username = request.data.get('username')
-        password = request.data.get('password')
-        
-        # Testar autenticação
-        user = authenticate(username=username, password=password)
-        if user:
-            return Response({
-                'success': True,
-                'user': {
-                    'username': user.username,
-                    'is_superuser': user.is_superuser,
-                    'user_type': user.user_type,
-                    'is_active': user.is_active
-                }
-            })
-        else:
-            return Response({
-                'success': False,
-                'error': 'Authentication failed'
-            })
-
 
 class AtendimentoIAView(APIView):
     def post(self, request):
