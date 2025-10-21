@@ -190,16 +190,33 @@ jobs:
         echo "Celery image: $CELERY_IMAGE"
         echo "Docs image: $DOCS_IMAGE"
         
-        # Pegar ID da stack
-        STACK_ID=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
-          "$PORTAINER_URL/api/stacks" | jq -r '.[] | select(.Name == "niochat") | .Id')
+        # Pegar ID da stack com tratamento de erro melhorado
+        echo "🔍 Buscando stack 'niochat' no Portainer..."
+        echo "🌐 URL: $PORTAINER_URL/api/stacks"
+        STACKS_RESPONSE=$(curl -s -H "X-API-Key: $PORTAINER_API_KEY" "$PORTAINER_URL/api/stacks")
+        echo "📥 Resposta da API:"
+        echo "$STACKS_RESPONSE" | head -c 500
+        echo "..."
+        
+        # Verificar se a resposta é válida JSON
+        if ! echo "$STACKS_RESPONSE" | jq . > /dev/null 2>&1; then
+          echo "❌ Erro: Resposta inválida da API do Portainer:"
+          echo "$STACKS_RESPONSE"
+          exit 1
+        fi
+        
+        # Verificar se é um array
+        if ! echo "$STACKS_RESPONSE" | jq 'type' | grep -q "array"; then
+          echo "❌ Erro: API retornou $STACKS_RESPONSE em vez de array"
+          exit 1
+        fi
+        
+        STACK_ID=$(echo "$STACKS_RESPONSE" | jq -r '.[] | select(.Name == "niochat") | .Id')
 
         if [ -z "$STACK_ID" ] || [ "$STACK_ID" = "null" ]; then
-          echo "Stack 'niochat' not found. Please create it first in Portainer."
-          # List available stacks for debugging
-          echo "Available stacks:"
-          curl -s -H "X-API-Key: $PORTAINER_API_KEY" \
-            "$PORTAINER_URL/api/stacks" | jq '.[].Name'
+          echo "❌ Stack 'niochat' not found. Please create it first in Portainer."
+          echo "📋 Available stacks:"
+          echo "$STACKS_RESPONSE" | jq -r '.[].Name'
           exit 1
         fi
 
@@ -225,8 +242,16 @@ jobs:
                    }" \
                    "$PORTAINER_URL/api/stacks/$STACK_ID?endpointId=1&pullImage=true&forceRecreate=true")
 
-        if echo "$RESPONSE" | grep -q "error"; then
-          echo "Error updating stack:"
+        # Verificar se a resposta é válida JSON
+        if ! echo "$RESPONSE" | jq . > /dev/null 2>&1; then
+          echo "❌ Erro: Resposta inválida ao atualizar stack:"
+          echo "$RESPONSE"
+          exit 1
+        fi
+        
+        # Verificar se há erro na resposta
+        if echo "$RESPONSE" | jq -r '.error // empty' | grep -q .; then
+          echo "❌ Erro ao atualizar stack:"
           echo "$RESPONSE" | jq .
           exit 1
         fi
