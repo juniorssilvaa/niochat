@@ -1648,12 +1648,13 @@ class CustomAuthToken(APIView):
                 logger.warning(f"Usuário {username} encontrado, mas inativo.")
                 return Response({'non_field_errors': ['Usuário inativo.']}, status=status.HTTP_400_BAD_REQUEST)
             
-            # Verificar se o provedor do usuário está ativo
-            provedores_user = user.provedores_admin.all()
-            for provedor in provedores_user:
-                if not provedor.is_active:
-                    logger.warning(f"Usuário {username} tentou fazer login, mas o provedor {provedor.nome} está inativo.")
-                    return Response({'non_field_errors': ['Seu provedor está temporariamente inativo. Entre em contato com o suporte.']}, status=status.HTTP_400_BAD_REQUEST)
+            # Verificar se o provedor do usuário está ativo (apenas para usuários não-superadmin)
+            if user.user_type != 'superadmin':
+                provedores_user = user.provedores_admin.all()
+                for provedor in provedores_user:
+                    if not provedor.is_active:
+                        logger.warning(f"Usuário {username} tentou fazer login, mas o provedor {provedor.nome} está inativo.")
+                        return Response({'non_field_errors': ['Seu provedor está temporariamente inativo. Entre em contato com o suporte.']}, status=status.HTTP_400_BAD_REQUEST)
             
             # Verificar se o usuário é admin de um provedor inativo
             if user.user_type == 'admin':
