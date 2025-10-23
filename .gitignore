@@ -48,6 +48,7 @@ frontend/frontend/.env.production.local
 
 # Configurações de desenvolvimento
 frontend/frontend/vite.config.dev.js
+frontend/frontend/vite.dev.js
 docker.env
 .env.local
 
