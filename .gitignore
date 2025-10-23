@@ -52,8 +52,9 @@ frontend/frontend/vite.config.dev.js
 docker.env
 .env.local
 
-=======
->>>>>>> 3b07e82f46c6cf3f8f20e058d1b016114218f0e0
+# Executáveis
+cloudflared.exe
+ngrok.exe
 # IDE
 .vscode/
 .idea/
