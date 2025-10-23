@@ -203,7 +203,6 @@ jobs:
         # Adicionar arquivos modificados
         git add VERSION
         git add frontend/frontend/package.json
-        git add frontend/frontend/package-lock.json
         git add frontend/frontend/pnpm-lock.yaml
         git add backend/niochat/settings.py
         git add backend/core/telegram_service.py  

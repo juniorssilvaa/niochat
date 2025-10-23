@@ -101,7 +101,7 @@ sudo systemctl restart niochat-celery
 npm cache clean --force
 
 # Remover node_modules
-rm -rf node_modules package-lock.json
+rm -rf node_modules
 
 # Reinstalar
 npm install
