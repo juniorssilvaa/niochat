@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Webhooks - NioChat</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/rainbow.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">NioChat</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">NioChat - Sistema de Atendimento WhatsApp</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../changelog/" class="nav-link">Changelog</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Ai</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../ai/configuration/" class="dropdown-item">Configuração da IA</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Api</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../authentication/" class="dropdown-item">Autenticação</a>
+</li>
+                                    
+<li>
+    <a href="../endpoints/" class="dropdown-item">Endpoints da API</a>
+</li>
+                                    
+<li>
+    <a href="../postman-guide/" class="dropdown-item">Guia de Uso do Postman com NioChat</a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Webhooks</a>
+</li>
+                                    
+<li>
+    <a href="../websocket/" class="dropdown-item">WebSocket</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Configuration</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../configuration/supabase/" class="dropdown-item">Configuração do Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Development</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../development/contributing/" class="dropdown-item">Contribuindo para o NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../../development/structure/" class="dropdown-item">Estrutura do Projeto</a>
+</li>
+                                    
+<li>
+    <a href="../../development/troubleshooting/" class="dropdown-item">Troubleshooting</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Installation</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../installation/development/" class="dropdown-item">Instalação em Desenvolvimento</a>
+</li>
+                                    
+<li>
+    <a href="../../installation/production/" class="dropdown-item">Instalação em Produção</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Overview</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../overview/architecture/" class="dropdown-item">Arquitetura do Sistema</a>
+</li>
+                                    
+<li>
+    <a href="../../overview/features/" class="dropdown-item">Funcionalidades</a>
+</li>
+                                    
+<li>
+    <a href="../../overview/introduction/" class="dropdown-item">Introdução ao NioChat</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Supabase</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../supabase/integration/" class="dropdown-item">Integração com Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Usage</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../usage/interface/" class="dropdown-item">Interface do Usuário</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../postman-guide/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../websocket/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#webhooks" class="nav-link">Webhooks</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#webhook-uazapievolution" class="nav-link">Webhook Uazapi/Evolution</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#implementacao-do-webhook" class="nav-link">Implementação do Webhook</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#configuracao-do-webhook" class="nav-link">Configuração do Webhook</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#validacao-de-webhook" class="nav-link">Validação de Webhook</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#tratamento-de-erros" class="nav-link">Tratamento de Erros</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#monitoramento" class="nav-link">Monitoramento</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#proximos-passos" class="nav-link">Próximos Passos</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="webhooks">Webhooks</h1>
+<p>O NioChat utiliza webhooks para receber notificações em tempo real de eventos do WhatsApp. Este documento explica como implementar e usar webhooks.</p>
+<h2 id="webhook-uazapievolution">Webhook Uazapi/Evolution</h2>
+<h3 id="url-do-webhook">URL do Webhook</h3>
+<pre><code>POST /webhook/evolution-uazapi/
+POST /webhooks/evolution-uazapi/
+</code></pre>
+<h3 id="estrutura-da-requisicao">Estrutura da Requisição</h3>
+<pre><code class="language-json">{
+  &quot;event&quot;: &quot;message&quot;,
+  &quot;data&quot;: {
+    &quot;message&quot;: {
+      &quot;id&quot;: &quot;message_id&quot;,
+      &quot;from&quot;: &quot;+5511999999999&quot;,
+      &quot;to&quot;: &quot;+5511888888888&quot;,
+      &quot;content&quot;: &quot;Olá, como posso ajudar?&quot;,
+      &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;,
+      &quot;message_type&quot;: &quot;text&quot;
+    }
+  }
+}
+</code></pre>
+<h3 id="eventos-suportados">Eventos Suportados</h3>
+<h4 id="mensagem-de-texto">Mensagem de Texto</h4>
+<pre><code class="language-json">{
+  &quot;event&quot;: &quot;message&quot;,
+  &quot;data&quot;: {
+    &quot;message&quot;: {
+      &quot;id&quot;: &quot;message_id&quot;,
+      &quot;from&quot;: &quot;+5511999999999&quot;,
+      &quot;to&quot;: &quot;+5511888888888&quot;,
+      &quot;content&quot;: &quot;Olá, como posso ajudar?&quot;,
+      &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;,
+      &quot;message_type&quot;: &quot;text&quot;,
+      &quot;sender&quot;: {
+        &quot;name&quot;: &quot;João Silva&quot;,
+        &quot;phone&quot;: &quot;+5511999999999&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<h4 id="mensagem-de-imagem">Mensagem de Imagem</h4>
+<pre><code class="language-json">{
+  &quot;event&quot;: &quot;message&quot;,
+  &quot;data&quot;: {
+    &quot;message&quot;: {
+      &quot;id&quot;: &quot;message_id&quot;,
+      &quot;from&quot;: &quot;+5511999999999&quot;,
+      &quot;to&quot;: &quot;+5511888888888&quot;,
+      &quot;content&quot;: &quot;Imagem enviada&quot;,
+      &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;,
+      &quot;message_type&quot;: &quot;image&quot;,
+      &quot;media&quot;: {
+        &quot;url&quot;: &quot;https://example.com/image.jpg&quot;,
+        &quot;filename&quot;: &quot;image.jpg&quot;,
+        &quot;size&quot;: 1024
+      },
+      &quot;sender&quot;: {
+        &quot;name&quot;: &quot;João Silva&quot;,
+        &quot;phone&quot;: &quot;+5511999999999&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<h4 id="mensagem-de-audio">Mensagem de Áudio</h4>
+<pre><code class="language-json">{
+  &quot;event&quot;: &quot;message&quot;,
+  &quot;data&quot;: {
+    &quot;message&quot;: {
+      &quot;id&quot;: &quot;message_id&quot;,
+      &quot;from&quot;: &quot;+5511999999999&quot;,
+      &quot;to&quot;: &quot;+5511888888888&quot;,
+      &quot;content&quot;: &quot;Áudio enviado&quot;,
+      &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;,
+      &quot;message_type&quot;: &quot;audio&quot;,
+      &quot;media&quot;: {
+        &quot;url&quot;: &quot;https://example.com/audio.ogg&quot;,
+        &quot;filename&quot;: &quot;audio.ogg&quot;,
+        &quot;size&quot;: 2048,
+        &quot;duration&quot;: 30
+      },
+      &quot;sender&quot;: {
+        &quot;name&quot;: &quot;João Silva&quot;,
+        &quot;phone&quot;: &quot;+5511999999999&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<h4 id="mensagem-de-video">Mensagem de Vídeo</h4>
+<pre><code class="language-json">{
+  &quot;event&quot;: &quot;message&quot;,
+  &quot;data&quot;: {
+    &quot;message&quot;: {
+      &quot;id&quot;: &quot;message_id&quot;,
+      &quot;from&quot;: &quot;+5511999999999&quot;,
+      &quot;to&quot;: &quot;+5511888888888&quot;,
+      &quot;content&quot;: &quot;Vídeo enviado&quot;,
+      &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;,
+      &quot;message_type&quot;: &quot;video&quot;,
+      &quot;media&quot;: {
+        &quot;url&quot;: &quot;https://example.com/video.mp4&quot;,
+        &quot;filename&quot;: &quot;video.mp4&quot;,
+        &quot;size&quot;: 5120
+      },
+      &quot;sender&quot;: {
+        &quot;name&quot;: &quot;João Silva&quot;,
+        &quot;phone&quot;: &quot;+5511999999999&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<h4 id="mensagem-de-documento">Mensagem de Documento</h4>
+<pre><code class="language-json">{
+  &quot;event&quot;: &quot;message&quot;,
+  &quot;data&quot;: {
+    &quot;message&quot;: {
+      &quot;id&quot;: &quot;message_id&quot;,
+      &quot;from&quot;: &quot;+5511999999999&quot;,
+      &quot;to&quot;: &quot;+5511888888888&quot;,
+      &quot;content&quot;: &quot;Documento enviado&quot;,
+      &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;,
+      &quot;message_type&quot;: &quot;document&quot;,
+      &quot;media&quot;: {
+        &quot;url&quot;: &quot;https://example.com/document.pdf&quot;,
+        &quot;filename&quot;: &quot;document.pdf&quot;,
+        &quot;size&quot;: 10240
+      },
+      &quot;sender&quot;: {
+        &quot;name&quot;: &quot;João Silva&quot;,
+        &quot;phone&quot;: &quot;+5511999999999&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<h4 id="reacao-a-mensagem">Reação a Mensagem</h4>
+<pre><code class="language-json">{
+  &quot;event&quot;: &quot;reaction&quot;,
+  &quot;data&quot;: {
+    &quot;message_id&quot;: &quot;message_id&quot;,
+    &quot;reaction&quot;: &quot;👍&quot;,
+    &quot;from&quot;: &quot;+5511999999999&quot;,
+    &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;
+  }
+}
+</code></pre>
+<h4 id="mensagem-deletada">Mensagem Deletada</h4>
+<pre><code class="language-json">{
+  &quot;event&quot;: &quot;message_deleted&quot;,
+  &quot;data&quot;: {
+    &quot;message_id&quot;: &quot;message_id&quot;,
+    &quot;from&quot;: &quot;+5511999999999&quot;,
+    &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;
+  }
+}
+</code></pre>
+<h4 id="status-de-entrega">Status de Entrega</h4>
+<pre><code class="language-json">{
+  &quot;event&quot;: &quot;delivery_status&quot;,
+  &quot;data&quot;: {
+    &quot;message_id&quot;: &quot;message_id&quot;,
+    &quot;status&quot;: &quot;delivered&quot;,
+    &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;
+  }
+}
+</code></pre>
+<h4 id="status-de-leitura">Status de Leitura</h4>
+<pre><code class="language-json">{
+  &quot;event&quot;: &quot;read_status&quot;,
+  &quot;data&quot;: {
+    &quot;message_id&quot;: &quot;message_id&quot;,
+    &quot;status&quot;: &quot;read&quot;,
+    &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;
+  }
+}
+</code></pre>
+<h2 id="implementacao-do-webhook">Implementação do Webhook</h2>
+<h3 id="python-django">Python (Django)</h3>
+<pre><code class="language-python">from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+import json
+import logging
+
+logger = logging.getLogger(__name__)
+
+@csrf_exempt
+@require_http_methods([&quot;POST&quot;])
+def webhook_evolution_uazapi(request):
+    try:
+        data = json.loads(request.body)
+        event = data.get('event')
+        message_data = data.get('data', {}).get('message', {})
+
+        logger.info(f&quot;Webhook recebido: {event}&quot;)
+
+        if event == 'message':
+            process_message(message_data)
+        elif event == 'reaction':
+            process_reaction(data.get('data', {}))
+        elif event == 'message_deleted':
+            process_message_deleted(data.get('data', {}))
+        elif event == 'delivery_status':
+            process_delivery_status(data.get('data', {}))
+        elif event == 'read_status':
+            process_read_status(data.get('data', {}))
+
+        return JsonResponse({'status': 'success'})
+
+    except Exception as e:
+        logger.error(f&quot;Erro no webhook: {e}&quot;)
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+def process_message(message_data):
+    &quot;&quot;&quot;Processa mensagem recebida&quot;&quot;&quot;
+    message_id = message_data.get('id')
+    from_number = message_data.get('from')
+    to_number = message_data.get('to')
+    content = message_data.get('content')
+    message_type = message_data.get('message_type', 'text')
+
+    # Processar mensagem
+    logger.info(f&quot;Processando mensagem {message_id} de {from_number}&quot;)
+
+    # Salvar no banco de dados
+    # Enviar para IA
+    # Atualizar dashboard via WebSocket
+
+def process_reaction(reaction_data):
+    &quot;&quot;&quot;Processa reação a mensagem&quot;&quot;&quot;
+    message_id = reaction_data.get('message_id')
+    reaction = reaction_data.get('reaction')
+
+    logger.info(f&quot;Reação {reaction} na mensagem {message_id}&quot;)
+
+def process_message_deleted(deleted_data):
+    &quot;&quot;&quot;Processa mensagem deletada&quot;&quot;&quot;
+    message_id = deleted_data.get('message_id')
+
+    logger.info(f&quot;Mensagem {message_id} foi deletada&quot;)
+
+def process_delivery_status(status_data):
+    &quot;&quot;&quot;Processa status de entrega&quot;&quot;&quot;
+    message_id = status_data.get('message_id')
+    status = status_data.get('status')
+
+    logger.info(f&quot;Status de entrega da mensagem {message_id}: {status}&quot;)
+
+def process_read_status(status_data):
+    &quot;&quot;&quot;Processa status de leitura&quot;&quot;&quot;
+    message_id = status_data.get('message_id')
+    status = status_data.get('status')
+
+    logger.info(f&quot;Status de leitura da mensagem {message_id}: {status}&quot;)
+</code></pre>
+<h3 id="nodejs-express">Node.js (Express)</h3>
+<pre><code class="language-javascript">const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+app.post('/webhook/evolution-uazapi', (req, res) =&gt; {
+  try {
+    const { event, data } = req.body;
+    const message = data?.message;
+
+    console.log(`Webhook recebido: ${event}`);
+
+    switch (event) {
+      case 'message':
+        processMessage(message);
+        break;
+      case 'reaction':
+        processReaction(data);
+        break;
+      case 'message_deleted':
+        processMessageDeleted(data);
+        break;
+      case 'delivery_status':
+        processDeliveryStatus(data);
+        break;
+      case 'read_status':
+        processReadStatus(data);
+        break;
+      default:
+        console.log(`Evento desconhecido: ${event}`);
+    }
+
+    res.json({ status: 'success' });
+  } catch (error) {
+    console.error('Erro no webhook:', error);
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+
+function processMessage(message) {
+  const { id, from, to, content, message_type } = message;
+  console.log(`Processando mensagem ${id} de ${from}`);
+
+  // Processar mensagem
+  // Salvar no banco de dados
+  // Enviar para IA
+  // Atualizar dashboard via WebSocket
+}
+
+function processReaction(data) {
+  const { message_id, reaction } = data;
+  console.log(`Reação ${reaction} na mensagem ${message_id}`);
+}
+
+function processMessageDeleted(data) {
+  const { message_id } = data;
+  console.log(`Mensagem ${message_id} foi deletada`);
+}
+
+function processDeliveryStatus(data) {
+  const { message_id, status } = data;
+  console.log(`Status de entrega da mensagem ${message_id}: ${status}`);
+}
+
+function processReadStatus(data) {
+  const { message_id, status } = data;
+  console.log(`Status de leitura da mensagem ${message_id}: ${status}`);
+}
+
+app.listen(3000, () =&gt; {
+  console.log('Servidor rodando na porta 3000');
+});
+</code></pre>
+<h3 id="php">PHP</h3>
+<pre><code class="language-php">&lt;?php
+header('Content-Type: application/json');
+
+$input = file_get_contents('php://input');
+$data = json_decode($input, true);
+
+if (!$data) {
+    http_response_code(400);
+    echo json_encode(['status' =&gt; 'error', 'message' =&gt; 'Dados inválidos']);
+    exit;
+}
+
+$event = $data['event'] ?? '';
+$messageData = $data['data']['message'] ?? [];
+
+error_log(&quot;Webhook recebido: $event&quot;);
+
+switch ($event) {
+    case 'message':
+        processMessage($messageData);
+        break;
+    case 'reaction':
+        processReaction($data['data']);
+        break;
+    case 'message_deleted':
+        processMessageDeleted($data['data']);
+        break;
+    case 'delivery_status':
+        processDeliveryStatus($data['data']);
+        break;
+    case 'read_status':
+        processReadStatus($data['data']);
+        break;
+    default:
+        error_log(&quot;Evento desconhecido: $event&quot;);
+}
+
+function processMessage($message) {
+    $id = $message['id'] ?? '';
+    $from = $message['from'] ?? '';
+    $content = $message['content'] ?? '';
+    $messageType = $message['message_type'] ?? 'text';
+
+    error_log(&quot;Processando mensagem $id de $from&quot;);
+
+    // Processar mensagem
+    // Salvar no banco de dados
+    // Enviar para IA
+    // Atualizar dashboard via WebSocket
+}
+
+function processReaction($data) {
+    $messageId = $data['message_id'] ?? '';
+    $reaction = $data['reaction'] ?? '';
+
+    error_log(&quot;Reação $reaction na mensagem $messageId&quot;);
+}
+
+function processMessageDeleted($data) {
+    $messageId = $data['message_id'] ?? '';
+    error_log(&quot;Mensagem $messageId foi deletada&quot;);
+}
+
+function processDeliveryStatus($data) {
+    $messageId = $data['message_id'] ?? '';
+    $status = $data['status'] ?? '';
+
+    error_log(&quot;Status de entrega da mensagem $messageId: $status&quot;);
+}
+
+function processReadStatus($data) {
+    $messageId = $data['message_id'] ?? '';
+    $status = $data['status'] ?? '';
+
+    error_log(&quot;Status de leitura da mensagem $messageId: $status&quot;);
+}
+
+echo json_encode(['status' =&gt; 'success']);
+?&gt;
+</code></pre>
+<h2 id="configuracao-do-webhook">Configuração do Webhook</h2>
+<h3 id="uazapievolution">Uazapi/Evolution</h3>
+<pre><code class="language-json">{
+  &quot;webhook&quot;: {
+    &quot;url&quot;: &quot;https://seu-dominio.com/webhook/evolution-uazapi/&quot;,
+    &quot;events&quot;: [
+      &quot;message&quot;,
+      &quot;reaction&quot;,
+      &quot;message_deleted&quot;,
+      &quot;delivery_status&quot;,
+      &quot;read_status&quot;
+    ],
+    &quot;headers&quot;: {
+      &quot;Authorization&quot;: &quot;Bearer seu_token_aqui&quot;
+    }
+  }
+}
+</code></pre>
+<h3 id="configuracao-no-niochat">Configuração no NioChat</h3>
+<pre><code class="language-python"># settings.py
+WEBHOOK_SECRET = 'seu_secret_aqui'
+WEBHOOK_TIMEOUT = 30
+WEBHOOK_RETRY_ATTEMPTS = 3
+</code></pre>
+<h2 id="validacao-de-webhook">Validação de Webhook</h2>
+<h3 id="verificacao-de-assinatura">Verificação de Assinatura</h3>
+<pre><code class="language-python">import hmac
+import hashlib
+
+def verify_webhook_signature(payload, signature, secret):
+    &quot;&quot;&quot;Verifica a assinatura do webhook&quot;&quot;&quot;
+    expected_signature = hmac.new(
+        secret.encode(),
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+
+    return hmac.compare_digest(signature, expected_signature)
+
+@csrf_exempt
+@require_http_methods([&quot;POST&quot;])
+def webhook_evolution_uazapi(request):
+    # Verificar assinatura
+    signature = request.headers.get('X-Signature')
+    if not verify_webhook_signature(request.body, signature, WEBHOOK_SECRET):
+        return JsonResponse({'status': 'error', 'message': 'Assinatura inválida'}, status=401)
+
+    # Processar webhook
+    # ...
+</code></pre>
+<h3 id="rate-limiting">Rate Limiting</h3>
+<pre><code class="language-python">from django.core.cache import cache
+from django.http import JsonResponse
+
+def rate_limit_webhook(request):
+    &quot;&quot;&quot;Aplica rate limiting ao webhook&quot;&quot;&quot;
+    client_ip = request.META.get('REMOTE_ADDR')
+    cache_key = f&quot;webhook_rate_limit_{client_ip}&quot;
+
+    # Limite de 100 requisições por minuto
+    current_count = cache.get(cache_key, 0)
+    if current_count &gt;= 100:
+        return JsonResponse({'status': 'error', 'message': 'Rate limit exceeded'}, status=429)
+
+    cache.set(cache_key, current_count + 1, 60)  # 60 segundos
+    return None
+</code></pre>
+<h2 id="tratamento-de-erros">Tratamento de Erros</h2>
+<h3 id="retry-automatico">Retry Automático</h3>
+<pre><code class="language-python">import time
+from django.core.cache import cache
+
+def process_webhook_with_retry(data, max_retries=3):
+    &quot;&quot;&quot;Processa webhook com retry automático&quot;&quot;&quot;
+    for attempt in range(max_retries):
+        try:
+            # Processar webhook
+            process_webhook(data)
+            return True
+        except Exception as e:
+            if attempt == max_retries - 1:
+                # Última tentativa falhou
+                logger.error(f&quot;Webhook falhou após {max_retries} tentativas: {e}&quot;)
+                return False
+            else:
+                # Aguardar antes da próxima tentativa
+                time.sleep(2 ** attempt)  # Backoff exponencial
+
+    return False
+</code></pre>
+<h3 id="logging-de-erros">Logging de Erros</h3>
+<pre><code class="language-python">import logging
+
+logger = logging.getLogger(__name__)
+
+@csrf_exempt
+@require_http_methods([&quot;POST&quot;])
+def webhook_evolution_uazapi(request):
+    try:
+        data = json.loads(request.body)
+        logger.info(f&quot;Webhook recebido: {data.get('event')}&quot;)
+
+        # Processar webhook
+        process_webhook(data)
+
+        return JsonResponse({'status': 'success'})
+
+    except json.JSONDecodeError as e:
+        logger.error(f&quot;Erro ao decodificar JSON: {e}&quot;)
+        return JsonResponse({'status': 'error', 'message': 'JSON inválido'}, status=400)
+
+    except Exception as e:
+        logger.error(f&quot;Erro no webhook: {e}&quot;, exc_info=True)
+        return JsonResponse({'status': 'error', 'message': 'Erro interno'}, status=500)
+</code></pre>
+<h2 id="monitoramento">Monitoramento</h2>
+<h3 id="metricas-de-webhook">Métricas de Webhook</h3>
+<pre><code class="language-python">from django.core.cache import cache
+from django.utils import timezone
+
+def track_webhook_metrics(event, status):
+    &quot;&quot;&quot;Rastreia métricas do webhook&quot;&quot;&quot;
+    timestamp = timezone.now()
+
+    # Incrementar contador de eventos
+    cache_key = f&quot;webhook_events_{event}_{status}&quot;
+    cache.incr(cache_key, 1)
+    cache.expire(cache_key, 3600)  # 1 hora
+
+    # Log de métricas
+    logger.info(f&quot;Webhook metric: {event} - {status} at {timestamp}&quot;)
+
+@csrf_exempt
+@require_http_methods([&quot;POST&quot;])
+def webhook_evolution_uazapi(request):
+    try:
+        data = json.loads(request.body)
+        event = data.get('event')
+
+        # Processar webhook
+        process_webhook(data)
+
+        # Rastrear métricas
+        track_webhook_metrics(event, 'success')
+
+        return JsonResponse({'status': 'success'})
+
+    except Exception as e:
+        # Rastrear métricas de erro
+        track_webhook_metrics('error', 'failed')
+        raise e
+</code></pre>
+<h2 id="proximos-passos">Próximos Passos</h2>
+<ol>
+<li><a href="../endpoints/">Endpoints</a> - Explore todos os endpoints da API</li>
+<li><a href="../websocket/">WebSocket</a> - Aprenda sobre WebSocket</li>
+<li><a href="../authentication/">Autenticação</a> - Aprenda sobre autenticação</li>
+</ol></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

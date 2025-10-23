@@ -1,0 +1,50 @@
+# Dockerfile específico para Celery Worker
+FROM python:3.12-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    apt-transport-https \
+    ca-certificates \
+    build-essential \
+    libpq-dev \
+    curl \
+    postgresql-client \
+ && rm -rf /var/lib/apt/lists/*
+
+# Set work directory
+WORKDIR /app
+
+# Copy requirements first (melhora cache do Docker)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy project
+COPY . .
+
+# Set backend directory
+WORKDIR /app/backend
+
+# Create directories for media and static files
+RUN mkdir -p media staticfiles
+
+# Entrypoint script específico para Celery - SIMPLIFICADO
+RUN echo '#!/bin/bash\n\
+set -e\n\
+echo "Starting Celery Worker..."\n\
+cd /app/backend\n\
+echo "Current directory: $(pwd)"\n\
+echo "Python path: $(which python)"\n\
+echo "Starting Celery worker (same as local)..."\n\
+exec python -m celery -A niochat worker -l info' > /app/celery-entrypoint.sh && chmod +x /app/celery-entrypoint.sh
+
+# Health check simplificado
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD python -c "import celery; print('Celery OK')" || exit 1
+
+# Use entrypoint script
+ENTRYPOINT ["/app/celery-entrypoint.sh"]

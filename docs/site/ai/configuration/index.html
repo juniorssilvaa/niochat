@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Configuração da IA - NioChat</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/rainbow.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">NioChat</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">NioChat - Sistema de Atendimento WhatsApp</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../changelog/" class="nav-link">Changelog</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Ai</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Configuração da IA</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Api</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../api/authentication/" class="dropdown-item">Autenticação</a>
+</li>
+                                    
+<li>
+    <a href="../../api/endpoints/" class="dropdown-item">Endpoints da API</a>
+</li>
+                                    
+<li>
+    <a href="../../api/postman-guide/" class="dropdown-item">Guia de Uso do Postman com NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../../api/webhooks/" class="dropdown-item">Webhooks</a>
+</li>
+                                    
+<li>
+    <a href="../../api/websocket/" class="dropdown-item">WebSocket</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Configuration</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../configuration/supabase/" class="dropdown-item">Configuração do Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Development</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../development/contributing/" class="dropdown-item">Contribuindo para o NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../../development/structure/" class="dropdown-item">Estrutura do Projeto</a>
+</li>
+                                    
+<li>
+    <a href="../../development/troubleshooting/" class="dropdown-item">Troubleshooting</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Installation</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../installation/development/" class="dropdown-item">Instalação em Desenvolvimento</a>
+</li>
+                                    
+<li>
+    <a href="../../installation/production/" class="dropdown-item">Instalação em Produção</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Overview</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../overview/architecture/" class="dropdown-item">Arquitetura do Sistema</a>
+</li>
+                                    
+<li>
+    <a href="../../overview/features/" class="dropdown-item">Funcionalidades</a>
+</li>
+                                    
+<li>
+    <a href="../../overview/introduction/" class="dropdown-item">Introdução ao NioChat</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Supabase</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../supabase/integration/" class="dropdown-item">Integração com Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Usage</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../usage/interface/" class="dropdown-item">Interface do Usuário</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../../changelog/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../../api/authentication/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#configuracao-da-ia" class="nav-link">Configuração da IA</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#visao-geral" class="nav-link">Visão Geral</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#configuracao-inicial" class="nav-link">Configuração Inicial</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#servico-openai" class="nav-link">Serviço OpenAI</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#function-calls" class="nav-link">Function Calls</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#transcricao-de-audio" class="nav-link">Transcrição de Áudio</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#analise-de-sentimento" class="nav-link">Análise de Sentimento</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#configuracoes-avancadas" class="nav-link">Configurações Avançadas</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#troubleshooting" class="nav-link">Troubleshooting</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#proximos-passos" class="nav-link">Próximos Passos</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="configuracao-da-ia">Configuração da IA</h1>
+<p>O NioChat utiliza OpenAI GPT para atendimento inteligente, transcrição de áudio e análise de sentimento. Este guia explica como configurar e usar a IA.</p>
+<h2 id="visao-geral">Visão Geral</h2>
+<h3 id="funcionalidades-da-ia">Funcionalidades da IA</h3>
+<ul>
+<li><strong>Atendimento Automatizado</strong>: Respostas inteligentes para clientes</li>
+<li><strong>Transcrição de Áudio</strong>: Conversão de mensagens de voz para texto</li>
+<li><strong>Consulta SGP</strong>: Integração automática com sistema de gestão</li>
+<li><strong>Análise de Sentimento</strong>: Interpretação de feedback CSAT</li>
+<li><strong>Function Calls</strong>: Execução automática de funções</li>
+</ul>
+<h3 id="arquitetura">Arquitetura</h3>
+<pre><code>Cliente → WhatsApp → NioChat → OpenAI → SGP → Resposta
+   ↓         ↓         ↓         ↓      ↓       ↓
+Mensagem → Webhook → IA → Function → Dados → Cliente
+</code></pre>
+<h2 id="configuracao-inicial">Configuração Inicial</h2>
+<h3 id="1-obter-chave-openai">1. Obter Chave OpenAI</h3>
+<pre><code class="language-bash"># Acessar OpenAI
+https://platform.openai.com
+
+# Criar API Key
+- Acesse API Keys
+- Clique em &quot;Create new secret key&quot;
+- Copie a chave gerada
+</code></pre>
+<h3 id="2-configurar-variaveis">2. Configurar Variáveis</h3>
+<pre><code class="language-env"># Adicionar ao .env
+OPENAI_API_KEY=sk-sua_chave_openai_aqui
+OPENAI_MODEL=gpt-4
+OPENAI_MAX_TOKENS=2000
+OPENAI_TEMPERATURE=0.7
+</code></pre>
+<h3 id="3-configurar-django">3. Configurar Django</h3>
+<pre><code class="language-python"># settings.py
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+OPENAI_MODEL = os.getenv('OPENAI_MODEL', 'gpt-4')
+OPENAI_MAX_TOKENS = int(os.getenv('OPENAI_MAX_TOKENS', '2000'))
+OPENAI_TEMPERATURE = float(os.getenv('OPENAI_TEMPERATURE', '0.7'))
+</code></pre>
+<h2 id="servico-openai">Serviço OpenAI</h2>
+<h3 id="1-classe-principal">1. Classe Principal</h3>
+<pre><code class="language-python"># core/openai_service.py
+import openai
+from django.conf import settings
+from typing import Dict, Any, Optional, List
+
+class OpenAIService:
+    def __init__(self):
+        openai.api_key = settings.OPENAI_API_KEY
+        self.model = settings.OPENAI_MODEL
+        self.max_tokens = settings.OPENAI_MAX_TOKENS
+        self.temperature = settings.OPENAI_TEMPERATURE
+
+    def generate_response(self, message: str, context: Dict[str, Any]) -&gt; str:
+        &quot;&quot;&quot;Gerar resposta da IA&quot;&quot;&quot;
+        try:
+            response = openai.ChatCompletion.create(
+                model=self.model,
+                messages=[
+                    {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: self._get_system_prompt(context)},
+                    {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: message}
+                ],
+                max_tokens=self.max_tokens,
+                temperature=self.temperature
+            )
+
+            return response.choices[0].message.content
+        except Exception as e:
+            print(f&quot;Erro ao gerar resposta: {e}&quot;)
+            return &quot;Desculpe, ocorreu um erro. Tente novamente.&quot;
+
+    def transcribe_audio(self, audio_file_path: str) -&gt; str:
+        &quot;&quot;&quot;Transcrever áudio para texto&quot;&quot;&quot;
+        try:
+            with open(audio_file_path, &quot;rb&quot;) as audio_file:
+                transcript = openai.Audio.transcribe(
+                    model=&quot;whisper-1&quot;,
+                    file=audio_file
+                )
+                return transcript.text
+        except Exception as e:
+            print(f&quot;Erro na transcrição: {e}&quot;)
+            return &quot;&quot;
+
+    def analyze_sentiment(self, text: str) -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;Analisar sentimento do texto&quot;&quot;&quot;
+        try:
+            response = openai.ChatCompletion.create(
+                model=self.model,
+                messages=[
+                    {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: self._get_sentiment_prompt()},
+                    {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: text}
+                ],
+                max_tokens=100,
+                temperature=0.1
+            )
+
+            return self._parse_sentiment_response(response.choices[0].message.content)
+        except Exception as e:
+            print(f&quot;Erro na análise de sentimento: {e}&quot;)
+            return {&quot;emoji&quot;: &quot;😐&quot;, &quot;rating&quot;: 3}
+
+    def _get_system_prompt(self, context: Dict[str, Any]) -&gt; str:
+        &quot;&quot;&quot;Obter prompt do sistema&quot;&quot;&quot;
+        return f&quot;&quot;&quot;
+        Você é um assistente virtual especializado em atendimento ao cliente.
+
+        Contexto:
+        - Provedor: {context.get('provedor_name', 'NioChat')}
+        - Cliente: {context.get('contact_name', 'Cliente')}
+        - Conversa: {context.get('conversation_id', 'Nova')}
+
+        Instruções:
+        1. Seja sempre cordial e prestativo
+        2. Use informações do SGP quando disponível
+        3. Se não souber algo, peça mais informações
+        4. Mantenha o tom profissional mas amigável
+        5. Use emojis moderadamente
+        &quot;&quot;&quot;
+
+    def _get_sentiment_prompt(self) -&gt; str:
+        &quot;&quot;&quot;Obter prompt para análise de sentimento&quot;&quot;&quot;
+        return &quot;&quot;&quot;
+        Analise o sentimento do texto e retorne:
+        - emoji: 😡 (1), 😕 (2), 😐 (3), 🙂 (4), 🤩 (5)
+        - rating: número de 1 a 5
+
+        Escala:
+        1 = Muito insatisfeito (😡)
+        2 = Insatisfeito (😕)
+        3 = Neutro (😐)
+        4 = Satisfeito (🙂)
+        5 = Muito satisfeito (🤩)
+
+        Responda apenas: {&quot;emoji&quot;: &quot;😐&quot;, &quot;rating&quot;: 3}
+        &quot;&quot;&quot;
+
+    def _parse_sentiment_response(self, response: str) -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;Parsear resposta de sentimento&quot;&quot;&quot;
+        try:
+            import json
+            return json.loads(response)
+        except:
+            return {&quot;emoji&quot;: &quot;😐&quot;, &quot;rating&quot;: 3}
+</code></pre>
+<h3 id="2-uso-no-django">2. Uso no Django</h3>
+<pre><code class="language-python"># Em views.py
+from core.openai_service import OpenAIService
+
+def process_message(request):
+    message = request.POST.get('message')
+    conversation = Conversation.objects.get(id=request.POST.get('conversation_id'))
+
+    # Gerar resposta da IA
+    openai_service = OpenAIService()
+    context = {
+        'provedor_name': conversation.provedor.name,
+        'contact_name': conversation.contact.name,
+        'conversation_id': conversation.id
+    }
+
+    response = openai_service.generate_response(message, context)
+
+    return JsonResponse({'response': response})
+</code></pre>
+<h2 id="function-calls">Function Calls</h2>
+<h3 id="1-configurar-funcoes">1. Configurar Funções</h3>
+<pre><code class="language-python"># core/openai_service.py
+def generate_response_with_functions(self, message: str, context: Dict[str, Any]) -&gt; Dict[str, Any]:
+    &quot;&quot;&quot;Gerar resposta com function calls&quot;&quot;&quot;
+    try:
+        response = openai.ChatCompletion.create(
+            model=self.model,
+            messages=[
+                {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: self._get_system_prompt(context)},
+                {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: message}
+            ],
+            functions=self._get_functions(),
+            function_call=&quot;auto&quot;,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature
+        )
+
+        return {
+            'response': response.choices[0].message.content,
+            'function_calls': response.choices[0].message.get('function_calls', [])
+        }
+    except Exception as e:
+        print(f&quot;Erro ao gerar resposta: {e}&quot;)
+        return {'response': 'Desculpe, ocorreu um erro.', 'function_calls': []}
+
+def _get_functions(self) -&gt; List[Dict[str, Any]]:
+    &quot;&quot;&quot;Obter funções disponíveis&quot;&quot;&quot;
+    return [
+        {
+            &quot;name&quot;: &quot;consultar_cliente_sgp&quot;,
+            &quot;description&quot;: &quot;Consultar dados do cliente no SGP&quot;,
+            &quot;parameters&quot;: {
+                &quot;type&quot;: &quot;object&quot;,
+                &quot;properties&quot;: {
+                    &quot;cpf_cnpj&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;description&quot;: &quot;CPF ou CNPJ do cliente&quot;
+                    }
+                },
+                &quot;required&quot;: [&quot;cpf_cnpj&quot;]
+            }
+        },
+        {
+            &quot;name&quot;: &quot;verificar_acesso_sgp&quot;,
+            &quot;description&quot;: &quot;Verificar status de acesso do cliente&quot;,
+            &quot;parameters&quot;: {
+                &quot;type&quot;: &quot;object&quot;,
+                &quot;properties&quot;: {
+                    &quot;contrato&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;description&quot;: &quot;Número do contrato&quot;
+                    }
+                },
+                &quot;required&quot;: [&quot;contrato&quot;]
+            }
+        },
+        {
+            &quot;name&quot;: &quot;gerar_fatura_completa&quot;,
+            &quot;description&quot;: &quot;Gerar fatura completa do cliente&quot;,
+            &quot;parameters&quot;: {
+                &quot;type&quot;: &quot;object&quot;,
+                &quot;properties&quot;: {
+                    &quot;contrato&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;description&quot;: &quot;Número do contrato&quot;
+                    }
+                },
+                &quot;required&quot;: [&quot;contrato&quot;]
+            }
+        },
+        {
+            &quot;name&quot;: &quot;criar_chamado_tecnico&quot;,
+            &quot;description&quot;: &quot;Criar chamado técnico para o cliente&quot;,
+            &quot;parameters&quot;: {
+                &quot;type&quot;: &quot;object&quot;,
+                &quot;properties&quot;: {
+                    &quot;cpf_cnpj&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;description&quot;: &quot;CPF ou CNPJ do cliente&quot;
+                    },
+                    &quot;motivo&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;description&quot;: &quot;Motivo do chamado&quot;
+                    },
+                    &quot;sintomas&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;description&quot;: &quot;Sintomas relatados&quot;
+                    }
+                },
+                &quot;required&quot;: [&quot;cpf_cnpj&quot;, &quot;motivo&quot;, &quot;sintomas&quot;]
+            }
+        }
+    ]
+</code></pre>
+<h3 id="2-executar-function-calls">2. Executar Function Calls</h3>
+<pre><code class="language-python"># core/openai_service.py
+def execute_function_call(self, function_name: str, parameters: Dict[str, Any]) -&gt; str:
+    &quot;&quot;&quot;Executar function call&quot;&quot;&quot;
+    try:
+        if function_name == &quot;consultar_cliente_sgp&quot;:
+            return self._consultar_cliente_sgp(parameters)
+        elif function_name == &quot;verificar_acesso_sgp&quot;:
+            return self._verificar_acesso_sgp(parameters)
+        elif function_name == &quot;gerar_fatura_completa&quot;:
+            return self._gerar_fatura_completa(parameters)
+        elif function_name == &quot;criar_chamado_tecnico&quot;:
+            return self._criar_chamado_tecnico(parameters)
+        else:
+            return &quot;Função não encontrada&quot;
+    except Exception as e:
+        print(f&quot;Erro ao executar função {function_name}: {e}&quot;)
+        return &quot;Erro ao executar função&quot;
+
+def _consultar_cliente_sgp(self, parameters: Dict[str, Any]) -&gt; str:
+    &quot;&quot;&quot;Consultar cliente no SGP&quot;&quot;&quot;
+    cpf_cnpj = parameters.get('cpf_cnpj')
+
+    # Integração com SGP
+    from core.sgp_client import SGPClient
+    sgp_client = SGPClient()
+    cliente = sgp_client.consultar_cliente(cpf_cnpj)
+
+    if cliente:
+        return f&quot;Cliente encontrado: {cliente['nome']} - Contrato: {cliente['contrato']}&quot;
+    else:
+        return &quot;Cliente não encontrado no SGP&quot;
+
+def _verificar_acesso_sgp(self, parameters: Dict[str, Any]) -&gt; str:
+    &quot;&quot;&quot;Verificar acesso no SGP&quot;&quot;&quot;
+    contrato = parameters.get('contrato')
+
+    from core.sgp_client import SGPClient
+    sgp_client = SGPClient()
+    status = sgp_client.verificar_acesso(contrato)
+
+    return f&quot;Status do acesso: {status}&quot;
+
+def _gerar_fatura_completa(self, parameters: Dict[str, Any]) -&gt; str:
+    &quot;&quot;&quot;Gerar fatura completa&quot;&quot;&quot;
+    contrato = parameters.get('contrato')
+
+    from core.sgp_client import SGPClient
+    sgp_client = SGPClient()
+    fatura = sgp_client.gerar_fatura(contrato)
+
+    if fatura:
+        return f&quot;Fatura gerada: {fatura['valor']} - Vencimento: {fatura['vencimento']}&quot;
+    else:
+        return &quot;Erro ao gerar fatura&quot;
+
+def _criar_chamado_tecnico(self, parameters: Dict[str, Any]) -&gt; str:
+    &quot;&quot;&quot;Criar chamado técnico&quot;&quot;&quot;
+    cpf_cnpj = parameters.get('cpf_cnpj')
+    motivo = parameters.get('motivo')
+    sintomas = parameters.get('sintomas')
+
+    from core.sgp_client import SGPClient
+    sgp_client = SGPClient()
+    chamado = sgp_client.criar_chamado(cpf_cnpj, motivo, sintomas)
+
+    if chamado:
+        return f&quot;Chamado criado: {chamado['numero']} - Status: {chamado['status']}&quot;
+    else:
+        return &quot;Erro ao criar chamado&quot;
+</code></pre>
+<h2 id="transcricao-de-audio">Transcrição de Áudio</h2>
+<h3 id="1-processar-audio">1. Processar Áudio</h3>
+<pre><code class="language-python"># conversations/views.py
+def process_audio_message(request):
+    audio_file = request.FILES.get('audio')
+    conversation_id = request.POST.get('conversation_id')
+
+    # Salvar arquivo temporário
+    temp_path = f&quot;/tmp/audio_{conversation_id}.ogg&quot;
+    with open(temp_path, 'wb') as f:
+        for chunk in audio_file.chunks():
+            f.write(chunk)
+
+    # Transcrever com OpenAI
+    openai_service = OpenAIService()
+    transcript = openai_service.transcribe_audio(temp_path)
+
+    # Limpar arquivo temporário
+    os.remove(temp_path)
+
+    # Processar transcrição
+    if transcript:
+        # Salvar mensagem transcrita
+        message = Message.objects.create(
+            conversation_id=conversation_id,
+            content=transcript,
+            message_type='text'
+        )
+
+        # Processar com IA
+        response = openai_service.generate_response(transcript, context)
+
+        return JsonResponse({
+            'transcript': transcript,
+            'response': response
+        })
+
+    return JsonResponse({'error': 'Erro na transcrição'})
+</code></pre>
+<h3 id="2-configurar-whisper">2. Configurar Whisper</h3>
+<pre><code class="language-python"># core/openai_service.py
+def transcribe_audio_advanced(self, audio_file_path: str, language: str = 'pt') -&gt; str:
+    &quot;&quot;&quot;Transcrever áudio com configurações avançadas&quot;&quot;&quot;
+    try:
+        with open(audio_file_path, &quot;rb&quot;) as audio_file:
+            transcript = openai.Audio.transcribe(
+                model=&quot;whisper-1&quot;,
+                file=audio_file,
+                language=language,
+                response_format=&quot;text&quot;,
+                temperature=0.0
+            )
+            return transcript
+    except Exception as e:
+        print(f&quot;Erro na transcrição: {e}&quot;)
+        return &quot;&quot;
+</code></pre>
+<h2 id="analise-de-sentimento">Análise de Sentimento</h2>
+<h3 id="1-sistema-csat">1. Sistema CSAT</h3>
+<pre><code class="language-python"># conversations/csat_automation.py
+from core.openai_service import OpenAIService
+
+class CSATAutomationService:
+    @classmethod
+    def process_csat_response(cls, message_text: str, conversation, contact):
+        &quot;&quot;&quot;Processar resposta CSAT&quot;&quot;&quot;
+        openai_service = OpenAIService()
+
+        # Analisar sentimento
+        sentiment = openai_service.analyze_sentiment(message_text)
+
+        # Corrigir rating se necessário
+        if any(word in message_text.lower() for word in ['péssimo', 'horrível', 'terrível']):
+            if sentiment['rating'] != 1:
+                sentiment = {'emoji': '😡', 'rating': 1}
+
+        # Salvar feedback
+        feedback = CSATFeedback.objects.create(
+            conversation=conversation,
+            contact=contact,
+            emoji_rating=sentiment['emoji'],
+            rating_value=sentiment['rating'],
+            original_message=message_text
+        )
+
+        # Gerar resposta personalizada
+        response = openai_service.generate_csat_response(
+            sentiment['rating'], 
+            contact.name
+        )
+
+        return feedback, response
+</code></pre>
+<h3 id="2-resposta-personalizada">2. Resposta Personalizada</h3>
+<pre><code class="language-python"># core/openai_service.py
+def generate_csat_response(self, rating: int, contact_name: str) -&gt; str:
+    &quot;&quot;&quot;Gerar resposta personalizada para CSAT&quot;&quot;&quot;
+    responses = {
+        1: f&quot;😔 Sinto muito que seu atendimento não foi bom, {contact_name}! Estamos sempre melhorando e esperamos te atender melhor na próxima vez.&quot;,
+        2: f&quot;😕 Poxa, {contact_name}, sentimos que não tenha gostado. Sua opinião é importante para melhorarmos!&quot;,
+        3: f&quot;🙂 Obrigado pelo seu feedback, {contact_name}! Vamos trabalhar para te surpreender da próxima vez.&quot;,
+        4: f&quot;😄 Que bom saber disso, {contact_name}! Ficamos felizes que seu atendimento foi bom!&quot;,
+        5: f&quot;🤩 Maravilha, {contact_name}! Agradecemos por sua avaliação e ficamos felizes com sua satisfação!&quot;
+    }
+
+    return responses.get(rating, responses[3])
+</code></pre>
+<h2 id="configuracoes-avancadas">Configurações Avançadas</h2>
+<h3 id="1-prompts-personalizados">1. Prompts Personalizados</h3>
+<pre><code class="language-python"># core/openai_service.py
+def _get_custom_prompt(self, provedor_id: int) -&gt; str:
+    &quot;&quot;&quot;Obter prompt personalizado por provedor&quot;&quot;&quot;
+    try:
+        provedor = Provedor.objects.get(id=provedor_id)
+        return f&quot;&quot;&quot;
+        Você é um assistente virtual da {provedor.name}.
+
+        Especialização: {provedor.description}
+        Tom: {provedor.tone or 'profissional e amigável'}
+        Linguagem: {provedor.language or 'português brasileiro'}
+
+        Instruções específicas:
+        {provedor.ai_instructions or 'Seja sempre prestativo e resolva os problemas do cliente.'}
+        &quot;&quot;&quot;
+    except:
+        return self._get_system_prompt({})
+</code></pre>
+<h3 id="2-rate-limiting">2. Rate Limiting</h3>
+<pre><code class="language-python"># core/openai_service.py
+from django.core.cache import cache
+
+def generate_response_with_rate_limit(self, message: str, context: Dict[str, Any]) -&gt; str:
+    &quot;&quot;&quot;Gerar resposta com rate limiting&quot;&quot;&quot;
+    user_id = context.get('user_id')
+    cache_key = f&quot;openai_rate_limit_{user_id}&quot;
+
+    # Verificar rate limit
+    if cache.get(cache_key):
+        return &quot;Muitas requisições. Aguarde um momento.&quot;
+
+    # Definir rate limit (1 requisição por segundo)
+    cache.set(cache_key, True, 1)
+
+    return self.generate_response(message, context)
+</code></pre>
+<h3 id="3-logging-e-monitoramento">3. Logging e Monitoramento</h3>
+<pre><code class="language-python"># core/openai_service.py
+import logging
+
+logger = logging.getLogger(__name__)
+
+def generate_response(self, message: str, context: Dict[str, Any]) -&gt; str:
+    &quot;&quot;&quot;Gerar resposta com logging&quot;&quot;&quot;
+    start_time = time.time()
+
+    try:
+        response = openai.ChatCompletion.create(
+            model=self.model,
+            messages=[
+                {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: self._get_system_prompt(context)},
+                {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: message}
+            ],
+            max_tokens=self.max_tokens,
+            temperature=self.temperature
+        )
+
+        # Log de sucesso
+        logger.info(f&quot;Resposta gerada em {time.time() - start_time:.2f}s&quot;)
+
+        return response.choices[0].message.content
+
+    except Exception as e:
+        # Log de erro
+        logger.error(f&quot;Erro ao gerar resposta: {e}&quot;)
+        return &quot;Desculpe, ocorreu um erro. Tente novamente.&quot;
+</code></pre>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="1-problemas-comuns">1. Problemas Comuns</h3>
+<pre><code class="language-bash"># Verificar chave OpenAI
+curl -H &quot;Authorization: Bearer sk-sua_chave&quot; https://api.openai.com/v1/models
+
+# Verificar créditos
+curl -H &quot;Authorization: Bearer sk-sua_chave&quot; https://api.openai.com/v1/usage
+</code></pre>
+<h3 id="2-logs-de-debug">2. Logs de Debug</h3>
+<pre><code class="language-python"># Testar conexão
+from core.openai_service import OpenAIService
+openai_service = OpenAIService()
+print(openai_service.test_connection())
+</code></pre>
+<h3 id="3-monitoramento">3. Monitoramento</h3>
+<pre><code class="language-python"># Verificar uso da API
+def check_openai_usage():
+    try:
+        usage = openai.Usage.retrieve()
+        print(f&quot;Tokens usados: {usage.total_tokens}&quot;)
+        print(f&quot;Custo: ${usage.total_cost}&quot;)
+    except Exception as e:
+        print(f&quot;Erro ao verificar uso: {e}&quot;)
+</code></pre>
+<h2 id="proximos-passos">Próximos Passos</h2>
+<ol>
+<li><a href="ai/function-calls.md">Function Calls</a> - Configure function calls</li>
+<li><a href="ai/sgp-integration.md">SGP Integration</a> - Configure integração SGP</li>
+<li><a href="ai/transcription.md">Transcrição</a> - Configure transcrição</li>
+</ol></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

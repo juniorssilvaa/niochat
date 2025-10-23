@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Endpoints da API - NioChat</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/rainbow.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">NioChat</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">NioChat - Sistema de Atendimento WhatsApp</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../changelog/" class="nav-link">Changelog</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Ai</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../ai/configuration/" class="dropdown-item">Configuração da IA</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Api</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../authentication/" class="dropdown-item">Autenticação</a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Endpoints da API</a>
+</li>
+                                    
+<li>
+    <a href="../postman-guide/" class="dropdown-item">Guia de Uso do Postman com NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../webhooks/" class="dropdown-item">Webhooks</a>
+</li>
+                                    
+<li>
+    <a href="../websocket/" class="dropdown-item">WebSocket</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Configuration</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../configuration/supabase/" class="dropdown-item">Configuração do Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Development</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../development/contributing/" class="dropdown-item">Contribuindo para o NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../../development/structure/" class="dropdown-item">Estrutura do Projeto</a>
+</li>
+                                    
+<li>
+    <a href="../../development/troubleshooting/" class="dropdown-item">Troubleshooting</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Installation</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../installation/development/" class="dropdown-item">Instalação em Desenvolvimento</a>
+</li>
+                                    
+<li>
+    <a href="../../installation/production/" class="dropdown-item">Instalação em Produção</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Overview</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../overview/architecture/" class="dropdown-item">Arquitetura do Sistema</a>
+</li>
+                                    
+<li>
+    <a href="../../overview/features/" class="dropdown-item">Funcionalidades</a>
+</li>
+                                    
+<li>
+    <a href="../../overview/introduction/" class="dropdown-item">Introdução ao NioChat</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Supabase</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../supabase/integration/" class="dropdown-item">Integração com Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Usage</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../usage/interface/" class="dropdown-item">Interface do Usuário</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../authentication/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../postman-guide/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#endpoints-da-api" class="nav-link">Endpoints da API</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#autenticacao" class="nav-link">Autenticação</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#contatos" class="nav-link">Contatos</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conversas" class="nav-link">Conversas</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#inboxes" class="nav-link">Inboxes</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conversas_1" class="nav-link">Conversas</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#mensagens" class="nav-link">Mensagens</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#equipes" class="nav-link">Equipes</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#chat-interno" class="nav-link">Chat Interno</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#chat-privado" class="nav-link">Chat Privado</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#csat-customer-satisfaction" class="nav-link">CSAT (Customer Satisfaction)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#dashboard" class="nav-link">Dashboard</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#ia-e-sgp" class="nav-link">IA e SGP</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#integracoes" class="nav-link">Integrações</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#auditoria" class="nav-link">Auditoria</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#webhooks" class="nav-link">Webhooks</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#sistema" class="nav-link">Sistema</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#websocket-events" class="nav-link">WebSocket Events</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#codigos-de-status" class="nav-link">Códigos de Status</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#tratamento-de-erros" class="nav-link">Tratamento de Erros</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#guia-do-postman" class="nav-link">Guia do Postman</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#proximos-passos" class="nav-link">Próximos Passos</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="endpoints-da-api">Endpoints da API</h1>
+<p>O NioChat oferece uma API REST completa para integração e automação. Esta seção documenta todos os endpoints disponíveis.</p>
+<h2 id="autenticacao">Autenticação</h2>
+<h3 id="login">Login</h3>
+<pre><code class="language-http">POST /api/auth/login/
+Content-Type: application/json
+
+{
+  &quot;username&quot;: &quot;usuario&quot;,
+  &quot;password&quot;: &quot;senha&quot;
+}
+</code></pre>
+<p><strong>Resposta:</strong></p>
+<pre><code class="language-json">{
+  &quot;token&quot;: &quot;afe94c2006465105312e24043b859e5c0628aadf&quot;
+}
+</code></pre>
+<p><strong>Nota:</strong> A API retorna apenas o token. Para obter dados do usuário, use <code>/api/auth/me/</code> após o login.</p>
+<h3 id="logout">Logout</h3>
+<pre><code class="language-http">POST /api/auth/logout/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="informacoes-do-usuario">Informações do Usuário</h3>
+<pre><code class="language-http">GET /api/auth/me/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<p><strong>Resposta:</strong></p>
+<pre><code class="language-json">{
+    &quot;id&quot;: 3,
+    &quot;username&quot;: &quot;niochat&quot;,
+    &quot;email&quot;: &quot;contatofinnybot@gmail.com.br&quot;,
+    &quot;first_name&quot;: &quot;Nio&quot;,
+    &quot;last_name&quot;: &quot;chat&quot;,
+    &quot;provedor_id&quot;: 1,
+    &quot;user_type&quot;: &quot;admin&quot;,
+    &quot;permissions&quot;: [],
+    &quot;sound_notifications_enabled&quot;: true,
+    &quot;new_message_sound&quot;: &quot;message_in_02.mp3&quot;,
+    &quot;new_conversation_sound&quot;: &quot;chat_new_08.mp3&quot;,
+    &quot;session_timeout&quot;: 60
+}
+</code></pre>
+<h3 id="timeout-de-sessao">Timeout de Sessão</h3>
+<pre><code class="language-http">POST /api/auth/session-timeout/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+
+{
+  &quot;timeout&quot;: 60
+}
+</code></pre>
+<p><strong>Resposta de Sucesso:</strong></p>
+<pre><code class="language-json">{
+  &quot;message&quot;: &quot;Timeout da sessão atualizado com sucesso&quot;,
+  &quot;session_timeout&quot;: 60
+}
+</code></pre>
+<p><strong>Resposta de Erro:</strong></p>
+<pre><code class="language-json">{
+  &quot;error&quot;: &quot;Timeout da sessão não fornecido&quot;
+}
+</code></pre>
+<h2 id="contatos">Contatos</h2>
+<h3 id="listar-contatos">Listar Contatos</h3>
+<pre><code class="language-http">GET /api/contacts/
+Authorization: Token afe94c2006465105312e24043b859e5c0628aadf
+</code></pre>
+<p><strong>Resposta:</strong></p>
+<pre><code class="language-json">{
+  &quot;count&quot;: 2,
+  &quot;next&quot;: null,
+  &quot;previous&quot;: null,
+  &quot;results&quot;: [
+    {
+      &quot;id&quot;: 1,
+      &quot;name&quot;: &quot;João Silva&quot;,
+      &quot;phone&quot;: &quot;11999999999&quot;,
+      &quot;avatar&quot;: &quot;https://example.com/avatar1.jpg&quot;,
+      &quot;inbox&quot;: 1,
+      &quot;created_at&quot;: &quot;2025-10-11T19:55:34.775872-03:00&quot;,
+      &quot;updated_at&quot;: &quot;2025-10-11T20:06:34.300428-03:00&quot;,
+      &quot;is_online&quot;: false,
+      &quot;last_seen&quot;: null,
+      &quot;conversation_count&quot;: 1,
+      &quot;unread_messages&quot;: 0
+    },
+    {
+      &quot;id&quot;: 2,
+      &quot;name&quot;: &quot;Maria Santos&quot;,
+      &quot;phone&quot;: &quot;11988888888&quot;,
+      &quot;avatar&quot;: &quot;https://example.com/avatar2.jpg&quot;,
+      &quot;inbox&quot;: 1,
+      &quot;created_at&quot;: &quot;2025-10-11T20:04:40.459828-03:00&quot;,
+      &quot;updated_at&quot;: &quot;2025-10-11T20:06:34.300428-03:00&quot;,
+      &quot;is_online&quot;: true,
+      &quot;last_seen&quot;: &quot;2025-10-11T20:30:00.000000-03:00&quot;,
+      &quot;conversation_count&quot;: 2,
+      &quot;unread_messages&quot;: 1
+    }
+  ]
+}
+</code></pre>
+<h3 id="detalhes-do-contato">Detalhes do Contato</h3>
+<pre><code class="language-http">GET /api/contacts/{id}/
+Authorization: Token afe94c2006465105312e24043b859e5c0628aadf
+</code></pre>
+<h3 id="criar-contato">Criar Contato</h3>
+<pre><code class="language-http">POST /api/contacts/
+Authorization: Token afe94c2006465105312e24043b859e5c0628aadf
+Content-Type: application/json
+
+{
+  &quot;name&quot;: &quot;João Silva&quot;,
+  &quot;phone&quot;: &quot;11999999999&quot;,
+  &quot;email&quot;: &quot;joao@exemplo.com&quot;,
+  &quot;provedor&quot;: 1
+}
+</code></pre>
+<p><strong>Resposta:</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: 14,
+  &quot;name&quot;: &quot;João Silva&quot;,
+  &quot;email&quot;: &quot;joao@exemplo.com&quot;,
+  &quot;phone&quot;: &quot;11999999999&quot;,
+  &quot;avatar&quot;: null,
+  &quot;additional_attributes&quot;: {},
+  &quot;provedor&quot;: 1,
+  &quot;created_at&quot;: &quot;2025-10-12T00:26:47.361663-03:00&quot;,
+  &quot;updated_at&quot;: &quot;2025-10-12T00:26:47.361663-03:00&quot;
+}
+</code></pre>
+<p><strong>Campos Obrigatórios:</strong>
+- <code>name</code>: Nome do contato
+- <code>phone</code>: Telefone do contato
+- <code>provedor</code>: ID do provedor (ex: 1)</p>
+<p><strong>Campos Opcionais:</strong>
+- <code>email</code>: Email do contato</p>
+<p><strong>Resposta de Sucesso:</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: 3,
+  &quot;name&quot;: &quot;João Silva&quot;,
+  &quot;phone&quot;: &quot;+5511999999999&quot;,
+  &quot;email&quot;: &quot;joao@exemplo.com&quot;,
+  &quot;avatar&quot;: null,
+  &quot;inbox&quot;: 1,
+  &quot;created_at&quot;: &quot;2025-10-12T00:21:00.000000-03:00&quot;,
+  &quot;updated_at&quot;: &quot;2025-10-12T00:21:00.000000-03:00&quot;,
+  &quot;is_online&quot;: false,
+  &quot;last_seen&quot;: null,
+  &quot;conversation_count&quot;: 0,
+  &quot;unread_messages&quot;: 0
+}
+</code></pre>
+<h2 id="conversas">Conversas</h2>
+<h3 id="listar-conversas">Listar Conversas</h3>
+<pre><code class="language-http">GET /api/conversations/
+Authorization: Token afe94c2006465105312e24043b859e5c0628aadf
+</code></pre>
+<p><strong>Parâmetros de Query:</strong>
+- <code>search</code>: Busca por nome ou telefone
+- <code>page</code>: Número da página
+- <code>page_size</code>: Tamanho da página</p>
+<p><strong>Resposta:</strong></p>
+<pre><code class="language-json">{
+  &quot;count&quot;: 2,
+  &quot;next&quot;: null,
+  &quot;previous&quot;: null,
+  &quot;results&quot;: [
+    {
+      &quot;id&quot;: 12,
+      &quot;name&quot;: &quot;Minha Vida 😍&quot;,
+      &quot;email&quot;: null,
+      &quot;phone&quot;: &quot;556392484773&quot;,
+      &quot;avatar&quot;: &quot;https://pps.whatsapp.net/v/t61.24694-24/559942536_2260568477780892_429171894518858519_n.jpg?ccb=11-4&amp;oh=01_Q5Aa2wGmst6l_wRLC1bGQRObsbi7pf4k7e6Svu24z3ZtDcGe7Q&amp;oe=68F2ACE8&amp;_nc_sid=5e03e0&amp;_nc_cat=103&quot;,
+      &quot;additional_attributes&quot;: {
+        &quot;event&quot;: &quot;messages&quot;,
+        &quot;chatid&quot;: &quot;556392484773@s.whatsapp.net&quot;,
+        &quot;instance&quot;: &quot;11999999999&quot;,
+        &quot;sender_lid&quot;: &quot;249666566365270@lid&quot;
+      },
+      &quot;provedor&quot;: 1,
+      &quot;created_at&quot;: &quot;2025-10-11T19:55:34.010282-03:00&quot;,
+      &quot;updated_at&quot;: &quot;2025-10-11T19:57:59.568844-03:00&quot;,
+      &quot;inbox&quot;: {
+        &quot;id&quot;: 1,
+        &quot;name&quot;: &quot;WhatsApp 11999999999&quot;,
+        &quot;channel_type&quot;: &quot;whatsapp&quot;,
+        &quot;provedor&quot;: 1,
+        &quot;is_active&quot;: true,
+        &quot;created_at&quot;: &quot;2025-09-17T23:01:58.067397-03:00&quot;
+      }
+    },
+    {
+      &quot;id&quot;: 13,
+      &quot;name&quot;: &quot;Minha Vida ❤️😍&quot;,
+      &quot;email&quot;: null,
+      &quot;phone&quot;: &quot;559491561248&quot;,
+      &quot;avatar&quot;: &quot;https://pps.whatsapp.net/v/t61.24694-24/564320629_4141239932761672_4017937049576898413_n.jpg?ccb=11-4&amp;oh=01_Q5Aa2wG7KvYDF5uxK2lrwVrQsCcnNxuVJ8w5W_8Ty4F0LxcZRw&amp;oe=68F7DAB1&amp;_nc_sid=5e03e0&amp;_nc_cat=109&quot;,
+      &quot;additional_attributes&quot;: {
+        &quot;event&quot;: &quot;messages&quot;,
+        &quot;chatid&quot;: &quot;559491561248@s.whatsapp.net&quot;,
+        &quot;instance&quot;: &quot;11999999999&quot;,
+        &quot;sender_lid&quot;: &quot;141880620785739@lid&quot;
+      },
+      &quot;provedor&quot;: 1,
+      &quot;created_at&quot;: &quot;2025-10-11T20:04:39.896621-03:00&quot;,
+      &quot;updated_at&quot;: &quot;2025-10-11T20:06:31.952866-03:00&quot;,
+      &quot;inbox&quot;: {
+        &quot;id&quot;: 1,
+        &quot;name&quot;: &quot;WhatsApp 11999999999&quot;,
+        &quot;channel_type&quot;: &quot;whatsapp&quot;,
+        &quot;provedor&quot;: 1,
+        &quot;is_active&quot;: true,
+        &quot;created_at&quot;: &quot;2025-09-17T23:01:58.067397-03:00&quot;
+      }
+    }
+  ]
+}
+</code></pre>
+<h3 id="detalhes-do-contato_1">Detalhes do Contato</h3>
+<pre><code class="language-http">GET /api/contacts/{id}/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="atualizar-contato">Atualizar Contato</h3>
+<pre><code class="language-http">PUT /api/contacts/{id}/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+
+{
+  &quot;name&quot;: &quot;João Silva Atualizado&quot;,
+  &quot;phone&quot;: &quot;+5511999999999&quot;
+}
+</code></pre>
+<h2 id="inboxes">Inboxes</h2>
+<h3 id="listar-inboxes">Listar Inboxes</h3>
+<pre><code class="language-http">GET /api/inboxes/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="detalhes-da-inbox">Detalhes da Inbox</h3>
+<pre><code class="language-http">GET /api/inboxes/{id}/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="criar-inbox">Criar Inbox</h3>
+<pre><code class="language-http">POST /api/inboxes/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+
+{
+  &quot;name&quot;: &quot;WhatsApp Business&quot;,
+  &quot;channel&quot;: 1,
+  &quot;provedor&quot;: 1
+}
+</code></pre>
+<h2 id="conversas_1">Conversas</h2>
+<h3 id="listar-conversas_1">Listar Conversas</h3>
+<pre><code class="language-http">GET /api/conversations/
+Authorization: Token afe94c2006465105312e24043b859e5c0628aadf
+</code></pre>
+<p><strong>Resposta:</strong></p>
+<pre><code class="language-json">{
+  &quot;count&quot;: 1,
+  &quot;next&quot;: null,
+  &quot;previous&quot;: null,
+  &quot;results&quot;: [
+    {
+      &quot;id&quot;: 13,
+      &quot;contact&quot;: {
+        &quot;id&quot;: 13,
+        &quot;name&quot;: &quot;Minha Vida ❤️😍&quot;,
+        &quot;email&quot;: null,
+        &quot;phone&quot;: &quot;559491561248&quot;,
+        &quot;avatar&quot;: &quot;https://pps.whatsapp.net/v/t61.24694-24/564320629_4141239932761672_4017937049576898413_n.jpg?ccb=11-4&amp;oh=01_Q5Aa2wG7KvYDF5uxK2lrwVrQsCcnNxuVJ8w5W_8Ty4F0LxcZRw&amp;oe=68F7DAB1&amp;_nc_sid=5e03e0&amp;_nc_cat=109&quot;,
+        &quot;additional_attributes&quot;: {
+          &quot;event&quot;: &quot;messages&quot;,
+          &quot;chatid&quot;: &quot;559491561248@s.whatsapp.net&quot;,
+          &quot;instance&quot;: &quot;11999999999&quot;,
+          &quot;sender_lid&quot;: &quot;141880620785739@lid&quot;
+        },
+        &quot;provedor&quot;: 1,
+        &quot;created_at&quot;: &quot;2025-10-11T20:04:39.896621-03:00&quot;,
+        &quot;updated_at&quot;: &quot;2025-10-11T20:06:31.952866-03:00&quot;,
+        &quot;inbox&quot;: {
+          &quot;id&quot;: 1,
+          &quot;name&quot;: &quot;WhatsApp 11999999999&quot;,
+          &quot;channel_type&quot;: &quot;whatsapp&quot;,
+          &quot;provedor&quot;: 1,
+          &quot;is_active&quot;: true,
+          &quot;created_at&quot;: &quot;2025-09-17T23:01:58.067397-03:00&quot;
+        }
+      },
+      &quot;inbox&quot;: {
+        &quot;id&quot;: 1,
+        &quot;name&quot;: &quot;WhatsApp 11999999999&quot;,
+        &quot;channel_type&quot;: &quot;whatsapp&quot;,
+        &quot;provedor&quot;: 1,
+        &quot;is_active&quot;: true,
+        &quot;created_at&quot;: &quot;2025-09-17T23:01:58.067397-03:00&quot;
+      },
+      &quot;assignee&quot;: null,
+      &quot;status&quot;: &quot;snoozed&quot;,
+      &quot;additional_attributes&quot;: {
+        &quot;event&quot;: &quot;messages&quot;,
+        &quot;instance&quot;: &quot;559484024089&quot;
+      },
+      &quot;last_message_at&quot;: null,
+      &quot;created_at&quot;: &quot;2025-10-11T20:04:40.407433-03:00&quot;,
+      &quot;last_message&quot;: {
+        &quot;id&quot;: 240,
+        &quot;conversation&quot;: 13,
+        &quot;message_type&quot;: &quot;outgoing&quot;,
+        &quot;media_type&quot;: &quot;outgoing&quot;,
+        &quot;file_url&quot;: null,
+        &quot;content&quot;: &quot;Atendimento encerrado. Agradecemos o seu contato, senhor Rogério. \n\nTenha uma excelente noite! 😊&quot;,
+        &quot;is_from_customer&quot;: false,
+        &quot;created_at&quot;: &quot;2025-10-11T20:06:34.300428-03:00&quot;,
+        &quot;external_id&quot;: &quot;559484024089:3EB01FEB66F1A4B05DB145&quot;,
+        &quot;additional_attributes&quot;: {
+          &quot;event&quot;: &quot;messages&quot;,
+          &quot;instance&quot;: &quot;559484024089&quot;
+        }
+      }
+    }
+  ]
+}
+</code></pre>
+<p><strong>Parâmetros de Query:</strong>
+- <code>status</code>: open, closed, pending
+- <code>assignee</code>: ID do agente
+- <code>team</code>: ID da equipe
+- <code>search</code>: Busca por texto
+- <code>page</code>: Número da página
+- <code>page_size</code>: Tamanho da página</p>
+<p><strong>Resposta:</strong></p>
+<pre><code class="language-json">{
+  &quot;count&quot;: 100,
+  &quot;next&quot;: &quot;http://localhost:8010/api/conversations/?page=2&quot;,
+  &quot;previous&quot;: null,
+  &quot;results&quot;: [
+    {
+      &quot;id&quot;: 1,
+      &quot;contact&quot;: {
+        &quot;id&quot;: 1,
+        &quot;name&quot;: &quot;João Silva&quot;,
+        &quot;phone&quot;: &quot;+5511999999999&quot;,
+        &quot;profile_picture&quot;: &quot;https://example.com/photo.jpg&quot;
+      },
+      &quot;status&quot;: &quot;open&quot;,
+      &quot;assignee&quot;: {
+        &quot;id&quot;: 1,
+        &quot;username&quot;: &quot;agente1&quot;,
+        &quot;first_name&quot;: &quot;Agente&quot;
+      },
+      &quot;team&quot;: {
+        &quot;id&quot;: 1,
+        &quot;name&quot;: &quot;Suporte&quot;
+      },
+      &quot;last_message&quot;: {
+        &quot;id&quot;: 1,
+        &quot;content&quot;: &quot;Olá, como posso ajudar?&quot;,
+        &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;
+      },
+      &quot;created_at&quot;: &quot;2024-01-01T09:00:00Z&quot;,
+      &quot;updated_at&quot;: &quot;2024-01-01T10:00:00Z&quot;
+    }
+  ]
+}
+</code></pre>
+<h3 id="detalhes-da-conversa">Detalhes da Conversa</h3>
+<pre><code class="language-http">GET /api/conversations/{id}/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="atribuir-conversa">Atribuir Conversa</h3>
+<pre><code class="language-http">POST /api/conversations/{id}/assign/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+
+{
+  &quot;user_id&quot;: 1
+}
+</code></pre>
+<p><strong>Resposta:</strong></p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;message&quot;: &quot;Conversa atribuída para Agente&quot;,
+  &quot;conversation&quot;: {
+    &quot;id&quot;: 1,
+    &quot;assignee&quot;: {
+      &quot;id&quot;: 1,
+      &quot;username&quot;: &quot;agente1&quot;,
+      &quot;first_name&quot;: &quot;Agente&quot;
+    },
+    &quot;status&quot;: &quot;open&quot;
+  }
+}
+</code></pre>
+<h3 id="transferir-para-agente">Transferir para Agente</h3>
+<pre><code class="language-http">POST /api/conversations/{id}/transfer/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+
+{
+  &quot;user_id&quot;: 2
+}
+</code></pre>
+<h3 id="transferir-para-equipe">Transferir para Equipe</h3>
+<pre><code class="language-http">POST /api/conversations/{id}/transfer_to_team/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+
+{
+  &quot;team_id&quot;: 1,
+  &quot;team_name&quot;: &quot;SUPORTE TÉCNICO&quot;
+}
+</code></pre>
+<p><strong>Resposta:</strong></p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;message&quot;: &quot;Conversa transferida para equipe SUPORTE TÉCNICO&quot;,
+  &quot;conversation&quot;: {
+    &quot;id&quot;: 1,
+    &quot;status&quot;: &quot;pending&quot;,
+    &quot;assignee&quot;: null,
+    &quot;team&quot;: &quot;SUPORTE TÉCNICO&quot;
+  }
+}
+</code></pre>
+<h3 id="fechar-conversa">Fechar Conversa</h3>
+<pre><code class="language-http">POST /api/conversations/{id}/close/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="reabrir-conversa">Reabrir Conversa</h3>
+<pre><code class="language-http">POST /api/conversations/{id}/reopen/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="estatisticas-de-recuperacao">Estatísticas de Recuperação</h3>
+<pre><code class="language-http">GET /api/recovery/stats/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="configuracoes-de-recuperacao">Configurações de Recuperação</h3>
+<pre><code class="language-http">POST /api/recovery/settings/{provedor_id}/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+
+{
+  &quot;enabled&quot;: true,
+  &quot;auto_recovery&quot;: true,
+  &quot;recovery_interval&quot;: 30
+}
+</code></pre>
+<h2 id="mensagens">Mensagens</h2>
+<h3 id="listar-mensagens">Listar Mensagens</h3>
+<pre><code class="language-http">GET /api/messages/
+Authorization: Token afe94c2006465105312e24043b859e5c0628aadf
+</code></pre>
+<p><strong>Resposta:</strong></p>
+<pre><code class="language-json">{
+  &quot;count&quot;: 23,
+  &quot;next&quot;: null,
+  &quot;previous&quot;: null,
+  &quot;results&quot;: [
+    {
+      &quot;id&quot;: 218,
+      &quot;conversation&quot;: 12,
+      &quot;message_type&quot;: &quot;incoming&quot;,
+      &quot;media_type&quot;: &quot;incoming&quot;,
+      &quot;file_url&quot;: null,
+      &quot;content&quot;: &quot;Ola&quot;,
+      &quot;is_from_customer&quot;: true,
+      &quot;created_at&quot;: &quot;2025-10-11T19:55:34.775872-03:00&quot;,
+        &quot;external_id&quot;: &quot;11999999999:ABC123DEF456&quot;,
+      &quot;additional_attributes&quot;: {
+        &quot;external_id&quot;: &quot;559484024089:3EB057A8C58547E3401498&quot;
+      }
+    },
+    {
+      &quot;id&quot;: 219,
+      &quot;conversation&quot;: 12,
+      &quot;message_type&quot;: &quot;outgoing&quot;,
+      &quot;media_type&quot;: &quot;outgoing&quot;,
+      &quot;file_url&quot;: null,
+      &quot;content&quot;: &quot;Boa noite! Você já é cliente da NIO NET ou deseja conhecer nossos planos?&quot;,
+      &quot;is_from_customer&quot;: false,
+      &quot;created_at&quot;: &quot;2025-10-11T19:55:38.094792-03:00&quot;,
+        &quot;external_id&quot;: &quot;11999999999:DEF456GHI789&quot;,
+      &quot;additional_attributes&quot;: {}
+    }
+  ]
+}
+</code></pre>
+<p><strong>Parâmetros de Query:</strong>
+- <code>conversation</code>: ID da conversa
+- <code>page</code>: Número da página
+- <code>page_size</code>: Tamanho da página</p>
+<h3 id="detalhes-da-mensagem">Detalhes da Mensagem</h3>
+<pre><code class="language-http">GET /api/messages/{id}/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="enviar-texto">Enviar Texto</h3>
+<pre><code class="language-http">POST /api/messages/send_text/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+
+{
+  &quot;conversation_id&quot;: 1,
+  &quot;content&quot;: &quot;Olá, como posso ajudar?&quot;
+}
+</code></pre>
+<h3 id="enviar-midia">Enviar Mídia</h3>
+<pre><code class="language-http">POST /api/messages/send_media/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: multipart/form-data
+
+{
+  &quot;conversation_id&quot;: 1,
+  &quot;file&quot;: [arquivo],
+  &quot;message_type&quot;: &quot;image&quot;
+}
+</code></pre>
+<h3 id="reagir-a-mensagem">Reagir a Mensagem</h3>
+<pre><code class="language-http">POST /api/messages/react/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+
+{
+  &quot;message_id&quot;: 1,
+  &quot;reaction&quot;: &quot;👍&quot;
+}
+</code></pre>
+<h3 id="deletar-mensagem">Deletar Mensagem</h3>
+<pre><code class="language-http">POST /api/messages/delete_message/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+
+{
+  &quot;message_id&quot;: 1
+}
+</code></pre>
+<h3 id="servir-arquivo-de-midia">Servir Arquivo de Mídia</h3>
+<pre><code class="language-http">GET /api/media/messages/{conversation_id}/{filename}/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h2 id="equipes">Equipes</h2>
+<h3 id="listar-equipes">Listar Equipes</h3>
+<pre><code class="language-http">GET /api/teams/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="detalhes-da-equipe">Detalhes da Equipe</h3>
+<pre><code class="language-http">GET /api/teams/{id}/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="criar-equipe">Criar Equipe</h3>
+<pre><code class="language-http">POST /api/teams/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+
+{
+  &quot;name&quot;: &quot;Suporte Técnico&quot;,
+  &quot;description&quot;: &quot;Equipe de suporte técnico&quot;,
+  &quot;provedor&quot;: 1
+}
+</code></pre>
+<h3 id="membros-da-equipe">Membros da Equipe</h3>
+<pre><code class="language-http">GET /api/team-members/?team={id}
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="adicionar-membro-a-equipe">Adicionar Membro à Equipe</h3>
+<pre><code class="language-http">POST /api/team-members/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+
+{
+  &quot;team&quot;: 1,
+  &quot;user&quot;: 2
+}
+</code></pre>
+<h2 id="chat-interno">Chat Interno</h2>
+<h3 id="salas-de-chat">Salas de Chat</h3>
+<pre><code class="language-http">GET /api/internal-chat/rooms/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="criar-sala-de-chat">Criar Sala de Chat</h3>
+<pre><code class="language-http">POST /api/internal-chat/rooms/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+
+{
+  &quot;name&quot;: &quot;Sala de Suporte&quot;,
+  &quot;description&quot;: &quot;Sala para discussões de suporte&quot;
+}
+</code></pre>
+<h3 id="mensagens-do-chat-interno">Mensagens do Chat Interno</h3>
+<pre><code class="language-http">GET /api/internal-chat/messages/?room={id}
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="enviar-mensagem-no-chat-interno">Enviar Mensagem no Chat Interno</h3>
+<pre><code class="language-http">POST /api/internal-chat/messages/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+
+{
+  &quot;room&quot;: 1,
+  &quot;content&quot;: &quot;Mensagem interna&quot;
+}
+</code></pre>
+<h3 id="participantes-da-sala">Participantes da Sala</h3>
+<pre><code class="language-http">GET /api/internal-chat/participants/?room={id}
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="adicionar-participante">Adicionar Participante</h3>
+<pre><code class="language-http">POST /api/internal-chat/participants/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+
+{
+  &quot;room&quot;: 1,
+  &quot;user&quot;: 2
+}
+</code></pre>
+<h3 id="contagem-de-mensagens-nao-lidas-chat-interno">Contagem de Mensagens Não Lidas (Chat Interno)</h3>
+<pre><code class="language-http">GET /api/internal-chat-unread-count/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="mensagens-nao-lidas-por-usuario-chat-interno">Mensagens Não Lidas por Usuário (Chat Interno)</h3>
+<pre><code class="language-http">GET /api/internal-chat-unread-by-user/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h2 id="chat-privado">Chat Privado</h2>
+<h3 id="mensagens-privadas">Mensagens Privadas</h3>
+<pre><code class="language-http">GET /api/private-messages/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="enviar-mensagem-privada">Enviar Mensagem Privada</h3>
+<pre><code class="language-http">POST /api/private-messages/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+
+{
+  &quot;recipient&quot;: 2,
+  &quot;content&quot;: &quot;Mensagem privada&quot;
+}
+</code></pre>
+<h3 id="contagem-de-mensagens-nao-lidas-chat-privado">Contagem de Mensagens Não Lidas (Chat Privado)</h3>
+<pre><code class="language-http">GET /api/private-unread-counts/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h2 id="csat-customer-satisfaction">CSAT (Customer Satisfaction)</h2>
+<h3 id="feedbacks-csat">Feedbacks CSAT</h3>
+<pre><code class="language-http">GET /api/csat/feedbacks/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="estatisticas-csat">Estatísticas CSAT</h3>
+<pre><code class="language-http">GET /api/csat/feedbacks/stats/
+Authorization: Token afe94c2006465105312e24043b859e5c0628aadf
+</code></pre>
+<p><strong>Resposta:</strong></p>
+<pre><code class="language-json">{
+  &quot;total_feedbacks&quot;: 0,
+  &quot;average_rating&quot;: 0,
+  &quot;satisfaction_rate&quot;: 0,
+  &quot;rating_distribution&quot;: [],
+  &quot;channel_distribution&quot;: [],
+  &quot;daily_stats&quot;: [
+    {
+      &quot;day&quot;: &quot;2025-09-12&quot;,
+      &quot;count&quot;: 0,
+      &quot;avg_rating&quot;: 0
+    },
+    {
+      &quot;day&quot;: &quot;2025-09-13&quot;,
+      &quot;count&quot;: 0,
+      &quot;avg_rating&quot;: 0
+    },
+    {
+      &quot;day&quot;: &quot;2025-09-14&quot;,
+      &quot;count&quot;: 0,
+      &quot;avg_rating&quot;: 0
+    }
+  ]
+}
+</code></pre>
+<p><strong>Resposta:</strong></p>
+<pre><code class="language-json">{
+  &quot;total_feedbacks&quot;: 50,
+  &quot;average_rating&quot;: 4.2,
+  &quot;rating_distribution&quot;: {
+    &quot;1&quot;: 2,
+    &quot;2&quot;: 3,
+    &quot;3&quot;: 8,
+    &quot;4&quot;: 15,
+    &quot;5&quot;: 22
+  },
+  &quot;recent_feedbacks&quot;: [
+    {
+      &quot;id&quot;: 1,
+      &quot;contact_name&quot;: &quot;João Silva&quot;,
+      &quot;contact_photo&quot;: &quot;https://example.com/photo.jpg&quot;,
+      &quot;emoji_rating&quot;: &quot;🤩&quot;,
+      &quot;rating_value&quot;: 5,
+      &quot;original_message&quot;: &quot;Excelente atendimento!&quot;,
+      &quot;feedback_sent_at&quot;: &quot;2024-01-01T10:00:00Z&quot;
+    }
+  ]
+}
+</code></pre>
+<h3 id="solicitacoes-csat">Solicitações CSAT</h3>
+<pre><code class="language-http">GET /api/csat/requests/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="webhook-csat">Webhook CSAT</h3>
+<pre><code class="language-http">POST /api/csat/webhook/
+Content-Type: application/json
+
+{
+  &quot;conversation_id&quot;: 1,
+  &quot;rating&quot;: 5,
+  &quot;feedback&quot;: &quot;Excelente atendimento!&quot;
+}
+</code></pre>
+<h2 id="dashboard">Dashboard</h2>
+<h3 id="estatisticas-do-dashboard">Estatísticas do Dashboard</h3>
+<pre><code class="language-http">GET /api/dashboard/stats/
+Authorization: Token afe94c2006465105312e24043b859e5c0628aadf
+</code></pre>
+<p><strong>Resposta:</strong></p>
+<pre><code class="language-json">{
+  &quot;total_conversas&quot;: 2,
+  &quot;conversas_abertas&quot;: 0,
+  &quot;conversas_pendentes&quot;: 0,
+  &quot;conversas_resolvidas&quot;: 1,
+  &quot;conversas_em_andamento&quot;: 0,
+  &quot;contatos_unicos&quot;: 2,
+  &quot;mensagens_30_dias&quot;: 23,
+  &quot;tempo_medio_resposta&quot;: &quot;0min&quot;,
+  &quot;tempo_primeira_resposta&quot;: &quot;1.2min&quot;,
+  &quot;taxa_resolucao&quot;: &quot;50%&quot;,
+  &quot;satisfacao_media&quot;: &quot;4.4&quot;,
+  &quot;canais&quot;: [
+    {
+      &quot;inbox__channel_type&quot;: &quot;whatsapp&quot;,
+      &quot;total&quot;: 2
+    }
+  ],
+  &quot;atendentes&quot;: [
+    {
+      &quot;name&quot;: &quot;amanda&quot;,
+      &quot;conversations&quot;: 0,
+      &quot;satisfaction&quot;: 4.5
+    },
+    {
+      &quot;name&quot;: &quot;Nio chat&quot;,
+      &quot;conversations&quot;: 0,
+      &quot;satisfaction&quot;: 4.5
+    }
+  ],
+  &quot;atividades&quot;: [
+    {
+      &quot;action&quot;: &quot;conversation_closed_agent&quot;,
+      &quot;user&quot;: &quot;niochat&quot;,
+      &quot;time&quot;: &quot;11/10/2025 22:58&quot;,
+      &quot;type&quot;: &quot;activity&quot;
+    },
+    {
+      &quot;action&quot;: &quot;conversation_closed_agent&quot;,
+      &quot;user&quot;: &quot;niochat&quot;,
+      &quot;time&quot;: &quot;11/10/2025 22:50&quot;,
+      &quot;type&quot;: &quot;activity&quot;
+    }
+  ]
+}
+</code></pre>
+<h3 id="estatisticas-de-conversas">Estatísticas de Conversas</h3>
+<pre><code class="language-http">GET /api/dashboard-stats/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="tempo-de-resposta-por-hora">Tempo de Resposta por Hora</h3>
+<pre><code class="language-http">GET /api/dashboard/response-time-hourly/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="analise-de-conversas">Análise de Conversas</h3>
+<pre><code class="language-http">GET /api/analysis/
+Authorization: Token afe94c2006465105312e24043b859e5c0628aadf
+</code></pre>
+<p><strong>Resposta:</strong></p>
+<pre><code class="language-json">{
+  &quot;period&quot;: &quot;week&quot;,
+  &quot;date_range&quot;: {
+    &quot;start&quot;: &quot;2025-10-05&quot;,
+    &quot;end&quot;: &quot;2025-10-12&quot;
+  },
+  &quot;summary&quot;: {
+    &quot;totalConversations&quot;: 2,
+    &quot;avgResponseTime&quot;: &quot;2.1min&quot;,
+    &quot;activeAgents&quot;: 0,
+    &quot;satisfactionRate&quot;: &quot;0.0&quot;
+  },
+  &quot;conversationsByDay&quot;: [
+    {
+      &quot;date&quot;: &quot;06/10&quot;,
+      &quot;conversations&quot;: 0
+    },
+    {
+      &quot;date&quot;: &quot;07/10&quot;,
+      &quot;conversations&quot;: 0
+    },
+    {
+      &quot;date&quot;: &quot;08/10&quot;,
+      &quot;conversations&quot;: 0
+    },
+    {
+      &quot;date&quot;: &quot;09/10&quot;,
+      &quot;conversations&quot;: 0
+    },
+    {
+      &quot;date&quot;: &quot;10/10&quot;,
+      &quot;conversations&quot;: 0
+    },
+    {
+      &quot;date&quot;: &quot;11/10&quot;,
+      &quot;conversations&quot;: 0
+    },
+    {
+      &quot;date&quot;: &quot;12/10&quot;,
+      &quot;conversations&quot;: 0
+    }
+  ],
+  &quot;channels&quot;: [
+    {
+      &quot;channel&quot;: &quot;whatsapp&quot;,
+      &quot;conversations&quot;: 2
+    }
+  ]
+}
+</code></pre>
+<h3 id="teste-de-analise">Teste de Análise</h3>
+<pre><code class="language-http">GET /api/test-analysis/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h2 id="ia-e-sgp">IA e SGP</h2>
+<h3 id="processar-com-ia">Processar com IA</h3>
+<pre><code class="language-http">POST /api/atendimento/ia/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+
+{
+  &quot;conversation_id&quot;: 1,
+  &quot;message&quot;: &quot;Quero pagar minha fatura&quot;
+}
+</code></pre>
+<p><strong>Resposta:</strong></p>
+<pre><code class="language-json">{
+  &quot;response&quot;: &quot;Para gerar sua fatura, preciso do seu CPF.&quot;,
+  &quot;function_calls&quot;: [],
+  &quot;needs_input&quot;: true
+}
+</code></pre>
+<h3 id="function-calls-sgp">Function Calls SGP</h3>
+<p>A IA executa automaticamente as seguintes funções:</p>
+<h4 id="consultar-cliente">Consultar Cliente</h4>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;consultar_cliente_sgp&quot;,
+  &quot;parameters&quot;: {
+    &quot;cpf_cnpj&quot;: &quot;123.456.789-00&quot;
+  }
+}
+</code></pre>
+<h4 id="verificar-acesso">Verificar Acesso</h4>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;verificar_acesso_sgp&quot;,
+  &quot;parameters&quot;: {
+    &quot;contrato&quot;: &quot;12345&quot;
+  }
+}
+</code></pre>
+<h4 id="gerar-fatura">Gerar Fatura</h4>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;gerar_fatura_completa&quot;,
+  &quot;parameters&quot;: {
+    &quot;contrato&quot;: &quot;12345&quot;
+  }
+}
+</code></pre>
+<h4 id="criar-chamado-tecnico">Criar Chamado Técnico</h4>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;criar_chamado_tecnico&quot;,
+  &quot;parameters&quot;: {
+    &quot;cpf_cnpj&quot;: &quot;123.456.789-00&quot;,
+    &quot;motivo&quot;: &quot;Sem internet&quot;,
+    &quot;sintomas&quot;: &quot;LED vermelho piscando&quot;
+  }
+}
+</code></pre>
+<h2 id="integracoes">Integrações</h2>
+<h3 id="whatsapp">WhatsApp</h3>
+<pre><code class="language-http">GET /api/integrations/whatsapp/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="telegram">Telegram</h3>
+<pre><code class="language-http">GET /api/integrations/telegram/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="email">Email</h3>
+<pre><code class="language-http">GET /api/integrations/email/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h3 id="webchat">Webchat</h3>
+<pre><code class="language-http">GET /api/integrations/webchat/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h2 id="auditoria">Auditoria</h2>
+<h3 id="logs-de-auditoria">Logs de Auditoria</h3>
+<pre><code class="language-http">GET /api/audit-logs/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<p><strong>Parâmetros de Query:</strong>
+- <code>action</code>: Tipo de ação
+- <code>user_id</code>: ID do usuário
+- <code>date_from</code>: Data inicial
+- <code>date_to</code>: Data final
+- <code>page</code>: Número da página</p>
+<p><strong>Resposta:</strong></p>
+<pre><code class="language-json">{
+  &quot;count&quot;: 1000,
+  &quot;next&quot;: &quot;http://localhost:8010/api/audit-logs/?page=2&quot;,
+  &quot;previous&quot;: null,
+  &quot;results&quot;: [
+    {
+      &quot;id&quot;: 1,
+      &quot;action&quot;: &quot;conversation_created&quot;,
+      &quot;details&quot;: {
+        &quot;conversation_id&quot;: 1,
+        &quot;contact_name&quot;: &quot;João Silva&quot;
+      },
+      &quot;user&quot;: {
+        &quot;id&quot;: 1,
+        &quot;username&quot;: &quot;agente1&quot;
+      },
+      &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;
+    }
+  ]
+}
+</code></pre>
+<h2 id="webhooks">Webhooks</h2>
+<h3 id="webhook-uazapievolution">Webhook Uazapi/Evolution</h3>
+<pre><code class="language-http">POST /webhook/evolution-uazapi/
+Content-Type: application/json
+
+{
+  &quot;event&quot;: &quot;message&quot;,
+  &quot;data&quot;: {
+    &quot;message&quot;: {
+      &quot;id&quot;: &quot;message_id&quot;,
+      &quot;from&quot;: &quot;+5511999999999&quot;,
+      &quot;to&quot;: &quot;+5511888888888&quot;,
+      &quot;content&quot;: &quot;Olá, como posso ajudar?&quot;,
+      &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;
+    }
+  }
+}
+</code></pre>
+<h3 id="webhook-evolution-legado">Webhook Evolution (Legado)</h3>
+<pre><code class="language-http">POST /webhooks/evolution-uazapi/
+Content-Type: application/json
+
+{
+  &quot;event&quot;: &quot;message&quot;,
+  &quot;data&quot;: {
+    &quot;message&quot;: {
+      &quot;id&quot;: &quot;message_id&quot;,
+      &quot;from&quot;: &quot;+5511999999999&quot;,
+      &quot;to&quot;: &quot;+5511888888888&quot;,
+      &quot;content&quot;: &quot;Olá, como posso ajudar?&quot;,
+      &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;
+    }
+  }
+}
+</code></pre>
+<h2 id="sistema">Sistema</h2>
+<h3 id="health-check">Health Check</h3>
+<pre><code class="language-http">GET /api/health/
+</code></pre>
+<h3 id="changelog">Changelog</h3>
+<pre><code class="language-http">GET /api/changelog/
+</code></pre>
+<h3 id="arquivos-uazapi">Arquivos Uazapi</h3>
+<pre><code class="language-http">GET /api/uazapi/file/{file_id}/
+Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h2 id="websocket-events">WebSocket Events</h2>
+<h3 id="conexao">Conexão</h3>
+<pre><code class="language-javascript">const ws = new WebSocket('ws://localhost:8010/ws/dashboard/');
+
+ws.onopen = function(event) {
+    console.log('Conectado ao WebSocket');
+};
+
+ws.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    console.log('Mensagem recebida:', data);
+};
+</code></pre>
+<h3 id="eventos-disponiveis">Eventos Disponíveis</h3>
+<h4 id="chat">Chat</h4>
+<pre><code class="language-javascript">// Nova mensagem
+{
+  &quot;type&quot;: &quot;chat_message&quot;,
+  &quot;data&quot;: {
+    &quot;conversation_id&quot;: 1,
+    &quot;message&quot;: {
+      &quot;id&quot;: 1,
+      &quot;content&quot;: &quot;Nova mensagem&quot;,
+      &quot;sender&quot;: &quot;customer&quot;
+    }
+  }
+}
+
+// Reação a mensagem
+{
+  &quot;type&quot;: &quot;message_reaction&quot;,
+  &quot;data&quot;: {
+    &quot;message_id&quot;: 1,
+    &quot;reaction&quot;: &quot;👍&quot;
+  }
+}
+
+// Mensagem deletada
+{
+  &quot;type&quot;: &quot;message_deleted&quot;,
+  &quot;data&quot;: {
+    &quot;message_id&quot;: 1
+  }
+}
+</code></pre>
+<h4 id="dashboard_1">Dashboard</h4>
+<pre><code class="language-javascript">// Métricas atualizadas
+{
+  &quot;type&quot;: &quot;dashboard_metrics&quot;,
+  &quot;data&quot;: {
+    &quot;total_conversations&quot;: 100,
+    &quot;open_conversations&quot;: 25,
+    &quot;average_satisfaction&quot;: 4.2
+  }
+}
+
+// CSAT atualizado
+{
+  &quot;type&quot;: &quot;csat_update&quot;,
+  &quot;data&quot;: {
+    &quot;conversation_id&quot;: 1,
+    &quot;rating&quot;: 5,
+    &quot;feedback&quot;: &quot;Excelente!&quot;
+  }
+}
+
+// Log de auditoria
+{
+  &quot;type&quot;: &quot;audit_log&quot;,
+  &quot;data&quot;: {
+    &quot;action&quot;: &quot;conversation_created&quot;,
+    &quot;details&quot;: {
+      &quot;conversation_id&quot;: 1
+    }
+  }
+}
+</code></pre>
+<h4 id="status-do-usuario">Status do Usuário</h4>
+<pre><code class="language-javascript">// Status online/offline
+{
+  &quot;type&quot;: &quot;user_status&quot;,
+  &quot;data&quot;: {
+    &quot;user_id&quot;: 1,
+    &quot;status&quot;: &quot;online&quot;
+  }
+}
+</code></pre>
+<h3 id="autenticacao-websocket">Autenticação WebSocket</h3>
+<pre><code class="language-javascript">const ws = new WebSocket('ws://localhost:8010/ws/dashboard/?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...');
+</code></pre>
+<h2 id="codigos-de-status">Códigos de Status</h2>
+<h3 id="sucesso">Sucesso</h3>
+<ul>
+<li><strong>200</strong>: OK</li>
+<li><strong>201</strong>: Criado</li>
+<li><strong>204</strong>: Sem conteúdo</li>
+</ul>
+<h3 id="erro-do-cliente">Erro do Cliente</h3>
+<ul>
+<li><strong>400</strong>: Requisição inválida</li>
+<li><strong>401</strong>: Não autorizado</li>
+<li><strong>403</strong>: Proibido</li>
+<li><strong>404</strong>: Não encontrado</li>
+<li><strong>422</strong>: Entidade não processável</li>
+</ul>
+<h3 id="erro-do-servidor">Erro do Servidor</h3>
+<ul>
+<li><strong>500</strong>: Erro interno do servidor</li>
+<li><strong>502</strong>: Bad Gateway</li>
+<li><strong>503</strong>: Serviço indisponível</li>
+</ul>
+<h2 id="tratamento-de-erros">Tratamento de Erros</h2>
+<h3 id="formato-de-erro">Formato de Erro</h3>
+<pre><code class="language-json">{
+  &quot;error&quot;: &quot;ValidationError&quot;,
+  &quot;message&quot;: &quot;Dados inválidos&quot;,
+  &quot;details&quot;: {
+    &quot;field&quot;: &quot;conversation_id&quot;,
+    &quot;message&quot;: &quot;Este campo é obrigatório&quot;
+  }
+}
+</code></pre>
+<h3 id="exemplos-de-erro">Exemplos de Erro</h3>
+<pre><code class="language-json">{
+  &quot;error&quot;: &quot;AuthenticationError&quot;,
+  &quot;message&quot;: &quot;Token inválido ou expirado&quot;
+}
+</code></pre>
+<pre><code class="language-json">{
+  &quot;error&quot;: &quot;PermissionError&quot;,
+  &quot;message&quot;: &quot;Você não tem permissão para esta ação&quot;
+}
+</code></pre>
+<h2 id="guia-do-postman">Guia do Postman</h2>
+<p>Para facilitar o teste da API, criamos um <a href="../postman-guide/">Guia Completo do Postman</a> com:
+- Configuração passo a passo
+- Solução de problemas comuns
+- Scripts úteis
+- Collection pronta para importar</p>
+<h2 id="proximos-passos">Próximos Passos</h2>
+<ol>
+<li><a href="../authentication/">Autenticação</a> - Aprenda sobre autenticação</li>
+<li><a href="../postman-guide/">Guia do Postman</a> - Configure o Postman</li>
+<li><a href="../websocket/">WebSocket</a> - Aprenda sobre WebSocket</li>
+<li><a href="../webhooks/">Webhooks</a> - Aprenda sobre webhooks</li>
+<li><a href="../../usage/interface/">Uso</a> - Aprenda a usar a interface</li>
+</ol></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

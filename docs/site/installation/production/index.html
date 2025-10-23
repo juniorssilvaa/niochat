@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Instalação em Produção - NioChat</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/rainbow.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">NioChat</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">NioChat - Sistema de Atendimento WhatsApp</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../changelog/" class="nav-link">Changelog</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Ai</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../ai/configuration/" class="dropdown-item">Configuração da IA</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Api</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../api/authentication/" class="dropdown-item">Autenticação</a>
+</li>
+                                    
+<li>
+    <a href="../../api/endpoints/" class="dropdown-item">Endpoints da API</a>
+</li>
+                                    
+<li>
+    <a href="../../api/postman-guide/" class="dropdown-item">Guia de Uso do Postman com NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../../api/webhooks/" class="dropdown-item">Webhooks</a>
+</li>
+                                    
+<li>
+    <a href="../../api/websocket/" class="dropdown-item">WebSocket</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Configuration</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../configuration/supabase/" class="dropdown-item">Configuração do Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Development</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../development/contributing/" class="dropdown-item">Contribuindo para o NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../../development/structure/" class="dropdown-item">Estrutura do Projeto</a>
+</li>
+                                    
+<li>
+    <a href="../../development/troubleshooting/" class="dropdown-item">Troubleshooting</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Installation</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../development/" class="dropdown-item">Instalação em Desenvolvimento</a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Instalação em Produção</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Overview</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../overview/architecture/" class="dropdown-item">Arquitetura do Sistema</a>
+</li>
+                                    
+<li>
+    <a href="../../overview/features/" class="dropdown-item">Funcionalidades</a>
+</li>
+                                    
+<li>
+    <a href="../../overview/introduction/" class="dropdown-item">Introdução ao NioChat</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Supabase</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../supabase/integration/" class="dropdown-item">Integração com Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Usage</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../usage/interface/" class="dropdown-item">Interface do Usuário</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../development/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../../overview/architecture/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#instalacao-em-producao" class="nav-link">Instalação em Produção</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#pre-requisitos" class="nav-link">Pré-requisitos</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#instalacao-do-sistema" class="nav-link">Instalação do Sistema</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#instalacao-do-niochat" class="nav-link">Instalação do NioChat</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#configuracao-do-nginx" class="nav-link">Configuração do Nginx</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#configuracao-do-ssl" class="nav-link">Configuração do SSL</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#configuracao-do-systemd" class="nav-link">Configuração do Systemd</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#configuracao-do-firewall" class="nav-link">Configuração do Firewall</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#monitoramento" class="nav-link">Monitoramento</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#backup" class="nav-link">Backup</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#atualizacoes" class="nav-link">Atualizações</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#verificacao" class="nav-link">Verificação</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#troubleshooting" class="nav-link">Troubleshooting</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#proximos-passos" class="nav-link">Próximos Passos</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="instalacao-em-producao">Instalação em Produção</h1>
+<p>Este guia explica como instalar e configurar o NioChat em um ambiente de produção.</p>
+<h2 id="pre-requisitos">Pré-requisitos</h2>
+<h3 id="servidor">Servidor</h3>
+<ul>
+<li><strong>Sistema Operacional</strong>: Ubuntu 20.04+ ou CentOS 8+</li>
+<li><strong>RAM</strong>: Mínimo 4GB, recomendado 8GB+</li>
+<li><strong>CPU</strong>: Mínimo 2 cores, recomendado 4 cores+</li>
+<li><strong>Disco</strong>: Mínimo 50GB, recomendado 100GB+</li>
+<li><strong>Rede</strong>: Conexão estável com internet</li>
+</ul>
+<h3 id="software">Software</h3>
+<ul>
+<li><strong>Python</strong>: 3.8+</li>
+<li><strong>Node.js</strong>: 16+</li>
+<li><strong>PostgreSQL</strong>: 12+</li>
+<li><strong>Redis</strong>: 6+</li>
+<li><strong>Nginx</strong>: 1.18+</li>
+<li><strong>Docker</strong>: 20+ (opcional)</li>
+</ul>
+<h2 id="instalacao-do-sistema">Instalação do Sistema</h2>
+<h3 id="1-atualizar-sistema">1. Atualizar Sistema</h3>
+<pre><code class="language-bash">sudo apt update &amp;&amp; sudo apt upgrade -y
+</code></pre>
+<h3 id="2-instalar-dependencias">2. Instalar Dependências</h3>
+<pre><code class="language-bash">sudo apt install -y python3 python3-pip python3-venv nodejs npm postgresql redis-server nginx git
+</code></pre>
+<h3 id="3-configurar-postgresql">3. Configurar PostgreSQL</h3>
+<pre><code class="language-bash">sudo -u postgres psql
+</code></pre>
+<pre><code class="language-sql">CREATE DATABASE niochat;
+CREATE USER niochat WITH PASSWORD 'senha_segura';
+GRANT ALL PRIVILEGES ON DATABASE niochat TO niochat;
+\q
+</code></pre>
+<h3 id="4-configurar-redis-porta-6380">4. Configurar Redis (Porta 6380)</h3>
+<pre><code class="language-bash">sudo systemctl enable redis-server
+sudo systemctl start redis-server
+
+# Configurar porta 6380 e senha
+sudo nano /etc/redis/redis.conf
+# Adicionar:
+# port 6380
+# requirepass SUA_SENHA_REDIS
+# bind 0.0.0.0
+
+sudo systemctl restart redis-server
+</code></pre>
+<h3 id="5-configurar-rabbitmq">5. Configurar RabbitMQ</h3>
+<pre><code class="language-bash">sudo apt install rabbitmq-server
+sudo systemctl enable rabbitmq-server
+sudo systemctl start rabbitmq-server
+
+# Configurar usuário e senha
+sudo rabbitmqctl add_user admin SUA_SENHA_RABBITMQ
+sudo rabbitmqctl set_user_tags admin administrator
+sudo rabbitmqctl set_permissions -p / admin &quot;.*&quot; &quot;.*&quot; &quot;.*&quot;
+</code></pre>
+<h2 id="instalacao-do-niochat">Instalação do NioChat</h2>
+<h3 id="1-clone-do-repositorio">1. Clone do Repositório</h3>
+<pre><code class="language-bash">cd /opt
+sudo git clone https://github.com/juniorssilvaa/niochat.git
+sudo chown -R $USER:$USER niochat
+cd niochat
+</code></pre>
+<h3 id="2-configurar-backend">2. Configurar Backend</h3>
+<pre><code class="language-bash">cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+</code></pre>
+<h3 id="3-configurar-frontend">3. Configurar Frontend</h3>
+<pre><code class="language-bash">cd frontend/frontend
+npm install
+npm run build
+</code></pre>
+<h3 id="4-configurar-variaveis-de-ambiente">4. Configurar Variáveis de Ambiente</h3>
+<pre><code class="language-bash">sudo nano /opt/niochat/backend/.env
+</code></pre>
+<pre><code class="language-env"># Django
+DEBUG=False
+SECRET_KEY=sua_chave_secreta_aqui
+ALLOWED_HOSTS=seu-dominio.com,www.seu-dominio.com
+
+# Banco de Dados
+DATABASE_URL=postgresql://niochat:senha_segura@localhost:5432/niochat
+
+# Redis (porta 6380)
+REDIS_URL=redis://:SUA_SENHA_REDIS@49.12.9.11:6380/0
+REDIS_HOST=49.12.9.11
+REDIS_PORT=6380
+REDIS_PASSWORD=SUA_SENHA_REDIS
+
+# RabbitMQ (para Celery broker)
+CELERY_BROKER_URL=amqp://admin:SUA_SENHA_RABBITMQ@49.12.9.11:5672
+CELERY_RESULT_BACKEND=redis://:SUA_SENHA_REDIS@49.12.9.11:6380/0
+CELERY_RESULT_EXPIRES=300
+CELERY_TASK_IGNORE_RESULT=False
+
+# OpenAI
+OPENAI_API_KEY=sua_chave_openai
+
+# Supabase
+SUPABASE_URL=sua_url_supabase
+SUPABASE_ANON_KEY=sua_chave_supabase
+
+# Uazapi
+UAZAPI_URL=https://seu-provedor.uazapi.com
+UAZAPI_TOKEN=seu_token_uazapi
+
+# Email
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=seu-email@gmail.com
+EMAIL_HOST_PASSWORD=sua_senha_app
+
+# Webhook
+WEBHOOK_SECRET=seu_secret_webhook
+</code></pre>
+<h3 id="5-configurar-django">5. Configurar Django</h3>
+<pre><code class="language-bash">cd /opt/niochat/backend
+source venv/bin/activate
+python manage.py migrate
+python manage.py collectstatic --noinput
+python manage.py createsuperuser
+</code></pre>
+<h2 id="configuracao-do-nginx">Configuração do Nginx</h2>
+<h3 id="1-criar-configuracao">1. Criar Configuração</h3>
+<pre><code class="language-bash">sudo nano /etc/nginx/sites-available/niochat
+</code></pre>
+<pre><code class="language-nginx">server {
+    listen 80;
+    server_name seu-dominio.com www.seu-dominio.com;
+
+    # Redirecionar para HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name seu-dominio.com www.seu-dominio.com;
+
+    # SSL
+    ssl_certificate /etc/letsencrypt/live/seu-dominio.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/seu-dominio.com/privkey.pem;
+
+    # Frontend
+    location / {
+        root /opt/niochat/frontend/frontend/dist;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Backend API
+    location /api/ {
+        proxy_pass http://127.0.0.1:8010;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # WebSocket
+    location /ws/ {
+        proxy_pass http://127.0.0.1:8010;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection &quot;upgrade&quot;;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Webhooks
+    location /webhook/ {
+        proxy_pass http://127.0.0.1:8010;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Admin
+    location /admin/ {
+        proxy_pass http://127.0.0.1:8010;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+</code></pre>
+<h3 id="2-ativar-site">2. Ativar Site</h3>
+<pre><code class="language-bash">sudo ln -s /etc/nginx/sites-available/niochat /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+</code></pre>
+<h2 id="configuracao-do-ssl">Configuração do SSL</h2>
+<h3 id="1-instalar-certbot">1. Instalar Certbot</h3>
+<pre><code class="language-bash">sudo apt install certbot python3-certbot-nginx
+</code></pre>
+<h3 id="2-obter-certificado">2. Obter Certificado</h3>
+<pre><code class="language-bash">sudo certbot --nginx -d seu-dominio.com -d www.seu-dominio.com
+</code></pre>
+<h3 id="3-renovacao-automatica">3. Renovação Automática</h3>
+<pre><code class="language-bash">sudo crontab -e
+</code></pre>
+<pre><code class="language-cron">0 12 * * * /usr/bin/certbot renew --quiet
+</code></pre>
+<h2 id="configuracao-do-systemd">Configuração do Systemd</h2>
+<h3 id="1-servico-backend">1. Serviço Backend</h3>
+<pre><code class="language-bash">sudo nano /etc/systemd/system/niochat-backend.service
+</code></pre>
+<pre><code class="language-ini">[Unit]
+Description=NioChat Backend
+After=network.target
+
+[Service]
+Type=exec
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/niochat/backend
+Environment=PATH=/opt/niochat/backend/venv/bin
+ExecStart=/opt/niochat/backend/venv/bin/python manage.py runserver 0.0.0.0:8010
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<h3 id="2-servico-celery">2. Serviço Celery</h3>
+<pre><code class="language-bash">sudo nano /etc/systemd/system/niochat-celery.service
+</code></pre>
+<pre><code class="language-ini">[Unit]
+Description=NioChat Celery Worker
+After=network.target
+
+[Service]
+Type=exec
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/niochat/backend
+Environment=PATH=/opt/niochat/backend/venv/bin
+ExecStart=/opt/niochat/backend/venv/bin/celery -A niochat worker -l info
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<h3 id="3-servico-celery-beat">3. Serviço Celery Beat</h3>
+<pre><code class="language-bash">sudo nano /etc/systemd/system/niochat-celery-beat.service
+</code></pre>
+<pre><code class="language-ini">[Unit]
+Description=NioChat Celery Beat
+After=network.target
+
+[Service]
+Type=exec
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/niochat/backend
+Environment=PATH=/opt/niochat/backend/venv/bin
+ExecStart=/opt/niochat/backend/venv/bin/celery -A niochat beat -l info
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<h3 id="4-ativar-servicos">4. Ativar Serviços</h3>
+<pre><code class="language-bash">sudo systemctl daemon-reload
+sudo systemctl enable niochat-backend
+sudo systemctl enable niochat-celery
+sudo systemctl enable niochat-celery-beat
+sudo systemctl start niochat-backend
+sudo systemctl start niochat-celery
+sudo systemctl start niochat-celery-beat
+</code></pre>
+<h2 id="configuracao-do-firewall">Configuração do Firewall</h2>
+<h3 id="1-ufw">1. UFW</h3>
+<pre><code class="language-bash">sudo ufw allow 22
+sudo ufw allow 80
+sudo ufw allow 443
+sudo ufw enable
+</code></pre>
+<h3 id="2-verificar-status">2. Verificar Status</h3>
+<pre><code class="language-bash">sudo ufw status
+</code></pre>
+<h2 id="monitoramento">Monitoramento</h2>
+<h3 id="1-logs-do-sistema">1. Logs do Sistema</h3>
+<pre><code class="language-bash">sudo journalctl -u niochat-backend -f
+sudo journalctl -u niochat-celery -f
+sudo journalctl -u niochat-celery-beat -f
+</code></pre>
+<h3 id="2-logs-do-nginx">2. Logs do Nginx</h3>
+<pre><code class="language-bash">sudo tail -f /var/log/nginx/access.log
+sudo tail -f /var/log/nginx/error.log
+</code></pre>
+<h3 id="3-logs-da-aplicacao">3. Logs da Aplicação</h3>
+<pre><code class="language-bash">sudo tail -f /opt/niochat/backend/logs/django.log
+sudo tail -f /opt/niochat/backend/logs/celery.log
+</code></pre>
+<h2 id="backup">Backup</h2>
+<h3 id="1-script-de-backup">1. Script de Backup</h3>
+<pre><code class="language-bash">sudo nano /opt/niochat/backup.sh
+</code></pre>
+<pre><code class="language-bash">#!/bin/bash
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_DIR=&quot;/opt/backups&quot;
+DB_NAME=&quot;niochat&quot;
+DB_USER=&quot;niochat&quot;
+DB_PASS=&quot;senha_segura&quot;
+
+# Criar diretório de backup
+mkdir -p $BACKUP_DIR
+
+# Backup do banco de dados
+pg_dump -h localhost -U $DB_USER -d $DB_NAME &gt; $BACKUP_DIR/db_$DATE.sql
+
+# Backup dos arquivos
+tar -czf $BACKUP_DIR/files_$DATE.tar.gz /opt/niochat
+
+# Remover backups antigos (manter 7 dias)
+find $BACKUP_DIR -name &quot;*.sql&quot; -mtime +7 -delete
+find $BACKUP_DIR -name &quot;*.tar.gz&quot; -mtime +7 -delete
+
+echo &quot;Backup concluído: $DATE&quot;
+</code></pre>
+<h3 id="2-tornar-executavel">2. Tornar Executável</h3>
+<pre><code class="language-bash">sudo chmod +x /opt/niochat/backup.sh
+</code></pre>
+<h3 id="3-agendar-backup">3. Agendar Backup</h3>
+<pre><code class="language-bash">sudo crontab -e
+</code></pre>
+<pre><code class="language-cron">0 2 * * * /opt/niochat/backup.sh
+</code></pre>
+<h2 id="atualizacoes">Atualizações</h2>
+<h3 id="1-script-de-atualizacao">1. Script de Atualização</h3>
+<pre><code class="language-bash">sudo nano /opt/niochat/update.sh
+</code></pre>
+<pre><code class="language-bash">#!/bin/bash
+cd /opt/niochat
+
+# Backup antes da atualização
+./backup.sh
+
+# Parar serviços
+sudo systemctl stop niochat-backend
+sudo systemctl stop niochat-celery
+sudo systemctl stop niochat-celery-beat
+
+# Atualizar código
+git pull origin main
+
+# Atualizar dependências
+cd backend
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Migrações
+python manage.py migrate
+python manage.py collectstatic --noinput
+
+# Rebuild frontend
+cd ../frontend/frontend
+npm install
+npm run build
+
+# Reiniciar serviços
+sudo systemctl start niochat-backend
+sudo systemctl start niochat-celery
+sudo systemctl start niochat-celery-beat
+
+echo &quot;Atualização concluída&quot;
+</code></pre>
+<h3 id="2-tornar-executavel_1">2. Tornar Executável</h3>
+<pre><code class="language-bash">sudo chmod +x /opt/niochat/update.sh
+</code></pre>
+<h2 id="verificacao">Verificação</h2>
+<h3 id="1-status-dos-servicos">1. Status dos Serviços</h3>
+<pre><code class="language-bash">sudo systemctl status niochat-backend
+sudo systemctl status niochat-celery
+sudo systemctl status niochat-celery-beat
+</code></pre>
+<h3 id="2-teste-de-conectividade">2. Teste de Conectividade</h3>
+<pre><code class="language-bash">curl -I https://seu-dominio.com
+curl -I https://seu-dominio.com/api/health/
+</code></pre>
+<h3 id="3-teste-de-websocket">3. Teste de WebSocket</h3>
+<pre><code class="language-javascript">const ws = new WebSocket('wss://seu-dominio.com/ws/dashboard/');
+ws.onopen = () =&gt; console.log('WebSocket conectado');
+</code></pre>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="problemas-comuns">Problemas Comuns</h3>
+<h4 id="1-servico-nao-inicia">1. Serviço não inicia</h4>
+<pre><code class="language-bash">sudo journalctl -u niochat-backend --no-pager
+</code></pre>
+<h4 id="2-erro-de-permissao">2. Erro de permissão</h4>
+<pre><code class="language-bash">sudo chown -R www-data:www-data /opt/niochat
+</code></pre>
+<h4 id="3-erro-de-banco-de-dados">3. Erro de banco de dados</h4>
+<pre><code class="language-bash">sudo -u postgres psql -d niochat -c &quot;SELECT * FROM django_migrations;&quot;
+</code></pre>
+<h4 id="4-erro-de-redis">4. Erro de Redis</h4>
+<pre><code class="language-bash">redis-cli -h 49.12.9.11 -p 6380 -a SUA_SENHA_REDIS ping
+</code></pre>
+<h4 id="5-erro-de-rabbitmq">5. Erro de RabbitMQ</h4>
+<pre><code class="language-bash">sudo systemctl status rabbitmq-server
+rabbitmqctl status
+</code></pre>
+<h4 id="6-erro-de-nginx">6. Erro de Nginx</h4>
+<pre><code class="language-bash">sudo nginx -t
+sudo systemctl reload nginx
+</code></pre>
+<h3 id="logs-importantes">Logs Importantes</h3>
+<pre><code class="language-bash"># Django
+tail -f /opt/niochat/backend/logs/django.log
+
+# Celery
+tail -f /opt/niochat/backend/logs/celery.log
+
+# Nginx
+tail -f /var/log/nginx/error.log
+
+# Sistema
+journalctl -u niochat-backend -f
+</code></pre>
+<h2 id="proximos-passos">Próximos Passos</h2>
+<ol>
+<li><a href="configuration/supabase.md">Configuração</a> - Configure integrações</li>
+<li><a href="usage/interface.md">Uso</a> - Aprenda a usar o sistema</li>
+<li><a href="api/endpoints.md">API</a> - Explore a API</li>
+<li><a href="development/troubleshooting.md">Troubleshooting</a> - Resolva problemas</li>
+</ol></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

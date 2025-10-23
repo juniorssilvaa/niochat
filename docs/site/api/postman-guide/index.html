@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Guia de Uso do Postman com NioChat - NioChat</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/rainbow.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">NioChat</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">NioChat - Sistema de Atendimento WhatsApp</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../changelog/" class="nav-link">Changelog</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Ai</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../ai/configuration/" class="dropdown-item">Configuração da IA</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Api</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../authentication/" class="dropdown-item">Autenticação</a>
+</li>
+                                    
+<li>
+    <a href="../endpoints/" class="dropdown-item">Endpoints da API</a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Guia de Uso do Postman com NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../webhooks/" class="dropdown-item">Webhooks</a>
+</li>
+                                    
+<li>
+    <a href="../websocket/" class="dropdown-item">WebSocket</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Configuration</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../configuration/supabase/" class="dropdown-item">Configuração do Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Development</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../development/contributing/" class="dropdown-item">Contribuindo para o NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../../development/structure/" class="dropdown-item">Estrutura do Projeto</a>
+</li>
+                                    
+<li>
+    <a href="../../development/troubleshooting/" class="dropdown-item">Troubleshooting</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Installation</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../installation/development/" class="dropdown-item">Instalação em Desenvolvimento</a>
+</li>
+                                    
+<li>
+    <a href="../../installation/production/" class="dropdown-item">Instalação em Produção</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Overview</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../overview/architecture/" class="dropdown-item">Arquitetura do Sistema</a>
+</li>
+                                    
+<li>
+    <a href="../../overview/features/" class="dropdown-item">Funcionalidades</a>
+</li>
+                                    
+<li>
+    <a href="../../overview/introduction/" class="dropdown-item">Introdução ao NioChat</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Supabase</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../supabase/integration/" class="dropdown-item">Integração com Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Usage</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../usage/interface/" class="dropdown-item">Interface do Usuário</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../endpoints/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../webhooks/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#guia-de-uso-do-postman-com-niochat" class="nav-link">Guia de Uso do Postman com NioChat</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#configuracao-inicial" class="nav-link">Configuração Inicial</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#autenticacao" class="nav-link">Autenticação</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#endpoints-principais" class="nav-link">Endpoints Principais</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#solucao-de-problemas" class="nav-link">Solução de Problemas</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#scripts-uteis" class="nav-link">Scripts Úteis</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#collection-completa" class="nav-link">Collection Completa</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#configuracao-de-pre-request-scripts" class="nav-link">Configuração de Pre-request Scripts</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#configuracao-de-tests" class="nav-link">Configuração de Tests</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#exportar-collection" class="nav-link">Exportar Collection</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#importar-collection" class="nav-link">Importar Collection</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#proximos-passos" class="nav-link">Próximos Passos</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="guia-de-uso-do-postman-com-niochat">Guia de Uso do Postman com NioChat</h1>
+<p>Este guia explica como configurar e usar o Postman para testar a API do NioChat.</p>
+<h2 id="configuracao-inicial">Configuração Inicial</h2>
+<h3 id="1-criar-nova-collection">1. Criar Nova Collection</h3>
+<ol>
+<li>Abra o Postman</li>
+<li>Clique em "New" → "Collection"</li>
+<li>Nome: "NioChat API"</li>
+<li>Descrição: "API do NioChat - Sistema de Atendimento WhatsApp"</li>
+</ol>
+<h3 id="2-configurar-variaveis-de-ambiente">2. Configurar Variáveis de Ambiente</h3>
+<ol>
+<li>Clique em "Environments" → "Create Environment"</li>
+<li>Nome: "NioChat Local" ou "NioChat Production"</li>
+<li>Adicione as seguintes variáveis:</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Initial Value</th>
+<th>Current Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>base_url</code></td>
+<td><code>http://localhost:8010</code></td>
+<td><code>http://localhost:8010</code></td>
+</tr>
+<tr>
+<td><code>token</code></td>
+<td>(deixar vazio)</td>
+<td>(será preenchido após login)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="autenticacao">Autenticação</h2>
+<h3 id="1-endpoint-de-login">1. Endpoint de Login</h3>
+<p><strong>Método:</strong> <code>POST</code><br />
+<strong>URL:</strong> <code>{{base_url}}/api/auth/login/</code><br />
+<strong>Headers:</strong></p>
+<pre><code>Content-Type: application/json
+</code></pre>
+<p><strong>Body (raw JSON):</strong></p>
+<pre><code class="language-json">{
+  &quot;username&quot;: &quot;seu_usuario&quot;,
+  &quot;password&quot;: &quot;sua_senha&quot;
+}
+</code></pre>
+<p><strong>Script de Teste (Tests tab):</strong></p>
+<pre><code class="language-javascript">if (pm.response.code === 200) {
+    const response = pm.response.json();
+    pm.environment.set(&quot;token&quot;, response.token);
+    console.log(&quot;Token salvo:&quot;, response.token);
+    console.log(&quot;Resposta completa:&quot;, response);
+} else {
+    console.log(&quot;Erro no login:&quot;, pm.response.text());
+}
+</code></pre>
+<p><strong>Resposta Esperada:</strong></p>
+<pre><code class="language-json">{
+  &quot;token&quot;: &quot;afe94c2006465105312e24043b859e5c0628aadf&quot;
+}
+</code></pre>
+<h3 id="2-configurar-authorization-global">2. Configurar Authorization Global</h3>
+<ol>
+<li>Vá para a aba "Authorization" da collection</li>
+<li>Type: "Bearer Token"</li>
+<li>Token: <code>{{token}}</code></li>
+</ol>
+<p><strong>OU</strong> configure manualmente em cada request:
+1. Vá para a aba "Authorization" do request
+2. Type: "Custom"
+3. Key: <code>Authorization</code>
+4. Value: <code>Token {{token}}</code></p>
+<h2 id="endpoints-principais">Endpoints Principais</h2>
+<h3 id="1-listar-contatos">1. Listar Contatos</h3>
+<p><strong>Método:</strong> <code>GET</code><br />
+<strong>URL:</strong> <code>{{base_url}}/api/contacts/</code><br />
+<strong>Headers:</strong></p>
+<pre><code>Authorization: Token {{token}}
+</code></pre>
+<p><strong>Parâmetros de Query (opcionais):</strong>
+- <code>search</code>: Busca por nome ou telefone
+- <code>page</code>: Número da página (padrão: 1)
+- <code>page_size</code>: Tamanho da página (padrão: 20)</p>
+<h3 id="2-informacoes-do-usuario">2. Informações do Usuário</h3>
+<p><strong>Método:</strong> <code>GET</code><br />
+<strong>URL:</strong> <code>{{base_url}}/api/auth/me/</code><br />
+<strong>Headers:</strong></p>
+<pre><code>Authorization: Token {{token}}
+</code></pre>
+<p><strong>Resposta Esperada:</strong></p>
+<pre><code class="language-json">{
+    &quot;id&quot;: 3,
+    &quot;username&quot;: &quot;niochat&quot;,
+    &quot;email&quot;: &quot;contatofinnybot@gmail.com.br&quot;,
+    &quot;first_name&quot;: &quot;Nio&quot;,
+    &quot;last_name&quot;: &quot;chat&quot;,
+    &quot;provedor_id&quot;: 1,
+    &quot;user_type&quot;: &quot;admin&quot;,
+    &quot;permissions&quot;: [],
+    &quot;sound_notifications_enabled&quot;: true,
+    &quot;new_message_sound&quot;: &quot;message_in_02.mp3&quot;,
+    &quot;new_conversation_sound&quot;: &quot;chat_new_08.mp3&quot;,
+    &quot;session_timeout&quot;: 60
+}
+</code></pre>
+<h3 id="3-listar-contatos">3. Listar Contatos</h3>
+<p><strong>Método:</strong> <code>GET</code><br />
+<strong>URL:</strong> <code>{{base_url}}/api/contacts/</code><br />
+<strong>Headers:</strong></p>
+<pre><code>Authorization: Token {{token}}
+</code></pre>
+<p><strong>Resposta Esperada:</strong></p>
+<pre><code class="language-json">{
+  &quot;count&quot;: 2,
+  &quot;next&quot;: null,
+  &quot;previous&quot;: null,
+  &quot;results&quot;: [
+    {
+      &quot;id&quot;: 1,
+      &quot;name&quot;: &quot;João Silva&quot;,
+      &quot;phone&quot;: &quot;11999999999&quot;,
+      &quot;avatar&quot;: &quot;https://example.com/avatar1.jpg&quot;,
+      &quot;inbox&quot;: 1,
+      &quot;created_at&quot;: &quot;2025-10-11T19:55:34.775872-03:00&quot;,
+      &quot;updated_at&quot;: &quot;2025-10-11T20:06:34.300428-03:00&quot;,
+      &quot;is_online&quot;: false,
+      &quot;last_seen&quot;: null,
+      &quot;conversation_count&quot;: 1,
+      &quot;unread_messages&quot;: 0
+    },
+    {
+      &quot;id&quot;: 2,
+      &quot;name&quot;: &quot;Maria Santos&quot;,
+      &quot;phone&quot;: &quot;11988888888&quot;,
+      &quot;avatar&quot;: &quot;https://example.com/avatar2.jpg&quot;,
+      &quot;inbox&quot;: 1,
+      &quot;created_at&quot;: &quot;2025-10-11T20:04:40.459828-03:00&quot;,
+      &quot;updated_at&quot;: &quot;2025-10-11T20:06:34.300428-03:00&quot;,
+      &quot;is_online&quot;: false,
+      &quot;last_seen&quot;: null,
+      &quot;conversation_count&quot;: 1,
+      &quot;unread_messages&quot;: 0
+    }
+  ]
+}
+</code></pre>
+<h3 id="4-detalhes-do-contato">4. Detalhes do Contato</h3>
+<p><strong>Método:</strong> <code>GET</code><br />
+<strong>URL:</strong> <code>{{base_url}}/api/contacts/{id}/</code><br />
+<strong>Headers:</strong></p>
+<pre><code>Authorization: Token {{token}}
+</code></pre>
+<h3 id="5-criar-contato">5. Criar Contato</h3>
+<p><strong>Método:</strong> <code>POST</code><br />
+<strong>URL:</strong> <code>{{base_url}}/api/contacts/</code><br />
+<strong>Headers:</strong></p>
+<pre><code>Authorization: Token {{token}}
+Content-Type: application/json
+</code></pre>
+<p><strong>Body (raw JSON):</strong></p>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;João Silva&quot;,
+  &quot;phone&quot;: &quot;11999999999&quot;,
+  &quot;email&quot;: &quot;joao@exemplo.com&quot;
+}
+</code></pre>
+<h3 id="6-listar-conversas">6. Listar Conversas</h3>
+<p><strong>Método:</strong> <code>GET</code><br />
+<strong>URL:</strong> <code>{{base_url}}/api/conversations/</code><br />
+<strong>Headers:</strong></p>
+<pre><code>Authorization: Token {{token}}
+</code></pre>
+<h3 id="7-timeout-de-sessao">7. Timeout de Sessão</h3>
+<p><strong>Método:</strong> <code>POST</code><br />
+<strong>URL:</strong> <code>{{base_url}}/api/auth/session-timeout/</code><br />
+<strong>Headers:</strong></p>
+<pre><code>Authorization: Token {{token}}
+Content-Type: application/json
+</code></pre>
+<p><strong>Body (raw JSON):</strong></p>
+<pre><code class="language-json">{
+  &quot;timeout&quot;: 60
+}
+</code></pre>
+<p><strong>Resposta Esperada:</strong></p>
+<pre><code class="language-json">{
+  &quot;message&quot;: &quot;Timeout da sessão atualizado com sucesso&quot;,
+  &quot;session_timeout&quot;: 60
+}
+</code></pre>
+<h3 id="7-dashboard-stats">7. Dashboard Stats</h3>
+<p><strong>Método:</strong> <code>GET</code><br />
+<strong>URL:</strong> <code>{{base_url}}/api/dashboard/stats/</code><br />
+<strong>Headers:</strong></p>
+<pre><code>Authorization: Token {{token}}
+</code></pre>
+<h3 id="8-analise-de-conversas">8. Análise de Conversas</h3>
+<p><strong>Método:</strong> <code>GET</code><br />
+<strong>URL:</strong> <code>{{base_url}}/api/analysis/</code><br />
+<strong>Headers:</strong></p>
+<pre><code>Authorization: Token {{token}}
+</code></pre>
+<h3 id="9-listar-mensagens">9. Listar Mensagens</h3>
+<p><strong>Método:</strong> <code>GET</code><br />
+<strong>URL:</strong> <code>{{base_url}}/api/messages/</code><br />
+<strong>Headers:</strong></p>
+<pre><code>Authorization: Token {{token}}
+</code></pre>
+<h3 id="10-listar-provedores">10. Listar Provedores</h3>
+<p><strong>Método:</strong> <code>GET</code><br />
+<strong>URL:</strong> <code>{{base_url}}/api/provedores/</code><br />
+<strong>Headers:</strong></p>
+<pre><code>Authorization: Token {{token}}
+</code></pre>
+<h2 id="solucao-de-problemas">Solução de Problemas</h2>
+<h3 id="erro-401-nao-autorizado">Erro 401 - Não Autorizado</h3>
+<h4 id="problema-as-credenciais-de-autenticacao-nao-foram-fornecidas">Problema: "As credenciais de autenticação não foram fornecidas"</h4>
+<p><strong>Solução:</strong>
+1. Verifique se fez login primeiro
+2. Verifique se o token está sendo enviado corretamente
+3. Verifique o formato do header Authorization</p>
+<h4 id="formato-correto-do-header">Formato Correto do Header:</h4>
+<pre><code>Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<p><strong>❌ Formato Incorreto:</strong></p>
+<pre><code>Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+</code></pre>
+<h4 id="script-para-verificar-token">Script para Verificar Token:</h4>
+<pre><code class="language-javascript">// Adicione este script na aba &quot;Tests&quot; de cada request
+const token = pm.environment.get(&quot;token&quot;);
+if (!token) {
+    console.log(&quot;❌ Token não encontrado. Faça login primeiro.&quot;);
+    pm.test(&quot;Token exists&quot;, () =&gt; {
+        pm.expect(token).to.not.be.undefined;
+    });
+} else {
+    console.log(&quot;✅ Token encontrado:&quot;, token.substring(0, 20) + &quot;...&quot;);
+}
+</code></pre>
+<h3 id="erro-403-proibido">Erro 403 - Proibido</h3>
+<p><strong>Solução:</strong>
+1. Verifique se o usuário tem permissão para acessar o endpoint
+2. Verifique se está logado com o usuário correto
+3. Verifique se o provedor está configurado corretamente</p>
+<h3 id="erro-400-requisicao-invalida">Erro 400 - Requisição Inválida</h3>
+<p><strong>Solução:</strong>
+1. Verifique se a URL está correta
+2. Verifique se o endpoint existe
+3. Verifique se o servidor está rodando
+4. <strong>Para <code>/api/auth/session-timeout/</code></strong>: Inclua o body JSON com o parâmetro <code>timeout</code></p>
+<p><strong>Exemplo de Body Correto:</strong></p>
+<pre><code class="language-json">{
+  &quot;timeout&quot;: 60
+}
+</code></pre>
+<p><strong>Erro Comum:</strong></p>
+<pre><code class="language-json">{
+  &quot;error&quot;: &quot;Timeout da sessão não fornecido&quot;
+}
+</code></pre>
+<h3 id="erro-404-nao-encontrado">Erro 404 - Não Encontrado</h3>
+<p><strong>Solução:</strong>
+1. Verifique se a URL está correta
+2. Verifique se o endpoint existe
+3. Verifique se o servidor está rodando</p>
+<h3 id="erro-500-erro-interno-do-servidor">Erro 500 - Erro Interno do Servidor</h3>
+<p><strong>Solução:</strong>
+1. Verifique os logs do servidor
+2. Verifique se o banco de dados está funcionando
+3. Verifique se todas as dependências estão instaladas</p>
+<h2 id="scripts-uteis">Scripts Úteis</h2>
+<h3 id="1-verificar-status-da-resposta">1. Verificar Status da Resposta</h3>
+<pre><code class="language-javascript">pm.test(&quot;Status code is 200&quot;, () =&gt; {
+    pm.response.to.have.status(200);
+});
+
+pm.test(&quot;Response has data&quot;, () =&gt; {
+    const jsonData = pm.response.json();
+    pm.expect(jsonData).to.have.property('data');
+});
+</code></pre>
+<h3 id="2-salvar-id-do-contato">2. Salvar ID do Contato</h3>
+<pre><code class="language-javascript">if (pm.response.code === 201) {
+    const response = pm.response.json();
+    pm.environment.set(&quot;contact_id&quot;, response.id);
+    console.log(&quot;ID do contato salvo:&quot;, response.id);
+}
+</code></pre>
+<h3 id="3-verificar-estrutura-da-resposta">3. Verificar Estrutura da Resposta</h3>
+<pre><code class="language-javascript">pm.test(&quot;Response structure is correct&quot;, () =&gt; {
+    const jsonData = pm.response.json();
+    pm.expect(jsonData).to.have.property('results');
+    pm.expect(jsonData).to.have.property('count');
+    pm.expect(jsonData).to.have.property('next');
+    pm.expect(jsonData).to.have.property('previous');
+});
+</code></pre>
+<h3 id="4-log-de-debug">4. Log de Debug</h3>
+<pre><code class="language-javascript">console.log(&quot;Request URL:&quot;, pm.request.url);
+console.log(&quot;Request Headers:&quot;, pm.request.headers);
+console.log(&quot;Response Status:&quot;, pm.response.status);
+console.log(&quot;Response Time:&quot;, pm.response.responseTime + &quot;ms&quot;);
+</code></pre>
+<h2 id="collection-completa">Collection Completa</h2>
+<h3 id="estrutura-recomendada">Estrutura Recomendada:</h3>
+<pre><code>NioChat API/
+├── Authentication/
+│   ├── Login
+│   ├── Logout
+│   └── Get User Info
+├── Users/
+│   ├── List Users
+│   ├── Get User
+│   ├── Create User
+│   └── Update User
+├── Contacts/
+│   ├── List Contacts
+│   ├── Get Contact
+│   ├── Create Contact
+│   └── Update Contact
+├── Conversations/
+│   ├── List Conversations
+│   ├── Get Conversation
+│   └── Create Conversation
+├── Messages/
+│   ├── List Messages
+│   ├── Send Message
+│   └── Get Message
+└── Dashboard/
+    ├── Get Stats
+    ├── Get CSAT Stats
+    └── Get Recent Feedbacks
+</code></pre>
+<h2 id="configuracao-de-pre-request-scripts">Configuração de Pre-request Scripts</h2>
+<h3 id="para-toda-a-collection">Para toda a Collection:</h3>
+<pre><code class="language-javascript">// Verificar se o token existe
+const token = pm.environment.get(&quot;token&quot;);
+if (!token &amp;&amp; pm.info.requestName !== &quot;Login&quot;) {
+    console.log(&quot;⚠️ Token não encontrado. Execute o request 'Login' primeiro.&quot;);
+}
+</code></pre>
+<h3 id="para-requests-especificos">Para requests específicos:</h3>
+<pre><code class="language-javascript">// Adicionar timestamp
+pm.globals.set(&quot;timestamp&quot;, new Date().toISOString());
+</code></pre>
+<h2 id="configuracao-de-tests">Configuração de Tests</h2>
+<h3 id="para-requests-de-autenticacao">Para requests de autenticação:</h3>
+<pre><code class="language-javascript">pm.test(&quot;Login successful&quot;, () =&gt; {
+    pm.response.to.have.status(200);
+    const jsonData = pm.response.json();
+    pm.expect(jsonData).to.have.property('token');
+    pm.expect(jsonData).to.have.property('user');
+});
+</code></pre>
+<h3 id="para-requests-de-dados">Para requests de dados:</h3>
+<pre><code class="language-javascript">pm.test(&quot;Data retrieved successfully&quot;, () =&gt; {
+    pm.response.to.have.status(200);
+    const jsonData = pm.response.json();
+    pm.expect(jsonData).to.be.an('object');
+});
+</code></pre>
+<h2 id="exportar-collection">Exportar Collection</h2>
+<ol>
+<li>Clique no menu da collection (três pontos)</li>
+<li>Selecione "Export"</li>
+<li>Escolha "Collection v2.1"</li>
+<li>Salve o arquivo JSON</li>
+<li>Compartilhe com a equipe</li>
+</ol>
+<h2 id="importar-collection">Importar Collection</h2>
+<ol>
+<li>Clique em "Import"</li>
+<li>Selecione o arquivo JSON da collection</li>
+<li>Confirme a importação</li>
+<li>Configure as variáveis de ambiente</li>
+</ol>
+<h2 id="proximos-passos">Próximos Passos</h2>
+<ol>
+<li><a href="../endpoints/">Endpoints</a> - Explore todos os endpoints</li>
+<li><a href="../websocket/">WebSocket</a> - Aprenda sobre WebSocket</li>
+<li><a href="../webhooks/">Webhooks</a> - Aprenda sobre webhooks</li>
+<li><a href="../../development/troubleshooting/">Troubleshooting</a> - Resolva problemas</li>
+</ol></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

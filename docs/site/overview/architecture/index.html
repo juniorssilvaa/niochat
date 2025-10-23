@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Arquitetura do Sistema - NioChat</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/rainbow.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">NioChat</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">NioChat - Sistema de Atendimento WhatsApp</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../changelog/" class="nav-link">Changelog</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Ai</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../ai/configuration/" class="dropdown-item">Configuração da IA</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Api</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../api/authentication/" class="dropdown-item">Autenticação</a>
+</li>
+                                    
+<li>
+    <a href="../../api/endpoints/" class="dropdown-item">Endpoints da API</a>
+</li>
+                                    
+<li>
+    <a href="../../api/postman-guide/" class="dropdown-item">Guia de Uso do Postman com NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../../api/webhooks/" class="dropdown-item">Webhooks</a>
+</li>
+                                    
+<li>
+    <a href="../../api/websocket/" class="dropdown-item">WebSocket</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Configuration</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../configuration/supabase/" class="dropdown-item">Configuração do Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Development</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../development/contributing/" class="dropdown-item">Contribuindo para o NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../../development/structure/" class="dropdown-item">Estrutura do Projeto</a>
+</li>
+                                    
+<li>
+    <a href="../../development/troubleshooting/" class="dropdown-item">Troubleshooting</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Installation</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../installation/development/" class="dropdown-item">Instalação em Desenvolvimento</a>
+</li>
+                                    
+<li>
+    <a href="../../installation/production/" class="dropdown-item">Instalação em Produção</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Overview</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Arquitetura do Sistema</a>
+</li>
+                                    
+<li>
+    <a href="../features/" class="dropdown-item">Funcionalidades</a>
+</li>
+                                    
+<li>
+    <a href="../introduction/" class="dropdown-item">Introdução ao NioChat</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Supabase</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../supabase/integration/" class="dropdown-item">Integração com Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Usage</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../usage/interface/" class="dropdown-item">Interface do Usuário</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../../installation/production/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../features/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#arquitetura-do-sistema" class="nav-link">Arquitetura do Sistema</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#visao-geral-da-arquitetura" class="nav-link">Visão Geral da Arquitetura</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#componentes-principais" class="nav-link">Componentes Principais</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#fluxo-de-dados" class="nav-link">Fluxo de Dados</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#padroes-arquiteturais" class="nav-link">Padrões Arquiteturais</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#seguranca" class="nav-link">Segurança</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#performance" class="nav-link">Performance</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#integracoes" class="nav-link">Integrações</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#deploy-e-infraestrutura" class="nav-link">Deploy e Infraestrutura</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#monitoramento-e-observabilidade" class="nav-link">Monitoramento e Observabilidade</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#proximos-passos" class="nav-link">Próximos Passos</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="arquitetura-do-sistema">Arquitetura do Sistema</h1>
+<p>O NioChat foi projetado com uma arquitetura moderna e escalável, utilizando as melhores práticas de desenvolvimento.</p>
+<h2 id="visao-geral-da-arquitetura">Visão Geral da Arquitetura</h2>
+<pre><code class="language-mermaid">graph TB
+    subgraph &quot;Frontend&quot;
+        A[React App]
+        B[Dashboard]
+        C[Chat Interface]
+        D[Admin Panel]
+    end
+
+    subgraph &quot;Backend&quot;
+        E[Django API]
+        F[WebSocket]
+        G[Celery Tasks]
+        H[Redis Cache]
+    end
+
+    subgraph &quot;Integrações&quot;
+        I[WhatsApp Uazapi]
+        J[OpenAI ChatGPT]
+        K[SGP System]
+        L[Supabase]
+    end
+
+    subgraph &quot;Banco de Dados&quot;
+        M[PostgreSQL]
+        N[Redis]
+        O[Supabase]
+    end
+
+    A --&gt; E
+    B --&gt; E
+    C --&gt; F
+    D --&gt; E
+
+    E --&gt; G
+    E --&gt; H
+    F --&gt; H
+
+    E --&gt; I
+    E --&gt; J
+    E --&gt; K
+    E --&gt; L
+
+    E --&gt; M
+    G --&gt; N
+    L --&gt; O
+</code></pre>
+<h2 id="componentes-principais">Componentes Principais</h2>
+<h3 id="1-frontend-react">1. Frontend (React)</h3>
+<ul>
+<li><strong>Responsabilidade</strong>: Interface do usuário</li>
+<li><strong>Tecnologia</strong>: React 18 + Vite</li>
+<li><strong>Características</strong>: SPA, tempo real, responsivo</li>
+<li><strong>Comunicação</strong>: REST API + WebSocket</li>
+</ul>
+<h3 id="2-backend-django">2. Backend (Django)</h3>
+<ul>
+<li><strong>Responsabilidade</strong>: Lógica de negócio e API</li>
+<li><strong>Tecnologia</strong>: Django 5.2 + DRF</li>
+<li><strong>Características</strong>: RESTful, WebSocket, autenticação</li>
+<li><strong>Comunicação</strong>: HTTP/WebSocket</li>
+</ul>
+<h3 id="3-processamento-assincrono-celery">3. Processamento Assíncrono (Celery)</h3>
+<ul>
+<li><strong>Responsabilidade</strong>: Tarefas em background</li>
+<li><strong>Tecnologia</strong>: Celery + Redis</li>
+<li><strong>Características</strong>: Escalável, confiável</li>
+<li><strong>Uso</strong>: CSAT, notificações, processamento</li>
+</ul>
+<h3 id="4-cache-redis">4. Cache (Redis)</h3>
+<ul>
+<li><strong>Responsabilidade</strong>: Cache e sessões</li>
+<li><strong>Tecnologia</strong>: Redis</li>
+<li><strong>Características</strong>: Alta performance, persistente</li>
+<li><strong>Uso</strong>: Sessões, cache, filas</li>
+</ul>
+<h3 id="5-banco-de-dados-postgresql">5. Banco de Dados (PostgreSQL)</h3>
+<ul>
+<li><strong>Responsabilidade</strong>: Dados principais</li>
+<li><strong>Tecnologia</strong>: PostgreSQL</li>
+<li><strong>Características</strong>: ACID, escalável</li>
+<li><strong>Uso</strong>: Dados transacionais</li>
+</ul>
+<h3 id="6-dashboard-supabase">6. Dashboard (Supabase)</h3>
+<ul>
+<li><strong>Responsabilidade</strong>: Métricas e relatórios</li>
+<li><strong>Tecnologia</strong>: Supabase</li>
+<li><strong>Características</strong>: Tempo real, isolamento</li>
+<li><strong>Uso</strong>: Dashboard, auditoria, CSAT</li>
+</ul>
+<h2 id="fluxo-de-dados">Fluxo de Dados</h2>
+<h3 id="1-recebimento-de-mensagem">1. Recebimento de Mensagem</h3>
+<pre><code>WhatsApp → Uazapi → Webhook → Django → IA → Resposta
+</code></pre>
+<h3 id="2-processamento-com-ia">2. Processamento com IA</h3>
+<pre><code>Mensagem → OpenAI → Function Calls → SGP → Dados → Resposta
+</code></pre>
+<h3 id="3-dashboard-em-tempo-real">3. Dashboard em Tempo Real</h3>
+<pre><code>Evento → Supabase → WebSocket → Frontend → Atualização
+</code></pre>
+<h3 id="4-sistema-csat">4. Sistema CSAT</h3>
+<pre><code>Fechamento → Celery → 1.5min → Envio → Feedback → IA → Análise
+</code></pre>
+<h2 id="padroes-arquiteturais">Padrões Arquiteturais</h2>
+<h3 id="1-multi-tenant">1. Multi-Tenant</h3>
+<ul>
+<li><strong>Isolamento</strong>: Cada provedor tem seus dados</li>
+<li><strong>Segurança</strong>: Row Level Security (RLS)</li>
+<li><strong>Escalabilidade</strong>: Horizontal e vertical</li>
+<li><strong>Manutenção</strong>: Independente por provedor</li>
+</ul>
+<h3 id="2-event-driven">2. Event-Driven</h3>
+<ul>
+<li><strong>Eventos</strong>: Mensagens, conversas, CSAT</li>
+<li><strong>Processamento</strong>: Assíncrono com Celery</li>
+<li><strong>Notificações</strong>: Tempo real via WebSocket</li>
+<li><strong>Auditoria</strong>: Log de todos os eventos</li>
+</ul>
+<h3 id="3-microservicos">3. Microserviços</h3>
+<ul>
+<li><strong>Separação</strong>: Frontend, Backend, IA, SGP</li>
+<li><strong>Comunicação</strong>: APIs REST e WebSocket</li>
+<li><strong>Deploy</strong>: Independente</li>
+<li><strong>Escalabilidade</strong>: Por componente</li>
+</ul>
+<h3 id="4-cqrs-command-query-responsibility-segregation">4. CQRS (Command Query Responsibility Segregation)</h3>
+<ul>
+<li><strong>Commands</strong>: Operações de escrita</li>
+<li><strong>Queries</strong>: Consultas de leitura</li>
+<li><strong>Separação</strong>: Dados transacionais vs. analíticos</li>
+<li><strong>Performance</strong>: Otimizada para cada tipo</li>
+</ul>
+<h2 id="seguranca">Segurança</h2>
+<h3 id="1-autenticacao">1. Autenticação</h3>
+<ul>
+<li><strong>Método</strong>: Token-based authentication</li>
+<li><strong>Segurança</strong>: JWT com expiração</li>
+<li><strong>Renovação</strong>: Automática</li>
+<li><strong>Logout</strong>: Invalidação de token</li>
+</ul>
+<h3 id="2-autorizacao">2. Autorização</h3>
+<ul>
+<li><strong>Níveis</strong>: Superuser, Admin, Agent, Viewer</li>
+<li><strong>Permissões</strong>: Granulares por recurso</li>
+<li><strong>Contexto</strong>: Por provedor</li>
+<li><strong>Auditoria</strong>: Log de todas as ações</li>
+</ul>
+<h3 id="3-isolamento-de-dados">3. Isolamento de Dados</h3>
+<ul>
+<li><strong>RLS</strong>: Row Level Security no Supabase</li>
+<li><strong>Filtros</strong>: Automáticos por provedor</li>
+<li><strong>Vazamento</strong>: Impossível entre provedores</li>
+<li><strong>Compliance</strong>: LGPD e GDPR</li>
+</ul>
+<h3 id="4-criptografia">4. Criptografia</h3>
+<ul>
+<li><strong>Transmissão</strong>: HTTPS/TLS</li>
+<li><strong>Armazenamento</strong>: Dados sensíveis criptografados</li>
+<li><strong>Chaves</strong>: Rotação automática</li>
+<li><strong>Backup</strong>: Criptografado</li>
+</ul>
+<h2 id="performance">Performance</h2>
+<h3 id="1-cache-strategy">1. Cache Strategy</h3>
+<ul>
+<li><strong>Redis</strong>: Sessões e cache</li>
+<li><strong>CDN</strong>: Arquivos estáticos</li>
+<li><strong>Database</strong>: Índices otimizados</li>
+<li><strong>API</strong>: Rate limiting</li>
+</ul>
+<h3 id="2-escalabilidade">2. Escalabilidade</h3>
+<ul>
+<li><strong>Horizontal</strong>: Múltiplas instâncias</li>
+<li><strong>Vertical</strong>: Recursos adicionais</li>
+<li><strong>Load Balancing</strong>: Distribuição de carga</li>
+<li><strong>Auto-scaling</strong>: Baseado em métricas</li>
+</ul>
+<h3 id="3-monitoramento">3. Monitoramento</h3>
+<ul>
+<li><strong>Métricas</strong>: Performance em tempo real</li>
+<li><strong>Alertas</strong>: Notificações automáticas</li>
+<li><strong>Logs</strong>: Centralizados</li>
+<li><strong>Dashboards</strong>: Visualização</li>
+</ul>
+<h2 id="integracoes">Integrações</h2>
+<h3 id="1-whatsapp-uazapi">1. WhatsApp (Uazapi)</h3>
+<ul>
+<li><strong>Protocolo</strong>: Webhook</li>
+<li><strong>Formato</strong>: JSON</li>
+<li><strong>Segurança</strong>: Assinatura digital</li>
+<li><strong>Retry</strong>: Automático</li>
+</ul>
+<h3 id="2-openai">2. OpenAI</h3>
+<ul>
+<li><strong>Protocolo</strong>: HTTPS</li>
+<li><strong>Formato</strong>: JSON</li>
+<li><strong>Rate Limiting</strong>: Configurável</li>
+<li><strong>Fallback</strong>: Resposta padrão</li>
+</ul>
+<h3 id="3-sgp">3. SGP</h3>
+<ul>
+<li><strong>Protocolo</strong>: HTTPS</li>
+<li><strong>Formato</strong>: JSON/XML</li>
+<li><strong>Cache</strong>: Dados temporários</li>
+<li><strong>Timeout</strong>: Configurável</li>
+</ul>
+<h3 id="4-supabase">4. Supabase</h3>
+<ul>
+<li><strong>Protocolo</strong>: HTTPS</li>
+<li><strong>Formato</strong>: JSON</li>
+<li><strong>Real-time</strong>: WebSocket</li>
+<li><strong>RLS</strong>: Row Level Security</li>
+</ul>
+<h2 id="deploy-e-infraestrutura">Deploy e Infraestrutura</h2>
+<h3 id="1-desenvolvimento">1. Desenvolvimento</h3>
+<ul>
+<li><strong>Local</strong>: Docker Compose</li>
+<li><strong>Hot Reload</strong>: Automático</li>
+<li><strong>Debug</strong>: Logs detalhados</li>
+<li><strong>Testing</strong>: Unit e integration</li>
+</ul>
+<h3 id="2-producao">2. Produção</h3>
+<ul>
+<li><strong>Servidor</strong>: Ubuntu/CentOS</li>
+<li><strong>Proxy</strong>: Nginx</li>
+<li><strong>SSL</strong>: Let's Encrypt</li>
+<li><strong>Monitoring</strong>: Systemd</li>
+</ul>
+<h3 id="3-cicd">3. CI/CD</h3>
+<ul>
+<li><strong>GitHub Actions</strong>: Automático</li>
+<li><strong>Testing</strong>: Automático</li>
+<li><strong>Deploy</strong>: Automático</li>
+<li><strong>Rollback</strong>: Automático</li>
+</ul>
+<h2 id="monitoramento-e-observabilidade">Monitoramento e Observabilidade</h2>
+<h3 id="1-metricas">1. Métricas</h3>
+<ul>
+<li><strong>Sistema</strong>: CPU, RAM, Disco</li>
+<li><strong>Aplicação</strong>: Requests, erros, latência</li>
+<li><strong>Negócio</strong>: Conversas, CSAT, resolução</li>
+<li><strong>Custom</strong>: Métricas específicas</li>
+</ul>
+<h3 id="2-logs">2. Logs</h3>
+<ul>
+<li><strong>Aplicação</strong>: Django, Celery</li>
+<li><strong>Sistema</strong>: Nginx, PostgreSQL</li>
+<li><strong>Integrações</strong>: APIs externas</li>
+<li><strong>Auditoria</strong>: Todas as ações</li>
+</ul>
+<h3 id="3-alertas">3. Alertas</h3>
+<ul>
+<li><strong>Sistema</strong>: Recursos baixos</li>
+<li><strong>Aplicação</strong>: Erros altos</li>
+<li><strong>Negócio</strong>: CSAT baixo</li>
+<li><strong>Integração</strong>: APIs fora</li>
+</ul>
+<h2 id="proximos-passos">Próximos Passos</h2>
+<ol>
+<li><a href="../features/">Funcionalidades</a> - Explore todas as funcionalidades</li>
+<li><a href="../../installation/development/">Instalação</a> - Configure o ambiente</li>
+<li><a href="../../api/endpoints/">API</a> - Explore a API</li>
+<li><a href="../../configuration/supabase/">Configuração</a> - Configure integrações</li>
+</ol></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

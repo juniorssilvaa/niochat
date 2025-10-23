@@ -1,0 +1,40 @@
+# Frontend Dockerfile - SERVIDO DIRETAMENTE PELO TRAEFIK, PORTA 8012
+FROM node:18-alpine AS build
+
+WORKDIR /app
+COPY frontend/frontend/package*.json ./
+RUN npm install -g pnpm
+RUN pnpm install
+
+COPY frontend/frontend/src ./src
+COPY frontend/frontend/public ./public
+COPY frontend/frontend/index.html ./
+COPY frontend/frontend/vite.config.js ./
+COPY frontend/frontend/jsconfig.json ./
+COPY frontend/frontend/components.json ./
+COPY frontend/frontend/eslint.config.js ./
+
+# Configurar variáveis de ambiente para build
+ENV VITE_API_URL=https://api.niochat.com.br
+ENV VITE_WS_URL=wss://api.niochat.com.br
+
+RUN pnpm run build
+
+# ------------------ Production ------------------
+FROM node:18-alpine
+
+# Instalar serve e wget (para healthcheck)
+RUN npm install -g serve && apk add --no-cache wget
+
+# Copiar arquivos buildados
+COPY --from=build /app/dist /app/dist
+
+# Expor porta 8012
+EXPOSE 8012
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8012/ || exit 1
+
+# ✅ Forma correta de ouvir em todas interfaces
+CMD ["serve", "-s", "/app/dist", "-l", "tcp://0.0.0.0:8012"]

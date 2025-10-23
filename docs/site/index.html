@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Documentação NioChat">
+        
+        
+        <link rel="shortcut icon" href="img/favicon.ico">
+        <title>NioChat</title>
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/fontawesome.min.css" rel="stylesheet">
+        <link href="css/brands.min.css" rel="stylesheet">
+        <link href="css/solid.min.css" rel="stylesheet">
+        <link href="css/v4-font-face.min.css" rel="stylesheet">
+        <link href="css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/rainbow.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body class="homepage">
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href=".">NioChat</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="." class="nav-link active" aria-current="page">NioChat - Sistema de Atendimento WhatsApp</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="changelog/" class="nav-link">Changelog</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Ai</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="ai/configuration/" class="dropdown-item">Configuração da IA</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Api</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="api/authentication/" class="dropdown-item">Autenticação</a>
+</li>
+                                    
+<li>
+    <a href="api/endpoints/" class="dropdown-item">Endpoints da API</a>
+</li>
+                                    
+<li>
+    <a href="api/postman-guide/" class="dropdown-item">Guia de Uso do Postman com NioChat</a>
+</li>
+                                    
+<li>
+    <a href="api/webhooks/" class="dropdown-item">Webhooks</a>
+</li>
+                                    
+<li>
+    <a href="api/websocket/" class="dropdown-item">WebSocket</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Configuration</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="configuration/supabase/" class="dropdown-item">Configuração do Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Development</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="development/contributing/" class="dropdown-item">Contribuindo para o NioChat</a>
+</li>
+                                    
+<li>
+    <a href="development/structure/" class="dropdown-item">Estrutura do Projeto</a>
+</li>
+                                    
+<li>
+    <a href="development/troubleshooting/" class="dropdown-item">Troubleshooting</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Installation</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="installation/development/" class="dropdown-item">Instalação em Desenvolvimento</a>
+</li>
+                                    
+<li>
+    <a href="installation/production/" class="dropdown-item">Instalação em Produção</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Overview</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="overview/architecture/" class="dropdown-item">Arquitetura do Sistema</a>
+</li>
+                                    
+<li>
+    <a href="overview/features/" class="dropdown-item">Funcionalidades</a>
+</li>
+                                    
+<li>
+    <a href="overview/introduction/" class="dropdown-item">Introdução ao NioChat</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Supabase</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="supabase/integration/" class="dropdown-item">Integração com Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Usage</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="usage/interface/" class="dropdown-item">Interface do Usuário</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" class="nav-link disabled">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="changelog/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#niochat-sistema-de-atendimento-whatsapp" class="nav-link">NioChat - Sistema de Atendimento WhatsApp</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#funcionalidades-principais" class="nav-link">🚀 Funcionalidades Principais</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#arquitetura" class="nav-link">🏗️ Arquitetura</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#inicio-rapido" class="nav-link">🚀 Início Rápido</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#documentacao-completa" class="nav-link">📚 Documentação Completa</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#suporte" class="nav-link">🆘 Suporte</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#licenca" class="nav-link">📄 Licença</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="niochat-sistema-de-atendimento-whatsapp">NioChat - Sistema de Atendimento WhatsApp</h1>
+<div class="grid cards" markdown>
+
+-   :material-robot:{ .lg .middle } **IA Inteligente**
+
+    ---
+
+    Sistema de IA avançado com ChatGPT integrado, transcrição automática de áudio e consulta automática ao SGP
+
+    [:octicons-arrow-right-24: Configurar IA](ai/configuration.md)
+
+-   :material-whatsapp:{ .lg .middle } **WhatsApp**
+
+    ---
+
+    Integração completa com Uazapi/Evolution API para envio e recebimento de mensagens
+
+    [:octicons-arrow-right-24: Configurar WhatsApp](configuration/integrations.md)
+
+-   :material-database:{ .lg .middle } **Supabase**
+
+    ---
+
+    Dashboard em tempo real, auditoria avançada e sistema CSAT com Supabase
+
+    [:octicons-arrow-right-24: Configurar Supabase](supabase/integration.md)
+
+-   :material-chart-line:{ .lg .middle } **Dashboard**
+
+    ---
+
+    Métricas em tempo real, gráficos interativos e relatórios detalhados
+
+    [:octicons-arrow-right-24: Ver Dashboard](usage/dashboard.md)
+
+</div>
+
+<h2 id="funcionalidades-principais">🚀 Funcionalidades Principais</h2>
+<h3 id="inteligencia-artificial-avancada">🤖 Inteligência Artificial Avançada</h3>
+<ul>
+<li><strong>IA ChatGPT Integrada</strong>: Atendimento automatizado inteligente</li>
+<li><strong>Transcrição de Áudio</strong>: Conversão automática de mensagens de voz para texto</li>
+<li><strong>Consulta SGP Automática</strong>: IA consulta dados reais do cliente automaticamente</li>
+<li><strong>Function Calls</strong>: IA executa funções do SGP em tempo real</li>
+<li><strong>Análise de Sentimento</strong>: IA analisa feedback textual e converte em avaliações CSAT</li>
+</ul>
+<h3 id="integracao-whatsapp-completa">📱 Integração WhatsApp Completa</h3>
+<ul>
+<li><strong>Uazapi/Evolution API</strong>: Integração nativa com WhatsApp Business</li>
+<li><strong>Webhooks em Tempo Real</strong>: Recebimento instantâneo de mensagens</li>
+<li><strong>Mídia Completa</strong>: Suporte a imagens, vídeos, áudios e documentos</li>
+<li><strong>Reações e Exclusão</strong>: Sistema completo de interações</li>
+<li><strong>Status de Entrega</strong>: Confirmação de recebimento das mensagens</li>
+</ul>
+<h3 id="dashboard-e-metricas">📊 Dashboard e Métricas</h3>
+<ul>
+<li><strong>Tempo Real</strong>: Atualizações instantâneas via WebSocket</li>
+<li><strong>Métricas Avançadas</strong>: Taxa de resolução, satisfação média, tempo de resposta</li>
+<li><strong>Gráficos Interativos</strong>: Visualizações dinâmicas com Recharts</li>
+<li><strong>Filtros Avançados</strong>: Por data, usuário, equipe e provedor</li>
+<li><strong>Exportação</strong>: Relatórios em PDF e Excel</li>
+</ul>
+<h3 id="sistema-multi-tenant">🔐 Sistema Multi-Tenant</h3>
+<ul>
+<li><strong>Isolamento Total</strong>: Cada provedor tem seus dados separados</li>
+<li><strong>Permissões Granulares</strong>: Controle fino de acesso por usuário</li>
+<li><strong>Equipes</strong>: Organização por equipes com visibilidade controlada</li>
+<li><strong>Transferência Inteligente</strong>: Entre agentes e equipes</li>
+</ul>
+<h3 id="sistema-csat">📈 Sistema CSAT</h3>
+<ul>
+<li><strong>Coleta Automática</strong>: Feedback enviado automaticamente após fechamento</li>
+<li><strong>Análise IA</strong>: Interpretação automática de feedback textual</li>
+<li><strong>Dashboard Completo</strong>: Métricas e evolução temporal</li>
+<li><strong>Histórico Detalhado</strong>: Últimos feedbacks com fotos de perfil</li>
+</ul>
+<h2 id="arquitetura">🏗️ Arquitetura</h2>
+<pre><code class="language-mermaid">graph TB
+    subgraph &quot;Frontend&quot;
+        A[React App]
+        B[Dashboard]
+        C[Chat Interface]
+        D[Admin Panel]
+    end
+
+    subgraph &quot;Backend&quot;
+        E[Django API]
+        F[WebSocket]
+        G[Celery Tasks]
+        H[Redis Cache]
+    end
+
+    subgraph &quot;Integrações&quot;
+        I[WhatsApp Uazapi]
+        J[OpenAI ChatGPT]
+        K[SGP System]
+        L[Supabase]
+    end
+
+    subgraph &quot;Banco de Dados&quot;
+        M[PostgreSQL]
+        N[Redis]
+        O[Supabase]
+    end
+
+    A --&gt; E
+    B --&gt; E
+    C --&gt; F
+    D --&gt; E
+
+    E --&gt; G
+    E --&gt; H
+    F --&gt; H
+
+    E --&gt; I
+    E --&gt; J
+    E --&gt; K
+    E --&gt; L
+
+    E --&gt; M
+    G --&gt; N
+    L --&gt; O
+</code></pre>
+<h2 id="inicio-rapido">🚀 Início Rápido</h2>
+<h3 id="1-clone-o-repositorio">1. Clone o Repositório</h3>
+<pre><code class="language-bash">git clone https://github.com/juniorssilvaa/niochat.git
+cd niochat
+</code></pre>
+<h3 id="2-configure-o-ambiente">2. Configure o Ambiente</h3>
+<pre><code class="language-bash"># Backend
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createsuperuser
+
+# Frontend
+cd frontend/frontend
+npm install
+</code></pre>
+<h3 id="3-inicie-os-servicos">3. Inicie os Serviços</h3>
+<pre><code class="language-bash"># Terminal 1 - Backend
+cd backend
+python manage.py runserver 0.0.0.0:8010
+
+# Terminal 2 - Frontend
+cd frontend/frontend
+npm run dev
+</code></pre>
+<h3 id="4-acesse-o-sistema">4. Acesse o Sistema</h3>
+<ul>
+<li><strong>Frontend</strong>: http://localhost:5173</li>
+<li><strong>Backend</strong>: http://localhost:8010</li>
+<li><strong>Admin</strong>: http://localhost:8010/admin</li>
+</ul>
+<h2 id="documentacao-completa">📚 Documentação Completa</h2>
+<p>Explore nossa documentação completa para aprender sobre:</p>
+<ul>
+<li><a href="installation/development/">:octicons-book-24: Instalação e Configuração</a></li>
+<li><a href="api/endpoints/">:octicons-code-24: API e Endpoints</a></li>
+<li><a href="ai/configuration/">:octicons-cpu-24: IA e SGP</a></li>
+<li><a href="supabase/integration/">:octicons-database-24: Supabase</a></li>
+<li><a href="development/structure/">:octicons-gear-24: Desenvolvimento</a></li>
+</ul>
+<h2 id="suporte">🆘 Suporte</h2>
+<ul>
+<li><strong>GitHub Issues</strong>: <a href="https://github.com/juniorssilvaa/niochat/issues">Reportar problemas</a></li>
+<li><strong>Documentação</strong>: Navegue pelas seções acima</li>
+<li><strong>Email</strong>: Entre em contato para suporte técnico</li>
+</ul>
+<h2 id="licenca">📄 Licença</h2>
+<p>Este projeto está sob a licença MIT. Veja o arquivo <a href="https://github.com/juniorssilvaa/niochat/blob/main/LICENSE">LICENSE</a> para mais detalhes.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = ".",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="js/base.js"></script>
+        <script src="search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
+
+<!--
+MkDocs version : 1.6.1
+Build Date UTC : 2025-10-13 14:07:05.740776+00:00
+-->

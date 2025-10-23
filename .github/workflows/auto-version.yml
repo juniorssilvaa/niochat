@@ -1,0 +1,272 @@
+name: Auto Version & Changelog Update
+
+on:
+  # Desabilitado temporariamente para evitar conflito com deploy.yml
+  # push:
+  #   branches: [ main, master ]
+  # pull_request:
+  #   branches: [ main, master ]
+  #   types: [ closed ]
+  workflow_dispatch: # Apenas execução manual
+
+jobs:
+  auto-version:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Get Commit Info
+      id: commit_info
+      run: |
+        # Obter mensagem do último commit
+        COMMIT_MSG=$(git log -1 --pretty=%B)
+        # Escapar caracteres especiais e quebras de linha
+        COMMIT_MSG_ESCAPED=$(echo "$COMMIT_MSG" | sed 's/"/\\"/g' | sed 's/`/\\`/g' | tr '\n' ' ' | sed 's/  */ /g')
+        echo "commit_message<<EOF" >> $GITHUB_OUTPUT
+        echo "$COMMIT_MSG_ESCAPED" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
+        # Determinar tipo de versão
+        COMMIT_LOWER=$(echo "$COMMIT_MSG" | tr '[:upper:]' '[:lower:]')
+        
+        if echo "$COMMIT_LOWER" | grep -q "breaking\|major\|incompatible"; then
+          echo "version_type=major" >> $GITHUB_OUTPUT
+        elif echo "$COMMIT_LOWER" | grep -q "feat\|feature\|minor\|add\|new\|funcionalidade"; then
+          echo "version_type=minor" >> $GITHUB_OUTPUT  
+        elif echo "$COMMIT_LOWER" | grep -q "fix\|patch\|bug\|correção\|ajuste"; then
+          echo "version_type=patch" >> $GITHUB_OUTPUT
+        else
+          echo "version_type=patch" >> $GITHUB_OUTPUT
+        fi
+        
+        echo "Commit: $COMMIT_MSG"
+        echo "Type detected: $(echo "$COMMIT_LOWER" | grep -q "feat\|feature" && echo "minor" || echo "patch")"
+
+    - name: Show Current Version
+      run: |
+        echo "Versão atual:"
+        python version_manager.py show
+        
+        echo "Arquivos de versão:"
+        echo "VERSION: $(cat VERSION 2>/dev/null || echo 'não encontrado')"
+        echo "package.json: $(grep '"version"' frontend/frontend/package.json 2>/dev/null || echo 'não encontrado')"
+
+    - name: Update Version & Changelog
+      id: update_version
+      run: |
+        echo "Atualizando versão (${{ steps.commit_info.outputs.version_type }})..."
+        
+        # Executar version_manager.py
+        python version_manager.py ${{ steps.commit_info.outputs.version_type }}
+        
+        # Obter nova versão
+        NEW_VERSION=$(cat VERSION)
+        echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        
+        echo "Nova versão: $NEW_VERSION"
+
+    - name: Customize Changelog Entry
+      run: |
+        echo "Personalizando entrada do changelog..."
+        
+        # Script Python para personalizar changelog baseado na mensagem do commit
+        python3 << 'EOF'
+        import json
+        import os
+        from pathlib import Path
+        
+        commit_msg = """${{ steps.commit_info.outputs.commit_message }}"""
+        version_type = "${{ steps.commit_info.outputs.version_type }}"
+        new_version = "${{ steps.update_version.outputs.new_version }}"
+        
+        # Ler changelog atual
+        changelog_path = Path("CHANGELOG.json")
+        if changelog_path.exists():
+            with open(changelog_path, 'r', encoding='utf-8') as f:
+                changelog = json.load(f)
+        else:
+            changelog = {"versions": []}
+        
+        # Encontrar a versão mais recente (que acabou de ser criada)
+        if changelog["versions"] and changelog["versions"][0]["version"] == new_version:
+            latest_version = changelog["versions"][0]
+            
+            # Personalizar baseado na mensagem do commit
+            commit_lower = commit_msg.lower()
+            
+            # Extrair título mais específico da mensagem
+            if ':' in commit_msg:
+                title_part = commit_msg.split(':', 1)[1].strip()
+                latest_version["title"] = title_part[:50] + ("..." if len(title_part) > 50 else "")
+            
+            # Personalizar mudanças baseado no tipo e conteúdo
+            changes = []
+            
+            if "feat" in commit_lower or "feature" in commit_lower:
+                changes.append({
+                    "type": "feature",
+                    "title": "Nova Funcionalidade",
+                    "description": commit_msg.split(':', 1)[1].strip() if ':' in commit_msg else commit_msg
+                })
+            elif "fix" in commit_lower or "bug" in commit_lower:
+                changes.append({
+                    "type": "fix", 
+                    "title": "Correção de Bug",
+                    "description": commit_msg.split(':', 1)[1].strip() if ':' in commit_msg else commit_msg
+                })
+            elif "improvement" in commit_lower or "melhoria" in commit_lower:
+                changes.append({
+                    "type": "improvement",
+                    "title": "Melhoria",
+                    "description": commit_msg.split(':', 1)[1].strip() if ':' in commit_msg else commit_msg
+                })
+            elif "security" in commit_lower or "segurança" in commit_lower:
+                changes.append({
+                    "type": "security",
+                    "title": "Correção de Segurança", 
+                    "description": commit_msg.split(':', 1)[1].strip() if ':' in commit_msg else commit_msg
+                })
+            else:
+                # Padrão baseado no tipo de versão
+                if version_type == "major":
+                    changes.append({
+                        "type": "feature",
+                        "title": "Atualização Principal",
+                        "description": commit_msg
+                    })
+                elif version_type == "minor":
+                    changes.append({
+                        "type": "feature", 
+                        "title": "Nova Funcionalidade",
+                        "description": commit_msg
+                    })
+                else:
+                    changes.append({
+                        "type": "fix",
+                        "title": "Melhorias Gerais",
+                        "description": commit_msg
+                    })
+            
+            # Atualizar changes se não estiver vazio
+            if changes:
+                latest_version["changes"] = changes
+            
+            # Salvar changelog atualizado
+            with open(changelog_path, 'w', encoding='utf-8') as f:
+                json.dump(changelog, f, indent=2, ensure_ascii=False)
+            
+            # Copiar para frontend/public
+            import shutil
+            frontend_path = Path("frontend/frontend/public/CHANGELOG.json")
+            if frontend_path.parent.exists():
+                shutil.copy2(changelog_path, frontend_path)
+            
+            print(f"Changelog personalizado para versão {new_version}")
+            print(f"Título: {latest_version.get('title', 'N/A')}")
+            print(f"Mudanças: {len(changes)} entrada(s)")
+        EOF
+
+    - name: Build Frontend
+      run: |
+        echo "Compilando frontend com nova versão..."
+        cd frontend/frontend
+        
+        # Instalar dependências se necessário
+        if [ ! -d "node_modules" ]; then
+          npm install
+        fi
+        
+        # Build do frontend
+        npm run build
+        
+        echo "Frontend compilado com versão ${{ steps.update_version.outputs.new_version }}"
+
+    - name: Commit & Push Changes
+      run: |
+        echo "Fazendo commit das mudanças..."
+        
+        # Configurar Git
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Adicionar arquivos modificados
+        git add VERSION
+        git add frontend/frontend/package.json
+        git add frontend/frontend/package-lock.json
+        git add frontend/frontend/pnpm-lock.yaml
+        git add backend/niochat/settings.py
+        git add backend/core/telegram_service.py  
+        git add CHANGELOG.json
+        git add frontend/frontend/public/CHANGELOG.json
+        git add VERSION_INFO.md
+        git add frontend/frontend/dist/ || true
+        
+        # Verificar se há mudanças
+        if git diff --staged --quiet; then
+          echo "Nenhuma mudança de versão detectada"
+        else
+          # Fazer commit
+          git commit -m "Auto-update version to ${{ steps.update_version.outputs.new_version }} [skip ci]"
+          
+          # Push das mudanças
+          git push origin ${{ github.ref_name }}
+          
+          echo "Versão ${{ steps.update_version.outputs.new_version }} commitada e enviada!"
+        fi
+
+    - name: Create Release Tag
+      if: steps.update_version.outputs.new_version != ''
+      run: |
+        echo "Criando tag de release..."
+        
+        NEW_VERSION="${{ steps.update_version.outputs.new_version }}"
+        
+        # Criar tag
+        git tag -a "v$NEW_VERSION" -m "Release version $NEW_VERSION"
+        
+        # Push da tag
+        git push origin "v$NEW_VERSION"
+        
+        echo "Tag v$NEW_VERSION criada!"
+
+    - name: Summary
+      run: |
+        echo "## Versionamento Automático Concluído!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Versão anterior:** $(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo 'N/A')" >> $GITHUB_STEP_SUMMARY
+        echo "- **Nova versão:** ${{ steps.update_version.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Tipo:** ${{ steps.commit_info.outputs.version_type }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit:** ${{ steps.commit_info.outputs.commit_message }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Arquivos Atualizados:" >> $GITHUB_STEP_SUMMARY
+        echo "- VERSION" >> $GITHUB_STEP_SUMMARY
+        echo "- frontend/frontend/package.json" >> $GITHUB_STEP_SUMMARY
+        echo "- CHANGELOG.json" >> $GITHUB_STEP_SUMMARY
+        echo "- Frontend build atualizado" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Sistema em produção atualizado automaticamente!**" >> $GITHUB_STEP_SUMMARY
+
+  notify-success:
+    needs: auto-version
+    runs-on: ubuntu-latest
+    if: success()
+    
+    steps:
+    - name: Success Notification
+      run: |
+        echo "Versionamento automático executado com sucesso!"
+        echo "Verifique o changelog em: https://github.com/${{ github.repository }}/blob/main/CHANGELOG.json"
+
+
+

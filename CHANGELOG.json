@@ -1,0 +1,245 @@
+{
+  "versions": [
+    {
+      "version": "2.23.5",
+      "date": "2025-10-08",
+      "type": "patch",
+      "title": "Sistema de encerramento automático aprimorado",
+      "changes": [
+        {
+          "type": "improvement",
+          "title": "Encerramento automático pela IA",
+          "description": "Melhorado o sistema de encerramento de atendimento feito pela IA de forma automática quando o cliente agradece após receber ajuda."
+        },
+        {
+          "type": "improvement",
+          "title": "Detecção inteligente de agradecimentos",
+          "description": "Sistema detecta automaticamente palavras de agradecimento como 'obrigado', 'obrigada', 'valeu' para encerrar conversas."
+        },
+        {
+          "type": "improvement",
+          "title": "Finalização após conclusão da tarefa",
+          "description": "Conversas são fechadas automaticamente quando a tarefa foi concluída com sucesso e o cliente demonstra satisfação."
+        }
+      ]
+    },
+    {
+      "version": "2.23.4",
+      "date": "2025-10-07",
+      "type": "patch",
+      "title": "CSAT – fluxo aprimorado",
+      "changes": [
+        {
+          "type": "improvement",
+          "title": "Agradecimento automático ao cliente",
+          "description": "Ao responder à pesquisa, o cliente recebe um agradecimento automático."
+        },
+        {
+          "type": "fix",
+          "title": "Evita respostas indevidas da IA",
+          "description": "Quando é resposta de pesquisa, a IA não responde nem reabre atendimento."
+        },
+        {
+          "type": "improvement",
+          "title": "Encerramento automático do atendimento",
+          "description": "Após registrar o feedback, o atendimento é encerrado automaticamente."
+        }
+      ]
+    },
+    {
+      "version": "2.23.3",
+      "date": "2025-10-07",
+      "type": "patch",
+      "title": "Correções e Melhorias no Atendimento e IA",
+      "changes": [
+        {
+          "type": "fix",
+          "title": "Mensagens em tempo real no atendimento",
+          "description": "Mensagens recebidas agora aparecem imediatamente no ChatArea, sem precisar atualizar a página."
+        },
+        {
+          "type": "improvement",
+          "title": "Reações em mensagens",
+          "description": "Atendentes podem reagir às mensagens dos clientes e também receber reações, inclusive em mensagens de mídia."
+        },
+        {
+          "type": "improvement",
+          "title": "IA – aprimoramento de fala",
+          "description": "Ajustes no modo de falar da IA para respostas mais naturais."
+        }
+      ]
+    },
+    {
+      "version": "2.23.2",
+      "date": "2025-09-29",
+      "type": "patch",
+      "title": "Correções Finais e Otimizações",
+      "changes": [
+        {
+          "type": "fix",
+          "title": "Otimização do Sistema de Notificações",
+          "description": "Ajustes finais no sistema de notificações para melhor performance"
+        },
+        {
+          "type": "improvement",
+          "title": "Estabilidade do Sistema",
+          "description": "Otimizações gerais para melhorar a estabilidade do sistema"
+        }
+      ]
+    },
+    {
+      "version": "2.23.1",
+      "date": "2025-09-29",
+      "type": "patch",
+      "title": "Correções de Estabilidade",
+      "changes": [
+        {
+          "type": "fix",
+          "title": "Correção no Sistema de Áudio",
+          "description": "Correção de bugs críticos no módulo de áudio que causavam instabilidade"
+        },
+        {
+          "type": "improvement",
+          "title": "Melhoria nas Transferências",
+          "description": "Otimização no sistema de transferências realizadas pela IA"
+        }
+      ]
+    },
+    {
+      "version": "2.23.0",
+      "date": "2025-09-27",
+      "type": "minor",
+      "title": "Nova IA Multimídia e Sistema CSAT",
+      "changes": [
+        {
+          "type": "feature",
+          "title": "IA com Processamento de Áudio e Imagens",
+          "description": "Nova capacidade da IA para processar e entender arquivos de áudio e imagens"
+        },
+        {
+          "type": "feature",
+          "title": "Sistema CSAT de Feedback",
+          "description": "Implementação de pesquisa de satisfação do cliente para coletar feedback dos clientes"
+        },
+        {
+          "type": "feature",
+          "title": "Biblioteca de Sons Expandida",
+          "description": "Adicionados novos efeitos sonoros ao sistema"
+        },
+        {
+          "type": "improvement",
+          "title": "Auditoria com Fotos",
+          "description": "Agora é possível visualizar a foto do contato diretamente na aba de auditoria"
+        },
+        {
+          "type": "improvement",
+          "title": "Otimização de Transferências por IA",
+          "description": "Melhoria no sistema de transferências realizadas pela IA para maior eficiência"
+        },
+        {
+          "type": "fix",
+          "title": "Correções no Sistema de Notificações",
+          "description": "Refatoração e correções no sistema de notificações"
+        }
+      ]
+    },
+    {
+      "version": "2.22.0",
+      "date": "2025-09-26",
+      "type": "minor",
+      "title": "Sistema CSAT e Melhorias Iniciais",
+      "changes": [
+        {
+          "type": "feature",
+          "title": "Sistema CSAT - Versão Inicial",
+          "description": "Implementação inicial da pesquisa de satisfação do cliente"
+        },
+        {
+          "type": "feature",
+          "title": "Processamento Multimídia Básico",
+          "description": "Primeira versão da capacidade da IA entender áudios e imagens"
+        },
+        {
+          "type": "improvement",
+          "title": "Transferências por IA",
+          "description": "Otimizações iniciais no sistema de transferências"
+        },
+        {
+          "type": "fix",
+          "title": "Correções no Sistema de Áudio",
+          "description": "Correções preliminares no módulo de áudio"
+        }
+      ]
+    },
+    {
+      "version": "2.21.0",
+      "date": "2025-09-26",
+      "type": "minor",
+      "title": "Base para Novas Funcionalidades",
+      "changes": [
+        {
+          "type": "feature",
+          "title": "Funcionalidades Base do Sistema",
+          "description": "Adição das funcionalidades fundamentais do sistema"
+        },
+        {
+          "type": "improvement",
+          "title": "Compatibilidade",
+          "description": "Manutenção da compatibilidade com versões anteriores"
+        }
+      ]
+    },
+    {
+      "version": "2.20.13",
+      "date": "2025-09-26",
+      "type": "patch",
+      "title": "Correções de Estabilidade",
+      "changes": [
+        {
+          "type": "fix",
+          "title": "Correções de Estabilidade",
+          "description": "Correções de problemas e melhorias de estabilidade"
+        }
+      ]
+    },
+    {
+      "version": "2.20.12",
+      "date": "2025-09-23",
+      "type": "patch",
+      "title": "Correções e Melhorias",
+      "changes": [
+        {
+          "type": "fix",
+          "title": "Correções de Bugs",
+          "description": "Correções de problemas e melhorias de estabilidade"
+        }
+      ]
+    },
+    {
+      "version": "2.20.11",
+      "date": "2025-09-21",
+      "type": "patch",
+      "title": "Correções e Melhorias",
+      "changes": [
+        {
+          "type": "fix",
+          "title": "Correções de Bugs",
+          "description": "Correções de problemas e melhorias de estabilidade"
+        }
+      ]
+    },
+    {
+      "version": "2.20.10",
+      "date": "2025-09-21",
+      "type": "patch",
+      "title": "Correções e Melhorias",
+      "changes": [
+        {
+          "type": "fix",
+          "title": "Correções de Bugs",
+          "description": "Correções de problemas e melhorias de estabilidade"
+        }
+      ]
+    }
+  ]
+}

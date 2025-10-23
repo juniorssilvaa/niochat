@@ -1,0 +1,330 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+static/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Frontend
+frontend/frontend/dist/
+frontend/frontend/build/
+frontend/frontend/.env.local
+frontend/frontend/.env.development.local
+frontend/frontend/.env.test.local
+frontend/frontend/.env.production.local
+
+# Configurações de desenvolvimento
+frontend/frontend/vite.config.dev.js
+docker.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+.env.production
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local development files
+docker-compose.override.yml
+docker-compose.local.yml
+.env.local
+.env.development
+.env.test
+env.local
+expose-local.js
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Certificate files
+*.pem
+*.key
+*.crt
+*.csr
+
+# Local configuration
+config.local.py
+settings.local.py
+
+# Test files
+test_*.py
+*_test.py
+tests/
+test/
+
+# Documentation build
+docs/_build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# Local media and uploads
+backend/media/
+backend/staticfiles/
+backend/static/
+frontend/frontend/public/uploads/
+
+# Local database
+backend/db.sqlite3
+backend/db.sqlite3-journal
+
+# Local logs
+backend/logs/
+frontend/frontend/logs/
+
+# Local certificates
+*.pem
+*.key
+*.crt
+
+# Local development scripts
+dev_*.py
+local_*.py
+test_*.py
+*_test.py
+
+# Local configuration overrides
+backend/local_settings.py
+backend/settings_local.py
+frontend/frontend/.env.local
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Temporary files
+*.tmp
+*.temp
+
+# Cloudflare Tunnel (conforme CLOUDFLARE_TUNNEL_REPORT.md)
+.cloudflared/
+*.cloudflared/
+
+# Nginx local (conforme CLOUDFLARE_TUNNEL_REPORT.md)
+/etc/nginx/sites-available/front.niochat.com.br.conf
+/etc/nginx/sites-enabled/front.niochat.com.br.conf
+
+# Certificados SSL locais (conforme CLOUDFLARE_TUNNEL_REPORT.md)
+/etc/ssl/localcerts/
+
+# Configurações de sistema (conforme CLOUDFLARE_TUNNEL_REPORT.md)
+/etc/hosts
+
+# Logs locais (conforme CLOUDFLARE_TUNNEL_REPORT.md)
+logs/
+*.log
+
+# Configurações de ambiente local (conforme CLOUDFLARE_TUNNEL_REPORT.md)
+.env.local
+.env.development
+
+# Configurações de desenvolvimento (NÃO COMMITAR)
+frontend/frontend/vite.config.dev.js
+frontend/frontend/.env.development
+frontend/frontend/src/config/environment.dev.js
+frontend/frontend/scripts/switch-env.js
+frontend/frontend/ENVIRONMENT_SETUP.md
+
+# Configurações de produção (COMMITAR)
+# frontend/frontend/vite.config.js - MANTER (PRODUÇÃO)
+# frontend/frontend/vite.config.prod.js - MANTER
+# frontend/frontend/src/config/environment.js - MANTER
+
+# Arquivos de desenvolvimento local (conforme CLOUDFLARE_TUNNEL_REPORT.md)
+CLOUDFLARE_TUNNEL_REPORT.md
+cloudflare-redirect.html
+nginx/sites/front.niochat.com.br.conf
+ngrok-config.yml
+test-nginx.conf
+.gitignore.local
+
+# Arquivos de cache Python
+backend/*/__pycache__/
+backend/*/__pycache__/*.pyc

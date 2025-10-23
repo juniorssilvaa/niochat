@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Contribuindo para o NioChat - NioChat</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/rainbow.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">NioChat</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">NioChat - Sistema de Atendimento WhatsApp</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../changelog/" class="nav-link">Changelog</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Ai</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../ai/configuration/" class="dropdown-item">Configuração da IA</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Api</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../api/authentication/" class="dropdown-item">Autenticação</a>
+</li>
+                                    
+<li>
+    <a href="../../api/endpoints/" class="dropdown-item">Endpoints da API</a>
+</li>
+                                    
+<li>
+    <a href="../../api/postman-guide/" class="dropdown-item">Guia de Uso do Postman com NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../../api/webhooks/" class="dropdown-item">Webhooks</a>
+</li>
+                                    
+<li>
+    <a href="../../api/websocket/" class="dropdown-item">WebSocket</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Configuration</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../configuration/supabase/" class="dropdown-item">Configuração do Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Development</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Contribuindo para o NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../structure/" class="dropdown-item">Estrutura do Projeto</a>
+</li>
+                                    
+<li>
+    <a href="../troubleshooting/" class="dropdown-item">Troubleshooting</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Installation</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../installation/development/" class="dropdown-item">Instalação em Desenvolvimento</a>
+</li>
+                                    
+<li>
+    <a href="../../installation/production/" class="dropdown-item">Instalação em Produção</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Overview</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../overview/architecture/" class="dropdown-item">Arquitetura do Sistema</a>
+</li>
+                                    
+<li>
+    <a href="../../overview/features/" class="dropdown-item">Funcionalidades</a>
+</li>
+                                    
+<li>
+    <a href="../../overview/introduction/" class="dropdown-item">Introdução ao NioChat</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Supabase</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../supabase/integration/" class="dropdown-item">Integração com Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Usage</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../usage/interface/" class="dropdown-item">Interface do Usuário</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../../configuration/supabase/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../structure/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#contribuindo-para-o-niochat" class="nav-link">Contribuindo para o NioChat</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#como-contribuir" class="nav-link">Como Contribuir</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#processo-de-desenvolvimento" class="nav-link">Processo de Desenvolvimento</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#convencoes-de-codigo" class="nav-link">Convenções de Código</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#estrutura-de-pull-request" class="nav-link">Estrutura de Pull Request</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#tipos-de-contribuicao" class="nav-link">Tipos de Contribuição</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#testes" class="nav-link">Testes</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#code-review" class="nav-link">Code Review</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#comunidade" class="nav-link">Comunidade</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#roadmap" class="nav-link">Roadmap</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#proximos-passos" class="nav-link">Próximos Passos</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#contato" class="nav-link">Contato</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="contribuindo-para-o-niochat">Contribuindo para o NioChat</h1>
+<p>Obrigado por seu interesse em contribuir para o NioChat! Este guia explica como contribuir para o projeto.</p>
+<h2 id="como-contribuir">Como Contribuir</h2>
+<h3 id="1-reportar-problemas">1. Reportar Problemas</h3>
+<ul>
+<li>Use o <a href="https://github.com/juniorssilvaa/niochat/issues">GitHub Issues</a></li>
+<li>Descreva o problema detalhadamente</li>
+<li>Inclua logs e screenshots se possível</li>
+<li>Use labels apropriadas</li>
+</ul>
+<h3 id="2-sugerir-melhorias">2. Sugerir Melhorias</h3>
+<ul>
+<li>Use o <a href="https://github.com/juniorssilvaa/niochat/discussions">GitHub Discussions</a></li>
+<li>Descreva a melhoria proposta</li>
+<li>Explique o benefício para os usuários</li>
+<li>Considere a implementação</li>
+</ul>
+<h3 id="3-enviar-pull-requests">3. Enviar Pull Requests</h3>
+<ul>
+<li>Fork o repositório</li>
+<li>Crie uma branch para sua feature</li>
+<li>Implemente as mudanças</li>
+<li>Teste suas mudanças</li>
+<li>Envie o pull request</li>
+</ul>
+<h2 id="processo-de-desenvolvimento">Processo de Desenvolvimento</h2>
+<h3 id="1-configurar-ambiente">1. Configurar Ambiente</h3>
+<pre><code class="language-bash"># Fork e clone
+git clone https://github.com/seu-usuario/niochat.git
+cd niochat
+
+# Configurar backend
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Configurar frontend
+cd ../frontend/frontend
+npm install
+</code></pre>
+<h3 id="2-criar-branch">2. Criar Branch</h3>
+<pre><code class="language-bash"># Criar branch para feature
+git checkout -b feature/nova-funcionalidade
+
+# Criar branch para bugfix
+git checkout -b bugfix/corrigir-problema
+</code></pre>
+<h3 id="3-implementar-mudancas">3. Implementar Mudanças</h3>
+<ul>
+<li>Siga as convenções de código</li>
+<li>Escreva testes para novas funcionalidades</li>
+<li>Atualize a documentação se necessário</li>
+<li>Mantenha o código limpo e legível</li>
+</ul>
+<h3 id="4-testar-mudancas">4. Testar Mudanças</h3>
+<pre><code class="language-bash"># Testes backend
+cd backend
+python manage.py test
+
+# Testes frontend
+cd frontend/frontend
+npm test
+
+# Lint
+npm run lint
+</code></pre>
+<h3 id="5-enviar-pull-request">5. Enviar Pull Request</h3>
+<pre><code class="language-bash"># Commit das mudanças
+git add .
+git commit -m &quot;feat: adicionar nova funcionalidade&quot;
+
+# Push para seu fork
+git push origin feature/nova-funcionalidade
+
+# Criar pull request no GitHub
+</code></pre>
+<h2 id="convencoes-de-codigo">Convenções de Código</h2>
+<h3 id="1-python-backend">1. Python (Backend)</h3>
+<pre><code class="language-python"># Nomes de variáveis e funções
+def process_message(message_text: str) -&gt; str:
+    &quot;&quot;&quot;Processar mensagem com IA.&quot;&quot;&quot;
+    return ai_service.generate_response(message_text)
+
+# Nomes de classes
+class ConversationService:
+    &quot;&quot;&quot;Serviço para gerenciar conversas.&quot;&quot;&quot;
+
+    def create_conversation(self, contact_id: int) -&gt; Conversation:
+        &quot;&quot;&quot;Criar nova conversa.&quot;&quot;&quot;
+        pass
+
+# Nomes de constantes
+MAX_MESSAGE_LENGTH = 1000
+DEFAULT_TIMEOUT = 30
+</code></pre>
+<h3 id="2-javascript-frontend">2. JavaScript (Frontend)</h3>
+<pre><code class="language-javascript">// Nomes de variáveis e funções
+const processMessage = (messageText) =&gt; {
+  return aiService.generateResponse(messageText);
+};
+
+// Nomes de componentes
+const ConversationList = ({ conversations }) =&gt; {
+  return (
+    &lt;div className=&quot;conversation-list&quot;&gt;
+      {conversations.map(conversation =&gt; (
+        &lt;ConversationItem key={conversation.id} conversation={conversation} /&gt;
+      ))}
+    &lt;/div&gt;
+  );
+};
+
+// Nomes de constantes
+const MAX_MESSAGE_LENGTH = 1000;
+const DEFAULT_TIMEOUT = 30;
+</code></pre>
+<h3 id="3-commits">3. Commits</h3>
+<pre><code class="language-bash"># Formato: tipo: descrição
+feat: adicionar nova funcionalidade
+fix: corrigir problema
+docs: atualizar documentação
+style: formatação de código
+refactor: refatorar código
+test: adicionar testes
+chore: tarefas de manutenção
+</code></pre>
+<h2 id="estrutura-de-pull-request">Estrutura de Pull Request</h2>
+<h3 id="1-titulo">1. Título</h3>
+<ul>
+<li>Descreva claramente a mudança</li>
+<li>Use o formato: <code>tipo: descrição</code></li>
+<li>Seja conciso mas descritivo</li>
+</ul>
+<h3 id="2-descricao">2. Descrição</h3>
+<pre><code class="language-markdown">## Descrição
+Descreva o que foi implementado ou corrigido.
+
+## Tipo de Mudança
+- [ ] Bug fix
+- [ ] Nova funcionalidade
+- [ ] Breaking change
+- [ ] Documentação
+
+## Como Testar
+1. Passo 1
+2. Passo 2
+3. Passo 3
+
+## Checklist
+- [ ] Código testado
+- [ ] Documentação atualizada
+- [ ] Testes adicionados
+- [ ] Lint passou
+</code></pre>
+<h3 id="3-checklist">3. Checklist</h3>
+<ul>
+<li>[ ] Código testado localmente</li>
+<li>[ ] Testes unitários passaram</li>
+<li>[ ] Lint passou</li>
+<li>[ ] Documentação atualizada</li>
+<li>[ ] Screenshots incluídas (se aplicável)</li>
+</ul>
+<h2 id="tipos-de-contribuicao">Tipos de Contribuição</h2>
+<h3 id="1-bug-fixes">1. Bug Fixes</h3>
+<ul>
+<li>Identifique o problema</li>
+<li>Crie um teste que reproduza o bug</li>
+<li>Implemente a correção</li>
+<li>Verifique que o teste passa</li>
+<li>Documente a correção</li>
+</ul>
+<h3 id="2-novas-funcionalidades">2. Novas Funcionalidades</h3>
+<ul>
+<li>Discuta a funcionalidade primeiro</li>
+<li>Implemente com testes</li>
+<li>Atualize documentação</li>
+<li>Considere impacto na performance</li>
+<li>Mantenha compatibilidade</li>
+</ul>
+<h3 id="3-melhorias-de-performance">3. Melhorias de Performance</h3>
+<ul>
+<li>Meça o impacto</li>
+<li>Documente as melhorias</li>
+<li>Mantenha funcionalidade</li>
+<li>Teste em diferentes cenários</li>
+<li>Considere trade-offs</li>
+</ul>
+<h3 id="4-documentacao">4. Documentação</h3>
+<ul>
+<li>Seja claro e conciso</li>
+<li>Use exemplos práticos</li>
+<li>Mantenha consistência</li>
+<li>Atualize regularmente</li>
+<li>Inclua screenshots</li>
+</ul>
+<h2 id="testes">Testes</h2>
+<h3 id="1-testes-unitarios">1. Testes Unitários</h3>
+<pre><code class="language-python"># backend/tests/test_models.py
+class ConversationModelTest(TestCase):
+    def test_create_conversation(self):
+        &quot;&quot;&quot;Testar criação de conversa.&quot;&quot;&quot;
+        contact = Contact.objects.create(name=&quot;Teste&quot;)
+        conversation = Conversation.objects.create(contact=contact)
+        self.assertEqual(conversation.status, 'open')
+</code></pre>
+<h3 id="2-testes-de-integracao">2. Testes de Integração</h3>
+<pre><code class="language-python"># backend/tests/test_api.py
+class ConversationAPITest(APITestCase):
+    def test_list_conversations(self):
+        &quot;&quot;&quot;Testar listagem de conversas.&quot;&quot;&quot;
+        response = self.client.get('/api/conversations/')
+        self.assertEqual(response.status_code, 200)
+</code></pre>
+<h3 id="3-testes-frontend">3. Testes Frontend</h3>
+<pre><code class="language-javascript">// frontend/tests/ConversationList.test.jsx
+import { render, screen } from '@testing-library/react';
+import ConversationList from '../components/ConversationList';
+
+test('renders conversation list', () =&gt; {
+  const conversations = [
+    { id: 1, name: 'Teste', status: 'open' }
+  ];
+  render(&lt;ConversationList conversations={conversations} /&gt;);
+  expect(screen.getByText('Teste')).toBeInTheDocument();
+});
+</code></pre>
+<h2 id="code-review">Code Review</h2>
+<h3 id="1-como-revisar">1. Como Revisar</h3>
+<ul>
+<li>Verifique a funcionalidade</li>
+<li>Teste o código localmente</li>
+<li>Verifique testes</li>
+<li>Comente sugestões construtivas</li>
+<li>Aprove se estiver satisfeito</li>
+</ul>
+<h3 id="2-o-que-procurar">2. O que Procurar</h3>
+<ul>
+<li>Funcionalidade correta</li>
+<li>Código limpo e legível</li>
+<li>Testes adequados</li>
+<li>Documentação atualizada</li>
+<li>Performance adequada</li>
+<li>Segurança</li>
+</ul>
+<h3 id="3-comentarios">3. Comentários</h3>
+<ul>
+<li>Seja construtivo</li>
+<li>Explique o porquê</li>
+<li>Sugira alternativas</li>
+<li>Reconheça boas práticas</li>
+<li>Seja respeitoso</li>
+</ul>
+<h2 id="comunidade">Comunidade</h2>
+<h3 id="1-codigo-de-conduta">1. Código de Conduta</h3>
+<ul>
+<li>Seja respeitoso</li>
+<li>Seja inclusivo</li>
+<li>Seja construtivo</li>
+<li>Seja paciente</li>
+<li>Seja colaborativo</li>
+</ul>
+<h3 id="2-comunicacao">2. Comunicação</h3>
+<ul>
+<li>Use issues para problemas</li>
+<li>Use discussions para ideias</li>
+<li>Use pull requests para código</li>
+<li>Seja claro e direto</li>
+<li>Seja paciente com respostas</li>
+</ul>
+<h3 id="3-suporte">3. Suporte</h3>
+<ul>
+<li>Leia a documentação primeiro</li>
+<li>Procure em issues existentes</li>
+<li>Seja específico no problema</li>
+<li>Inclua logs e screenshots</li>
+<li>Seja paciente</li>
+</ul>
+<h2 id="roadmap">Roadmap</h2>
+<h3 id="1-funcionalidades-planejadas">1. Funcionalidades Planejadas</h3>
+<ul>
+<li>[ ] Integração com Telegram</li>
+<li>[ ] Sistema de templates</li>
+<li>[ ] Analytics avançados</li>
+<li>[ ] API GraphQL</li>
+<li>[ ] Mobile app</li>
+</ul>
+<h3 id="2-melhorias-tecnicas">2. Melhorias Técnicas</h3>
+<ul>
+<li>[ ] Testes E2E</li>
+<li>[ ] CI/CD melhorado</li>
+<li>[ ] Monitoramento avançado</li>
+<li>[ ] Cache distribuído</li>
+<li>[ ] Microserviços</li>
+</ul>
+<h3 id="3-documentacao">3. Documentação</h3>
+<ul>
+<li>[ ] Tutoriais em vídeo</li>
+<li>[ ] Exemplos práticos</li>
+<li>[ ] Guias de deploy</li>
+<li>[ ] Troubleshooting</li>
+<li>[ ] FAQ</li>
+</ul>
+<h2 id="proximos-passos">Próximos Passos</h2>
+<ol>
+<li><a href="../structure/">Estrutura</a> - Entenda a estrutura do projeto</li>
+<li><a href="../troubleshooting/">Troubleshooting</a> - Resolva problemas</li>
+<li><a href="../../api/endpoints/">API</a> - Explore a API</li>
+<li><a href="../../configuration/supabase/">Configuração</a> - Configure integrações</li>
+</ol>
+<h2 id="contato">Contato</h2>
+<ul>
+<li><strong>GitHub</strong>: <a href="https://github.com/juniorssilvaa/niochat">juniorssilvaa/niochat</a></li>
+<li><strong>Email</strong>: suporte@niochat.com.br</li>
+<li><strong>Discord</strong>: <a href="https://discord.gg/niochat">Link do servidor</a></li>
+<li><strong>Twitter</strong>: <a href="https://twitter.com/niochat">@niochat</a></li>
+</ul>
+<p>Obrigado por contribuir para o NioChat! 🚀</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

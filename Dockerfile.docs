@@ -1,0 +1,33 @@
+# Dockerfile para documentação MkDocs
+FROM python:3.12-alpine as builder
+
+# Instalar dependências do sistema
+RUN apk add --no-cache git curl
+
+# Definir diretório de trabalho
+WORKDIR /app
+
+# Copiar arquivos de documentação
+COPY docs/ /app/docs/
+
+# Gerar mkdocs.yml dinamicamente
+RUN printf "%b" "site_name: NioChat\nsite_description: Documentação NioChat\ndocs_dir: docs_content\n\ntheme:\n  name: material\n  language: pt-BR\nplugins:\n  - search\n" > /app/docs/mkdocs.yml
+
+# Instalar MkDocs e dependências
+RUN pip install --no-cache-dir mkdocs mkdocs-material mkdocs-bootswatch
+
+# Gerar documentação
+WORKDIR /app/docs
+RUN mkdocs build
+
+# Stage 1: Servir a documentação com Nginx
+FROM nginx:alpine
+
+# Copiar a documentação gerada do estágio anterior
+COPY --from=builder /app/docs/site /usr/share/nginx/html
+
+# Expor porta padrão do Nginx
+EXPOSE 80
+
+# Comando para iniciar o Nginx
+CMD ["nginx", "-g", "daemon off;"]

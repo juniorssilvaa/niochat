@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>WebSocket - NioChat</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/rainbow.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">NioChat</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">NioChat - Sistema de Atendimento WhatsApp</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../changelog/" class="nav-link">Changelog</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Ai</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../ai/configuration/" class="dropdown-item">Configuração da IA</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Api</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../authentication/" class="dropdown-item">Autenticação</a>
+</li>
+                                    
+<li>
+    <a href="../endpoints/" class="dropdown-item">Endpoints da API</a>
+</li>
+                                    
+<li>
+    <a href="../postman-guide/" class="dropdown-item">Guia de Uso do Postman com NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../webhooks/" class="dropdown-item">Webhooks</a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">WebSocket</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Configuration</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../configuration/supabase/" class="dropdown-item">Configuração do Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Development</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../development/contributing/" class="dropdown-item">Contribuindo para o NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../../development/structure/" class="dropdown-item">Estrutura do Projeto</a>
+</li>
+                                    
+<li>
+    <a href="../../development/troubleshooting/" class="dropdown-item">Troubleshooting</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Installation</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../installation/development/" class="dropdown-item">Instalação em Desenvolvimento</a>
+</li>
+                                    
+<li>
+    <a href="../../installation/production/" class="dropdown-item">Instalação em Produção</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Overview</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../overview/architecture/" class="dropdown-item">Arquitetura do Sistema</a>
+</li>
+                                    
+<li>
+    <a href="../../overview/features/" class="dropdown-item">Funcionalidades</a>
+</li>
+                                    
+<li>
+    <a href="../../overview/introduction/" class="dropdown-item">Introdução ao NioChat</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Supabase</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../supabase/integration/" class="dropdown-item">Integração com Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Usage</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../usage/interface/" class="dropdown-item">Interface do Usuário</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../webhooks/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../../configuration/supabase/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#websocket" class="nav-link">WebSocket</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#conexao" class="nav-link">Conexão</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#implementacao-javascript" class="nav-link">Implementação JavaScript</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#eventos-disponiveis" class="nav-link">Eventos Disponíveis</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#implementacao-react" class="nav-link">Implementação React</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#implementacao-vuejs" class="nav-link">Implementação Vue.js</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#implementacao-angular" class="nav-link">Implementação Angular</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#tratamento-de-erros" class="nav-link">Tratamento de Erros</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#proximos-passos" class="nav-link">Próximos Passos</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="websocket">WebSocket</h1>
+<p>O NioChat utiliza WebSocket para comunicação em tempo real entre o frontend e backend. Este documento explica como implementar e usar WebSocket.</p>
+<h2 id="conexao">Conexão</h2>
+<h3 id="url-de-conexao">URL de Conexão</h3>
+<pre><code class="language-javascript">const ws = new WebSocket('ws://localhost:8010/ws/dashboard/');
+</code></pre>
+<h3 id="com-autenticacao">Com Autenticação</h3>
+<pre><code class="language-javascript">const token = 'seu_token_aqui';
+const ws = new WebSocket(`ws://localhost:8010/ws/dashboard/?token=${token}`);
+</code></pre>
+<h2 id="implementacao-javascript">Implementação JavaScript</h2>
+<h3 id="classe-websocket">Classe WebSocket</h3>
+<pre><code class="language-javascript">class NioChatWebSocket {
+  constructor(token) {
+    this.token = token;
+    this.ws = null;
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = 5;
+    this.reconnectInterval = 5000;
+    this.listeners = {};
+  }
+
+  connect() {
+    const url = `ws://localhost:8010/ws/dashboard/?token=${this.token}`;
+
+    this.ws = new WebSocket(url);
+
+    this.ws.onopen = (event) =&gt; {
+      console.log('WebSocket conectado');
+      this.reconnectAttempts = 0;
+      this.emit('connected', event);
+    };
+
+    this.ws.onmessage = (event) =&gt; {
+      try {
+        const data = JSON.parse(event.data);
+        this.handleMessage(data);
+      } catch (error) {
+        console.error('Erro ao processar mensagem:', error);
+      }
+    };
+
+    this.ws.onclose = (event) =&gt; {
+      console.log('WebSocket desconectado:', event.code, event.reason);
+      this.emit('disconnected', event);
+      this.attemptReconnect();
+    };
+
+    this.ws.onerror = (error) =&gt; {
+      console.error('Erro no WebSocket:', error);
+      this.emit('error', error);
+    };
+  }
+
+  handleMessage(data) {
+    const { type, data: messageData } = data;
+
+    switch (type) {
+      case 'chat_message':
+        this.emit('chat_message', messageData);
+        break;
+      case 'message_reaction':
+        this.emit('message_reaction', messageData);
+        break;
+      case 'message_deleted':
+        this.emit('message_deleted', messageData);
+        break;
+      case 'dashboard_metrics':
+        this.emit('dashboard_metrics', messageData);
+        break;
+      case 'csat_update':
+        this.emit('csat_update', messageData);
+        break;
+      case 'audit_log':
+        this.emit('audit_log', messageData);
+        break;
+      case 'user_status':
+        this.emit('user_status', messageData);
+        break;
+      default:
+        console.log('Tipo de mensagem desconhecido:', type);
+    }
+  }
+
+  attemptReconnect() {
+    if (this.reconnectAttempts &lt; this.maxReconnectAttempts) {
+      this.reconnectAttempts++;
+      console.log(`Tentativa de reconexão ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
+
+      setTimeout(() =&gt; {
+        this.connect();
+      }, this.reconnectInterval);
+    } else {
+      console.error('Máximo de tentativas de reconexão atingido');
+      this.emit('reconnect_failed');
+    }
+  }
+
+  send(data) {
+    if (this.ws &amp;&amp; this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(data));
+    } else {
+      console.error('WebSocket não está conectado');
+    }
+  }
+
+  on(event, callback) {
+    if (!this.listeners[event]) {
+      this.listeners[event] = [];
+    }
+    this.listeners[event].push(callback);
+  }
+
+  off(event, callback) {
+    if (this.listeners[event]) {
+      this.listeners[event] = this.listeners[event].filter(cb =&gt; cb !== callback);
+    }
+  }
+
+  emit(event, data) {
+    if (this.listeners[event]) {
+      this.listeners[event].forEach(callback =&gt; callback(data));
+    }
+  }
+
+  disconnect() {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+}
+
+// Uso
+const ws = new NioChatWebSocket('seu_token_aqui');
+
+// Conectar
+ws.connect();
+
+// Escutar eventos
+ws.on('chat_message', (data) =&gt; {
+  console.log('Nova mensagem:', data);
+});
+
+ws.on('dashboard_metrics', (data) =&gt; {
+  console.log('Métricas atualizadas:', data);
+});
+
+ws.on('csat_update', (data) =&gt; {
+  console.log('CSAT atualizado:', data);
+});
+
+ws.on('connected', () =&gt; {
+  console.log('Conectado ao WebSocket');
+});
+
+ws.on('disconnected', () =&gt; {
+  console.log('Desconectado do WebSocket');
+});
+
+ws.on('error', (error) =&gt; {
+  console.error('Erro no WebSocket:', error);
+});
+</code></pre>
+<h2 id="eventos-disponiveis">Eventos Disponíveis</h2>
+<h3 id="chat">Chat</h3>
+<h4 id="nova-mensagem">Nova Mensagem</h4>
+<pre><code class="language-javascript">{
+  &quot;type&quot;: &quot;chat_message&quot;,
+  &quot;data&quot;: {
+    &quot;conversation_id&quot;: 1,
+    &quot;message&quot;: {
+      &quot;id&quot;: 1,
+      &quot;content&quot;: &quot;Nova mensagem&quot;,
+      &quot;sender&quot;: &quot;customer&quot;,
+      &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;,
+      &quot;message_type&quot;: &quot;text&quot;
+    }
+  }
+}
+</code></pre>
+<h4 id="reacao-a-mensagem">Reação a Mensagem</h4>
+<pre><code class="language-javascript">{
+  &quot;type&quot;: &quot;message_reaction&quot;,
+  &quot;data&quot;: {
+    &quot;message_id&quot;: 1,
+    &quot;reaction&quot;: &quot;👍&quot;,
+    &quot;user_id&quot;: 1
+  }
+}
+</code></pre>
+<h4 id="mensagem-deletada">Mensagem Deletada</h4>
+<pre><code class="language-javascript">{
+  &quot;type&quot;: &quot;message_deleted&quot;,
+  &quot;data&quot;: {
+    &quot;message_id&quot;: 1,
+    &quot;deleted_by&quot;: 1
+  }
+}
+</code></pre>
+<h3 id="dashboard">Dashboard</h3>
+<h4 id="metricas-atualizadas">Métricas Atualizadas</h4>
+<pre><code class="language-javascript">{
+  &quot;type&quot;: &quot;dashboard_metrics&quot;,
+  &quot;data&quot;: {
+    &quot;total_conversations&quot;: 100,
+    &quot;open_conversations&quot;: 25,
+    &quot;closed_conversations&quot;: 75,
+    &quot;average_satisfaction&quot;: 4.2,
+    &quot;resolution_rate&quot;: 0.85,
+    &quot;response_time&quot;: 120
+  }
+}
+</code></pre>
+<h4 id="csat-atualizado">CSAT Atualizado</h4>
+<pre><code class="language-javascript">{
+  &quot;type&quot;: &quot;csat_update&quot;,
+  &quot;data&quot;: {
+    &quot;conversation_id&quot;: 1,
+    &quot;rating&quot;: 5,
+    &quot;feedback&quot;: &quot;Excelente atendimento!&quot;,
+    &quot;contact_name&quot;: &quot;João Silva&quot;,
+    &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;
+  }
+}
+</code></pre>
+<h4 id="log-de-auditoria">Log de Auditoria</h4>
+<pre><code class="language-javascript">{
+  &quot;type&quot;: &quot;audit_log&quot;,
+  &quot;data&quot;: {
+    &quot;id&quot;: 1,
+    &quot;action&quot;: &quot;conversation_created&quot;,
+    &quot;details&quot;: {
+      &quot;conversation_id&quot;: 1,
+      &quot;contact_name&quot;: &quot;João Silva&quot;
+    },
+    &quot;user&quot;: {
+      &quot;id&quot;: 1,
+      &quot;username&quot;: &quot;agente1&quot;
+    },
+    &quot;timestamp&quot;: &quot;2024-01-01T10:00:00Z&quot;
+  }
+}
+</code></pre>
+<h3 id="status-do-usuario">Status do Usuário</h3>
+<h4 id="usuario-onlineoffline">Usuário Online/Offline</h4>
+<pre><code class="language-javascript">{
+  &quot;type&quot;: &quot;user_status&quot;,
+  &quot;data&quot;: {
+    &quot;user_id&quot;: 1,
+    &quot;status&quot;: &quot;online&quot;,
+    &quot;last_seen&quot;: &quot;2024-01-01T10:00:00Z&quot;
+  }
+}
+</code></pre>
+<h2 id="implementacao-react">Implementação React</h2>
+<h3 id="hook-usewebsocket">Hook useWebSocket</h3>
+<pre><code class="language-javascript">import { useState, useEffect, useCallback } from 'react';
+
+export const useWebSocket = (token) =&gt; {
+  const [ws, setWs] = useState(null);
+  const [connected, setConnected] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [metrics, setMetrics] = useState(null);
+  const [csatUpdates, setCsatUpdates] = useState([]);
+
+  const connect = useCallback(() =&gt; {
+    if (!token) return;
+
+    const websocket = new WebSocket(`ws://localhost:8010/ws/dashboard/?token=${token}`);
+
+    websocket.onopen = () =&gt; {
+      setConnected(true);
+      setWs(websocket);
+    };
+
+    websocket.onmessage = (event) =&gt; {
+      const data = JSON.parse(event.data);
+
+      switch (data.type) {
+        case 'chat_message':
+          setMessages(prev =&gt; [...prev, data.data]);
+          break;
+        case 'dashboard_metrics':
+          setMetrics(data.data);
+          break;
+        case 'csat_update':
+          setCsatUpdates(prev =&gt; [...prev, data.data]);
+          break;
+        default:
+          console.log('Evento desconhecido:', data.type);
+      }
+    };
+
+    websocket.onclose = () =&gt; {
+      setConnected(false);
+      setWs(null);
+    };
+
+    websocket.onerror = (error) =&gt; {
+      console.error('Erro no WebSocket:', error);
+    };
+
+    return websocket;
+  }, [token]);
+
+  useEffect(() =&gt; {
+    const websocket = connect();
+
+    return () =&gt; {
+      if (websocket) {
+        websocket.close();
+      }
+    };
+  }, [connect]);
+
+  const sendMessage = useCallback((data) =&gt; {
+    if (ws &amp;&amp; ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(data));
+    }
+  }, [ws]);
+
+  return {
+    connected,
+    messages,
+    metrics,
+    csatUpdates,
+    sendMessage
+  };
+};
+</code></pre>
+<h3 id="componente-dashboard">Componente Dashboard</h3>
+<pre><code class="language-javascript">import React from 'react';
+import { useWebSocket } from './hooks/useWebSocket';
+
+const Dashboard = ({ token }) =&gt; {
+  const { connected, metrics, csatUpdates } = useWebSocket(token);
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;Dashboard&lt;/h1&gt;
+      &lt;p&gt;Status: {connected ? 'Conectado' : 'Desconectado'}&lt;/p&gt;
+
+      {metrics &amp;&amp; (
+        &lt;div&gt;
+          &lt;h2&gt;Métricas&lt;/h2&gt;
+          &lt;p&gt;Total de Conversas: {metrics.total_conversations}&lt;/p&gt;
+          &lt;p&gt;Conversas Abertas: {metrics.open_conversations}&lt;/p&gt;
+          &lt;p&gt;Satisfação Média: {metrics.average_satisfaction}&lt;/p&gt;
+        &lt;/div&gt;
+      )}
+
+      {csatUpdates.length &gt; 0 &amp;&amp; (
+        &lt;div&gt;
+          &lt;h2&gt;Últimos CSATs&lt;/h2&gt;
+          {csatUpdates.map((csat, index) =&gt; (
+            &lt;div key={index}&gt;
+              &lt;p&gt;{csat.contact_name}: {csat.rating} - {csat.feedback}&lt;/p&gt;
+            &lt;/div&gt;
+          ))}
+        &lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  );
+};
+
+export default Dashboard;
+</code></pre>
+<h2 id="implementacao-vuejs">Implementação Vue.js</h2>
+<h3 id="plugin-websocket">Plugin WebSocket</h3>
+<pre><code class="language-javascript">// websocket.js
+export default {
+  install(Vue) {
+    Vue.prototype.$websocket = {
+      ws: null,
+      connected: false,
+      listeners: {},
+
+      connect(token) {
+        this.ws = new WebSocket(`ws://localhost:8010/ws/dashboard/?token=${token}`);
+
+        this.ws.onopen = () =&gt; {
+          this.connected = true;
+          this.emit('connected');
+        };
+
+        this.ws.onmessage = (event) =&gt; {
+          const data = JSON.parse(event.data);
+          this.emit(data.type, data.data);
+        };
+
+        this.ws.onclose = () =&gt; {
+          this.connected = false;
+          this.emit('disconnected');
+        };
+
+        this.ws.onerror = (error) =&gt; {
+          this.emit('error', error);
+        };
+      },
+
+      send(data) {
+        if (this.ws &amp;&amp; this.ws.readyState === WebSocket.OPEN) {
+          this.ws.send(JSON.stringify(data));
+        }
+      },
+
+      on(event, callback) {
+        if (!this.listeners[event]) {
+          this.listeners[event] = [];
+        }
+        this.listeners[event].push(callback);
+      },
+
+      off(event, callback) {
+        if (this.listeners[event]) {
+          this.listeners[event] = this.listeners[event].filter(cb =&gt; cb !== callback);
+        }
+      },
+
+      emit(event, data) {
+        if (this.listeners[event]) {
+          this.listeners[event].forEach(callback =&gt; callback(data));
+        }
+      },
+
+      disconnect() {
+        if (this.ws) {
+          this.ws.close();
+          this.ws = null;
+        }
+      }
+    };
+  }
+};
+</code></pre>
+<h3 id="componente-vue">Componente Vue</h3>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;div&gt;
+    &lt;h1&gt;Dashboard&lt;/h1&gt;
+    &lt;p&gt;Status: {{ connected ? 'Conectado' : 'Desconectado' }}&lt;/p&gt;
+
+    &lt;div v-if=&quot;metrics&quot;&gt;
+      &lt;h2&gt;Métricas&lt;/h2&gt;
+      &lt;p&gt;Total de Conversas: {{ metrics.total_conversations }}&lt;/p&gt;
+      &lt;p&gt;Conversas Abertas: {{ metrics.open_conversations }}&lt;/p&gt;
+      &lt;p&gt;Satisfação Média: {{ metrics.average_satisfaction }}&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;div v-if=&quot;csatUpdates.length &gt; 0&quot;&gt;
+      &lt;h2&gt;Últimos CSATs&lt;/h2&gt;
+      &lt;div v-for=&quot;(csat, index) in csatUpdates&quot; :key=&quot;index&quot;&gt;
+        &lt;p&gt;{{ csat.contact_name }}: {{ csat.rating }} - {{ csat.feedback }}&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  data() {
+    return {
+      connected: false,
+      metrics: null,
+      csatUpdates: []
+    };
+  },
+
+  mounted() {
+    const token = localStorage.getItem('niochat_token');
+    if (token) {
+      this.$websocket.connect(token);
+
+      this.$websocket.on('connected', () =&gt; {
+        this.connected = true;
+      });
+
+      this.$websocket.on('disconnected', () =&gt; {
+        this.connected = false;
+      });
+
+      this.$websocket.on('dashboard_metrics', (data) =&gt; {
+        this.metrics = data;
+      });
+
+      this.$websocket.on('csat_update', (data) =&gt; {
+        this.csatUpdates.push(data);
+      });
+    }
+  },
+
+  beforeDestroy() {
+    this.$websocket.disconnect();
+  }
+};
+&lt;/script&gt;
+</code></pre>
+<h2 id="implementacao-angular">Implementação Angular</h2>
+<h3 id="servico-websocket">Serviço WebSocket</h3>
+<pre><code class="language-typescript">import { Injectable } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class WebSocketService {
+  private ws: WebSocket;
+  private connected = false;
+  private messageSubject = new Subject&lt;any&gt;();
+
+  connect(token: string): void {
+    this.ws = new WebSocket(`ws://localhost:8010/ws/dashboard/?token=${token}`);
+
+    this.ws.onopen = () =&gt; {
+      this.connected = true;
+      this.messageSubject.next({ type: 'connected' });
+    };
+
+    this.ws.onmessage = (event) =&gt; {
+      const data = JSON.parse(event.data);
+      this.messageSubject.next(data);
+    };
+
+    this.ws.onclose = () =&gt; {
+      this.connected = false;
+      this.messageSubject.next({ type: 'disconnected' });
+    };
+
+    this.ws.onerror = (error) =&gt; {
+      this.messageSubject.next({ type: 'error', data: error });
+    };
+  }
+
+  send(data: any): void {
+    if (this.ws &amp;&amp; this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(data));
+    }
+  }
+
+  getMessages(): Observable&lt;any&gt; {
+    return this.messageSubject.asObservable();
+  }
+
+  isConnected(): boolean {
+    return this.connected;
+  }
+
+  disconnect(): void {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+}
+</code></pre>
+<h3 id="componente-angular">Componente Angular</h3>
+<pre><code class="language-typescript">import { Component, OnInit, OnDestroy } from '@angular/core';
+import { WebSocketService } from './websocket.service';
+import { Subscription } from 'rxjs';
+
+@Component({
+  selector: 'app-dashboard',
+  template: `
+    &lt;div&gt;
+      &lt;h1&gt;Dashboard&lt;/h1&gt;
+      &lt;p&gt;Status: {{ connected ? 'Conectado' : 'Desconectado' }}&lt;/p&gt;
+
+      &lt;div *ngIf=&quot;metrics&quot;&gt;
+        &lt;h2&gt;Métricas&lt;/h2&gt;
+        &lt;p&gt;Total de Conversas: {{ metrics.total_conversations }}&lt;/p&gt;
+        &lt;p&gt;Conversas Abertas: {{ metrics.open_conversations }}&lt;/p&gt;
+        &lt;p&gt;Satisfação Média: {{ metrics.average_satisfaction }}&lt;/p&gt;
+      &lt;/div&gt;
+
+      &lt;div *ngIf=&quot;csatUpdates.length &gt; 0&quot;&gt;
+        &lt;h2&gt;Últimos CSATs&lt;/h2&gt;
+        &lt;div *ngFor=&quot;let csat of csatUpdates; let i = index&quot;&gt;
+          &lt;p&gt;{{ csat.contact_name }}: {{ csat.rating }} - {{ csat.feedback }}&lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  `
+})
+export class DashboardComponent implements OnInit, OnDestroy {
+  connected = false;
+  metrics: any = null;
+  csatUpdates: any[] = [];
+  private subscription: Subscription;
+
+  constructor(private websocketService: WebSocketService) {}
+
+  ngOnInit() {
+    const token = localStorage.getItem('niochat_token');
+    if (token) {
+      this.websocketService.connect(token);
+
+      this.subscription = this.websocketService.getMessages().subscribe(message =&gt; {
+        switch (message.type) {
+          case 'connected':
+            this.connected = true;
+            break;
+          case 'disconnected':
+            this.connected = false;
+            break;
+          case 'dashboard_metrics':
+            this.metrics = message.data;
+            break;
+          case 'csat_update':
+            this.csatUpdates.push(message.data);
+            break;
+        }
+      });
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+    this.websocketService.disconnect();
+  }
+}
+</code></pre>
+<h2 id="tratamento-de-erros">Tratamento de Erros</h2>
+<h3 id="reconexao-automatica">Reconexão Automática</h3>
+<pre><code class="language-javascript">class WebSocketWithReconnect {
+  constructor(url, options = {}) {
+    this.url = url;
+    this.options = {
+      maxReconnectAttempts: 5,
+      reconnectInterval: 5000,
+      ...options
+    };
+    this.reconnectAttempts = 0;
+    this.listeners = {};
+  }
+
+  connect() {
+    this.ws = new WebSocket(this.url);
+
+    this.ws.onopen = () =&gt; {
+      this.reconnectAttempts = 0;
+      this.emit('connected');
+    };
+
+    this.ws.onclose = (event) =&gt; {
+      this.emit('disconnected', event);
+      this.attemptReconnect();
+    };
+
+    this.ws.onerror = (error) =&gt; {
+      this.emit('error', error);
+    };
+
+    this.ws.onmessage = (event) =&gt; {
+      const data = JSON.parse(event.data);
+      this.emit(data.type, data.data);
+    };
+  }
+
+  attemptReconnect() {
+    if (this.reconnectAttempts &lt; this.options.maxReconnectAttempts) {
+      this.reconnectAttempts++;
+      console.log(`Tentativa de reconexão ${this.reconnectAttempts}/${this.options.maxReconnectAttempts}`);
+
+      setTimeout(() =&gt; {
+        this.connect();
+      }, this.options.reconnectInterval);
+    } else {
+      this.emit('reconnect_failed');
+    }
+  }
+
+  send(data) {
+    if (this.ws &amp;&amp; this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(data));
+    } else {
+      console.error('WebSocket não está conectado');
+    }
+  }
+
+  on(event, callback) {
+    if (!this.listeners[event]) {
+      this.listeners[event] = [];
+    }
+    this.listeners[event].push(callback);
+  }
+
+  emit(event, data) {
+    if (this.listeners[event]) {
+      this.listeners[event].forEach(callback =&gt; callback(data));
+    }
+  }
+
+  disconnect() {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+}
+</code></pre>
+<h2 id="proximos-passos">Próximos Passos</h2>
+<ol>
+<li><a href="../endpoints/">Endpoints</a> - Explore todos os endpoints da API</li>
+<li><a href="../authentication/">Autenticação</a> - Aprenda sobre autenticação</li>
+<li><a href="../webhooks/">Webhooks</a> - Aprenda sobre webhooks</li>
+</ol></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

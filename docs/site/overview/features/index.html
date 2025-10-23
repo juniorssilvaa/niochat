@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Funcionalidades - NioChat</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/rainbow.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">NioChat</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">NioChat - Sistema de Atendimento WhatsApp</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../changelog/" class="nav-link">Changelog</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Ai</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../ai/configuration/" class="dropdown-item">Configuração da IA</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Api</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../api/authentication/" class="dropdown-item">Autenticação</a>
+</li>
+                                    
+<li>
+    <a href="../../api/endpoints/" class="dropdown-item">Endpoints da API</a>
+</li>
+                                    
+<li>
+    <a href="../../api/postman-guide/" class="dropdown-item">Guia de Uso do Postman com NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../../api/webhooks/" class="dropdown-item">Webhooks</a>
+</li>
+                                    
+<li>
+    <a href="../../api/websocket/" class="dropdown-item">WebSocket</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Configuration</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../configuration/supabase/" class="dropdown-item">Configuração do Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Development</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../development/contributing/" class="dropdown-item">Contribuindo para o NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../../development/structure/" class="dropdown-item">Estrutura do Projeto</a>
+</li>
+                                    
+<li>
+    <a href="../../development/troubleshooting/" class="dropdown-item">Troubleshooting</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Installation</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../installation/development/" class="dropdown-item">Instalação em Desenvolvimento</a>
+</li>
+                                    
+<li>
+    <a href="../../installation/production/" class="dropdown-item">Instalação em Produção</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Overview</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../architecture/" class="dropdown-item">Arquitetura do Sistema</a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Funcionalidades</a>
+</li>
+                                    
+<li>
+    <a href="../introduction/" class="dropdown-item">Introdução ao NioChat</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Supabase</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../supabase/integration/" class="dropdown-item">Integração com Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Usage</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../usage/interface/" class="dropdown-item">Interface do Usuário</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../architecture/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../introduction/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#funcionalidades" class="nav-link">Funcionalidades</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#ia-inteligente" class="nav-link">IA Inteligente</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#whatsapp-completo" class="nav-link">WhatsApp Completo</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#dashboard-e-metricas" class="nav-link">Dashboard e Métricas</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#sistema-csat" class="nav-link">Sistema CSAT</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#sistema-multi-tenant" class="nav-link">Sistema Multi-Tenant</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#integracoes" class="nav-link">Integrações</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#chat-interno" class="nav-link">Chat Interno</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#auditoria" class="nav-link">Auditoria</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#seguranca" class="nav-link">Segurança</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#performance" class="nav-link">Performance</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#proximos-passos" class="nav-link">Próximos Passos</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="funcionalidades">Funcionalidades</h1>
+<p>O NioChat oferece um conjunto completo de funcionalidades para atendimento via WhatsApp com IA inteligente.</p>
+<h2 id="ia-inteligente">IA Inteligente</h2>
+<h3 id="chatgpt-integrado">ChatGPT Integrado</h3>
+<ul>
+<li><strong>Atendimento Automatizado</strong>: IA responde perguntas comuns automaticamente</li>
+<li><strong>Contexto Conversacional</strong>: Mantém contexto da conversa</li>
+<li><strong>Personalização</strong>: IA única para cada provedor</li>
+<li><strong>Aprendizado Contínuo</strong>: Melhora com o tempo</li>
+</ul>
+<h3 id="transcricao-de-audio">Transcrição de Áudio</h3>
+<ul>
+<li><strong>Conversão Automática</strong>: Mensagens de voz convertidas para texto</li>
+<li><strong>Suporte a Múltiplos Idiomas</strong>: Português, inglês, espanhol</li>
+<li><strong>Alta Precisão</strong>: 95%+ de precisão na transcrição</li>
+<li><strong>Processamento em Tempo Real</strong>: Transcrição instantânea</li>
+</ul>
+<h3 id="consulta-sgp-automatica">Consulta SGP Automática</h3>
+<ul>
+<li><strong>Dados Reais</strong>: IA consulta informações reais do cliente</li>
+<li><strong>Function Calls</strong>: Execução automática de funções do SGP</li>
+<li><strong>Integração Transparente</strong>: Cliente não percebe a consulta</li>
+<li><strong>Dados Atualizados</strong>: Informações sempre atualizadas</li>
+</ul>
+<h2 id="whatsapp-completo">WhatsApp Completo</h2>
+<h3 id="uazapievolution-api">Uazapi/Evolution API</h3>
+<ul>
+<li><strong>Integração Nativa</strong>: Conecta diretamente com WhatsApp Business</li>
+<li><strong>Webhooks em Tempo Real</strong>: Recebimento instantâneo de mensagens</li>
+<li><strong>Status de Entrega</strong>: Confirmação de recebimento</li>
+<li><strong>Múltiplas Instâncias</strong>: Suporte a vários números</li>
+</ul>
+<h3 id="midia-completa">Mídia Completa</h3>
+<ul>
+<li><strong>Imagens</strong>: Suporte a JPG, PNG, GIF</li>
+<li><strong>Vídeos</strong>: MP4, AVI, MOV</li>
+<li><strong>Áudios</strong>: OGG, MP3, WAV</li>
+<li><strong>Documentos</strong>: PDF, DOC, XLS, PPT</li>
+<li><strong>Stickers</strong>: Suporte completo a stickers</li>
+</ul>
+<h3 id="interacoes-avancadas">Interações Avançadas</h3>
+<ul>
+<li><strong>Reações</strong>: Emojis e reações personalizadas</li>
+<li><strong>Exclusão de Mensagens</strong>: Deletar mensagens enviadas</li>
+<li><strong>Status de Leitura</strong>: Confirmação de visualização</li>
+<li><strong>Respostas Rápidas</strong>: Templates de mensagens</li>
+</ul>
+<h2 id="dashboard-e-metricas">Dashboard e Métricas</h2>
+<h3 id="metricas-em-tempo-real">Métricas em Tempo Real</h3>
+<ul>
+<li><strong>Total de Conversas</strong>: Contador em tempo real</li>
+<li><strong>Conversas Abertas</strong>: Fechadas e pendentes</li>
+<li><strong>Taxa de Resolução</strong>: Percentual de problemas resolvidos</li>
+<li><strong>Tempo de Resposta</strong>: Média de tempo de resposta</li>
+<li><strong>Satisfação do Cliente</strong>: CSAT automático</li>
+</ul>
+<h3 id="graficos-interativos">Gráficos Interativos</h3>
+<ul>
+<li><strong>Evolução Temporal</strong>: Gráficos de linha</li>
+<li><strong>Distribuição por Equipe</strong>: Gráficos de pizza</li>
+<li><strong>Performance por Agente</strong>: Gráficos de barras</li>
+<li><strong>Tendências</strong>: Análise de tendências</li>
+</ul>
+<h3 id="filtros-avancados">Filtros Avançados</h3>
+<ul>
+<li><strong>Por Data</strong>: Filtros por período</li>
+<li><strong>Por Usuário</strong>: Performance individual</li>
+<li><strong>Por Equipe</strong>: Métricas por equipe</li>
+<li><strong>Por Provedor</strong>: Isolamento de dados</li>
+</ul>
+<h2 id="sistema-csat">Sistema CSAT</h2>
+<h3 id="coleta-automatica">Coleta Automática</h3>
+<ul>
+<li><strong>Envio Automático</strong>: 1.5 minutos após fechamento</li>
+<li><strong>Mensagem Personalizada</strong>: Texto personalizado por provedor</li>
+<li><strong>Múltiplos Canais</strong>: WhatsApp, SMS, Email</li>
+<li><strong>Agendamento</strong>: Envio em horários específicos</li>
+</ul>
+<h3 id="analise-ia">Análise IA</h3>
+<ul>
+<li><strong>Interpretação Automática</strong>: IA analisa feedback textual</li>
+<li><strong>Mapeamento de Emojis</strong>: 😡 (1) a 🤩 (5)</li>
+<li><strong>Palavras-chave</strong>: Identifica sentimentos</li>
+<li><strong>Correção Automática</strong>: Corrige mapeamentos incorretos</li>
+</ul>
+<h3 id="dashboard-csat">Dashboard CSAT</h3>
+<ul>
+<li><strong>Métricas Visuais</strong>: Gráficos de satisfação</li>
+<li><strong>Histórico Detalhado</strong>: Últimos feedbacks</li>
+<li><strong>Fotos de Perfil</strong>: Avatars dos clientes</li>
+<li><strong>Mensagens Originais</strong>: Feedback completo</li>
+</ul>
+<h2 id="sistema-multi-tenant">Sistema Multi-Tenant</h2>
+<h3 id="isolamento-total">Isolamento Total</h3>
+<ul>
+<li><strong>Dados Separados</strong>: Cada provedor tem seus dados</li>
+<li><strong>RLS (Row Level Security)</strong>: Isolamento no Supabase</li>
+<li><strong>Permissões Granulares</strong>: Controle fino de acesso</li>
+<li><strong>Auditoria Completa</strong>: Log de todas as ações</li>
+</ul>
+<h3 id="equipes">Equipes</h3>
+<ul>
+<li><strong>Organização</strong>: Estrutura hierárquica</li>
+<li><strong>Permissões</strong>: Controle de acesso por equipe</li>
+<li><strong>Transferência</strong>: Entre agentes e equipes</li>
+<li><strong>Visibilidade</strong>: Controle de visibilidade</li>
+</ul>
+<h3 id="usuarios">Usuários</h3>
+<ul>
+<li><strong>Perfis</strong>: Diferentes tipos de usuário</li>
+<li><strong>Permissões</strong>: Controle granular</li>
+<li><strong>Sessões</strong>: Gerenciamento de sessões</li>
+<li><strong>Segurança</strong>: Autenticação robusta</li>
+</ul>
+<h2 id="integracoes">Integrações</h2>
+<h3 id="sgp-sistema-de-gestao-de-provedores">SGP (Sistema de Gestão de Provedores)</h3>
+<ul>
+<li><strong>Consulta de Clientes</strong>: Busca por CPF/CNPJ</li>
+<li><strong>Verificação de Acesso</strong>: Status da conexão</li>
+<li><strong>Geração de Faturas</strong>: PIX e boleto automático</li>
+<li><strong>Chamados Técnicos</strong>: Criação automática</li>
+<li><strong>Histórico</strong>: Consulta de histórico</li>
+</ul>
+<h3 id="supabase">Supabase</h3>
+<ul>
+<li><strong>Dashboard</strong>: Métricas em tempo real</li>
+<li><strong>Auditoria</strong>: Log de todas as ações</li>
+<li><strong>CSAT</strong>: Sistema de satisfação</li>
+<li><strong>Dados</strong>: Armazenamento de dados</li>
+</ul>
+<h3 id="uazapievolution">Uazapi/Evolution</h3>
+<ul>
+<li><strong>WhatsApp Business</strong>: Integração nativa</li>
+<li><strong>Múltiplas Instâncias</strong>: Vários números</li>
+<li><strong>Webhooks</strong>: Eventos em tempo real</li>
+<li><strong>Mídia</strong>: Suporte completo</li>
+</ul>
+<h2 id="chat-interno">Chat Interno</h2>
+<h3 id="salas-de-chat">Salas de Chat</h3>
+<ul>
+<li><strong>Criação</strong>: Salas por equipe ou projeto</li>
+<li><strong>Participantes</strong>: Adição/remoção de membros</li>
+<li><strong>Mensagens</strong>: Chat em tempo real</li>
+<li><strong>Histórico</strong>: Mensagens salvas</li>
+</ul>
+<h3 id="chat-privado">Chat Privado</h3>
+<ul>
+<li><strong>Mensagens Diretas</strong>: Entre usuários</li>
+<li><strong>Notificações</strong>: Alertas de mensagens</li>
+<li><strong>Status</strong>: Online/offline</li>
+<li><strong>Histórico</strong>: Mensagens salvas</li>
+</ul>
+<h2 id="auditoria">Auditoria</h2>
+<h3 id="logs-detalhados">Logs Detalhados</h3>
+<ul>
+<li><strong>Ações</strong>: Todas as ações do sistema</li>
+<li><strong>Usuários</strong>: Quem fez o quê</li>
+<li><strong>Timestamps</strong>: Quando aconteceu</li>
+<li><strong>Detalhes</strong>: Informações completas</li>
+</ul>
+<h3 id="filtros">Filtros</h3>
+<ul>
+<li><strong>Por Ação</strong>: Tipo de ação</li>
+<li><strong>Por Usuário</strong>: Ações de usuário específico</li>
+<li><strong>Por Data</strong>: Período específico</li>
+<li><strong>Por Provedor</strong>: Isolamento de dados</li>
+</ul>
+<h3 id="exportacao">Exportação</h3>
+<ul>
+<li><strong>PDF</strong>: Relatórios em PDF</li>
+<li><strong>Excel</strong>: Dados em planilha</li>
+<li><strong>CSV</strong>: Dados estruturados</li>
+<li><strong>JSON</strong>: Dados brutos</li>
+</ul>
+<h2 id="seguranca">Segurança</h2>
+<h3 id="autenticacao">Autenticação</h3>
+<ul>
+<li><strong>Tokens</strong>: Autenticação por token</li>
+<li><strong>Sessões</strong>: Gerenciamento de sessões</li>
+<li><strong>Timeout</strong>: Expiração automática</li>
+<li><strong>Refresh</strong>: Renovação de tokens</li>
+</ul>
+<h3 id="autorizacao">Autorização</h3>
+<ul>
+<li><strong>Permissões</strong>: Controle granular</li>
+<li><strong>Roles</strong>: Papéis de usuário</li>
+<li><strong>Equipes</strong>: Permissões por equipe</li>
+<li><strong>Provedores</strong>: Isolamento de dados</li>
+</ul>
+<h3 id="dados">Dados</h3>
+<ul>
+<li><strong>Criptografia</strong>: Dados sensíveis protegidos</li>
+<li><strong>Backup</strong>: Backup automático</li>
+<li><strong>SSL/TLS</strong>: Comunicação segura</li>
+<li><strong>Monitoramento</strong>: Logs de segurança</li>
+</ul>
+<h2 id="performance">Performance</h2>
+<h3 id="otimizacoes">Otimizações</h3>
+<ul>
+<li><strong>Cache</strong>: Redis para cache</li>
+<li><strong>Consultas</strong>: Otimização de queries</li>
+<li><strong>Índices</strong>: Índices de banco de dados</li>
+<li><strong>CDN</strong>: Entrega de conteúdo</li>
+</ul>
+<h3 id="escalabilidade">Escalabilidade</h3>
+<ul>
+<li><strong>Horizontal</strong>: Múltiplos servidores</li>
+<li><strong>Vertical</strong>: Recursos adicionais</li>
+<li><strong>Load Balancing</strong>: Distribuição de carga</li>
+<li><strong>Microserviços</strong>: Arquitetura modular</li>
+</ul>
+<h3 id="monitoramento">Monitoramento</h3>
+<ul>
+<li><strong>Métricas</strong>: Performance em tempo real</li>
+<li><strong>Alertas</strong>: Notificações de problemas</li>
+<li><strong>Logs</strong>: Logs detalhados</li>
+<li><strong>Dashboards</strong>: Visualização de métricas</li>
+</ul>
+<h2 id="proximos-passos">Próximos Passos</h2>
+<ol>
+<li><a href="installation/development.md">Instalação</a> - Configure o ambiente</li>
+<li><a href="configuration/supabase.md">Configuração</a> - Configure integrações</li>
+<li><a href="usage/interface.md">Uso</a> - Aprenda a usar o sistema</li>
+<li><a href="api/endpoints.md">API</a> - Explore a API</li>
+</ol></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

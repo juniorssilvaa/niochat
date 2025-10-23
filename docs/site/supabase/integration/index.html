@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Integração com Supabase - NioChat</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/rainbow.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">NioChat</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">NioChat - Sistema de Atendimento WhatsApp</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../changelog/" class="nav-link">Changelog</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Ai</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../ai/configuration/" class="dropdown-item">Configuração da IA</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Api</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../api/authentication/" class="dropdown-item">Autenticação</a>
+</li>
+                                    
+<li>
+    <a href="../../api/endpoints/" class="dropdown-item">Endpoints da API</a>
+</li>
+                                    
+<li>
+    <a href="../../api/postman-guide/" class="dropdown-item">Guia de Uso do Postman com NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../../api/webhooks/" class="dropdown-item">Webhooks</a>
+</li>
+                                    
+<li>
+    <a href="../../api/websocket/" class="dropdown-item">WebSocket</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Configuration</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../configuration/supabase/" class="dropdown-item">Configuração do Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Development</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../development/contributing/" class="dropdown-item">Contribuindo para o NioChat</a>
+</li>
+                                    
+<li>
+    <a href="../../development/structure/" class="dropdown-item">Estrutura do Projeto</a>
+</li>
+                                    
+<li>
+    <a href="../../development/troubleshooting/" class="dropdown-item">Troubleshooting</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Installation</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../installation/development/" class="dropdown-item">Instalação em Desenvolvimento</a>
+</li>
+                                    
+<li>
+    <a href="../../installation/production/" class="dropdown-item">Instalação em Produção</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Overview</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../overview/architecture/" class="dropdown-item">Arquitetura do Sistema</a>
+</li>
+                                    
+<li>
+    <a href="../../overview/features/" class="dropdown-item">Funcionalidades</a>
+</li>
+                                    
+<li>
+    <a href="../../overview/introduction/" class="dropdown-item">Introdução ao NioChat</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Supabase</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Integração com Supabase</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Usage</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../usage/interface/" class="dropdown-item">Interface do Usuário</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../../overview/introduction/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../../usage/interface/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#integracao-com-supabase" class="nav-link">Integração com Supabase</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#visao-geral" class="nav-link">Visão Geral</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#configuracao-inicial" class="nav-link">Configuração Inicial</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#estrutura-do-banco" class="nav-link">Estrutura do Banco</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#row-level-security-rls" class="nav-link">Row Level Security (RLS)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#servico-supabase" class="nav-link">Serviço Supabase</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#real-time-updates" class="nav-link">Real-time Updates</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#sistema-csat" class="nav-link">Sistema CSAT</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#auditoria" class="nav-link">Auditoria</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#monitoramento" class="nav-link">Monitoramento</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#troubleshooting" class="nav-link">Troubleshooting</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#proximos-passos" class="nav-link">Próximos Passos</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="integracao-com-supabase">Integração com Supabase</h1>
+<p>O NioChat utiliza Supabase para dashboard em tempo real, auditoria e sistema CSAT. Este guia explica como implementar e usar a integração.</p>
+<h2 id="visao-geral">Visão Geral</h2>
+<h3 id="funcionalidades">Funcionalidades</h3>
+<ul>
+<li><strong>Dashboard em Tempo Real</strong>: Métricas atualizadas instantaneamente</li>
+<li><strong>Auditoria Completa</strong>: Log de todas as ações do sistema</li>
+<li><strong>Sistema CSAT</strong>: Coleta e análise de satisfação do cliente</li>
+<li><strong>Isolamento de Dados</strong>: Cada provedor tem seus dados separados</li>
+<li><strong>Real-time Updates</strong>: Atualizações via WebSocket</li>
+</ul>
+<h3 id="arquitetura">Arquitetura</h3>
+<pre><code>NioChat Backend → Supabase → Dashboard Frontend
+     ↓              ↓              ↓
+  Django API    PostgreSQL    React App
+     ↓              ↓              ↓
+  WebSocket    Real-time     WebSocket
+</code></pre>
+<h2 id="configuracao-inicial">Configuração Inicial</h2>
+<h3 id="1-criar-projeto-supabase">1. Criar Projeto Supabase</h3>
+<pre><code class="language-bash"># Acessar Supabase
+https://supabase.com
+
+# Criar novo projeto
+- Nome: NioChat
+- Database Password: senha_segura
+- Region: escolher mais próxima
+</code></pre>
+<h3 id="2-obter-credenciais">2. Obter Credenciais</h3>
+<pre><code class="language-env"># Adicionar ao .env
+SUPABASE_URL=https://seu-projeto.supabase.co
+SUPABASE_ANON_KEY=sua_chave_anon_aqui
+SUPABASE_SERVICE_ROLE_KEY=sua_chave_service_role_aqui
+</code></pre>
+<h3 id="3-configurar-django">3. Configurar Django</h3>
+<pre><code class="language-python"># settings.py
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_ANON_KEY = os.getenv('SUPABASE_ANON_KEY')
+SUPABASE_SERVICE_ROLE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+</code></pre>
+<h2 id="estrutura-do-banco">Estrutura do Banco</h2>
+<h3 id="1-tabelas-principais">1. Tabelas Principais</h3>
+<h4 id="conversas">Conversas</h4>
+<pre><code class="language-sql">CREATE TABLE conversations (
+    id BIGINT PRIMARY KEY,
+    provedor_id BIGINT NOT NULL,
+    contact_id BIGINT NOT NULL,
+    inbox_id BIGINT,
+    status TEXT DEFAULT 'open',
+    assignee_id BIGINT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    ended_at TIMESTAMPTZ,
+    additional_attributes JSONB
+);
+</code></pre>
+<h4 id="contatos">Contatos</h4>
+<pre><code class="language-sql">CREATE TABLE contacts (
+    id BIGINT PRIMARY KEY,
+    provedor_id BIGINT NOT NULL,
+    name TEXT NOT NULL,
+    phone TEXT,
+    email TEXT,
+    avatar TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    additional_attributes JSONB
+);
+</code></pre>
+<h4 id="mensagens">Mensagens</h4>
+<pre><code class="language-sql">CREATE TABLE messages (
+    id BIGINT PRIMARY KEY,
+    conversation_id BIGINT NOT NULL,
+    contact_id BIGINT NOT NULL,
+    provedor_id BIGINT NOT NULL,
+    content TEXT,
+    message_type TEXT DEFAULT 'text',
+    is_from_customer BOOLEAN DEFAULT true,
+    file_url TEXT,
+    file_name TEXT,
+    file_size BIGINT,
+    external_id TEXT,
+    additional_attributes JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+</code></pre>
+<h4 id="csat-feedback">CSAT Feedback</h4>
+<pre><code class="language-sql">CREATE TABLE csat_feedback (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    provedor_id BIGINT NOT NULL,
+    conversation_id BIGINT NOT NULL,
+    contact_id BIGINT NOT NULL,
+    emoji_rating TEXT,
+    rating_value INTEGER NOT NULL,
+    original_message TEXT,
+    contact_avatar TEXT,
+    feedback_sent_at TIMESTAMPTZ DEFAULT NOW()
+);
+</code></pre>
+<h4 id="logs-de-auditoria">Logs de Auditoria</h4>
+<pre><code class="language-sql">CREATE TABLE audit_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    provedor_id BIGINT NOT NULL,
+    user_id BIGINT,
+    action TEXT NOT NULL,
+    details JSONB,
+    timestamp TIMESTAMPTZ DEFAULT NOW()
+);
+</code></pre>
+<h3 id="2-indices-para-performance">2. Índices para Performance</h3>
+<pre><code class="language-sql">-- Conversas
+CREATE INDEX idx_conversations_provedor_id ON conversations(provedor_id);
+CREATE INDEX idx_conversations_status ON conversations(status);
+CREATE INDEX idx_conversations_assignee_id ON conversations(assignee_id);
+CREATE INDEX idx_conversations_created_at ON conversations(created_at);
+
+-- Contatos
+CREATE INDEX idx_contacts_provedor_id ON contacts(provedor_id);
+CREATE INDEX idx_contacts_phone ON contacts(phone);
+
+-- Mensagens
+CREATE INDEX idx_messages_conversation_id ON messages(conversation_id);
+CREATE INDEX idx_messages_provedor_id ON messages(provedor_id);
+CREATE INDEX idx_messages_created_at ON messages(created_at);
+
+-- CSAT
+CREATE INDEX idx_csat_provedor_id ON csat_feedback(provedor_id);
+CREATE INDEX idx_csat_rating_value ON csat_feedback(rating_value);
+CREATE INDEX idx_csat_feedback_sent_at ON csat_feedback(feedback_sent_at);
+
+-- Auditoria
+CREATE INDEX idx_audit_provedor_id ON audit_logs(provedor_id);
+CREATE INDEX idx_audit_user_id ON audit_logs(user_id);
+CREATE INDEX idx_audit_action ON audit_logs(action);
+CREATE INDEX idx_audit_timestamp ON audit_logs(timestamp);
+</code></pre>
+<h2 id="row-level-security-rls">Row Level Security (RLS)</h2>
+<h3 id="1-habilitar-rls">1. Habilitar RLS</h3>
+<pre><code class="language-sql">-- Habilitar RLS em todas as tabelas
+ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contacts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE csat_feedback ENABLE ROW LEVEL SECURITY;
+ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
+</code></pre>
+<h3 id="2-politicas-de-isolamento">2. Políticas de Isolamento</h3>
+<pre><code class="language-sql">-- Política para conversas
+CREATE POLICY &quot;Isolate by provedor_id&quot; ON conversations
+    FOR ALL USING (provedor_id = current_setting('request.jwt.claims', true)::json-&gt;&gt;'provedor_id'::bigint);
+
+-- Política para contatos
+CREATE POLICY &quot;Isolate by provedor_id&quot; ON contacts
+    FOR ALL USING (provedor_id = current_setting('request.jwt.claims', true)::json-&gt;&gt;'provedor_id'::bigint);
+
+-- Política para mensagens
+CREATE POLICY &quot;Isolate by provedor_id&quot; ON messages
+    FOR ALL USING (provedor_id = current_setting('request.jwt.claims', true)::json-&gt;&gt;'provedor_id'::bigint);
+
+-- Política para CSAT
+CREATE POLICY &quot;Isolate by provedor_id&quot; ON csat_feedback
+    FOR ALL USING (provedor_id = current_setting('request.jwt.claims', true)::json-&gt;&gt;'provedor_id'::bigint);
+
+-- Política para auditoria
+CREATE POLICY &quot;Isolate by provedor_id&quot; ON audit_logs
+    FOR ALL USING (provedor_id = current_setting('request.jwt.claims', true)::json-&gt;&gt;'provedor_id'::bigint);
+</code></pre>
+<h2 id="servico-supabase">Serviço Supabase</h2>
+<h3 id="1-classe-principal">1. Classe Principal</h3>
+<pre><code class="language-python"># core/supabase_service.py
+import requests
+from django.conf import settings
+from typing import Dict, Any, Optional
+
+class SupabaseService:
+    def __init__(self):
+        self.url = settings.SUPABASE_URL
+        self.headers = {
+            'apikey': settings.SUPABASE_ANON_KEY,
+            'Authorization': f'Bearer {settings.SUPABASE_ANON_KEY}',
+            'Content-Type': 'application/json'
+        }
+
+    def _post(self, table: str, data: Dict[str, Any], provedor_id: int) -&gt; bool:
+        &quot;&quot;&quot;Enviar dados para Supabase&quot;&quot;&quot;
+        try:
+            # Adicionar provedor_id para RLS
+            data['provedor_id'] = provedor_id
+
+            response = requests.post(
+                f&quot;{self.url}/rest/v1/{table}&quot;,
+                json=data,
+                headers=self.headers
+            )
+
+            return response.status_code in [200, 201]
+        except Exception as e:
+            print(f&quot;Erro ao enviar para Supabase: {e}&quot;)
+            return False
+
+    def save_conversation(self, *, provedor_id: int, conversation_id: int, 
+                         contact_id: int, inbox_id: Optional[int] = None,
+                         status: str = 'open', assignee_id: Optional[int] = None,
+                         additional_attributes: Optional[Dict] = None) -&gt; bool:
+        &quot;&quot;&quot;Salvar conversa no Supabase&quot;&quot;&quot;
+        payload = {
+            &quot;id&quot;: conversation_id,
+            &quot;contact_id&quot;: contact_id,
+            &quot;inbox_id&quot;: inbox_id,
+            &quot;status&quot;: status,
+            &quot;assignee_id&quot;: assignee_id,
+            &quot;additional_attributes&quot;: additional_attributes or {}
+        }
+        return self._post(&quot;conversations&quot;, payload, provedor_id)
+
+    def save_contact(self, *, provedor_id: int, contact_id: int, name: str,
+                    phone: Optional[str] = None, email: Optional[str] = None,
+                    avatar: Optional[str] = None, 
+                    additional_attributes: Optional[Dict] = None) -&gt; bool:
+        &quot;&quot;&quot;Salvar contato no Supabase&quot;&quot;&quot;
+        payload = {
+            &quot;id&quot;: contact_id,
+            &quot;name&quot;: name,
+            &quot;phone&quot;: phone,
+            &quot;email&quot;: email,
+            &quot;avatar&quot;: avatar,
+            &quot;additional_attributes&quot;: additional_attributes or {}
+        }
+        return self._post(&quot;contacts&quot;, payload, provedor_id)
+
+    def save_message(self, *, provedor_id: int, message_id: int, 
+                    conversation_id: int, contact_id: int, content: str,
+                    message_type: str = 'text', is_from_customer: bool = True,
+                    file_url: Optional[str] = None, file_name: Optional[str] = None,
+                    file_size: Optional[int] = None, external_id: Optional[str] = None,
+                    additional_attributes: Optional[Dict] = None) -&gt; bool:
+        &quot;&quot;&quot;Salvar mensagem no Supabase&quot;&quot;&quot;
+        payload = {
+            &quot;id&quot;: message_id,
+            &quot;conversation_id&quot;: conversation_id,
+            &quot;contact_id&quot;: contact_id,
+            &quot;content&quot;: content,
+            &quot;message_type&quot;: message_type,
+            &quot;is_from_customer&quot;: is_from_customer,
+            &quot;file_url&quot;: file_url,
+            &quot;file_name&quot;: file_name,
+            &quot;file_size&quot;: file_size,
+            &quot;external_id&quot;: external_id,
+            &quot;additional_attributes&quot;: additional_attributes or {}
+        }
+        return self._post(&quot;messages&quot;, payload, provedor_id)
+
+    def save_csat(self, *, provedor_id: int, conversation_id: int, 
+                 contact_id: int, emoji_rating: str, rating_value: int,
+                 original_message: Optional[str] = None,
+                 contact_avatar: Optional[str] = None,
+                 feedback_sent_at_iso: Optional[str] = None) -&gt; bool:
+        &quot;&quot;&quot;Salvar feedback CSAT no Supabase&quot;&quot;&quot;
+        payload = {
+            &quot;conversation_id&quot;: conversation_id,
+            &quot;contact_id&quot;: contact_id,
+            &quot;emoji_rating&quot;: emoji_rating,
+            &quot;rating_value&quot;: rating_value,
+            &quot;original_message&quot;: original_message,
+            &quot;contact_avatar&quot;: contact_avatar,
+            &quot;feedback_sent_at&quot;: feedback_sent_at_iso
+        }
+        return self._post(&quot;csat_feedback&quot;, payload, provedor_id)
+
+    def save_audit_log(self, *, provedor_id: int, user_id: Optional[int],
+                      action: str, details: Optional[Dict] = None) -&gt; bool:
+        &quot;&quot;&quot;Salvar log de auditoria no Supabase&quot;&quot;&quot;
+        payload = {
+            &quot;user_id&quot;: user_id,
+            &quot;action&quot;: action,
+            &quot;details&quot;: details or {}
+        }
+        return self._post(&quot;audit_logs&quot;, payload, provedor_id)
+</code></pre>
+<h3 id="2-uso-no-django">2. Uso no Django</h3>
+<pre><code class="language-python"># Em views.py
+from core.supabase_service import SupabaseService
+
+def create_conversation(request):
+    # Criar conversa no Django
+    conversation = Conversation.objects.create(...)
+
+    # Salvar no Supabase
+    supabase_service = SupabaseService()
+    supabase_service.save_conversation(
+        provedor_id=conversation.provedor.id,
+        conversation_id=conversation.id,
+        contact_id=conversation.contact.id,
+        status=conversation.status
+    )
+
+    return JsonResponse({'success': True})
+</code></pre>
+<h2 id="real-time-updates">Real-time Updates</h2>
+<h3 id="1-configurar-real-time">1. Configurar Real-time</h3>
+<pre><code class="language-sql">-- Habilitar real-time para tabelas
+ALTER PUBLICATION supabase_realtime ADD TABLE conversations;
+ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+ALTER PUBLICATION supabase_realtime ADD TABLE csat_feedback;
+ALTER PUBLICATION supabase_realtime ADD TABLE audit_logs;
+</code></pre>
+<h3 id="2-frontend-websocket">2. Frontend WebSocket</h3>
+<pre><code class="language-javascript">// frontend/src/hooks/useSupabase.js
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL
+const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+export const useSupabaseRealtime = (table, callback) =&gt; {
+  useEffect(() =&gt; {
+    const subscription = supabase
+      .channel(`${table}_changes`)
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table },
+        callback
+      )
+      .subscribe()
+
+    return () =&gt; {
+      subscription.unsubscribe()
+    }
+  }, [table, callback])
+}
+
+// Uso
+const handleConversationUpdate = (payload) =&gt; {
+  console.log('Conversa atualizada:', payload)
+  // Atualizar estado do React
+}
+
+useSupabaseRealtime('conversations', handleConversationUpdate)
+</code></pre>
+<h3 id="3-dashboard-em-tempo-real">3. Dashboard em Tempo Real</h3>
+<pre><code class="language-javascript">// frontend/src/components/Dashboard.jsx
+import { useSupabaseRealtime } from '../hooks/useSupabase'
+
+const Dashboard = () =&gt; {
+  const [metrics, setMetrics] = useState({})
+
+  // Atualizar métricas em tempo real
+  useSupabaseRealtime('conversations', (payload) =&gt; {
+    if (payload.eventType === 'INSERT') {
+      setMetrics(prev =&gt; ({
+        ...prev,
+        total_conversations: prev.total_conversations + 1
+      }))
+    }
+  })
+
+  useSupabaseRealtime('csat_feedback', (payload) =&gt; {
+    if (payload.eventType === 'INSERT') {
+      setMetrics(prev =&gt; ({
+        ...prev,
+        total_feedbacks: prev.total_feedbacks + 1
+      }))
+    }
+  })
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;Dashboard&lt;/h1&gt;
+      &lt;p&gt;Total de Conversas: {metrics.total_conversations}&lt;/p&gt;
+      &lt;p&gt;Total de Feedbacks: {metrics.total_feedbacks}&lt;/p&gt;
+    &lt;/div&gt;
+  )
+}
+</code></pre>
+<h2 id="sistema-csat">Sistema CSAT</h2>
+<h3 id="1-coleta-automatica">1. Coleta Automática</h3>
+<pre><code class="language-python"># conversations/csat_automation.py
+from core.supabase_service import SupabaseService
+
+class CSATAutomationService:
+    @classmethod
+    def process_csat_response(cls, message_text: str, conversation, contact):
+        # Processar feedback com IA
+        ai_analysis = openai_service.analyze_csat_sentiment(message_text)
+
+        # Salvar no Supabase
+        supabase_service = SupabaseService()
+        supabase_service.save_csat(
+            provedor_id=conversation.provedor.id,
+            conversation_id=conversation.id,
+            contact_id=contact.id,
+            emoji_rating=ai_analysis['emoji'],
+            rating_value=ai_analysis['rating'],
+            original_message=message_text,
+            contact_avatar=contact.avatar
+        )
+
+        return True
+</code></pre>
+<h3 id="2-dashboard-csat">2. Dashboard CSAT</h3>
+<pre><code class="language-javascript">// frontend/src/components/CSATDashboard.jsx
+import { useSupabaseRealtime } from '../hooks/useSupabase'
+
+const CSATDashboard = () =&gt; {
+  const [csatData, setCsatData] = useState([])
+
+  // Atualizar em tempo real
+  useSupabaseRealtime('csat_feedback', (payload) =&gt; {
+    if (payload.eventType === 'INSERT') {
+      setCsatData(prev =&gt; [payload.new, ...prev])
+    }
+  })
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;Feedbacks CSAT&lt;/h2&gt;
+      {csatData.map(feedback =&gt; (
+        &lt;div key={feedback.id}&gt;
+          &lt;p&gt;Rating: {feedback.emoji_rating} ({feedback.rating_value})&lt;/p&gt;
+          &lt;p&gt;Mensagem: {feedback.original_message}&lt;/p&gt;
+        &lt;/div&gt;
+      ))}
+    &lt;/div&gt;
+  )
+}
+</code></pre>
+<h2 id="auditoria">Auditoria</h2>
+<h3 id="1-log-automatico">1. Log Automático</h3>
+<pre><code class="language-python"># core/middleware.py
+class AuditMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        # Log de auditoria
+        if request.user.is_authenticated:
+            supabase_service = SupabaseService()
+            supabase_service.save_audit_log(
+                provedor_id=request.user.provedor.id,
+                user_id=request.user.id,
+                action=f&quot;{request.method} {request.path}&quot;,
+                details={
+                    'ip': request.META.get('REMOTE_ADDR'),
+                    'user_agent': request.META.get('HTTP_USER_AGENT'),
+                    'status_code': response.status_code
+                }
+            )
+
+        return response
+</code></pre>
+<h3 id="2-visualizacao-de-logs">2. Visualização de Logs</h3>
+<pre><code class="language-javascript">// frontend/src/components/AuditLogs.jsx
+const AuditLogs = () =&gt; {
+  const [logs, setLogs] = useState([])
+
+  // Atualizar em tempo real
+  useSupabaseRealtime('audit_logs', (payload) =&gt; {
+    if (payload.eventType === 'INSERT') {
+      setLogs(prev =&gt; [payload.new, ...prev])
+    }
+  })
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;Logs de Auditoria&lt;/h2&gt;
+      {logs.map(log =&gt; (
+        &lt;div key={log.id}&gt;
+          &lt;p&gt;Ação: {log.action}&lt;/p&gt;
+          &lt;p&gt;Usuário: {log.user_id}&lt;/p&gt;
+          &lt;p&gt;Data: {log.timestamp}&lt;/p&gt;
+        &lt;/div&gt;
+      ))}
+    &lt;/div&gt;
+  )
+}
+</code></pre>
+<h2 id="monitoramento">Monitoramento</h2>
+<h3 id="1-metricas-em-tempo-real">1. Métricas em Tempo Real</h3>
+<pre><code class="language-sql">-- View para métricas
+CREATE VIEW dashboard_metrics AS
+SELECT 
+    provedor_id,
+    COUNT(*) as total_conversations,
+    COUNT(CASE WHEN status = 'open' THEN 1 END) as open_conversations,
+    COUNT(CASE WHEN status = 'closed' THEN 1 END) as closed_conversations,
+    AVG(CASE WHEN status = 'closed' THEN 
+        EXTRACT(EPOCH FROM (ended_at - created_at))/3600 
+    END) as avg_resolution_time_hours
+FROM conversations
+WHERE created_at &gt;= NOW() - INTERVAL '24 hours'
+GROUP BY provedor_id;
+</code></pre>
+<h3 id="2-alertas-automaticos">2. Alertas Automáticos</h3>
+<pre><code class="language-sql">-- Função para alertas
+CREATE OR REPLACE FUNCTION check_conversation_alerts()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Alertar se conversa aberta há mais de 1 hora
+    IF NEW.status = 'open' AND 
+       EXTRACT(EPOCH FROM (NOW() - NEW.created_at))/3600 &gt; 1 THEN
+        -- Enviar notificação
+        PERFORM pg_notify('conversation_alert', 
+            json_build_object(
+                'conversation_id', NEW.id,
+                'provedor_id', NEW.provedor_id,
+                'alert_type', 'long_open_conversation'
+            )::text
+        );
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger para alertas
+CREATE TRIGGER conversation_alert_trigger
+    AFTER UPDATE ON conversations
+    FOR EACH ROW
+    EXECUTE FUNCTION check_conversation_alerts();
+</code></pre>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="1-problemas-comuns">1. Problemas Comuns</h3>
+<pre><code class="language-bash"># Verificar conexão
+curl -I https://seu-projeto.supabase.co
+
+# Verificar chave
+curl -H &quot;apikey: sua_chave&quot; https://seu-projeto.supabase.co/rest/v1/
+</code></pre>
+<h3 id="2-logs-de-debug">2. Logs de Debug</h3>
+<pre><code class="language-python"># Testar conexão
+from core.supabase_service import SupabaseService
+supabase = SupabaseService()
+print(supabase.test_connection())
+</code></pre>
+<h3 id="3-verificar-rls">3. Verificar RLS</h3>
+<pre><code class="language-sql">-- Verificar políticas
+SELECT * FROM pg_policies WHERE tablename = 'conversations';
+
+-- Testar acesso
+SELECT * FROM conversations WHERE provedor_id = 1;
+</code></pre>
+<h2 id="proximos-passos">Próximos Passos</h2>
+<ol>
+<li><a href="supabase/dashboard.md">Dashboard</a> - Configure o dashboard</li>
+<li><a href="supabase/csat.md">CSAT</a> - Configure o sistema CSAT</li>
+<li><a href="supabase/audit.md">Auditoria</a> - Configure a auditoria</li>
+</ol></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
