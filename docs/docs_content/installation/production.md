@@ -110,14 +110,24 @@ ALLOWED_HOSTS=seu-dominio.com,www.seu-dominio.com
 DATABASE_URL=postgresql://niochat:senha_segura@localhost:5432/niochat
 
 # Redis (porta 6380)
+<<<<<<< HEAD
 REDIS_URL=redis://:SUA_SENHA_REDIS@49.12.9.11:6380/0
 REDIS_HOST=49.12.9.11
+=======
+REDIS_URL=redis://:SUA_SENHA_REDIS@154.38.176.17:6380/0
+REDIS_HOST=154.38.176.17
+>>>>>>> 3b07e82f46c6cf3f8f20e058d1b016114218f0e0
 REDIS_PORT=6380
 REDIS_PASSWORD=SUA_SENHA_REDIS
 
 # RabbitMQ (para Celery broker)
+<<<<<<< HEAD
 CELERY_BROKER_URL=amqp://admin:SUA_SENHA_RABBITMQ@49.12.9.11:5672
 CELERY_RESULT_BACKEND=redis://:SUA_SENHA_REDIS@49.12.9.11:6380/0
+=======
+CELERY_BROKER_URL=amqp://admin:SUA_SENHA_RABBITMQ@154.38.176.17:5672
+CELERY_RESULT_BACKEND=redis://:SUA_SENHA_REDIS@154.38.176.17:6380/0
+>>>>>>> 3b07e82f46c6cf3f8f20e058d1b016114218f0e0
 CELERY_RESULT_EXPIRES=300
 CELERY_TASK_IGNORE_RESULT=False
 
@@ -508,7 +518,11 @@ sudo -u postgres psql -d niochat -c "SELECT * FROM django_migrations;"
 
 #### 4. Erro de Redis
 ```bash
+<<<<<<< HEAD
 redis-cli -h 49.12.9.11 -p 6380 -a SUA_SENHA_REDIS ping
+=======
+redis-cli -h 154.38.176.17 -p 6380 -a SUA_SENHA_REDIS ping
+>>>>>>> 3b07e82f46c6cf3f8f20e058d1b016114218f0e0
 ```
 
 #### 5. Erro de RabbitMQ

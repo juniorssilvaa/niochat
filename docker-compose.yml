@@ -141,9 +141,15 @@ services:
       - DEBUG=True
       - ALLOWED_HOSTS=*
       - DATABASE_URL=postgresql://niochat_user:E0sJT3wAYFuahovmHkxgy@postgres:5432/niochat
+<<<<<<< HEAD
       - REDIS_URL=redis://:E0sJT3wAYFuahovmHkxgy@49.12.9.11:6380/0
       - CELERY_BROKER_URL=amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@49.12.9.11:5672
       - CELERY_RESULT_BACKEND=redis://:E0sJT3wAYFuahovmHkxgy@49.12.9.11:6380/0
+=======
+      - REDIS_URL=redis://:E0sJT3wAYFuahovmHkxgy@49.12.9.11:6379/0
+      - CELERY_BROKER_URL=amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@rabbitmq:5672
+      - CELERY_RESULT_BACKEND=redis://:E0sJT3wAYFuahovmHkxgy@49.12.9.11:6379/0
+>>>>>>> 3b07e82f46c6cf3f8f20e058d1b016114218f0e0
       - CELERY_RESULT_EXPIRES=300
       - CELERY_TASK_IGNORE_RESULT=False
       - CELERY_WORKER_PREFETCH_MULTIPLIER=1

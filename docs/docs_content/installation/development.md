@@ -88,6 +88,7 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 DATABASE_URL=postgresql://usuario:senha@localhost:5432/niochat
 
 # Redis (porta 6380)
+<<<<<<< HEAD
 REDIS_URL=redis://:SUA_SENHA_REDIS@	49.12.9.1:6379/0
 REDIS_HOST=	49.12.9.1
 REDIS_PORT=6379
@@ -96,6 +97,16 @@ REDIS_PASSWORD=SUA_SENHA_REDIS
 # RabbitMQ (para Celery broker)
 CELERY_BROKER_URL=amqp://admin:SUA_SENHA_RABBITMQ@49.12.9.11:5672
 CELERY_RESULT_BACKEND=redis://:SUA_SENHA_REDIS@49.12.9.11:6380/0
+=======
+REDIS_URL=redis://:SUA_SENHA_REDIS@154.38.176.17:6380/0
+REDIS_HOST=154.38.176.17
+REDIS_PORT=6380
+REDIS_PASSWORD=SUA_SENHA_REDIS
+
+# RabbitMQ (para Celery broker)
+CELERY_BROKER_URL=amqp://admin:SUA_SENHA_RABBITMQ@154.38.176.17:5672
+CELERY_RESULT_BACKEND=redis://:SUA_SENHA_REDIS@154.38.176.17:6380/0
+>>>>>>> 3b07e82f46c6cf3f8f20e058d1b016114218f0e0
 CELERY_RESULT_EXPIRES=300
 CELERY_TASK_IGNORE_RESULT=False
 
@@ -322,7 +333,11 @@ python manage.py flush
 #### Erro de Redis
 ```bash
 # Verificar status
+<<<<<<< HEAD
 redis-cli -h 49.12.9.11 -p 6380 -a SUA_SENHA_REDIS ping
+=======
+redis-cli -h 154.38.176.17 -p 6380 -a SUA_SENHA_REDIS ping
+>>>>>>> 3b07e82f46c6cf3f8f20e058d1b016114218f0e0
 
 # Reiniciar Redis
 sudo systemctl restart redis-server
@@ -360,7 +375,11 @@ python manage.py check
 python manage.py dbshell
 
 # Redis
+<<<<<<< HEAD
 redis-cli -h 49.12.9.11 -p 6380 -a SUA_SENHA_REDIS ping
+=======
+redis-cli -h 154.38.176.17 -p 6380 -a SUA_SENHA_REDIS ping
+>>>>>>> 3b07e82f46c6cf3f8f20e058d1b016114218f0e0
 
 # RabbitMQ
 rabbitmqctl status

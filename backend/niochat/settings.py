@@ -189,7 +189,11 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             'hosts': [{
+<<<<<<< HEAD
                 'host': '49.12.9.11',
+=======
+                'host': '154.38.176.17',
+>>>>>>> 3b07e82f46c6cf3f8f20e058d1b016114218f0e0
                 'port': 6380,
                 'password': 'E0sJT3wAYFuahovmHkxgy',
                 'db': 0,
@@ -213,8 +217,13 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 
 # Celery configuration
+<<<<<<< HEAD
 CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@49.12.9.11:5672')
 CELERY_RESULT_BACKEND = config('REDIS_URL', default='redis://:E0sJT3wAYFuahovmHkxgy@49.12.9.11:6380/0')
+=======
+CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@rabbitmq:5672')
+CELERY_RESULT_BACKEND = config('REDIS_URL', default='redis://:E0sJT3wAYFuahovmHkxgy@154.38.176.17:6380/0')
+>>>>>>> 3b07e82f46c6cf3f8f20e058d1b016114218f0e0
 CELERY_RESULT_EXPIRES = 300  # Resultados expiram em 5 minutos
 CELERY_TASK_IGNORE_RESULT = False  # Manter resultados por pouco tempo
 CELERY_ACCEPT_CONTENT = ['json']
@@ -234,7 +243,11 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 # Redis configuration for AI and memory
 REDIS_URL = config('REDIS_URL', default='redis://:E0sJT3wAYFuahovmHkxgy@49.12.9.11:6379/0')
 REDIS_HOST = config('REDIS_HOST', default='49.12.9.11')
+<<<<<<< HEAD
 REDIS_PORT = config('REDIS_PORT', default=6380, cast=int)
+=======
+REDIS_PORT = config('REDIS_PORT', default=6379, cast=int)
+>>>>>>> 3b07e82f46c6cf3f8f20e058d1b016114218f0e0
 REDIS_DB = config('REDIS_DB', default=0, cast=int)
 REDIS_USERNAME = config('REDIS_USERNAME', default='niochat')
 REDIS_PASSWORD = config('REDIS_PASSWORD', default='E0sJT3wAYFuahovmHkxgy')
