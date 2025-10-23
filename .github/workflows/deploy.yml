@@ -69,9 +69,9 @@ jobs:
         SECRET_KEY: test-secret-key
         DEBUG: True
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/niochat_test
-        REDIS_URL: redis://localhost:6380/0
-        CELERY_BROKER_URL: amqp://admin:test_password@localhost:5672
-        CELERY_RESULT_BACKEND: redis://localhost:6380/0
+        REDIS_URL: redis://49.12.9.11:6379/0
+        CELERY_BROKER_URL: amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@49.12.9.11:5672
+        CELERY_RESULT_BACKEND: redis://49.12.9.11:6379/0
       run: |
         cd backend
         python manage.py migrate

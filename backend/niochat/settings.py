@@ -189,8 +189,8 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             'hosts': [{
-                'host': '154.38.176.17',
-                'port': 6380,
+                'host': '49.12.9.11',
+                'port': 6379,
                 'password': 'E0sJT3wAYFuahovmHkxgy',
                 'db': 0,
             }],

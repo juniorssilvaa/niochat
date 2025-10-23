@@ -46,7 +46,6 @@ frontend/frontend/.env.development.local
 frontend/frontend/.env.test.local
 frontend/frontend/.env.production.local
 
-<<<<<<< HEAD
 # Configurações de desenvolvimento
 frontend/frontend/vite.config.dev.js
 docker.env
@@ -55,6 +54,7 @@ docker.env
 # Executáveis
 cloudflared.exe
 ngrok.exe
+
 # IDE
 .vscode/
 .idea/
