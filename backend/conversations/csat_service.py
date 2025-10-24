@@ -26,12 +26,12 @@ class CSATService:
         '🙂': 4,
         '🤩': 5,
     }
-    DELAY_MINUTES = 3  # Tempo de espera após encerramento da conversa
+    DELAY_MINUTES = 2  # Tempo de espera após encerramento da conversa
     
     @classmethod
     def schedule_csat_request(cls, conversation_id: int, ended_by_user_id: int = None):
         """
-        Agendar solicitação de CSAT 3 minutos após encerramento da conversa
+        Agendar solicitação de CSAT 2 minutos após encerramento da conversa
         """
         try:
             conversation = Conversation.objects.get(id=conversation_id)
@@ -45,15 +45,15 @@ class CSATService:
                 logger.info(f"CSAT request already exists for conversation {conversation_id}")
                 return existing_request
             
-            # Obter o timezone de São Paulo
+            # Obter o timezone de Belém
             import pytz
-            sao_paulo_tz = pytz.timezone('America/Sao_Paulo')
+            belem_tz = pytz.timezone('America/Belem')
             
-            # Calcular horário de envio (3 minutos após encerramento)
+            # Calcular horário de envio (2 minutos após encerramento)
             ended_at = timezone.now()  # UTC
             # Converter para o timezone local e adicionar o delay
-            ended_at_sp = ended_at.astimezone(sao_paulo_tz)
-            scheduled_send_at = ended_at_sp + timedelta(minutes=cls.DELAY_MINUTES)
+            ended_at_belem = ended_at.astimezone(belem_tz)
+            scheduled_send_at = ended_at_belem + timedelta(minutes=cls.DELAY_MINUTES)
             
             # Determinar canal
             channel_type = 'whatsapp'  # Default
@@ -71,23 +71,33 @@ class CSATService:
                 status='pending'
             )
             
-            # Converter o horário agendado para UTC para o agendamento do Celery
+            # Converter o horário agendado para UTC para o agendamento
             if scheduled_send_at.tzinfo is not None:
                 # Se o horário já tem timezone, converter para UTC
                 eta_utc = scheduled_send_at.astimezone(pytz.UTC)
             else:
                 # Se não tem timezone, assumir que é local e converter para UTC
-                scheduled_time_aware = sao_paulo_tz.localize(scheduled_send_at)
+                scheduled_time_aware = belem_tz.localize(scheduled_send_at)
                 eta_utc = scheduled_time_aware.astimezone(pytz.UTC)
             
-            # Importar e agendar tarefa do Celery
+            # Importar e agendar tarefa do Dramatiq
             from .tasks import send_csat_message
-            send_csat_message.apply_async(
-                args=[csat_request.id],
-                eta=eta_utc
-            )
             
-            logger.info(f"CSAT request scheduled for conversation {conversation_id} at {scheduled_send_at}")
+            # Agendar a tarefa usando Dramatiq com delay
+            delay_seconds = int((eta_utc - datetime.now(pytz.UTC)).total_seconds())
+            
+            if delay_seconds > 0:
+                # Usar delay do Dramatiq para agendar a tarefa
+                send_csat_message.send_with_options(
+                    args=[csat_request.id],
+                    delay=delay_seconds * 1000  # Dramatiq usa milissegundos
+                )
+                logger.info(f"CSAT request scheduled for conversation {conversation_id} at {scheduled_send_at} (delay: {delay_seconds}s)")
+            else:
+                # Se o horário já passou, executar imediatamente
+                send_csat_message.send(csat_request.id)
+                logger.info(f"CSAT request sent immediately for conversation {conversation_id}")
+            
             return csat_request
             
         except Conversation.DoesNotExist:

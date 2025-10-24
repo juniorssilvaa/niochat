@@ -212,25 +212,6 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 
-# Celery configuration
-CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@49.12.9.11:5672')
-CELERY_RESULT_BACKEND = config('REDIS_URL', default='redis://:E0sJT3wAYFuahovmHkxgy@49.12.9.11:6379/0')
-CELERY_RESULT_EXPIRES = 300  # Resultados expiram em 5 minutos
-CELERY_TASK_IGNORE_RESULT = False  # Manter resultados por pouco tempo
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'America/Sao_Paulo'
-CELERY_ENABLE_UTC = False
-CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutos
-CELERY_TASK_SOFT_TIME_LIMIT = 25 * 60  # 25 minutos
-CELERY_WORKER_PREFETCH_MULTIPLIER = 1
-CELERY_WORKER_MAX_TASKS_PER_CHILD = 1000
-
-# Celery configuration
-CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-
 # Redis configuration for AI and memory
 REDIS_URL = config('REDIS_URL', default='redis://:E0sJT3wAYFuahovmHkxgy@49.12.9.11:6379/0')
 REDIS_HOST = config('REDIS_HOST', default='49.12.9.11')

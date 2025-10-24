@@ -1,10 +1,14 @@
 """
-Inicialização do projeto Nio Chat
+Configuração inicial do projeto Django
 """
+import os
+import django
+from django.conf import settings
 
-__version__ = '2.1.5'
+# Configurar Django antes de importar models
+if not settings.configured:
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'niochat.settings')
+    django.setup()
 
-# Importar Celery para garantir que seja carregado quando Django iniciar
-from .celery import app as celery_app
-
-__all__ = ('celery_app',)
+# Importar configuração do Dramatiq
+from niochat.dramatiq_config import broker

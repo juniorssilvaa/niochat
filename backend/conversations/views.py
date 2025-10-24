@@ -164,20 +164,23 @@ def log_conversation_closure(request, conversation, action_type, resolution_type
         except Exception as _msg_err:
             print(f"⚠️ DEBUG: Falha ao enviar mensagens para Supabase: {_msg_err}")
         
-        # Criar solicitação de CSAT após encerramento
+        # Agendar solicitação de CSAT para 2 minutos após encerramento
         try:
-            from .csat_automation import CSATAutomationService
-            csat_request = CSATAutomationService.create_csat_request(conversation)
+            from .csat_service import CSATService
+            csat_request = CSATService.schedule_csat_request(
+                conversation_id=conversation.id,
+                ended_by_user_id=user.id if user and user.is_authenticated else None
+            )
             if csat_request:
-                print(f"✅ DEBUG: CSAT request criada: {csat_request.id}")
+                print(f"✅ DEBUG: CSAT request agendada para 2 minutos: {csat_request.id}")
             else:
-                print(f"⚠️ DEBUG: Não foi possível criar CSAT request")
+                print(f"⚠️ DEBUG: Não foi possível agendar CSAT request")
         except ImportError as import_error:
             print(f"❌ DEBUG: Erro de importação CSAT: {import_error}")
             import traceback
             traceback.print_exc()
         except Exception as csat_error:
-            print(f"❌ DEBUG: Erro ao criar CSAT request: {csat_error}")
+            print(f"❌ DEBUG: Erro ao agendar CSAT request: {csat_error}")
             import traceback
             traceback.print_exc()
         

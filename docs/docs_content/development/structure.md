@@ -34,7 +34,7 @@ backend/
 │   ├── urls.py            # URLs principais
 │   ├── wsgi.py            # WSGI
 │   ├── asgi.py            # ASGI
-│   └── celery.py          # Configuração Celery
+│   └── dramatiq_config.py # Configuração Dramatiq
 ├── core/                   # Aplicação principal
 │   ├── models.py          # Modelos principais
 │   ├── views.py           # Views principais
@@ -51,7 +51,7 @@ backend/
 │   ├── urls.py            # URLs
 │   ├── csat_automation.py # Automação CSAT
 │   ├── csat_service.py    # Serviço CSAT
-│   ├── tasks.py           # Tarefas Celery
+│   ├── tasks.py           # Tarefas Dramatiq
 │   └── signals.py         # Signals Django
 ├── integrations/           # Integrações
 │   ├── models.py          # Modelos de integração
@@ -166,15 +166,15 @@ urlpatterns = [
 ]
 ```
 
-### 3. Configuração Celery
+### 3. Configuração Dramatiq
 ```python
-# niochat/celery.py
-from celery import Celery
-from django.conf import settings
+# niochat/dramatiq_config.py
+import dramatiq
+from dramatiq.brokers.rabbitmq import RabbitmqBroker
 
-app = Celery('niochat')
-app.config_from_object('django.conf:settings', namespace='CELERY')
-app.autodiscover_tasks()
+# Configuração do broker RabbitMQ
+broker = RabbitmqBroker(url="amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@49.12.9.11:5672")
+dramatiq.set_broker(broker)
 ```
 
 ## Modelos de Dados

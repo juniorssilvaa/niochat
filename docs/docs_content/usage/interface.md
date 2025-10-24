@@ -86,7 +86,7 @@ A lista de conversas mostra:
 ## Sistema CSAT
 
 ### 1. Configuração
-- **Tempo de Envio**: 1.5 minutos após fechamento
+- **Tempo de Envio**: 2 minutos após fechamento
 - **Mensagem Personalizada**: Texto customizado por provedor
 - **Canais**: WhatsApp, SMS, Email
 - **Agendamento**: Horários específicos

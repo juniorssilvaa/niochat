@@ -2,7 +2,7 @@ import logging
 import json
 from datetime import datetime, timedelta
 from django.utils import timezone
-from celery import shared_task
+import dramatiq
 import pytz
 from .models import Conversation, CSATRequest, CSATFeedback
 from integrations.telegram_service import TelegramService
@@ -144,49 +144,14 @@ Pode deixar sua opinião em uma única mensagem:
     @classmethod
     def create_csat_request(cls, conversation):
         """
-        Cria uma solicitação de CSAT para conversa encerrada
+        DEPRECATED: Use CSATService.schedule_csat_request instead
+        Mantido apenas para compatibilidade
         """
         try:
-            existing_request = CSATRequest.objects.filter(conversation=conversation).first()
-            if existing_request:
-                return existing_request
-            
-            twelve_hours_ago = timezone.now() - timedelta(hours=12)
-            recent_csat = CSATRequest.objects.filter(
-                contact=conversation.contact,
-                created_at__gte=twelve_hours_ago
-            ).exists()
-            
-            if recent_csat:
-                return None
-            
-            # Obter o timezone de São Paulo
-            sao_paulo_tz = pytz.timezone('America/Sao_Paulo')
-            
-            # Obter horário atual em UTC e converter para São Paulo
-            current_time_utc = timezone.now()
-            current_time_sp = current_time_utc.astimezone(sao_paulo_tz)
-            
-            # Agendar para 90 segundos a partir de agora (no timezone local)
-            scheduled_time = current_time_sp + timedelta(seconds=90)
-            
-            csat_request = CSATRequest.objects.create(
-                conversation=conversation,
-                contact=conversation.contact,
-                provedor=conversation.inbox.provedor,
-                channel_type=conversation.inbox.channel_type,
-                status='pending',
-                conversation_ended_at=current_time_utc,  # Manter o horário de término em UTC
-                scheduled_send_at=scheduled_time  # Horário agendado em timezone local
-            )
-            
-            # Executar task imediatamente com delay interno
-            from .tasks import send_csat_message
-            send_csat_message.apply_async(args=[csat_request.id], countdown=90)
-            return csat_request
-            
+            from .csat_service import CSATService
+            return CSATService.schedule_csat_request(conversation.id)
         except Exception as e:
-            logger.error(f"Erro ao criar CSAT request: {e}")
+            logger.error(f"Erro ao agendar CSAT request: {e}")
             return None
     
     @classmethod

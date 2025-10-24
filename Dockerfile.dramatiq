@@ -1,0 +1,61 @@
+# Dramatiq Worker Dockerfile
+FROM python:3.12-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    ffmpeg \
+    curl \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set work directory
+WORKDIR /app
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy project
+COPY . .
+
+# Set backend directory
+WORKDIR /app/backend
+
+# Create dramatiq worker entrypoint script
+RUN echo '#!/bin/bash\n\
+set -e\n\
+echo "Starting Dramatiq Worker..."\n\
+echo "Waiting for PostgreSQL to be ready..."\n\
+MAX_ATTEMPTS=120\n\
+ATTEMPT=0\n\
+while ! pg_isready -h postgres -p 5432 -U niochat_user -d niochat > /dev/null 2>&1; do\n\
+  ATTEMPT=$((ATTEMPT + 1))\n\
+  if [ $ATTEMPT -ge $MAX_ATTEMPTS ]; then\n\
+    echo "PostgreSQL failed to start after $MAX_ATTEMPTS attempts."\n\
+    echo "Attempting to continue anyway..."\n\
+    break\n\
+  fi\n\
+  echo "PostgreSQL is unavailable - sleeping... (attempt $ATTEMPT/$MAX_ATTEMPTS)"\n\
+  sleep 10\n\
+done\n\
+echo "PostgreSQL check completed!"\n\
+echo "Starting Dramatiq worker..."\n\
+exec "$@"' > /app/dramatiq_entrypoint.sh && chmod +x /app/dramatiq_entrypoint.sh
+
+# Health check for Dramatiq worker
+HEALTHCHECK --interval=15s --timeout=10s --start-period=60s --retries=5 \
+    CMD python -c "import dramatiq; from niochat.dramatiq_config import broker; print('Dramatiq OK' if broker.connected else exit(1))"
+    CMD python -c "import dramatiq; print('Dramatiq OK')" || exit 1
+
+# Use entrypoint script
+ENTRYPOINT ["/app/dramatiq_entrypoint.sh"]
+
+# Default command - start Dramatiq worker
+CMD ["python", "-m", "dramatiq", "niochat.dramatiq_config"]

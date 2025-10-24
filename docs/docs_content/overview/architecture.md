@@ -66,9 +66,9 @@ graph TB
 - **Características**: RESTful, WebSocket, autenticação
 - **Comunicação**: HTTP/WebSocket
 
-### 3. Processamento Assíncrono (Celery)
+### 3. Processamento Assíncrono (Dramatiq)
 - **Responsabilidade**: Tarefas em background
-- **Tecnologia**: Celery + Redis
+- **Tecnologia**: Dramatiq + RabbitMQ
 - **Características**: Escalável, confiável
 - **Uso**: CSAT, notificações, processamento
 
@@ -109,7 +109,7 @@ Evento → Supabase → WebSocket → Frontend → Atualização
 
 ### 4. Sistema CSAT
 ```
-Fechamento → Celery → 1.5min → Envio → Feedback → IA → Análise
+Fechamento → Dramatiq → 1.5min → Envio → Feedback → IA → Análise
 ```
 
 ## Padrões Arquiteturais
@@ -122,7 +122,7 @@ Fechamento → Celery → 1.5min → Envio → Feedback → IA → Análise
 
 ### 2. Event-Driven
 - **Eventos**: Mensagens, conversas, CSAT
-- **Processamento**: Assíncrono com Celery
+- **Processamento**: Assíncrono com Dramatiq
 - **Notificações**: Tempo real via WebSocket
 - **Auditoria**: Log de todos os eventos
 

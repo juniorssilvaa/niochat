@@ -93,11 +93,8 @@ REDIS_HOST=49.12.9.11
 REDIS_PORT=6379
 REDIS_PASSWORD=SUA_SENHA_REDIS
 
-# RabbitMQ (para Celery broker)
-CELERY_BROKER_URL=amqp://admin:SUA_SENHA_RABBITMQ@49.12.9.11:5672
-CELERY_RESULT_BACKEND=redis://:SUA_SENHA_REDIS@49.12.9.11:6379/0
-CELERY_RESULT_EXPIRES=300
-CELERY_TASK_IGNORE_RESULT=False
+# RabbitMQ (para Dramatiq broker)
+DRAMATIQ_BROKER_URL=amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@49.12.9.11:5672
 
 # OpenAI
 OPENAI_API_KEY=sua_chave_openai
@@ -122,21 +119,14 @@ source venv/bin/activate
 python manage.py runserver 0.0.0.0:8010
 ```
 
-#### Terminal 2 - Celery Worker
+#### Terminal 2 - Dramatiq Worker
 ```bash
 cd backend
 source venv/bin/activate
-celery -A niochat worker -l info
+python -m dramatiq niochat.dramatiq_config
 ```
 
-#### Terminal 3 - Celery Beat
-```bash
-cd backend
-source venv/bin/activate
-celery -A niochat beat -l info
-```
-
-#### Terminal 4 - Frontend
+#### Terminal 3 - Frontend
 ```bash
 cd frontend/frontend
 npm run dev

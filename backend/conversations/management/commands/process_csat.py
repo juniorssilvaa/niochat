@@ -8,8 +8,8 @@ class Command(BaseCommand):
     help = 'Processa CSAT requests pendentes que já deveriam ter sido enviados'
 
     def handle(self, *args, **options):
-        sao_paulo_tz = pytz.timezone('America/Sao_Paulo')
-        now = timezone.now().astimezone(sao_paulo_tz)
+        belem_tz = pytz.timezone('America/Belem')
+        now = timezone.now().astimezone(belem_tz)
         
         self.stdout.write(f'Verificando CSATs pendentes às {now}')
         
@@ -19,7 +19,7 @@ class Command(BaseCommand):
         processed = 0
         for csat_request in pending_csats:
             if csat_request.scheduled_send_at:
-                scheduled_local = csat_request.scheduled_send_at.astimezone(sao_paulo_tz)
+                scheduled_local = csat_request.scheduled_send_at.astimezone(belem_tz)
                 if now > scheduled_local:
                     self.stdout.write(f'Processando CSAT {csat_request.id} (agendado para {scheduled_local})')
                     try:

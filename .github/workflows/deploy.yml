@@ -37,6 +37,15 @@ jobs:
           --health-retries 5
         ports:
           - 6380:6379
+      
+      rabbitmq:
+        image: rabbitmq:3-management
+        env:
+          RABBITMQ_DEFAULT_USER: niochat
+          RABBITMQ_DEFAULT_PASS: ccf9e819f70a54bb790487f2438da6ee
+        ports:
+          - 5672:5672
+          - 15672:15672
 
     steps:
     - name: Checkout code
@@ -70,8 +79,7 @@ jobs:
         DEBUG: True
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/niochat_test
         REDIS_URL: redis://49.12.9.11:6379/0
-        CELERY_BROKER_URL: amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@49.12.9.11:5672
-        CELERY_RESULT_BACKEND: redis://49.12.9.11:6379/0
+        DRAMATIQ_BROKER_URL: amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@localhost:5672
       run: |
         cd backend
         python manage.py migrate
@@ -143,15 +151,15 @@ jobs:
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
 
-    - name: Build and push celery image
+    - name: Build and push dramatiq image
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./Dockerfile.celery
+        file: ./Dockerfile.dramatiq
         push: true
         tags: |
-          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-celery:latest
-          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-celery:${{ github.sha }}
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-dramatiq:latest
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-dramatiq:${{ github.sha }}
 
     - name: Build and push docs image
       uses: docker/build-push-action@v5
@@ -181,13 +189,13 @@ jobs:
         PORTAINER_API_KEY: ${{ secrets.PORTAINER_API_KEY }}
         BACKEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
         FRONTEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
-        CELERY_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-celery:latest
+        DRAMATIQ_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-dramatiq:latest
         DOCS_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-docs:latest
       run: |
         echo "Deploying to Portainer..."
         echo "Backend image: $BACKEND_IMAGE"
         echo "Frontend image: $FRONTEND_IMAGE"
-        echo "Celery image: $CELERY_IMAGE"
+        echo "Dramatiq image: $DRAMATIQ_IMAGE"
         echo "Docs image: $DOCS_IMAGE"
         
         # Pegar ID da stack com tratamento de erro melhorado
@@ -222,25 +230,24 @@ jobs:
 
         echo "Found stack: niochat (ID: $STACK_ID)"
 
-                 # ⚡️ ATUALIZAÇÃO CHAVE: Enviar o arquivo docker-compose.yml completo
-                 # Ler o arquivo docker-compose.yml e substituir as imagens
-                COMPOSE_CONTENT=$(cat docker-compose.yml \
-                  | sed "s|ghcr.io/juniorssilvaa/niochat-backend:latest|$BACKEND_IMAGE|g" \
-                  | sed "s|ghcr.io/juniorssilvaa/niochat-frontend:latest|$FRONTEND_IMAGE|g" \
-                  | sed "s|ghcr.io/juniorssilvaa/niochat-celery:latest|$CELERY_IMAGE|g" \
-                  | sed "s|ghcr.io/juniorssilvaa/niochat-docs:latest|$DOCS_IMAGE|g")
-                 
-                 # Escapar aspas e quebras de linha para JSON
-                 COMPOSE_CONTENT_ESCAPED=$(echo "$COMPOSE_CONTENT" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
-                 
-                 RESPONSE=$(curl -s -X PUT \
-                   -H "X-API-Key: $PORTAINER_API_KEY" \
-                   -H "Content-Type: application/json" \
-                   --data "{
-                     \"Env\": [],
-                     \"StackFileContent\": \"$COMPOSE_CONTENT_ESCAPED\"
-                   }" \
-                   "$PORTAINER_URL/api/stacks/$STACK_ID?endpointId=1&pullImage=true&forceRecreate=true")
+        # ⚡️ ATUALIZAÇÃO CHAVE: Enviar o arquivo docker-compose.yml completo
+        COMPOSE_CONTENT=$(cat docker-compose.yml \
+          | sed "s|ghcr.io/juniorssilvaa/niochat-backend:latest|$BACKEND_IMAGE|g" \
+          | sed "s|ghcr.io/juniorssilvaa/niochat-frontend:latest|$FRONTEND_IMAGE|g" \
+          | sed "s|ghcr.io/juniorssilvaa/niochat-dramatiq:latest|$DRAMATIQ_IMAGE|g" \
+          | sed "s|ghcr.io/juniorssilvaa/niochat-docs:latest|$DOCS_IMAGE|g")
+        
+        # Escapar aspas e quebras de linha para JSON
+        COMPOSE_CONTENT_ESCAPED=$(echo "$COMPOSE_CONTENT" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+        
+        RESPONSE=$(curl -s -X PUT \
+          -H "X-API-Key: $PORTAINER_API_KEY" \
+          -H "Content-Type: application/json" \
+          --data "{
+            \"Env\": [],
+            \"StackFileContent\": \"$COMPOSE_CONTENT_ESCAPED\"
+          }" \
+          "$PORTAINER_URL/api/stacks/$STACK_ID?endpointId=1&pullImage=true&forceRecreate=true")
 
         # Verificar se a resposta é válida JSON
         if ! echo "$RESPONSE" | jq . > /dev/null 2>&1; then

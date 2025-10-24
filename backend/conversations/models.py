@@ -440,7 +440,7 @@ class CSATRequest(models.Model):
     # Status e timing
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     conversation_ended_at = models.DateTimeField()
-    scheduled_send_at = models.DateTimeField()  # 3 minutos após encerramento
+    scheduled_send_at = models.DateTimeField()  # 2 minutos após encerramento
     sent_at = models.DateTimeField(null=True, blank=True)
     responded_at = models.DateTimeField(null=True, blank=True)
     

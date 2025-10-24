@@ -874,15 +874,19 @@ DATA E HORA ATUAL: {data_atual}"""
                         except Exception as _sup_err:
                             logger.error(f"Erro ao enviar auditoria para Supabase: {_sup_err}")
                         
-                        # CRIAR SOLICITAÇÃO DE CSAT AUTOMÁTICA
+                        # AGENDAR SOLICITAÇÃO DE CSAT PARA 2 MINUTOS
                         try:
-                            csat_request = CSATAutomationService.create_csat_request(conversation)
+                            from conversations.csat_service import CSATService
+                            csat_request = CSATService.schedule_csat_request(
+                                conversation_id=conversation.id,
+                                ended_by_user_id=None  # Encerramento por IA
+                            )
                             if csat_request:
-                                logger.info(f"CSAT request criada automaticamente: {csat_request.id}")
+                                logger.info(f"CSAT request agendada para 2 minutos: {csat_request.id}")
                             else:
-                                logger.warning("Não foi possível criar CSAT request automático")
+                                logger.warning("Não foi possível agendar CSAT request")
                         except Exception as csat_error:
-                            logger.error(f"Erro ao criar CSAT request automático: {csat_error}")
+                            logger.error(f"Erro ao agendar CSAT request: {csat_error}")
                             
                         except Exception as audit_error:
                             logger.error(f"Erro ao registrar auditoria de encerramento: {audit_error}")
@@ -3885,4 +3889,4 @@ LEMBRE-SE: A transferência só acontece se você USAR as duas funções!
             logger.error(f"Erro ao obter nome para CSAT: {e}")
             return "Cliente"
 
-openai_service = OpenAIService() 
+openai_service = OpenAIService()

@@ -49,6 +49,8 @@ services:
       - MEDIA_URL=/media/
       - STATIC_URL=/static/
       - LOG_LEVEL=DEBUG
+      - REDIS_URL=redis://:E0sJT3wAYFuahovmHkxgy@49.12.9.11:6379/0
+      - DRAMATIQ_BROKER_URL=amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@rabbitmq:5672
     volumes:
       - niochat-media:/app/backend/media
       - niochat-static:/app/backend/staticfiles
@@ -57,6 +59,7 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
+      - rabbitmq
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8010/api/health/"]
       interval: 30s
@@ -132,33 +135,50 @@ services:
       - "traefik.http.routers.niochat-frontend.service=niochat-frontend-service"
       - "traefik.http.services.niochat-frontend-service.loadbalancer.server.port=8012"
 
-  # Celery Worker para CSAT e tarefas assíncronas — ✅ SCRIPT SEPARADO
-  niochat-celery:
-    image: ghcr.io/juniorssilvaa/niochat-backend:latest
-    command: ["/app/celery_entrypoint.sh"]
-    environment:
-      - SECRET_KEY=OFfGQLqPs5osrBBnhOBdIfkjq1F6vpb74YoAWNkjwbY4BwTNK5
-      - DEBUG=True
-      - ALLOWED_HOSTS=*
-      - DATABASE_URL=postgresql://niochat_user:E0sJT3wAYFuahovmHkxgy@postgres:5432/niochat
-      - REDIS_URL=redis://:E0sJT3wAYFuahovmHkxgy@49.12.9.11:6379/0
-      - CELERY_BROKER_URL=amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@49.12.9.11:5672
-      - CELERY_RESULT_BACKEND=redis://:E0sJT3wAYFuahovmHkxgy@49.12.9.11:6379/0
-      - CELERY_RESULT_EXPIRES=300
-      - CELERY_TASK_IGNORE_RESULT=False
-      - CELERY_WORKER_PREFETCH_MULTIPLIER=1
-      - CELERY_TASK_ACKS_LATE=True
-      - CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP=True
-      - CELERY_BROKER_CONNECTION_RETRY=True
-      - CELERY_BROKER_CONNECTION_MAX_RETRIES=10
-      - CELERY_WORKER_DISABLE_RATE_LIMITS=True
-      - CELERY_WORKER_MAX_TASKS_PER_CHILD=1000
+  # Redis para IA e memória de conversas
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass E0sJT3wAYFuahovmHkxgy
     networks:
       - nioNet
     restart: unless-stopped
-    # ✅ Healthcheck para monitorar o worker
     healthcheck:
-      test: ["CMD", "python", "-c", "import celery; from celery import Celery; app = Celery('niochat'); print('Celery OK')"]
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # RabbitMQ para Dramatiq
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=niochat
+      - RABBITMQ_DEFAULT_PASS=ccf9e819f70a54bb790487f2438da6ee
+    networks:
+      - nioNet
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Worker Dramatiq
+  niochat-dramatiq:
+    image: ghcr.io/juniorssilvaa/niochat-dramatiq:latest
+    environment:
+      - DATABASE_URL=postgresql://niochat_user:E0sJT3wAYFuahovmHkxgy@postgres:5432/niochat
+      - DRAMATIQ_BROKER_URL=amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@rabbitmq:5672
+    networks:
+      - nioNet
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - rabbitmq
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM); sock.connect(('rabbitmq', 5672))"]
       interval: 30s
       timeout: 10s
       retries: 3
