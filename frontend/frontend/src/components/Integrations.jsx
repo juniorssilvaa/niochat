@@ -737,7 +737,7 @@ export default function Integrations({ provedorId }) {
         <h2 className="text-3xl font-bold text-white ml-2">Canais Configurados</h2>
               <button 
           onClick={handleAdd}
-          className="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow"
+          className="bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow"
               >
           <Plus className="w-5 h-5" /> Adicionar Canal
               </button>
@@ -953,44 +953,44 @@ export default function Integrations({ provedorId }) {
       )}
 
       {/* SGP CONFIGURATION */}
-      <div className="mt-10 p-8 bg-[#23243a] rounded-xl shadow-lg border border-[#35365a]">
-        <h3 className="text-xl font-bold text-white mb-6">Configurações do SGP</h3>
+      <div className="mt-10 p-8 bg-card rounded-xl shadow-lg border border-border">
+        <h3 className="text-xl font-bold text-foreground mb-6">Configurações do SGP</h3>
         <form onSubmit={handleSgpSave} className="flex flex-col gap-4">
           <div className="flex flex-col">
-            <label htmlFor="sgpUrl" className="text-sm font-semibold text-white mb-1">URL do SGP</label>
+            <label htmlFor="sgpUrl" className="text-sm font-semibold text-foreground mb-1">URL do SGP</label>
                     <input 
               type="url"
               id="sgpUrl"
               name="sgp_url"
               value={sgp.sgp_url}
               onChange={handleSgpChange}
-              className="bg-[#1a1b2e] border border-[#35365a] text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-background border border-border text-foreground px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="https://api.seu-sgp.com"
               required
                     />
                   </div>
           <div className="flex flex-col">
-            <label htmlFor="sgpToken" className="text-sm font-semibold text-white mb-1">Token do SGP</label>
+            <label htmlFor="sgpToken" className="text-sm font-semibold text-foreground mb-1">Token do SGP</label>
                     <input 
                       type="text" 
               id="sgpToken"
               name="sgp_token"
               value={sgp.sgp_token}
               onChange={handleSgpChange}
-              className="bg-[#1a1b2e] border border-[#35365a] text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-background border border-border text-foreground px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Seu token de acesso"
               required
                     />
                   </div>
           <div className="flex flex-col">
-            <label htmlFor="sgpApp" className="text-sm font-semibold text-white mb-1">App do SGP</label>
+            <label htmlFor="sgpApp" className="text-sm font-semibold text-foreground mb-1">App do SGP</label>
                     <input 
                       type="text" 
               id="sgpApp"
               name="sgp_app"
               value={sgp.sgp_app}
               onChange={handleSgpChange}
-              className="bg-[#1a1b2e] border border-[#35365a] text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-background border border-border text-foreground px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Ex: my-app-name"
               required
                     />
@@ -1011,31 +1011,31 @@ export default function Integrations({ provedorId }) {
             </div>
 
               {/* WhatsApp CONFIGURATION */}
-        <div className="mt-10 p-8 bg-[#23243a] rounded-xl shadow-lg border border-[#35365a]">
-          <h3 className="text-xl font-bold text-white mb-6">Configurações do WhatsApp</h3>
+        <div className="mt-10 p-8 bg-card rounded-xl shadow-lg border border-border">
+          <h3 className="text-xl font-bold text-foreground mb-6">Configurações do WhatsApp</h3>
           <form onSubmit={handleUazapiSave} className="flex flex-col gap-4">
             <div className="flex flex-col">
-              <label htmlFor="whatsappUrl" className="text-sm font-semibold text-white mb-1">URL da Instância</label>
+              <label htmlFor="whatsappUrl" className="text-sm font-semibold text-foreground mb-1">URL da Instância</label>
               <input
                 type="url"
                 id="whatsappUrl"
                 name="whatsapp_url"
                 value={uazapi.whatsapp_url}
                 onChange={handleUazapiChange}
-                className="bg-[#1a1b2e] border border-[#35365a] text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="bg-background border border-border text-foreground px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="https://niochat.uazapi.com"
                 required
               />
           </div>
             <div className="flex flex-col">
-              <label htmlFor="whatsappToken" className="text-sm font-semibold text-white mb-1">Token da Instância</label>
+              <label htmlFor="whatsappToken" className="text-sm font-semibold text-foreground mb-1">Token da Instância</label>
               <input 
                 type="text" 
                 id="whatsappToken"
                 name="whatsapp_token"
                 value={uazapi.whatsapp_token}
                 onChange={handleUazapiChange}
-                className="bg-[1a1b2e] border border-[#35365a] text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="bg-background border border-border text-foreground px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Seu token de acesso"
                 required
               />
@@ -1043,7 +1043,7 @@ export default function Integrations({ provedorId }) {
               <button 
               type="submit"
               disabled={saving}
-              className="bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? 'Salvando...' : 'Salvar Configurações do WhatsApp'}
               </button>
@@ -1056,4 +1056,4 @@ export default function Integrations({ provedorId }) {
         </div>
     </div>
   );
-} 
+}

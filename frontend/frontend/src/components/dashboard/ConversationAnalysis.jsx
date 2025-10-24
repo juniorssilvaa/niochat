@@ -87,27 +87,27 @@ export default function ConversationAnalysis() {
   };
 
   return (
-    <Card className="bg-[#1a1f2e] border-[#2d3748] text-white">
+    <Card className="bg-card border-border">
       <CardContent className="p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-white">Análise de Conversas</h2>
+          <h2 className="text-xl font-semibold text-foreground">Análise de Conversas</h2>
           <div className="flex items-center gap-4">
-            <span className="text-gray-400 text-sm">Total de Conversas</span>
-            <span className="text-3xl font-bold text-white">{data.totalConversations}</span>
+            <span className="text-muted-foreground text-sm">Total de Conversas</span>
+            <span className="text-3xl font-bold text-foreground">{data.totalConversations}</span>
           </div>
         </div>
 
         {/* Período Selecionado */}
         <div className="mb-6">
-          <label className="block text-gray-400 text-sm mb-2">Período Selecionado</label>
+          <label className="block text-muted-foreground text-sm mb-2">Período Selecionado</label>
           <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-            <SelectTrigger className="w-48 bg-[#2d3748] border-[#4a5568] text-white">
+            <SelectTrigger className="w-48 bg-background border-border text-foreground">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#2d3748] border-[#4a5568]">
+            <SelectContent className="bg-popover border-border">
               {Object.entries(periods).map(([key, period]) => (
-                <SelectItem key={key} value={key} className="text-white hover:bg-[#4a5568]">
+                <SelectItem key={key} value={key} className="text-foreground hover:bg-accent">
                   {period.label}
                 </SelectItem>
               ))}
@@ -161,10 +161,10 @@ export default function ConversationAnalysis() {
                         </Pie>
                         <Tooltip 
                           contentStyle={{
-                            backgroundColor: '#2d3748',
-                            border: '1px solid #4a5568',
+                            backgroundColor: 'hsl(var(--popover))',
+                            border: '1px solid hsl(var(--border))',
                             borderRadius: '8px',
-                            color: '#ffffff'
+                            color: 'hsl(var(--popover-foreground))'
                           }}
                           formatter={(value, name) => [
                             `${value} conversas`,
@@ -183,11 +183,11 @@ export default function ConversationAnalysis() {
                             className="w-3 h-3 rounded-full" 
                             style={{ backgroundColor: channel.color }}
                           />
-                          <span className="text-gray-300">{channel.name}</span>
+                          <span className="text-muted-foreground">{channel.name}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-white font-medium">{channel.count}</span>
-                          <span className="text-gray-400 text-sm">({channel.percentage})</span>
+                          <span className="text-foreground font-medium">{channel.count}</span>
+                          <span className="text-muted-foreground text-sm">({channel.percentage})</span>
                         </div>
                       </div>
                     ))}
@@ -219,10 +219,10 @@ export default function ConversationAnalysis() {
                       <YAxis hide />
                       <Tooltip 
                         contentStyle={{
-                          backgroundColor: '#2d3748',
-                          border: '1px solid #4a5568',
+                          backgroundColor: 'hsl(var(--popover))',
+                          border: '1px solid hsl(var(--border))',
                           borderRadius: '8px',
-                          color: '#ffffff'
+                          color: 'hsl(var(--popover-foreground))'
                         }}
                         formatter={(value, name) => [
                           `${value} conversas`,

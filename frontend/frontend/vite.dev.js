@@ -35,6 +35,38 @@ export default defineConfig({
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
       'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
+    },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8010',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api-token-auth': {
+        target: 'http://localhost:8010',
+        changeOrigin: true,
+        secure: false
+      },
+      '/auth': {
+        target: 'http://localhost:8010',
+        changeOrigin: true,
+        secure: false
+      },
+      '/webhook': {
+        target: 'http://localhost:8010',
+        changeOrigin: true,
+        secure: false
+      },
+      '/webhooks': {
+        target: 'http://localhost:8010',
+        changeOrigin: true,
+        secure: false
+      },
+      '/media': {
+        target: 'http://localhost:8010',
+        changeOrigin: true,
+        secure: false
+      }
     }
   }
 })
