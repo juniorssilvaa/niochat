@@ -60,6 +60,7 @@ services:
     depends_on:
       - postgres
       - rabbitmq
+      - redis
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8010/api/health/"]
       interval: 30s
@@ -171,6 +172,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://niochat_user:E0sJT3wAYFuahovmHkxgy@postgres:5432/niochat
       - DRAMATIQ_BROKER_URL=amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@rabbitmq:5672
+      - REDIS_URL=redis://:E0sJT3wAYFuahovmHkxgy@redis:6379/0
     networks:
       - nioNet
     restart: unless-stopped
