@@ -79,7 +79,7 @@ jobs:
         DEBUG: True
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/niochat_test
         REDIS_URL: redis://49.12.9.11:6379/0
-        DRAMATIQ_BROKER_URL: amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@localhost:5672
+        DRAMATIQ_BROKER_URL: amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@rabbitmq:5672
       run: |
         cd backend
         python manage.py migrate

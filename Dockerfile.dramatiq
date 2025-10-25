@@ -49,12 +49,13 @@ echo "PostgreSQL check completed!"\n\
 echo "Starting Dramatiq worker..."\n\
 exec "$@"' > /app/dramatiq_entrypoint.sh && chmod +x /app/dramatiq_entrypoint.sh
 
-# Health check for Dramatiq worker
+# Health check for Dramatiq worker - verifica apenas a conexão com RabbitMQ
 HEALTHCHECK --interval=15s --timeout=10s --start-period=60s --retries=5 \
-    CMD python -c "import dramatiq; from niochat.dramatiq_config import broker; print('Dramatiq OK' if broker.connected else exit(1))"
+    CMD python -c "import socket; sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM); sock.connect(('rabbitmq', 5672))"
 
 # Use entrypoint script
 ENTRYPOINT ["/app/dramatiq_entrypoint.sh"]
 
-# Default command - start Dramatiq worker with all task modules
-CMD ["python", "-m", "dramatiq", "niochat.dramatiq_config", "niochat.dramatiq_tasks", "conversations.dramatiq_tasks"]
+# Default command - start Dramatiq worker with Django settings and all task modules
+ENV DJANGO_SETTINGS_MODULE=niochat.settings
+CMD ["python", "-m", "dramatiq", "--path", "/app/backend", "--processes", "1", "--threads", "8", "niochat.dramatiq_tasks", "conversations.dramatiq_tasks"]
