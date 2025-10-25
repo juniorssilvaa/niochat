@@ -49,8 +49,6 @@ services:
       - MEDIA_URL=/media/
       - STATIC_URL=/static/
       - LOG_LEVEL=DEBUG
-      - REDIS_URL=redis://:E0sJT3wAYFuahovmHkxgy@49.12.9.11:6379/0
-      - DRAMATIQ_BROKER_URL=amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@rabbitmq:5672
     volumes:
       - niochat-media:/app/backend/media
       - niochat-static:/app/backend/staticfiles
@@ -58,9 +56,8 @@ services:
       - nioNet
     restart: unless-stopped
     depends_on:
-      - postgres
-      - rabbitmq
-      - redis
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8010/api/health/"]
       interval: 30s
@@ -128,79 +125,42 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      # Regra para frontend - PRIORIDADE BAIXA (catch-all)
+      # Regra para frontend - PRIORIDADE NORMAL
       - "traefik.http.routers.niochat-frontend.rule=Host(`app.niochat.com.br`)"
       - "traefik.http.routers.niochat-frontend.entrypoints=websecure"
       - "traefik.http.routers.niochat-frontend.tls.certresolver=letsencryptresolver"
-      - "traefik.http.routers.niochat-frontend.priority=1"
+      - "traefik.http.routers.niochat-frontend.priority=100"
       - "traefik.http.routers.niochat-frontend.service=niochat-frontend-service"
       - "traefik.http.services.niochat-frontend-service.loadbalancer.server.port=8012"
 
-  # Redis para IA e memória de conversas
-  redis:
-    image: redis:7-alpine
-    command: redis-server --requirepass E0sJT3wAYFuahovmHkxgy
-    networks:
-      - nioNet
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # RabbitMQ para Dramatiq
-  rabbitmq:
-    image: rabbitmq:3-management
+  # Dramatiq Worker
+  dramatiq:
+    image: ghcr.io/juniorssilvaa/niochat-backend:latest
+    command: >
+      sh -c "
+        python manage.py migrate --noinput &&
+        python manage.py rundramatiq --path /app/backend --processes 1 --threads 8 niochat.dramatiq_tasks conversations.dramatiq_tasks
+      "
     environment:
-      - RABBITMQ_DEFAULT_USER=niochat
-      - RABBITMQ_DEFAULT_PASS=ccf9e819f70a54bb790487f2438da6ee
-    networks:
-      - nioNet
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "rabbitmqctl", "status"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # Worker Dramatiq
-  niochat-dramatiq:
-    image: ghcr.io/juniorssilvaa/niochat-dramatiq:latest
-    environment:
+      - SECRET_KEY=OFfGQLqPs5osrBBnhOBdIfkjq1F6vpb74YoAWNkjwbY4BwTNK5
+      - DEBUG=True
+      - ALLOWED_HOSTS=*
       - DATABASE_URL=postgresql://niochat_user:E0sJT3wAYFuahovmHkxgy@postgres:5432/niochat
-      - DRAMATIQ_BROKER_URL=amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@rabbitmq:5672
-      - REDIS_URL=redis://:E0sJT3wAYFuahovmHkxgy@redis:6379/0
+      - DJANGO_SETTINGS_MODULE=niochat.settings
     networks:
       - nioNet
     restart: unless-stopped
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      niochat-backend:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import socket; sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM); sock.connect(('rabbitmq', 5672))"]
+      test: ["CMD-SHELL", "ps aux | grep dramatiq || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  # Documentação MkDocs - Buildada localmente
-  niochat-docs:
-    image: niochat-docs:local
-    networks:
-      - nioNet
-    restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      # Regra para documentação - PRIORIDADE ALTA
-      - "traefik.http.routers.niochat-docs.rule=Host(`docs.niochat.com.br`)"
-      - "traefik.http.routers.niochat-docs.entrypoints=websecure"
-      - "traefik.http.routers.niochat-docs.tls.certresolver=letsencryptresolver"
-      - "traefik.http.routers.niochat-docs.priority=200"
-      - "traefik.http.routers.niochat-docs.service=niochat-docs-service"
-      - "traefik.http.services.niochat-docs-service.loadbalancer.server.port=80"
 
 networks:
   nioNet:
@@ -208,12 +168,6 @@ networks:
     name: nioNet
 
 volumes:
-  niochat-media:
-    external: true
-    name: niochat-media
-  niochat-static:
-    external: true
-    name: niochat-static
   niochat-postgres:
-    external: true
-    name: niochat-postgres
+  niochat-media:
+  niochat-static:
