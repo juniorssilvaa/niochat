@@ -52,7 +52,6 @@ exec "$@"' > /app/dramatiq_entrypoint.sh && chmod +x /app/dramatiq_entrypoint.sh
 # Health check for Dramatiq worker
 HEALTHCHECK --interval=15s --timeout=10s --start-period=60s --retries=5 \
     CMD python -c "import dramatiq; from niochat.dramatiq_config import broker; print('Dramatiq OK' if broker.connected else exit(1))"
-    CMD python -c "import dramatiq; print('Dramatiq OK')" || exit 1
 
 # Use entrypoint script
 ENTRYPOINT ["/app/dramatiq_entrypoint.sh"]
