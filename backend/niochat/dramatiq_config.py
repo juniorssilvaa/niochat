@@ -19,7 +19,7 @@ logger.info("Configurando RabbitMQ como broker do Dramatiq")
 
 # Configuração do RabbitMQ usando URL e middleware de retentativas
 rabbitmq_broker = RabbitmqBroker(
-    url="amqp://niochat:ccf9e819f70a54bb790487f2438da6ee@49.12.9.11:5672/",
+    url=os.getenv("DRAMATIQ_BROKER_URL"),
     middleware=[
         Retries(max_retries=10, min_backoff=30000, max_backoff=900000),
         AgeLimit(),
@@ -34,10 +34,14 @@ broker = rabbitmq_broker
 logger.info("RabbitMQ configurado com sucesso")
 
 # Configurar backend de resultados com Redis
+from urllib.parse import urlparse
+
+redis_url = urlparse(os.getenv("REDIS_URL", "redis://localhost:6379/1"))
 results_backend = RedisBackend(
-    host="49.12.9.11",  # Redis para resultados
-    port=6379,
-    db=1
+    host=redis_url.hostname,
+    port=redis_url.port,
+    password=redis_url.password,
+    db=int(redis_url.path[1:]) if redis_url.path else 1
 )
 
 # Adicionar middleware apenas se não existir

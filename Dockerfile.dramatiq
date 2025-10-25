@@ -56,5 +56,5 @@ HEALTHCHECK --interval=15s --timeout=10s --start-period=60s --retries=5 \
 # Use entrypoint script
 ENTRYPOINT ["/app/dramatiq_entrypoint.sh"]
 
-# Default command - start Dramatiq worker
-CMD ["python", "-m", "dramatiq", "niochat.dramatiq_config"]
+# Default command - start Dramatiq worker with all task modules
+CMD ["python", "-m", "dramatiq", "niochat.dramatiq_config", "niochat.dramatiq_tasks", "conversations.dramatiq_tasks"]
